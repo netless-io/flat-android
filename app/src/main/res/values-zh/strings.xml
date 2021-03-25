@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FlatAndroid</string>
     <string name="title_activity_home">HomeActivity</string>
-    <string name="title_home">Home</string>
-    <string name="title_user_profile">UserProfile</string>
+    <string name="title_home">首页</string>
+    <string name="title_user_profile">我的资料</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
 </resources>

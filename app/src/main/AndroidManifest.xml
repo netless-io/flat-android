@@ -12,13 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
-        <activity android:name="com.agora.netless.flat.ui.activities.UserProfileActivity">
+        <activity
+            android:name=".ui.activity.ComposeTestActivity"
+            android:exported="true"
+            android:label="@string/title_activity_compose_test"
+            android:theme="@style/Theme.FlatAndroid.NoActionBar"></activity>
+        <activity
+            android:name=".ui.activity.HomeActivity"
+            android:exported="true"
+            android:label="@string/title_activity_home"
+            android:theme="@style/Theme.FlatAndroid.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.activities.UserProfileActivity" />
     </application>
 
 </manifest>

@@ -22,7 +22,6 @@ class AppModule {
     @Retention(AnnotationRetention.RUNTIME)
     annotation class LocalUserDataSource
 
-
     @Singleton
     @Provides
     fun provideIoDispatcher() = Dispatchers.IO

@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class UserRepository @Inject constructor(private val userService: UserService) {
-    suspend fun getUserInfo(): Flow<UserInfo> = flow {
+    fun getUserInfo(): Flow<UserInfo> = flow {
         try {
             emit(userService.getUserInfo().data)
         } catch (e: HttpException) {

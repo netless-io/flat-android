@@ -2,10 +2,12 @@ package com.agora.netless.flat.di;
 
 import com.agora.netless.flat.Constants
 import com.agora.netless.flat.data.api.UserService
+import com.agora.netless.flat.http.HeaderProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -26,7 +28,12 @@ object UserModule {
     }
 
     @Provides
-    fun provideUserToken(): String {
-        return "Token";
+    @IntoSet
+    fun provideUserHeaderProvider(): HeaderProvider {
+        return object : HeaderProvider {
+            override fun getHeaders(): Set<Pair<String, String>> {
+                return setOf("Authorization" to String.format("Bearer %s", Constants.WX_TOKEN))
+            }
+        }
     }
 }

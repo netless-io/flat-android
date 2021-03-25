@@ -16,11 +16,13 @@ object NetworkModule {
     @NormalOkHttpClient
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
+        // TODO workaround inject headerProviders
+        val component: MainComponent = DaggerMainComponent.create()
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
         return OkHttpClient.Builder()
             .addInterceptor(logger)
-            .addInterceptor(HeaderInterceptor())
+            .addInterceptor(HeaderInterceptor(component.headerProviders()))
             .build()
     }
 
