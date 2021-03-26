@@ -11,19 +11,22 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agora.netless.flat.R
 import com.agora.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
-import com.agora.netless.flat.ui.compose.FlatTopAppBar
+import com.agora.netless.flat.ui.activity.ui.theme.FlatRed
+import com.agora.netless.flat.ui.compose.BackTopAppBar
 import com.agora.netless.flat.ui.viewmodel.UserViewModel
 import com.agora.netless.flat.util.Resource
+import com.google.accompanist.systemuicontroller.LocalSystemUiController
+import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 
 fun launchUserProfileActivity(context: Context) {
@@ -38,17 +41,25 @@ class UserProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatAndroidTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    Column {
-                        FlatTopAppBar(
-                            title = stringResource(id = R.string.title_user_profile),
-                            startPaint = painterResource(id = R.drawable.ic_user_profile_head),
-                            onStartClick = { finish() }
-                        )
-                        GreetingUser()
-                    }
+                val controller = rememberAndroidSystemUiController()
+                controller.setStatusBarColor(FlatRed, darkIcons = true)
+
+                CompositionLocalProvider(LocalSystemUiController provides controller) {
+                    UserProfileScreen()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun UserProfileScreen() {
+    Surface(color = MaterialTheme.colors.background) {
+        Column {
+            BackTopAppBar(title = stringResource(id = R.string.title_user_profile)) {
+
+            }
+            GreetingUser()
         }
     }
 }
@@ -100,6 +111,6 @@ fun FetchResultView(
 @Composable
 fun DefaultPreview() {
     FlatAndroidTheme {
-        GreetingUser()
+        UserProfileScreen()
     }
 }

@@ -3,5 +3,6 @@
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
     <string name="title_user_profile">UserProfile</string>
+    <string name="title_setting">Setting</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
 </resources>

@@ -7,18 +7,23 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.agora.netless.flat.R
-import com.agora.netless.flat.ui.activities.launchUserProfileActivity
 import com.agora.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
+import com.agora.netless.flat.ui.activity.ui.theme.FlatBlueAlpha50
+import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import com.agora.netless.flat.ui.compose.FlatTopAppBar
 
 class HomeActivity : ComponentActivity() {
@@ -26,49 +31,64 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatAndroidTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
-                }
+                HomePage();
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String) {
-    val context = LocalContext.current
-
-    Column {
-        FlatTopAppBar(
-            title = stringResource(id = R.string.title_home),
-            onEndClick = { launchUserProfileActivity(context) },
-            startPaint = painterResource(id = R.drawable.ic_user_profile_head),
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        FlatHomeBottomBar()
+fun HomePage() {
+    Surface(color = MaterialTheme.colors.background) {
+        Column {
+            FlatHomeTopBar()
+            Spacer(modifier = Modifier.weight(1f))
+            FlatHomeBottomBar()
+        }
     }
 }
 
 @Composable
+fun FlatHomeTopBar() {
+    val context = LocalContext.current
+    FlatTopAppBar(
+        title = {
+            Text(text = stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
+        },
+        actions = {
+            IconButton(
+                onClick = { launchSettingActivity(context) }) {
+                Image(
+                    modifier = Modifier
+                        .size(24.dp, 24.dp)
+                        .clip(shape = RoundedCornerShape(12.dp)),
+                    painter = painterResource(id = R.drawable.header),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
+                )
+            }
+        }
+    )
+}
+
+@Composable
 fun FlatHomeBottomBar() {
-    BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.primarySurface) {
+    BottomAppBar(elevation = 0.dp, backgroundColor = FlatBlueAlpha50) {
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            Button(
-                elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                onClick = { /*TODO*/ }) {}
-            Image(
-                painter = painterResource(R.drawable.ic_home),
-                contentDescription = null
-            )
+            IconButton(onClick = { /*TODO*/ }) {
+                Image(
+                    painter = painterResource(R.drawable.ic_home),
+                    contentDescription = null
+                )
+            }
         }
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            Button(
-                elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                onClick = { /*TODO*/ }) {}
-            Image(
-                painter = painterResource(R.drawable.ic_cloudstorage),
-                contentDescription = null
-            )
+            IconButton(onClick = { /*TODO*/ }) {
+                Image(
+                    painter = painterResource(R.drawable.ic_cloudstorage),
+                    contentDescription = null
+                )
+            }
         }
     }
 }
@@ -77,6 +97,6 @@ fun FlatHomeBottomBar() {
 @Composable
 fun DefaultPreview() {
     FlatAndroidTheme {
-        Greeting("Android")
+        HomePage()
     }
 }

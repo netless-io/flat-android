@@ -5,28 +5,32 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+
 )
 
-private val LightColorPalette = lightColors(
-//    primary = Color(0xFFFFFFFF),
-//    primaryVariant = Color(0xFFFFFFFF),
-//    secondary = Color(0xFFFFFFFF),
-//    secondaryVariant = Color(0xFFFFFFFF),
 
-//    background = Color(0xFFFFFFFF),
-    surface = Color.White,
-    error = Color.Red,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    onError = Color.Red
+/**
+ * See <a href="https://material.io/design/material-theming/implementing-your-theme.html">Material Theming</a>
+ */
+private val LightColorPalette = lightColors(
+    primary = FlatWhite,
+    primaryVariant = FlatWhite,
+    secondary = FlatBlue,
+    secondaryVariant = FlatBlue,
+
+    // behind scrollable content
+    background = FlatWhite,
+    // cards, sheets, and menus
+    surface = FlatWhite,
+    error = FlatRed,
+
+    onPrimary = FlatTextPrimary,
+    onSecondary = FlatTextSecondary,
+    onBackground = FlatBlack,
+    onSurface = FlatBlack,
+    onError = FlatRed
 )
 
 @Composable

@@ -18,16 +18,24 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     )
-    /* Other default text styles to override
-    button = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W500,
-        fontSize = 14.sp
-    ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    )
-    */
+)
+
+val FlatTitleTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+    color = FlatTextPrimary,
+)
+
+
+val FlatCommonTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 16.sp,
+    color = FlatTextPrimary,
+)
+
+val FlatCommonTipTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 16.sp,
+    color = FlatTextSecondary,
 )

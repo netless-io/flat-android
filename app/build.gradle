@@ -95,4 +95,6 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-beta02'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02"
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta02'
+
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.7.0'
 }
