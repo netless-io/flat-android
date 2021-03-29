@@ -19,6 +19,10 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
         MutableLiveData<Resource<UserInfo>>()
     }
 
+    val loginResource: MutableLiveData<Resource<Boolean>> by lazy {
+        MutableLiveData<Resource<Boolean>>()
+    }
+
     fun getUsers() {
         viewModelScope.launch {
             userRepository.getUserInfo().onStart {
@@ -35,5 +39,27 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
                 userInfoResource.postValue(Resource.success(data = it))
             }
         }
+    }
+
+    fun login() {
+        viewModelScope.launch {
+            userRepository.login().onStart {
+                loginResource.postValue(Resource.loading())
+            }.catch {
+                loginResource.postValue(
+                    Resource.error(
+                        null,
+                        message = it.message ?: "Error Occurred!",
+                        error = Error(it.cause)
+                    )
+                )
+            }.collect {
+                loginResource.postValue(Resource.success(data = it))
+            }
+        }
+    }
+
+    fun isUserLogin(): Boolean {
+        return userRepository.isLoggedIn()
     }
 }

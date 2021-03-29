@@ -3,13 +3,15 @@ package com.agora.netless.flat.ui.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,36 +23,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.agora.netless.flat.R
-import com.agora.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
 import com.agora.netless.flat.ui.activity.ui.theme.FlatBlueAlpha50
 import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
+import com.agora.netless.flat.ui.compose.FlatColumnPage
 import com.agora.netless.flat.ui.compose.FlatTopAppBar
+import com.agora.netless.flat.ui.viewmodel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
+    private val userViewModel: UserViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            FlatAndroidTheme {
-                HomePage();
+        if (userViewModel.isUserLogin()) {
+            setContent {
+                HomePage()
             }
+        } else {
+            launchLoginActivity(this)
         }
     }
 }
 
 @Composable
 fun HomePage() {
-    Surface(color = MaterialTheme.colors.background) {
-        Column {
-            FlatHomeTopBar()
-            Spacer(modifier = Modifier.weight(1f))
-            FlatHomeBottomBar()
-        }
+    FlatColumnPage {
+        FlatHomeTopBar()
+        Spacer(modifier = Modifier.weight(1f))
+        FlatHomeBottomBar()
     }
 }
 
 @Composable
 fun FlatHomeTopBar() {
     val context = LocalContext.current
+
     FlatTopAppBar(
         title = {
             Text(text = stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
@@ -96,7 +104,5 @@ fun FlatHomeBottomBar() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    FlatAndroidTheme {
-        HomePage()
-    }
+    HomePage()
 }
