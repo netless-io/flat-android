@@ -13,11 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import com.agora.netless.flat.ui.compose.BackTopAppBar
 import com.agora.netless.flat.ui.compose.FlatColumnPage
 import com.agora.netless.flat.ui.viewmodel.UserViewModel
+import com.agora.netless.flat.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 fun launchLoginActivity(context: Context) {
@@ -43,13 +45,17 @@ private fun LoginPage(onBackPressed: () -> Unit) {
     val userViewModel: UserViewModel = viewModel()
     val loginState = userViewModel.loginResource.observeAsState()
 
-    FlatColumnPage {
-        BackTopAppBar(title = "Login", onBackPressed)
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = {
-                userViewModel.login()
-            }) {
-                Text(style = FlatTitleTextStyle, text = "Tag Login")
+    if (loginState.value?.status == Resource.Status.SUCCESS) {
+        launchHomeActivity(context = LocalContext.current)
+    } else {
+        FlatColumnPage {
+            BackTopAppBar(title = "Login", onBackPressed)
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Button(onClick = {
+                    userViewModel.login()
+                }) {
+                    Text(style = FlatTitleTextStyle, text = "Tag Login")
+                }
             }
         }
     }

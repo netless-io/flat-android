@@ -16,9 +16,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object UserModule {
+
     @Provides
     @Singleton
     fun provideUserService(@NormalOkHttpClient client: OkHttpClient): UserService {
+
         return Retrofit.Builder()
             .baseUrl(Constants.FLAT_SERVICE_URL)
             .client(client)

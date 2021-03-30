@@ -1,6 +1,6 @@
 package com.agora.netless.flat.data.repository
 
-import android.content.SharedPreferences
+import com.agora.netless.flat.data.AppDataCenter
 import com.agora.netless.flat.data.api.UserService
 import com.agora.netless.flat.data.model.UserInfo
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService,
-    private val globalData: SharedPreferences
+    private val appDataCenter: AppDataCenter
 ) {
     fun getUserInfo(): Flow<UserInfo> = flow {
         try {
@@ -27,9 +27,7 @@ class UserRepository @Inject constructor(
 
     fun login(): Flow<Boolean> = flow {
         try {
-            globalData.edit().apply {
-                putBoolean("key_is_logged_in", true)
-            }.apply()
+            appDataCenter.setUserLoggedIn(true)
             emit(true)
         } catch (e: HttpException) {
             throw e
@@ -39,6 +37,10 @@ class UserRepository @Inject constructor(
     }
 
     fun isLoggedIn(): Boolean {
-        return globalData.getBoolean("key_is_logged_in", false)
+        return appDataCenter.isUserLoggedIn(false)
+    }
+
+    fun setLoggedIn(loggedIn: Boolean) {
+        return appDataCenter.setUserLoggedIn(loggedIn)
     }
 }

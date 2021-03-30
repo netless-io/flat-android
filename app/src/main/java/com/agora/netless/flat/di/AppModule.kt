@@ -1,7 +1,7 @@
 package com.agora.netless.flat.di
 
 import android.content.Context
-import android.content.SharedPreferences
+import com.agora.netless.flat.data.AppDataCenter
 import com.agora.netless.flat.data.api.UserService
 import com.agora.netless.flat.data.repository.UserRepository
 import dagger.Module
@@ -29,28 +29,27 @@ class AppModule {
     @Retention(AnnotationRetention.RUNTIME)
     annotation class GlobalData
 
-    @Singleton
     @Provides
     fun provideIoDispatcher() = Dispatchers.IO
 
     @GlobalData
     @Singleton
     @Provides
-    fun provideAppGlobalData(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("global_kv_data", Context.MODE_PRIVATE)
+    fun provideAppDataCenter(@ApplicationContext context: Context): AppDataCenter {
+        return AppDataCenter(context)
     }
 
     @Module
     @InstallIn(SingletonComponent::class)
     object UserRepositoryModule {
 
-        @Singleton
         @Provides
+        @Singleton
         fun provideUserRepository(
             userService: UserService,
-            @GlobalData globalData: SharedPreferences
+            @GlobalData appDataCenter: AppDataCenter
         ): UserRepository {
-            return UserRepository(userService, globalData)
+            return UserRepository(userService, appDataCenter)
         }
     }
 }

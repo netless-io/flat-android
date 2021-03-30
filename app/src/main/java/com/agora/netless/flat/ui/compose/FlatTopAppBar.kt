@@ -1,8 +1,6 @@
 package com.agora.netless.flat.ui.compose
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -12,13 +10,9 @@ import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.agora.netless.flat.R
 import com.agora.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
 import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 
@@ -58,7 +52,7 @@ fun FlatTopAppBar(
 }
 
 @Composable
-fun BackTopAppBar(title: String, onBackPressed: () -> Unit) {
+fun BackTopAppBar(title: String, onBackPressed: () -> Unit, actions: @Composable RowScope.() -> Unit = {}) {
     FlatTopAppBar(
         title = {
             Text(text = title, style = FlatTitleTextStyle)
@@ -68,19 +62,7 @@ fun BackTopAppBar(title: String, onBackPressed: () -> Unit) {
                 Icon(Icons.Rounded.ArrowBackIosNew, contentDescription = null)
             }
         },
-        actions = {
-            IconButton(
-                onClick = { /*TODO*/ }) {
-                Image(
-                    modifier = Modifier
-                        .size(24.dp, 24.dp)
-                        .clip(shape = RoundedCornerShape(12.dp)),
-                    painter = painterResource(id = R.drawable.header),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null
-                )
-            }
-        }
+        actions = actions
     )
 }
 

@@ -13,8 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
+            android:name=".ui.activity.DevToolsActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.activity.LoginActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.activity.SettingActivity"
             android:exported="true" />
@@ -22,15 +25,7 @@
             android:name=".ui.activity.ComposeTestActivity"
             android:exported="true"
             android:label="@string/title_activity_compose_test"
-            android:theme="@style/Theme.FlatAndroid.NoActionBar">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
             android:name=".ui.activity.HomeActivity"
             android:exported="true"

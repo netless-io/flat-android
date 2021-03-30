@@ -59,7 +59,16 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
         }
     }
 
-    fun isUserLogin(): Boolean {
+    val loggedInData: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>(isLoggedIn())
+    }
+
+    fun isLoggedIn(): Boolean {
         return userRepository.isLoggedIn()
+    }
+
+    fun setLoggedIn(loggedIn: Boolean) {
+        userRepository.setLoggedIn(loggedIn)
+        loggedInData.postValue(loggedIn)
     }
 }

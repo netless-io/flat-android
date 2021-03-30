@@ -1,5 +1,7 @@
 package com.agora.netless.flat.ui.activity
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,13 +32,28 @@ import com.agora.netless.flat.ui.compose.FlatTopAppBar
 import com.agora.netless.flat.ui.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+fun launchHomeActivity(context: Context) {
+    val intent = Intent(context, HomeActivity::class.java).apply {
+        setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    }
+    context.startActivity(intent)
+}
+
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
     private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (userViewModel.isUserLogin()) {
+    }
+
+    override fun onResume() {
+        super.onResume()
+        actionLoginState()
+    }
+
+    private fun actionLoginState() {
+        if (userViewModel.isLoggedIn()) {
             setContent {
                 HomePage()
             }

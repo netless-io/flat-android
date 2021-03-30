@@ -56,9 +56,7 @@ class UserProfileActivity : ComponentActivity() {
 fun UserProfileScreen() {
     Surface(color = MaterialTheme.colors.background) {
         Column {
-            BackTopAppBar(title = stringResource(id = R.string.title_user_profile)) {
-
-            }
+            BackTopAppBar(title = stringResource(id = R.string.title_user_profile), {})
             GreetingUser()
         }
     }

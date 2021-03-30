@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +38,9 @@ class SettingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatColumnPage() {
-                BackTopAppBar(stringResource(id = R.string.title_setting), { })
+                BackTopAppBar(
+                    stringResource(id = R.string.title_setting),
+                    onBackPressed = { finish() })
                 SettingItemList()
             }
         }
@@ -45,6 +49,8 @@ class SettingActivity : ComponentActivity() {
 
 @Composable
 fun SettingItemList() {
+    val context = LocalContext.current
+
     LazyColumn(modifier = Modifier.fillMaxHeight()) {
         item {
             SettingItem(id = R.drawable.ic_user_profile_head, "个人信息")
@@ -54,16 +60,22 @@ fun SettingItemList() {
             SettingItem(id = R.drawable.ic_user_profile_aboutus, "吐个槽")
             Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
             SettingItem(id = R.drawable.ic_user_profile_feedback, "关于我们")
+            Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
+            SettingItem(
+                id = R.drawable.ic_user_profile_feedback,
+                "Debug Tools",
+                onClick = { launchDevToolsActivity(context) })
         }
     }
 }
 
 @Composable
-fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "") {
+fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", onClick: () -> Unit = {}) {
     Row(
         Modifier
-            .fillMaxWidth(1f)
-            .height(48.dp), verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth()
+            .height(48.dp)
+            .clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(16.dp))
         Image(painter = painterResource(id), contentDescription = null)
