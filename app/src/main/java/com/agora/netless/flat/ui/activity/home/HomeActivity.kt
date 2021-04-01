@@ -1,4 +1,4 @@
-package com.agora.netless.flat.ui.activity
+package com.agora.netless.flat.ui.activity.home
 
 import android.content.Context
 import android.content.Intent
@@ -6,15 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,17 +24,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agora.netless.flat.R
+import com.agora.netless.flat.ui.activity.home.room.HomeRoomLists
+import com.agora.netless.flat.ui.activity.launchLoginActivity
+import com.agora.netless.flat.ui.activity.launchSettingActivity
+import com.agora.netless.flat.ui.activity.ui.theme.FlatBlue
 import com.agora.netless.flat.ui.activity.ui.theme.FlatBlueAlpha50
+import com.agora.netless.flat.ui.activity.ui.theme.FlatSmallTextStyle
 import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import com.agora.netless.flat.ui.compose.FlatColumnPage
 import com.agora.netless.flat.ui.compose.FlatTopAppBar
+import com.agora.netless.flat.ui.viewmodel.HomeViewModel
 import com.agora.netless.flat.ui.viewmodel.UserViewModel
+import com.puculek.pulltorefresh.PullToRefresh
 import dagger.hilt.android.AndroidEntryPoint
 
 fun launchHomeActivity(context: Context) {
     val intent = Intent(context, HomeActivity::class.java).apply {
-        setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
     context.startActivity(intent)
 }
@@ -42,6 +50,7 @@ fun launchHomeActivity(context: Context) {
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
     private val userViewModel: UserViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +66,8 @@ class HomeActivity : ComponentActivity() {
             setContent {
                 HomePage()
             }
+            homeViewModel.loadRooms()
+            homeViewModel.loadHistoryRooms()
         } else {
             launchLoginActivity(this)
         }
@@ -65,10 +76,61 @@ class HomeActivity : ComponentActivity() {
 
 @Composable
 fun HomePage() {
-    FlatColumnPage {
-        FlatHomeTopBar()
-        Spacer(modifier = Modifier.weight(1f))
-        FlatHomeBottomBar()
+    val viewModel = viewModel(HomeViewModel::class.java)
+    val viewState = viewModel.state.collectAsState()
+
+    PullToRefresh(
+        progressColor  = FlatBlue,
+        isRefreshing = viewState.value.refreshing,
+        onRefresh = {
+            viewModel.reloadRoomList()
+        }
+    ) {
+        FlatColumnPage {
+            // 顶部栏
+            FlatHomeTopBar()
+            // 操作区
+            TopOperations()
+            // 房间列表区
+            HomeRoomLists(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                onCategorySelected = viewModel::onRoomCategorySelected,
+                selectedHomeCategory = viewState.value.selectedHomeCategory,
+                roomList = viewState.value.roomList,
+                roomHistory = viewState.value.roomHistoryList
+            )
+            // 底部状态区
+            FlatHomeBottomBar()
+        }
+    }
+}
+
+@Composable
+fun TopOperations() {
+    Row(Modifier.fillMaxWidth()) {
+        OperationItem(R.drawable.ic_home_create_room, R.string.create_room)
+        OperationItem(R.drawable.ic_home_join_room, R.string.join_room)
+        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room)
+    }
+}
+
+@Composable
+private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int) {
+    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id),
+                contentDescription = "",
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(stringResource(id = tip), style = FlatSmallTextStyle)
+        }
     }
 }
 

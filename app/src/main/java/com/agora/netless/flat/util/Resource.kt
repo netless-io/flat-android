@@ -1,6 +1,11 @@
 package com.agora.netless.flat.util
 
-data class Resource<out T>(val status: Status, val data: T?, val error: Throwable?, val message: String?) {
+data class Resource<out T>(
+    val status: Status,
+    val data: T?,
+    val error: Throwable?,
+    val message: String?
+) {
 
     enum class Status {
         SUCCESS,

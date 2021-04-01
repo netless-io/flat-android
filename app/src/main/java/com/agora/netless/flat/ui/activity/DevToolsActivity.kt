@@ -68,8 +68,8 @@ fun UserLoginFlag() {
         Text(text = "设置User", style = FlatCommonTextStyle)
         Spacer(modifier = Modifier.weight(1f))
         Switch(
-            checked = loggedInData?.value ?: false,
-            onCheckedChange = { userViewModel.setLoggedIn(!(loggedInData?.value ?: false)) })
+            checked = loggedInData.value ?: false,
+            onCheckedChange = { userViewModel.setLoggedIn(!(loggedInData.value ?: false)) })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }

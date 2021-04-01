@@ -5,4 +5,15 @@
     <string name="title_user_profile">UserProfile</string>
     <string name="title_setting">Setting</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
+    <string name="create_room" translatable="false">创建房间</string>
+    <string name="join_room" translatable="false">加入房间</string>
+    <string name="subscribe_room" translatable="false">预约房间</string>
+
+    <string name="home_room_list" translatable="false">房间列表</string>
+    <string name="home_history_record" translatable="false">历史记录</string>
+    <string name="home_room_state_idle" translatable="false">待开始</string>
+    <string name="home_room_state_started" translatable="false">进行中</string>
+    <string name="home_room_state_end" translatable="false">已结束</string>
+
+    <string name="title_activity_create_room" translatable="false">CreateRoomActivity</string>
 </resources>

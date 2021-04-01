@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <package android:name="com.tencent.mm" />
+    </queries>
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -13,8 +17,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
+            android:name=".ui.activity.room.CreateRoomActivity"
+            android:exported="true"
+            android:label="@string/title_activity_create_room"
+            android:theme="@style/Theme.FlatAndroid.NoActionBar"></activity>
+        <activity
             android:name=".ui.activity.DevToolsActivity"
             android:exported="true" />
+        <activity
+            android:name=".ui.activity.WeChatLoginActivity"
+            android:exported="true">
+            <!--            <intent-filter>-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
+
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+            <!--            </intent-filter>-->
+        </activity>
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true" />
@@ -27,7 +45,7 @@
             android:label="@string/title_activity_compose_test"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
-            android:name=".ui.activity.HomeActivity"
+            android:name=".ui.activity.home.HomeActivity"
             android:exported="true"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.FlatAndroid.NoActionBar">
@@ -38,6 +56,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activities.UserProfileActivity" />
+        <activity
+            android:name="link.netless.flat.wxapi.WXEntryActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:taskAffinity="link.netless.flat"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

@@ -5,7 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -15,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.agora.netless.flat.ui.activity.home.launchHomeActivity
 import com.agora.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import com.agora.netless.flat.ui.compose.BackTopAppBar
 import com.agora.netless.flat.ui.compose.FlatColumnPage

@@ -5,18 +5,35 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.agora.netless.flat"
+        applicationId "link.netless.flat"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(property('signing.filepath'))
+            storePassword property('signing.storePassword')
+            keyAlias property('signing.keyAlias')
+            keyPassword property('signing.keyPassword')
+        }
+
+        debug {
+            storeFile file(property('signing.filepath'))
+            storePassword property('signing.storePassword')
+            keyAlias property('signing.keyAlias')
+            keyPassword property('signing.keyPassword')
+        }
     }
 
     buildFeatures {
@@ -27,8 +44,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -37,8 +61,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         useIR = true
-        // TODO
-        freeCompilerArgs += ["-Xallow-result-return-type"]
         freeCompilerArgs += ["-Xallow-jvm-ir-dependencies"]
     }
 
@@ -71,7 +93,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.activity:activity-ktx:1.2.0"
 
-
     // hilt
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
@@ -93,8 +114,16 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-core:1.0.0-beta02'
     implementation 'androidx.compose.material:material-icons-extended:1.0.0-beta02'
     implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-beta02'
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha05'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02"
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta02'
+    // TODO PullToRefresh
+    implementation 'com.puculek.pulltorefresh:pull-to-refresh-compose:1.0.5'
 
+    // Google Accompanist
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.7.0'
+    implementation "com.google.accompanist:accompanist-pager:0.7.0"
+    implementation "com.google.accompanist:accompanist-pager-indicators:0.7.0"
+    // tencent
+    api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.5'
 }

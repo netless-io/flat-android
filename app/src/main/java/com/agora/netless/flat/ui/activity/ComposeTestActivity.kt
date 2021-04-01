@@ -26,7 +26,6 @@ import com.agora.netless.flat.ui.compose.BackTopAppBar
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 
-
 class ComposeTestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +41,6 @@ class ComposeTestActivity : ComponentActivity() {
         }
     }
 }
-
 
 @Composable
 fun ComposeTestScreen() {

@@ -13,11 +13,18 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp
     ),
+
     body1 = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        color = FlatTextPrimary,
+    ),
+
+    body2 = TextStyle(
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
-    )
+        fontSize = 12.sp,
+        color = FlatTextSecondary,
+    ),
 )
 
 val FlatTitleTextStyle = TextStyle(
@@ -27,10 +34,15 @@ val FlatTitleTextStyle = TextStyle(
     color = FlatTextPrimary,
 )
 
-
 val FlatCommonTextStyle = TextStyle(
     fontFamily = FontFamily.Default,
     fontSize = 16.sp,
+    color = FlatTextPrimary,
+)
+
+val FlatSmallTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 12.sp,
     color = FlatTextPrimary,
 )
 

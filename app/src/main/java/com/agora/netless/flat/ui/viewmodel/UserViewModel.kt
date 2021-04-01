@@ -68,7 +68,7 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
     }
 
     fun setLoggedIn(loggedIn: Boolean) {
-        userRepository.setLoggedIn(loggedIn)
         loggedInData.postValue(loggedIn)
+        userRepository.setLoggedIn(loggedIn)
     }
 }
