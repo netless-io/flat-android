@@ -1,4 +1,4 @@
-package com.agora.netless.flat
+package link.netless.flat
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

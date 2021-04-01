@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.agora.netless.flat">
+    package="link.netless.flat">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -20,19 +20,13 @@
             android:name=".ui.activity.room.CreateRoomActivity"
             android:exported="true"
             android:label="@string/title_activity_create_room"
-            android:theme="@style/Theme.FlatAndroid.NoActionBar"></activity>
+            android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
             android:name=".ui.activity.DevToolsActivity"
             android:exported="true" />
         <activity
             android:name=".ui.activity.WeChatLoginActivity"
-            android:exported="true">
-            <!--            <intent-filter>-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--            </intent-filter>-->
-        </activity>
+            android:exported="true"></activity>
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true" />
@@ -57,7 +51,7 @@
         </activity>
         <activity android:name=".ui.activities.UserProfileActivity" />
         <activity
-            android:name="link.netless.flat.wxapi.WXEntryActivity"
+            android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
