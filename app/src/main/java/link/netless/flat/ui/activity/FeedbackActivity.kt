@@ -16,10 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import link.netless.flat.R
-import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
-import link.netless.flat.ui.activity.ui.theme.FlatColorBorder
-import link.netless.flat.ui.activity.ui.theme.FlatColorWhite
-import link.netless.flat.ui.activity.ui.theme.FlatCommonTextStyle
+import link.netless.flat.ui.activity.ui.theme.*
 import link.netless.flat.ui.compose.BackTopAppBar
 import link.netless.flat.ui.compose.FlatColumnPage
 import link.netless.flat.ui.viewmodel.FeedbackViewModel
@@ -44,7 +41,10 @@ class FeedbackActivity : ComponentActivity() {
                     colors = TextFieldDefaults.textFieldColors(
                         focusedIndicatorColor = FlatColorBorder,
                         unfocusedIndicatorColor = FlatColorBorder
-                    )
+                    ),
+                    placeholder = {
+                        Text("请输入内容", style = FlatCommonTextStyle, color = FlatColorGray)
+                    }
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(

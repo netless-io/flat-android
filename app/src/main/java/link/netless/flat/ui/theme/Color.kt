@@ -20,4 +20,3 @@ val FlatColorGray = Color(0xFFCCCCCC)
 
 // For Test
 val FlatColorBlueAlpha50 = Color(0x7F3381FF)
-

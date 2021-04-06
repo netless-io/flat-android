@@ -9,11 +9,8 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.puculek.pulltorefresh.PullToRefresh
 import dagger.hilt.android.AndroidEntryPoint
 import link.netless.flat.R
+import link.netless.flat.common.Navigator
 import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
 import link.netless.flat.ui.activity.ui.theme.FlatColorBlueAlpha50
 import link.netless.flat.ui.activity.ui.theme.FlatSmallTextStyle
@@ -34,7 +32,6 @@ import link.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import link.netless.flat.ui.compose.FlatColumnPage
 import link.netless.flat.ui.compose.FlatTopAppBar
 import link.netless.flat.ui.viewmodel.UserViewModel
-import link.netless.flat.common.Navigator
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -125,23 +122,51 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int) {
 
 @Composable
 fun FlatHomeTopBar() {
-    val context = LocalContext.current
-
     FlatTopAppBar(
         title = {
             Text(text = stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
         },
         actions = {
-            IconButton(
-                onClick = { Navigator.launchSettingActivity(context) }) {
-                Image(
-                    modifier = Modifier
-                        .size(24.dp, 24.dp)
-                        .clip(shape = RoundedCornerShape(12.dp)),
-                    painter = painterResource(id = R.drawable.header),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null
-                )
+            Box {
+                val context = LocalContext.current
+                var expanded by remember { mutableStateOf(false) }
+
+                IconButton(
+                    onClick = { expanded = true }) {
+                    Image(
+                        modifier = Modifier
+                            .size(24.dp, 24.dp)
+                            .clip(shape = RoundedCornerShape(12.dp)),
+                        painter = painterResource(id = R.drawable.header),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null
+                    )
+                }
+                DropdownMenu(
+                    modifier = Modifier.wrapContentSize(),
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    DropdownMenuItem(onClick = { Navigator.launchSettingActivity(context) }) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_user_profile_head),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("我的资料", Modifier.width(100.dp))
+                    }
+                    DropdownMenuItem(
+                        onClick = { /* Handle settings! */ },
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_user_profile_aboutus),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        // TODO
+                        Text("个人信息", Modifier.width(100.dp))
+                    }
+                }
             }
         }
     )
@@ -172,5 +197,5 @@ fun FlatHomeBottomBar() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    HomePage()
+    FlatHomeTopBar()
 }
