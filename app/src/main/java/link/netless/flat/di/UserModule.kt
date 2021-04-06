@@ -37,13 +37,4 @@ object UserModule {
             }
         }
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideUserRepository(
-//        userService: UserService,
-//        @AppModule.GlobalData appDataCenter: AppDataCenter
-//    ): UserRepository {
-//        return UserRepository(userService, appDataCenter)
-//    }
 }

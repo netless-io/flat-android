@@ -20,4 +20,6 @@ interface RoomService {
         @Query(value = "page") page: Int = 1,
         @Body empty: BaseReq = BaseReq.EMPTY
     ): BaseResp<List<RoomInfo>>
+
+
 }

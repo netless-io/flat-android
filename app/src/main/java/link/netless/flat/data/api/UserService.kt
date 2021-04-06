@@ -10,4 +10,10 @@ interface UserService {
 
     @POST("v1/login")
     suspend fun getUserInfo(@Body empty: BaseReq = BaseReq.EMPTY): BaseResp<UserInfo>
+
+    @POST("v1/login")
+    suspend fun loginThirdParty(
+        type: String,
+        @Body empty: BaseReq = BaseReq.EMPTY
+    ): BaseResp<UserInfo>
 }

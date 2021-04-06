@@ -22,6 +22,12 @@
             android:label="@string/title_activity_create_room"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
+            android:name=".ui.activity.FeedbackActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.activity.AboutUsActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.activity.DevToolsActivity"
             android:exported="true" />
         <activity

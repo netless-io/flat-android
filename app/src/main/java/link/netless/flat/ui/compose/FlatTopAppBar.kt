@@ -78,9 +78,5 @@ fun DefaultPreview() {
     }
 }
 
-private val AppBarHorizontalPadding = 8.dp
-
 private val TitleInsetWithoutIcon = Modifier.width(16.dp)
-
-private val TitleIconModifier = Modifier
-    .fillMaxHeight()
+private val TitleIconModifier = Modifier.fillMaxHeight()

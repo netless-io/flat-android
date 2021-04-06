@@ -1,7 +1,5 @@
 package link.netless.flat.ui.activity
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,17 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
-import link.netless.flat.ui.activity.home.launchHomeActivity
 import link.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import link.netless.flat.ui.compose.BackTopAppBar
 import link.netless.flat.ui.compose.FlatColumnPage
 import link.netless.flat.ui.viewmodel.UserViewModel
+import link.netless.flat.common.Navigator
 import link.netless.flat.util.Resource
 
-fun launchLoginActivity(context: Context) {
-    val intent = Intent(context, LoginActivity::class.java)
-    context.startActivity(intent)
-}
 
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
@@ -47,7 +41,7 @@ private fun LoginPage(onBackPressed: () -> Unit) {
     val loginState = userViewModel.loginResource.observeAsState()
 
     if (loginState.value?.status == Resource.Status.SUCCESS) {
-        launchHomeActivity(context = LocalContext.current)
+        Navigator.launchHomeActivity(context = LocalContext.current)
     } else {
         FlatColumnPage {
             BackTopAppBar(title = "Login", onBackPressed)

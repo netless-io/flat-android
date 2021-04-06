@@ -22,11 +22,6 @@ import link.netless.flat.ui.compose.BackTopAppBar
 import link.netless.flat.ui.compose.FlatColumnPage
 import link.netless.flat.ui.viewmodel.UserViewModel
 
-fun launchDevToolsActivity(context: Context) {
-    val intent = Intent(context, DevToolsActivity::class.java)
-    context.startActivity(intent)
-}
-
 @AndroidEntryPoint
 class DevToolsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

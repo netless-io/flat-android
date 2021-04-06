@@ -1,4 +1,4 @@
-package link.netless.flat.ui.activity.home.room
+package link.netless.flat.ui.activity.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,11 +19,10 @@ import com.google.gson.Gson
 import link.netless.flat.R
 import link.netless.flat.data.model.RoomInfo
 import link.netless.flat.data.model.RoomStatus
-import link.netless.flat.ui.activity.home.RoomCategory
-import link.netless.flat.ui.activity.ui.theme.FlatBlue
-import link.netless.flat.ui.activity.ui.theme.FlatDivider
-import link.netless.flat.ui.activity.ui.theme.FlatRed
-import link.netless.flat.ui.activity.ui.theme.FlatTextSecondary
+import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
+import link.netless.flat.ui.activity.ui.theme.FlatColorDivider
+import link.netless.flat.ui.activity.ui.theme.FlatColorRed
+import link.netless.flat.ui.activity.ui.theme.FlatColorTextSecondary
 import link.netless.flat.util.formatToHHmm
 import link.netless.flat.util.formatToMMDDWeek
 
@@ -73,7 +72,7 @@ private fun HomeRoomTabs(
     val indicator = @Composable { tabPositions: List<TabPosition> ->
         HomeTabIndicator(
             Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-            FlatBlue
+            FlatColorBlue
         )
     }
 
@@ -167,21 +166,21 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                         modifier = Modifier.align(Alignment.BottomEnd),
                         text = stringResource(R.string.home_room_state_idle),
                         style = typography.body2,
-                        color = FlatRed
+                        color = FlatColorRed
                     )
                 RoomStatus.Started, RoomStatus.Paused ->
                     Text(
                         modifier = Modifier.align(Alignment.BottomEnd),
                         text = stringResource(R.string.home_room_state_started),
                         style = typography.body2,
-                        color = FlatBlue
+                        color = FlatColorBlue
                     )
                 RoomStatus.Stopped ->
                     Text(
                         modifier = Modifier.align(Alignment.BottomEnd),
                         text = stringResource(R.string.home_room_state_end),
                         style = typography.body2,
-                        color = FlatTextSecondary
+                        color = FlatColorTextSecondary
                     )
             }
         }
@@ -190,7 +189,7 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .height(0.5.dp)
-                .background(FlatDivider),
+                .background(FlatColorDivider),
         )
     }
 }
@@ -204,11 +203,11 @@ fun RoomListItemPreview() {
             "            \"periodicUUID\": null,\n" +
             "            \"ownerUUID\": \"722f7f6d-cc0f-4e63-a543-446a3b7bd659\",\n" +
             "            \"roomType\": \"OneToOne\",\n" +
-            "            \"title\": \"冯利斌创建的房间\",\n" +
+            "            \"title\": \"XXX创建的房间\",\n" +
             "            \"beginTime\": 1615371918318,\n" +
             "            \"endTime\": 1615371955296,\n" +
             "            \"roomStatus\": \"Stopped\",\n" +
-            "            \"ownerName\": \"冯利斌\",\n" +
+            "            \"ownerName\": \"XXX\",\n" +
             "            \"hasRecord\": true\n" +
             "        }"
     val roomInfo = Gson().fromJson(roomStr, RoomInfo::class.java)

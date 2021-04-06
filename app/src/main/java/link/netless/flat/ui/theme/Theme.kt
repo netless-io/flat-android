@@ -15,22 +15,22 @@ private val DarkColorPalette = darkColors(
  * See <a href="https://material.io/design/material-theming/implementing-your-theme.html">Material Theming</a>
  */
 private val LightColorPalette = lightColors(
-    primary = FlatWhite,
-    primaryVariant = FlatWhite,
-    secondary = FlatBlue,
-    secondaryVariant = FlatBlue,
+    primary = FlatColorWhite,
+    primaryVariant = FlatColorWhite,
+    secondary = FlatColorBlue,
+    secondaryVariant = FlatColorBlue,
 
     // behind scrollable content
-    background = FlatWhite,
+    background = FlatColorWhite,
     // cards, sheets, and menus
-    surface = FlatWhite,
-    error = FlatRed,
+    surface = FlatColorWhite,
+    error = FlatColorRed,
 
-    onPrimary = FlatTextPrimary,
-    onSecondary = FlatTextSecondary,
-    onBackground = FlatBlack,
-    onSurface = FlatBlack,
-    onError = FlatRed
+    onPrimary = FlatColorTextPrimary,
+    onSecondary = FlatColorTextSecondary,
+    onBackground = FlatColorBlack,
+    onSurface = FlatColorBlack,
+    onError = FlatColorRed
 )
 
 @Composable

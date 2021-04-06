@@ -15,7 +15,6 @@ class RoomRepository @Inject constructor(
     fun getRoomListAll(page: Int): Flow<List<RoomInfo>> = flow {
         try {
             val roomAll = roomService.getRoomAll(page)
-            print("getRoomListAll $roomAll")
             emit(roomAll.data)
         } catch (e: HttpException) {
             throw e
@@ -24,10 +23,9 @@ class RoomRepository @Inject constructor(
         }
     }
 
-    fun getHistoryRecord(page: Int): Flow<List<RoomInfo>> = flow {
+    fun getRoomListHistory(page: Int): Flow<List<RoomInfo>> = flow {
         try {
             val roomAll = roomService.getRoomHistory(page)
-            print("getHistoryRecord $roomAll")
             emit(roomAll.data)
         } catch (e: HttpException) {
             throw e

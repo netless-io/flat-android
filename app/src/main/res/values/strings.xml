@@ -2,7 +2,7 @@
     <string name="app_name">FlatAndroid</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
-    <string name="title_user_profile">UserProfile</string>
+    <string name="title_user_profile">个人设置</string>
     <string name="title_setting">Setting</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
     <string name="create_room" translatable="false">创建房间</string>
@@ -16,4 +16,6 @@
     <string name="home_room_state_end" translatable="false">已结束</string>
 
     <string name="title_activity_create_room" translatable="false">CreateRoomActivity</string>
+    <string name="title_feedback" translatable="false">吐个槽</string>
+    <string name="title_about_us" translatable="false">关于我们</string>
 </resources>

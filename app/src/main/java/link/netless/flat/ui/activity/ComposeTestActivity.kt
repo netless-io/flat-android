@@ -23,7 +23,7 @@ import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import link.netless.flat.R
 import link.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
-import link.netless.flat.ui.activity.ui.theme.FlatWhite
+import link.netless.flat.ui.activity.ui.theme.FlatColorWhite
 import link.netless.flat.ui.compose.BackTopAppBar
 
 class ComposeTestActivity : ComponentActivity() {
@@ -32,7 +32,7 @@ class ComposeTestActivity : ComponentActivity() {
         setContent {
             FlatAndroidTheme {
                 val controller = rememberAndroidSystemUiController()
-                controller.setStatusBarColor(FlatWhite)
+                controller.setStatusBarColor(FlatColorWhite)
 
                 CompositionLocalProvider(LocalSystemUiController provides controller) {
                     ComposeTestScreen()
@@ -120,7 +120,7 @@ fun HelloContent(name: String, onNameChange: (String) -> Unit) {
 fun DefaultPreview2() {
     FlatAndroidTheme {
         val controller = rememberAndroidSystemUiController()
-        controller.setStatusBarColor(FlatWhite)
+        controller.setStatusBarColor(FlatColorWhite)
 
         CompositionLocalProvider(LocalSystemUiController provides controller) {
             ComposeTestScreen()

@@ -1,7 +1,5 @@
 package link.netless.flat.ui.activity.home
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,23 +27,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.puculek.pulltorefresh.PullToRefresh
 import dagger.hilt.android.AndroidEntryPoint
 import link.netless.flat.R
-import link.netless.flat.ui.activity.home.room.HomeRoomLists
-import link.netless.flat.ui.activity.launchLoginActivity
-import link.netless.flat.ui.activity.launchSettingActivity
-import link.netless.flat.ui.activity.ui.theme.FlatBlue
-import link.netless.flat.ui.activity.ui.theme.FlatBlueAlpha50
+import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
+import link.netless.flat.ui.activity.ui.theme.FlatColorBlueAlpha50
 import link.netless.flat.ui.activity.ui.theme.FlatSmallTextStyle
 import link.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import link.netless.flat.ui.compose.FlatColumnPage
 import link.netless.flat.ui.compose.FlatTopAppBar
 import link.netless.flat.ui.viewmodel.UserViewModel
-
-fun launchHomeActivity(context: Context) {
-    val intent = Intent(context, HomeActivity::class.java).apply {
-        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    }
-    context.startActivity(intent)
-}
+import link.netless.flat.common.Navigator
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -69,7 +58,7 @@ class HomeActivity : ComponentActivity() {
             homeViewModel.loadRooms()
             homeViewModel.loadHistoryRooms()
         } else {
-            launchLoginActivity(this)
+            Navigator.launchLoginActivity(this)
         }
     }
 }
@@ -80,7 +69,7 @@ fun HomePage() {
     val viewState = viewModel.state.collectAsState()
 
     PullToRefresh(
-        progressColor = FlatBlue,
+        progressColor = FlatColorBlue,
         isRefreshing = viewState.value.refreshing,
         onRefresh = {
             viewModel.reloadRoomList()
@@ -144,7 +133,7 @@ fun FlatHomeTopBar() {
         },
         actions = {
             IconButton(
-                onClick = { launchSettingActivity(context) }) {
+                onClick = { Navigator.launchSettingActivity(context) }) {
                 Image(
                     modifier = Modifier
                         .size(24.dp, 24.dp)
@@ -160,7 +149,7 @@ fun FlatHomeTopBar() {
 
 @Composable
 fun FlatHomeBottomBar() {
-    BottomAppBar(elevation = 0.dp, backgroundColor = FlatBlueAlpha50) {
+    BottomAppBar(elevation = 0.dp, backgroundColor = FlatColorBlueAlpha50) {
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { /*TODO*/ }) {
                 Image(

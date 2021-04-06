@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import link.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
-import link.netless.flat.ui.activity.ui.theme.FlatWhite
+import link.netless.flat.ui.activity.ui.theme.FlatColorWhite
 
 @Composable
-fun FlatPage(statusBarColor: Color = FlatWhite, content: @Composable() () -> Unit) {
+fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -> Unit) {
     val controller = rememberAndroidSystemUiController()
     controller.setStatusBarColor(statusBarColor)
 
@@ -26,7 +26,7 @@ fun FlatPage(statusBarColor: Color = FlatWhite, content: @Composable() () -> Uni
 
 @Composable
 fun FlatColumnPage(
-    statusBarColor: Color = FlatWhite,
+    statusBarColor: Color = FlatColorWhite,
     content: @Composable() ColumnScope.() -> Unit
 ) {
     val controller = rememberAndroidSystemUiController()

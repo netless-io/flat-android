@@ -1,7 +1,5 @@
 package link.netless.flat.ui.activity
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,16 +20,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import link.netless.flat.R
+import link.netless.flat.common.Navigator
 import link.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
 import link.netless.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import link.netless.flat.ui.activity.ui.theme.FlatCommonTipTextStyle
 import link.netless.flat.ui.compose.BackTopAppBar
 import link.netless.flat.ui.compose.FlatColumnPage
-
-fun launchSettingActivity(context: Context) {
-    val intent = Intent(context, SettingActivity::class.java)
-    context.startActivity(intent)
-}
+import link.netless.flat.util.getAppVersion
 
 class SettingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,29 +43,47 @@ class SettingActivity : ComponentActivity() {
 }
 
 @Composable
-fun SettingItemList() {
+private fun ColumnScope.SettingItemList() {
     val context = LocalContext.current
+    val version = context.getAppVersion()
 
-    LazyColumn(modifier = Modifier.fillMaxHeight()) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f)
+    ) {
         item {
-            SettingItem(id = R.drawable.ic_user_profile_head, "个人信息")
+            SettingItem(id = R.drawable.ic_user_profile_head, "个人信息", onClick = {
+                Navigator.launchUserProfileActivity(context)
+            })
             Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
-            SettingItem(id = R.drawable.ic_user_profile_update, "检查更新", "2.2.0")
+            SettingItem(id = R.drawable.ic_user_profile_update, "检查更新", version)
             Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
-            SettingItem(id = R.drawable.ic_user_profile_aboutus, "吐个槽")
+            SettingItem(
+                id = R.drawable.ic_user_profile_aboutus,
+                "吐个槽",
+                onClick = { Navigator.launchFeedbackActivity(context) })
             Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
-            SettingItem(id = R.drawable.ic_user_profile_feedback, "关于我们")
+            SettingItem(
+                id = R.drawable.ic_user_profile_feedback,
+                "关于我们",
+                onClick = { Navigator.launchAboutUsActivity(context) })
             Divider(Modifier.padding(start = 44.dp, end = 16.dp), thickness = 1.dp)
             SettingItem(
                 id = R.drawable.ic_user_profile_feedback,
                 "Debug Tools",
-                onClick = { launchDevToolsActivity(context) })
+                onClick = { Navigator.launchDevToolsActivity(context) })
         }
     }
 }
 
 @Composable
-fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", onClick: () -> Unit = {}) {
+private fun SettingItem(
+    @DrawableRes id: Int,
+    tip: String,
+    desc: String = "",
+    onClick: () -> Unit = {}
+) {
     Row(
         Modifier
             .fillMaxWidth()

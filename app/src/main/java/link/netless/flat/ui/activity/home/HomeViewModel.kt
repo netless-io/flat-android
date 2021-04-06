@@ -12,6 +12,9 @@ import link.netless.flat.data.repository.RoomRepository
 import link.netless.flat.util.formatToMMDD
 import javax.inject.Inject
 
+/**
+ * Here Use StateFlow To Manage State
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val roomRepository: RoomRepository) : ViewModel() {
     private val selectedCategory = MutableStateFlow(RoomCategory.Current)
@@ -79,7 +82,7 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
 
     fun loadHistoryRooms() {
         viewModelScope.launch {
-            roomRepository.getHistoryRecord(page).catch {
+            roomRepository.getRoomListHistory(page).catch {
                 // showError
             }.collect {
                 launch(Dispatchers.Default) {
@@ -90,6 +93,9 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
         }
     }
 
+    /**
+     * 添加节点
+     */
     private fun addShowDayHeadFlag(list: List<RoomInfo>): List<RoomInfo> {
         var lastDay = ""
         list.forEach { roomInfo ->
