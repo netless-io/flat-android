@@ -2,6 +2,7 @@ package link.netless.flat.ui.activity.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,12 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
 import link.netless.flat.R
+import link.netless.flat.common.Navigator
 import link.netless.flat.data.model.RoomInfo
 import link.netless.flat.data.model.RoomStatus
 import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
@@ -114,11 +117,21 @@ fun HomeTabIndicator(
 
 @Composable
 fun CurrentRoomList(modifier: Modifier, roomList: List<RoomInfo>) {
+    val context = LocalContext.current
+
     LazyColumn {
         items(count = roomList.size, key = { index: Int ->
             roomList[index].roomUUID
         }) {
-            RoomListItem(roomList[it], Modifier)
+            RoomListItem(
+                roomList[it],
+                Modifier.clickable {
+                    Navigator.launchRoomDetailActivity(
+                        context,
+                        roomList[it].roomUUID,
+                        roomList[it].periodicUUID
+                    )
+                })
         }
     }
 }
@@ -127,7 +140,7 @@ fun CurrentRoomList(modifier: Modifier, roomList: List<RoomInfo>) {
 fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
 
-    Column() {
+    Column(modifier) {
         if (roomInfo.showDayHead) {
             Row(
                 Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),

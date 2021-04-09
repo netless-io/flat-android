@@ -3,10 +3,11 @@ package link.netless.flat.ui.activity.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import link.netless.flat.data.ErrorResult
+import link.netless.flat.data.Success
 import link.netless.flat.data.model.RoomInfo
 import link.netless.flat.data.repository.RoomRepository
 import link.netless.flat.util.formatToMMDD
@@ -54,11 +55,14 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
         selectedCategory.value = category
     }
 
+    // TODO
     private var page: Int = 1;
+    private var historyPage: Int = 1;
 
     fun reloadRoomList() {
         viewModelScope.launch {
             refreshing.value = true
+            // TODO
             loadRooms()
             loadHistoryRooms()
             delay(2000)
@@ -68,13 +72,17 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
 
     fun loadRooms() {
         viewModelScope.launch {
-            roomRepository.getRoomListAll(page).catch {
-                // showError
-            }.collect {
-                // TODO Kotlin
-                launch(Dispatchers.Default) {
-                    addShowDayHeadFlag(it + roomList.value)
-                    roomList.value = it
+            when (val response = roomRepository.getRoomListAll(page)) {
+                is Success -> {
+                    // val list = ArrayList(response.data) + roomList.value
+                    val list = ArrayList(response.data)
+                    addShowDayHeadFlag(list)
+                    roomList.value = list
+                }
+                is ErrorResult -> {
+                    when (response.error.status) {
+                        // handle error
+                    }
                 }
             }
         }
@@ -82,12 +90,17 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
 
     fun loadHistoryRooms() {
         viewModelScope.launch {
-            roomRepository.getRoomListHistory(page).catch {
-                // showError
-            }.collect {
-                launch(Dispatchers.Default) {
-                    addShowDayHeadFlag(it + roomHistoryList.value)
-                    roomHistoryList.value = it
+            when (val response = roomRepository.getRoomListHistory(historyPage)) {
+                is Success -> {
+                    // val list = ArrayList(response.data) + roomHistoryList.value
+                    val list = ArrayList(response.data)
+                    addShowDayHeadFlag(list)
+                    roomHistoryList.value = list
+                }
+                is ErrorResult -> {
+                    when (response.error.status) {
+                        // handle error
+                    }
                 }
             }
         }

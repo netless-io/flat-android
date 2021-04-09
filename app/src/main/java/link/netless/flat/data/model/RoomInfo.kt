@@ -6,10 +6,14 @@ package link.netless.flat.data.model
 data class RoomInfo(
     // 房间的 uuid
     val roomUUID: String,
+    // 房间类型
+    val roomType: RoomType,
     // 周期性房间的 uuid
-    val periodicUUID: String,
+    val periodicUUID: String? = null,
     // 房间所有者的名称
-    val ownerUserName: String,
+    val ownerUUID: String,
+    // 房间所有者的名称
+    val ownerName: String,
     // 房间标题
     val title: String,
     // 房间开始时间

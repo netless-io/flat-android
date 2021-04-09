@@ -32,7 +32,7 @@
             android:exported="true" />
         <activity
             android:name=".ui.activity.WeChatLoginActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true" />
@@ -63,6 +63,8 @@
             android:launchMode="singleTask"
             android:taskAffinity="link.netless.flat"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity android:name=".ui.activity.room.RoomDetailActivity" />
     </application>
 
 </manifest>

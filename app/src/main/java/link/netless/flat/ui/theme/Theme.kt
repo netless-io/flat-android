@@ -1,4 +1,4 @@
-package link.netless.flat.ui.activity.ui.theme
+  package link.netless.flat.ui.activity.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

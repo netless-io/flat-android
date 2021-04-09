@@ -2,12 +2,14 @@ package link.netless.flat.common
 
 import android.content.Context
 import android.content.Intent
+import link.netless.flat.Constants
 import link.netless.flat.ui.activities.UserProfileActivity
 import link.netless.flat.ui.activity.DevToolsActivity
 import link.netless.flat.ui.activity.FeedbackActivity
 import link.netless.flat.ui.activity.LoginActivity
 import link.netless.flat.ui.activity.SettingActivity
 import link.netless.flat.ui.activity.home.HomeActivity
+import link.netless.flat.ui.activity.room.RoomDetailActivity
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
@@ -19,6 +21,14 @@ object Navigator {
 
     fun launchLoginActivity(context: Context) {
         val intent = Intent(context, LoginActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchRoomDetailActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
+        val intent = Intent(context, RoomDetailActivity::class.java).apply {
+            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
+            putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
+        }
         context.startActivity(intent)
     }
 
