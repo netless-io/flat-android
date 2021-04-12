@@ -21,11 +21,9 @@ import com.google.gson.Gson
 import link.netless.flat.R
 import link.netless.flat.common.Navigator
 import link.netless.flat.data.model.RoomInfo
-import link.netless.flat.data.model.RoomStatus
 import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
 import link.netless.flat.ui.activity.ui.theme.FlatColorDivider
-import link.netless.flat.ui.activity.ui.theme.FlatColorRed
-import link.netless.flat.ui.activity.ui.theme.FlatColorTextSecondary
+import link.netless.flat.ui.compose.FlatRoomStatusText
 import link.netless.flat.util.formatToHHmm
 import link.netless.flat.util.formatToMMDDWeek
 
@@ -173,29 +171,7 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 text = "${roomInfo.beginTime.formatToHHmm()} ~ ${roomInfo.endTime.formatToHHmm()}",
                 style = typography.body2
             )
-            when (roomInfo.roomStatus) {
-                RoomStatus.Idle ->
-                    Text(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        text = stringResource(R.string.home_room_state_idle),
-                        style = typography.body2,
-                        color = FlatColorRed
-                    )
-                RoomStatus.Started, RoomStatus.Paused ->
-                    Text(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        text = stringResource(R.string.home_room_state_started),
-                        style = typography.body2,
-                        color = FlatColorBlue
-                    )
-                RoomStatus.Stopped ->
-                    Text(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        text = stringResource(R.string.home_room_state_end),
-                        style = typography.body2,
-                        color = FlatColorTextSecondary
-                    )
-            }
+            FlatRoomStatusText(roomStatus = roomInfo.roomStatus, modifier = Modifier.align(Alignment.BottomEnd))
         }
         Spacer(
             modifier = Modifier
