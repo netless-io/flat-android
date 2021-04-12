@@ -17,6 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
+            android:name=".ui.activity.play.RoomPlayActivity"
+            android:exported="true"></activity>
+        <activity
+            android:name=".ui.activity.play.PlaybackActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.activity.room.CreateRoomActivity"
             android:exported="true"
             android:label="@string/title_activity_create_room"
@@ -63,7 +69,6 @@
             android:launchMode="singleTask"
             android:taskAffinity="link.netless.flat"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity android:name=".ui.activity.room.RoomDetailActivity" />
     </application>
 

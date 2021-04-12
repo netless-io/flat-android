@@ -33,10 +33,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import link.netless.flat.R
+import link.netless.flat.common.Navigator
 import link.netless.flat.data.model.*
 import link.netless.flat.ui.activity.ui.theme.*
 import link.netless.flat.ui.compose.*
 import link.netless.flat.ui.viewmodel.RoomDetailViewModel
+import link.netless.flat.ui.viewmodel.UIRoomInfo
 import link.netless.flat.util.FlatDataTimeFormatter
 import java.util.*
 
@@ -50,17 +52,24 @@ class RoomDetailActivity : ComponentActivity() {
             var visible by remember { mutableStateOf(false) }
 
             Box(Modifier.fillMaxSize()) {
-                RoomDetailPage {
-                    when (it) {
+                RoomDetailPage { action ->
+                    when (action) {
                         DetailUiAction.Back -> finish()
-                        DetailUiAction.EnterRoom -> {
-
+                        is DetailUiAction.EnterRoom -> {
+                            Navigator.launchRoomPlayActivity(
+                                this@RoomDetailActivity,
+                                action.roomUUID,
+                                action.periodicUUID
+                            )
                         }
                         DetailUiAction.Invite -> {
                             // Show Dialog
                         }
-                        DetailUiAction.Playback -> {
-
+                        is DetailUiAction.Playback -> {
+                            Navigator.launchPlaybackActivity(
+                                this@RoomDetailActivity,
+                                action.roomUUID
+                            )
                         }
                         DetailUiAction.ShowAllRooms -> {
                             visible = true
@@ -150,6 +159,7 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
             )
             Spacer(modifier = Modifier.weight(1f))
             Operations(
+                roomInfo,
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 32.dp, horizontal = 16.dp),
@@ -287,16 +297,16 @@ private fun PeriodicSubRoomItem(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                DropdownMenuItem(onClick = {expanded = false}) {
+                DropdownMenuItem(onClick = { expanded = false }) {
                     Text("房间详情")
                 }
-                DropdownMenuItem(onClick = {expanded = false}) {
+                DropdownMenuItem(onClick = { expanded = false }) {
                     Text("修改房间")
                 }
-                DropdownMenuItem(onClick = {expanded = false}) {
+                DropdownMenuItem(onClick = { expanded = false }) {
                     Text("取消房间")
                 }
-                DropdownMenuItem(onClick = {expanded = false}) {
+                DropdownMenuItem(onClick = { expanded = false }) {
                     Text("复制邀请")
                 }
             }
@@ -359,30 +369,49 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
 }
 
 @Composable
-private fun Operations(modifier: Modifier, actioner: (DetailUiAction) -> Unit) {
-    Column(modifier) {
-        OutlinedButton(
-            modifier = Modifier
+private fun Operations(
+    roomInfo: UIRoomInfo,
+    modifier: Modifier,
+    actioner: (DetailUiAction) -> Unit
+) = when (roomInfo.roomStatus) {
+    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
+        Column(modifier) {
+            OutlinedButton(modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
-            shape = Shapes.small,
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
-            onClick = { actioner(DetailUiAction.Invite) }
-        ) {
-            Text("邀请", style = FlatCommonTextStyle, color = FlatColorTextPrimary)
+                shape = Shapes.small,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
+                onClick = { actioner(DetailUiAction.Invite) }) {
+                Text("邀请", style = FlatCommonTextStyle, color = FlatColorTextPrimary)
+            }
+            FlatNormalVerticalSpacer()
+            TextButton(modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp),
+                colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
+                shape = Shapes.small,
+                onClick = {
+                    actioner(
+                        DetailUiAction.EnterRoom(
+                            roomInfo.roomUUID,
+                            roomInfo.periodicUUID
+                        )
+                    )
+                }) {
+                Text("进入房间", style = FlatCommonTextStyle, color = FlatColorWhite)
+            }
         }
-
-        FlatNormalVerticalSpacer()
-
-        TextButton(modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp),
-            colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
-            shape = Shapes.small,
-            onClick = { actioner(DetailUiAction.EnterRoom) }) {
-            Text("进入房间", style = FlatCommonTextStyle, color = FlatColorWhite)
+    RoomStatus.Stopped ->
+        Column(modifier) {
+            TextButton(modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp),
+                colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
+                shape = Shapes.small,
+                onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) }) {
+                Text("回放", style = FlatCommonTextStyle, color = FlatColorWhite)
+            }
         }
-    }
 }
 
 private val allRoomTextStyle = TextStyle(
@@ -582,7 +611,7 @@ private fun BasePeriodicDisplayPreview() {
 internal sealed class DetailUiAction {
     object Back : DetailUiAction()
     object Invite : DetailUiAction()
-    object EnterRoom : DetailUiAction()
-    object Playback : DetailUiAction()
+    data class EnterRoom(val roomUUID: String, val periodicUUID: String?) : DetailUiAction()
+    data class Playback(val roomUUID: String) : DetailUiAction()
     object ShowAllRooms : DetailUiAction()
 }

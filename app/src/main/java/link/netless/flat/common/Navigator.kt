@@ -9,6 +9,8 @@ import link.netless.flat.ui.activity.FeedbackActivity
 import link.netless.flat.ui.activity.LoginActivity
 import link.netless.flat.ui.activity.SettingActivity
 import link.netless.flat.ui.activity.home.HomeActivity
+import link.netless.flat.ui.activity.play.PlaybackActivity
+import link.netless.flat.ui.activity.play.RoomPlayActivity
 import link.netless.flat.ui.activity.room.RoomDetailActivity
 
 object Navigator {
@@ -31,6 +33,20 @@ object Navigator {
         }
         context.startActivity(intent)
     }
+
+    fun launchPlaybackActivity(context: Context, roomUUID: String) {
+        val intent = Intent(context, PlaybackActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchRoomPlayActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
+        val intent = Intent(context, RoomPlayActivity::class.java).apply {
+            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
+            putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
+        }
+        context.startActivity(intent)
+    }
+
 
     fun launchSettingActivity(context: Context) {
         val intent = Intent(context, SettingActivity::class.java)
