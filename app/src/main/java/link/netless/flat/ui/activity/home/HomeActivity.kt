@@ -1,5 +1,9 @@
 package link.netless.flat.ui.activity.home
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +26,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.puculek.pulltorefresh.PullToRefresh
+import com.tencent.mm.opensdk.constants.ConstantsAPI
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
+import link.netless.flat.Constants
 import link.netless.flat.R
 import link.netless.flat.common.Navigator
 import link.netless.flat.ui.activity.ui.theme.FlatColorBlue
@@ -38,8 +46,13 @@ class HomeActivity : ComponentActivity() {
     private val userViewModel: UserViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
 
+    private lateinit var api: IWXAPI
+    private var wxReceiver: BroadcastReceiver? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        registerToWx()
     }
 
     override fun onResume() {
@@ -47,11 +60,29 @@ class HomeActivity : ComponentActivity() {
         actionLoginState()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (wxReceiver != null) {
+            unregisterReceiver(wxReceiver)
+        }
+    }
+
+    private fun registerToWx() {
+        api = WXAPIFactory.createWXAPI(this, Constants.WX_APP_ID, true)
+        api.registerApp(Constants.WX_APP_ID)
+
+        wxReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                api.registerApp(Constants.WX_APP_ID)
+            }
+        }
+        registerReceiver(wxReceiver, IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP))
+    }
+
+    // TODO 存在token时调用调用login接口
     private fun actionLoginState() {
         if (userViewModel.isLoggedIn()) {
-            setContent {
-                HomePage()
-            }
+            setContent { HomePage() }
             homeViewModel.loadRooms()
             homeViewModel.loadHistoryRooms()
         } else {

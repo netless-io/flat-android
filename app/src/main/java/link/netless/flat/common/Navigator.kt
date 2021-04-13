@@ -3,7 +3,7 @@ package link.netless.flat.common
 import android.content.Context
 import android.content.Intent
 import link.netless.flat.Constants
-import link.netless.flat.ui.activities.UserProfileActivity
+import link.netless.flat.ui.activity.UserProfileActivity
 import link.netless.flat.ui.activity.DevToolsActivity
 import link.netless.flat.ui.activity.FeedbackActivity
 import link.netless.flat.ui.activity.LoginActivity

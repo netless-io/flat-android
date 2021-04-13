@@ -1,7 +1,5 @@
 package link.netless.flat.ui.activity
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -64,7 +62,8 @@ fun UserLoginFlag() {
         Spacer(modifier = Modifier.weight(1f))
         Switch(
             checked = loggedInData.value ?: false,
-            onCheckedChange = { userViewModel.setLoggedIn(!(loggedInData.value ?: false)) })
+            enabled = loggedInData.value ?: true,
+            onCheckedChange = { userViewModel.logout() })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }

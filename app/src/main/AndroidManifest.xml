@@ -18,7 +18,7 @@
         android:theme="@style/Theme.FlatAndroid">
         <activity
             android:name=".ui.activity.play.RoomPlayActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
         <activity
             android:name=".ui.activity.play.PlaybackActivity"
             android:exported="true" />
@@ -35,9 +35,6 @@
             android:exported="true" />
         <activity
             android:name=".ui.activity.DevToolsActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.activity.WeChatLoginActivity"
             android:exported="true" />
         <activity
             android:name=".ui.activity.LoginActivity"
@@ -61,7 +58,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.UserProfileActivity" />
+        <activity android:name=".ui.activity.UserProfileActivity" />
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"

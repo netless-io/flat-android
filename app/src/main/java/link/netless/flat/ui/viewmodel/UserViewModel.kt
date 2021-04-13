@@ -2,61 +2,21 @@ package link.netless.flat.ui.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import link.netless.flat.data.model.UserInfo
 import link.netless.flat.data.repository.UserRepository
-import link.netless.flat.util.Resource
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
-    val userInfoResource: MutableLiveData<Resource<UserInfo>> by lazy {
-        MutableLiveData<Resource<UserInfo>>()
-    }
+    private val _userInfo = MutableStateFlow(userRepository.getUserInfo())
+    val userInfo: StateFlow<UserInfo>
+        get() = _userInfo
 
-    val loginResource: MutableLiveData<Resource<Boolean>> by lazy {
-        MutableLiveData<Resource<Boolean>>()
-    }
+    init {
 
-    fun getUsers() {
-        viewModelScope.launch {
-            userRepository.getUserInfo().onStart {
-                userInfoResource.postValue(Resource.loading())
-            }.catch {
-                userInfoResource.postValue(
-                    Resource.error(
-                        null,
-                        message = it.message ?: "Error Occurred!",
-                        error = Error(it.cause)
-                    )
-                )
-            }.collect {
-                userInfoResource.postValue(Resource.success(data = it))
-            }
-        }
-    }
-
-    fun login() {
-        viewModelScope.launch {
-            userRepository.login().onStart {
-                loginResource.postValue(Resource.loading())
-            }.catch {
-                loginResource.postValue(
-                    Resource.error(
-                        null,
-                        message = it.message ?: "Error Occurred!",
-                        error = Error(it.cause)
-                    )
-                )
-            }.collect {
-                loginResource.postValue(Resource.success(data = it))
-            }
-        }
     }
 
     val loggedInData: MutableLiveData<Boolean> by lazy {
@@ -67,8 +27,8 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
         return userRepository.isLoggedIn()
     }
 
-    fun setLoggedIn(loggedIn: Boolean) {
-        loggedInData.postValue(loggedIn)
-        userRepository.setLoggedIn(loggedIn)
+    fun logout() {
+        userRepository.logout()
+        loggedInData.value = false
     }
 }

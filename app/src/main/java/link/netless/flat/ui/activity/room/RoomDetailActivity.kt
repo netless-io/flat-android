@@ -81,7 +81,18 @@ class RoomDetailActivity : ComponentActivity() {
                     enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
                     exit = fadeOut(animationSpec = tween())
                 ) {
-                    AllRoomDetail(onBackPressed = { visible = false })
+                    AllRoomDetail { action ->
+                        when (action) {
+                            DetailUiAction.AllRoomBack -> {
+                                visible = false
+                            }
+                            DetailUiAction.CancelRoom -> {
+
+                            }
+                            else -> {
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -97,25 +108,7 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
         BackTopAppBar(
             stringResource(R.string.title_room_detail),
             onBackPressed = { actioner(DetailUiAction.Back) }) {
-            Box {
-                var expanded by remember { mutableStateOf(false) }
-
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
-                }
-                DropdownMenu(
-                    modifier = Modifier.wrapContentSize(),
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    DropdownMenuItem(onClick = {}) {
-                        Text("修改房间")
-                    }
-                    DropdownMenuItem(onClick = {}) {
-                        Text("个人信息", color = FlatColorRed)
-                    }
-                }
-            }
+            AppBarMoreButton(actioner)
         }
 
         if (viewState.value.loading) {
@@ -171,37 +164,15 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
 
 @ExperimentalAnimationApi
 @Composable
-fun AllRoomDetail(onBackPressed: () -> Unit) {
+private fun AllRoomDetail(actioner: (DetailUiAction) -> Unit) {
     val viewModel: RoomDetailViewModel = viewModel()
     val viewState = viewModel.state.collectAsState()
 
     FlatColumnPage {
-        BackHandler(onBack = onBackPressed)
-        BackTopAppBar(
-            stringResource(id = R.string.title_room_all),
-            onBackPressed = onBackPressed
-        ) {
-            Box {
-                var expanded by remember { mutableStateOf(false) }
-
-                IconButton(
-                    onClick = { expanded = true }) {
-                    Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
-                }
-
-                DropdownMenu(
-                    modifier = Modifier.wrapContentSize(),
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    DropdownMenuItem(onClick = {}) {
-                        Text("修改房间")
-                    }
-                    DropdownMenuItem(onClick = {}) {
-                        Text("个人信息", color = FlatColorRed)
-                    }
-                }
-            }
+        BackHandler(onBack = { actioner(DetailUiAction.AllRoomBack) })
+        BackTopAppBar(stringResource(R.string.title_room_all),
+            onBackPressed = { actioner(DetailUiAction.AllRoomBack) }) {
+            AppBarMoreButton(actioner)
         }
         viewState.value.periodicRoomInfo?.run {
             LazyColumn {
@@ -212,6 +183,29 @@ fun AllRoomDetail(onBackPressed: () -> Unit) {
                 item {
                     PeriodicSubRoomsDisplay(rooms)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppBarMoreButton(actioner: (DetailUiAction) -> Unit) {
+    Box {
+        var expanded by remember { mutableStateOf(false) }
+
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
+        }
+        DropdownMenu(
+            modifier = Modifier.wrapContentSize(),
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(onClick = { actioner(DetailUiAction.ModifyRoom) }) {
+                Text("修改房间")
+            }
+            DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
+                Text("取消房间", color = FlatColorRed)
             }
         }
     }
@@ -614,4 +608,9 @@ internal sealed class DetailUiAction {
     data class EnterRoom(val roomUUID: String, val periodicUUID: String?) : DetailUiAction()
     data class Playback(val roomUUID: String) : DetailUiAction()
     object ShowAllRooms : DetailUiAction()
+    object ModifyRoom : DetailUiAction()
+    object CancelRoom : DetailUiAction()
+
+    // AllRoom
+    object AllRoomBack : DetailUiAction()
 }

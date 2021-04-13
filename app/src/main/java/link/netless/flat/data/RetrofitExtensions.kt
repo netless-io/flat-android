@@ -89,7 +89,7 @@ inline fun <T> Response<BaseResp<T>>.toResult(): Result<T> = try {
         } else {
             ErrorResult(
                 toException(),
-                Error(bodyOrThrow().status, bodyOrThrow().code)
+                Error(bodyOrThrow().status, bodyOrThrow().code ?: -1)
             )
         }
     } else {

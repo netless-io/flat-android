@@ -1,4 +1,4 @@
-package link.netless.flat.ui.activities
+package link.netless.flat.ui.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,44 +12,44 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import link.netless.flat.R
 import link.netless.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import link.netless.flat.ui.activity.ui.theme.FlatCommonTipTextStyle
 import link.netless.flat.ui.compose.BackTopAppBar
 import link.netless.flat.ui.compose.FlatColumnPage
+import link.netless.flat.ui.viewmodel.UserViewModel
 
 @AndroidEntryPoint
 class UserProfileActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FlatColumnPage {
-                BackTopAppBar(
-                    title = stringResource(id = R.string.title_user_profile),
-                    { finish() })
-                SettingList()
+                val viewModel = viewModel(UserViewModel::class.java)
+                val userInfo = viewModel.userInfo.collectAsState()
+
+                BackTopAppBar(stringResource(id = R.string.title_user_profile), { finish() })
+                SettingList(userInfo.value.name)
             }
         }
     }
 }
 
 @Composable
-private fun SettingList() {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+private fun SettingList(name: String) {
+    LazyColumn(Modifier.fillMaxWidth()) {
         item {
             Item("匿名", "Hello", onClickOrNull = {})
             Divider(Modifier.padding(start = 16.dp, end = 16.dp), thickness = 1.dp)
-            Item("微信", "HelloWx")
+            Item("微信", name)
         }
     }
 }
@@ -88,5 +88,7 @@ private fun Item(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-
+    FlatColumnPage {
+        SettingList("Preview Name")
+    }
 }

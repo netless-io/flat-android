@@ -95,6 +95,7 @@ dependencies {
     // hilt
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
+    kapt "androidx.hilt:hilt-compiler:1.0.0-beta01"
     implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03'
 
     // network

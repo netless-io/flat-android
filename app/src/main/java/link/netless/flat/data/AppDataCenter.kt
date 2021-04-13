@@ -2,6 +2,8 @@ package link.netless.flat.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
+import link.netless.flat.data.model.UserInfo
 
 /**
  * 提供App级别的KV存储
@@ -9,20 +11,42 @@ import android.content.SharedPreferences
 class AppDataCenter(context: Context) {
     private val store: SharedPreferences =
         context.getSharedPreferences("global_kv_data", Context.MODE_PRIVATE)
+    private val gson = Gson()
 
     // region user
-    fun setUserLoggedIn(loggedIn: Boolean) {
+    fun setLogout() {
         store.edit().apply {
-            putBoolean(KEY_IS_LOGGED_IN, loggedIn)
+            putString(KEY_LOGIN_TOKEN, null)
         }.apply()
     }
 
-    fun isUserLoggedIn(defaultValue: Boolean = false): Boolean {
-        return store.getBoolean(KEY_IS_LOGGED_IN, defaultValue)
+    fun isUserLoggedIn(): Boolean {
+        return !store.getString(KEY_LOGIN_TOKEN, null).isNullOrEmpty()
+    }
+
+    fun setToken(token: String) {
+        store.edit().apply {
+            putString(KEY_LOGIN_TOKEN, token)
+        }.apply()
+    }
+
+    fun setUserInfo(userInfo: UserInfo) {
+        store.edit().apply {
+            putString(KEY_LOGIN_USER_INFO, gson.toJson(userInfo))
+        }.apply()
+    }
+
+    fun getUserInfo(): UserInfo? {
+        val userInfoJson = store.getString(KEY_LOGIN_USER_INFO, null)
+        if (userInfoJson.isNullOrBlank())
+            return null
+        return gson.fromJson(userInfoJson, UserInfo::class.java)
     }
     // endregion
 
     companion object {
-        const val KEY_IS_LOGGED_IN = "key_is_logged_in"
+        const val KEY_LOGIN_TOKEN = "key_login_token"
+
+        const val KEY_LOGIN_USER_INFO = "key_login_user_info"
     }
 }
