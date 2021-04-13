@@ -39,4 +39,25 @@ class RoomRepository @Inject constructor(
                 .executeOnce().toResult()
         }
     }
+
+    suspend fun cancelOrdinary(roomUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.cancelOrdinary(CancelRoomReq(roomUUID = roomUUID))
+                .executeOnce().toResult()
+        }
+    }
+
+    suspend fun cancelPeriodic(periodicUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.cancelPeriodic(CancelRoomReq(periodicUUID = periodicUUID))
+                .executeOnce().toResult()
+        }
+    }
+
+    suspend fun cancelPeriodicSubRoom(roomUUID: String, periodicUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.cancelPeriodicSubRoom(CancelRoomReq(roomUUID, periodicUUID))
+                .executeOnce().toResult()
+        }
+    }
 }

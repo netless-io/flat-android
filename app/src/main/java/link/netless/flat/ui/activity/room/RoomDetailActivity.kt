@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -49,50 +50,58 @@ class RoomDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel: RoomDetailViewModel = viewModel()
+            val cancelSuccess = viewModel.cancelSuccess.collectAsState()
             var visible by remember { mutableStateOf(false) }
 
-            Box(Modifier.fillMaxSize()) {
-                RoomDetailPage { action ->
-                    when (action) {
-                        DetailUiAction.Back -> finish()
-                        is DetailUiAction.EnterRoom -> {
-                            Navigator.launchRoomPlayActivity(
-                                this@RoomDetailActivity,
-                                action.roomUUID,
-                                action.periodicUUID
-                            )
-                        }
-                        DetailUiAction.Invite -> {
-                            // Show Dialog
-                        }
-                        is DetailUiAction.Playback -> {
-                            Navigator.launchPlaybackActivity(
-                                this@RoomDetailActivity,
-                                action.roomUUID
-                            )
-                        }
-                        DetailUiAction.ShowAllRooms -> {
-                            visible = true
-                        }
+            var actioner: (DetailUiAction) -> Unit = { action ->
+                when (action) {
+                    DetailUiAction.Back -> finish()
+                    is DetailUiAction.EnterRoom -> {
+                        Navigator.launchRoomPlayActivity(
+                            this@RoomDetailActivity,
+                            action.roomUUID,
+                            action.periodicUUID
+                        )
+                    }
+                    DetailUiAction.Invite -> {
+                        // Show Dialog
+                    }
+                    is DetailUiAction.Playback -> {
+                        Navigator.launchPlaybackActivity(
+                            this@RoomDetailActivity,
+                            action.roomUUID
+                        )
+                    }
+                    DetailUiAction.ShowAllRooms -> {
+                        visible = true
+                    }
+                    DetailUiAction.AllRoomBack -> {
+                        visible = false
+                    }
+                    DetailUiAction.CancelRoom -> {
+                        viewModel.cancelRoom()
+                    }
+                    DetailUiAction.ModifyRoom -> {
+
                     }
                 }
+            }
+
+            if (cancelSuccess.value) {
+                Navigator.launchHomeActivity(LocalContext.current)
+                finish()
+                return@setContent
+            }
+
+            Box(Modifier.fillMaxSize()) {
+                RoomDetailPage(actioner = actioner)
                 AnimatedVisibility(
                     visible = visible,
                     enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
                     exit = fadeOut(animationSpec = tween())
                 ) {
-                    AllRoomDetail { action ->
-                        when (action) {
-                            DetailUiAction.AllRoomBack -> {
-                                visible = false
-                            }
-                            DetailUiAction.CancelRoom -> {
-
-                            }
-                            else -> {
-                            }
-                        }
-                    }
+                    AllRoomDetail(actioner = actioner)
                 }
             }
         }
@@ -111,53 +120,55 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
             AppBarMoreButton(actioner)
         }
 
-        if (viewState.value.loading) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                FlatPageLoading()
-            }
-        } else {
-            val roomInfo = viewState.value.roomInfo!!
-            TimeDisplay(
-                begin = roomInfo.beginTime,
-                end = roomInfo.endTime,
-                state = roomInfo.roomStatus
-            )
-            if (viewModel.isPeriodicRoom() && viewState.value.periodicRoomInfo != null) {
-                val periodicRoomInfo = viewState.value.periodicRoomInfo!!
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .animateContentSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "查看全部${periodicRoomInfo.rooms.size}个房间",
-                        Modifier
-                            .padding(4.dp)
-                            .clickable { actioner(DetailUiAction.ShowAllRooms) },
-                        style = allRoomTextStyle
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f), contentAlignment = Alignment.Center
+        ) {
+            if (viewState.value.roomInfo != null) {
+                val roomInfo = viewState.value.roomInfo!!
+                Column(Modifier.fillMaxSize()) {
+                    TimeDisplay(
+                        begin = roomInfo.beginTime,
+                        end = roomInfo.endTime,
+                        state = roomInfo.roomStatus
                     )
-                    FlatNormalVerticalSpacer()
+                    if (viewModel.isPeriodicRoom() && viewState.value.periodicRoomInfo != null) {
+                        val periodicRoomInfo = viewState.value.periodicRoomInfo!!
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .animateContentSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "查看全部${periodicRoomInfo.rooms.size}个房间",
+                                Modifier
+                                    .padding(4.dp)
+                                    .clickable { actioner(DetailUiAction.ShowAllRooms) },
+                                style = allRoomTextStyle
+                            )
+                            FlatNormalVerticalSpacer()
+                        }
+                    }
+                    MoreRomeInfoDisplay(
+                        if (viewModel.isPeriodicRoom()) roomInfo.periodicUUID!! else roomInfo.roomUUID,
+                        roomInfo.roomType,
+                        viewModel.isPeriodicRoom()
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Operations(
+                        roomInfo,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp, horizontal = 16.dp),
+                        actioner = actioner
+                    )
                 }
             }
-            MoreRomeInfoDisplay(
-                if (viewModel.isPeriodicRoom()) roomInfo.periodicUUID!! else roomInfo.roomUUID,
-                roomInfo.roomType,
-                viewModel.isPeriodicRoom()
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Operations(
-                roomInfo,
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp, horizontal = 16.dp),
-                actioner = actioner
-            )
+            if (viewState.value.loading) {
+                FlatPageLoading()
+            }
         }
     }
 }

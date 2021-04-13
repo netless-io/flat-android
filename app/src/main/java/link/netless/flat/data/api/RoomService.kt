@@ -33,4 +33,20 @@ interface RoomService {
     fun getPeriodicSubRoomInfo(
         @Body periodicSubRoomReq: PeriodicSubRoomReq
     ): Call<BaseResp<PeriodicSubRoom>>
+
+    // 取消房间
+    @POST("v1/room/cancel/ordinary")
+    fun cancelOrdinary(
+        @Body cancelRoomReq: CancelRoomReq
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/room/cancel/periodic")
+    fun cancelPeriodic(
+        @Body cancelRoomReq: CancelRoomReq
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/room/cancel/periodic-sub-room")
+    fun cancelPeriodicSubRoom(
+        @Body cancelRoomReq: CancelRoomReq
+    ): Call<BaseResp<RespNoData>>
 }

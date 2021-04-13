@@ -31,6 +31,10 @@ class RoomDetailViewModel @Inject constructor(
     val state: StateFlow<RoomDetailViewState>
         get() = _state
 
+    private var _cancelSuccess: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val cancelSuccess: StateFlow<Boolean>
+        get() = _cancelSuccess
+
     init {
         viewModelScope.launch {
             combine(
@@ -106,6 +110,23 @@ class RoomDetailViewModel @Inject constructor(
 
     private fun intentValueNullable(key: String): String? {
         return savedStateHandle.get<String>(key)
+    }
+
+    fun cancelRoom() {
+        viewModelScope.launch {
+            incLoadingCount()
+            val resp = if (isPeriodicRoom()) {
+                roomRepository.cancelPeriodic(intentValue(Constants.IntentKey.PERIODIC_UUID))
+            } else {
+                roomRepository.cancelOrdinary(intentValue(Constants.IntentKey.ROOM_UUID))
+            }
+            if (resp is Success) {
+                _cancelSuccess.value = true
+            } else {
+
+            }
+            decLoadingCount()
+        }
     }
 }
 
