@@ -12,11 +12,11 @@ object FlatDataTimeFormatter {
 
     private val longDateWithWeekFormatter = SimpleDateFormat("yyyy/MM/dd EE", Locale.CHINA)
 
-    fun formatTime(utcMs: Long): String {
+    fun time(utcMs: Long): String {
         return timeFormatter.format(utcMs)
     }
 
-    fun formatDate(utcMs: Long): String {
+    fun date(utcMs: Long): String {
         return dateFormatter.format(utcMs)
     }
 
@@ -26,6 +26,10 @@ object FlatDataTimeFormatter {
 
     fun longDateWithWeek(utcMs: Long): String {
         return longDateWithWeekFormatter.format(utcMs)
+    }
+
+    fun timeDuring(begin: Long, end: Long): String {
+        return "${timeFormatter.format(begin)}~${timeFormatter.format(end)}"
     }
 
     // TODO 国际化支持
