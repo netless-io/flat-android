@@ -11,6 +11,7 @@ import link.netless.flat.ui.activity.SettingActivity
 import link.netless.flat.ui.activity.home.HomeActivity
 import link.netless.flat.ui.activity.play.PlaybackActivity
 import link.netless.flat.ui.activity.play.RoomPlayActivity
+import link.netless.flat.ui.activity.room.JoinRoomActivity
 import link.netless.flat.ui.activity.room.RoomDetailActivity
 
 object Navigator {
@@ -70,6 +71,11 @@ object Navigator {
 
     fun launchAboutUsActivity(context: Context) {
         val intent = Intent(context, UserProfileActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchJoinRoomActivity(context: Context) {
+        val intent = Intent(context, JoinRoomActivity::class.java)
         context.startActivity(intent)
     }
 }

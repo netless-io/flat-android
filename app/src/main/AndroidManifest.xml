@@ -18,7 +18,7 @@
         android:theme="@style/Theme.FlatAndroid">
         <activity
             android:name=".ui.activity.play.RoomPlayActivity"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".ui.activity.play.PlaybackActivity"
             android:exported="true" />
@@ -27,6 +27,7 @@
             android:exported="true"
             android:label="@string/title_activity_create_room"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
+        <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity
             android:name=".ui.activity.FeedbackActivity"
             android:exported="true" />

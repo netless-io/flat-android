@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -126,24 +127,31 @@ fun HomePage() {
 
 @Composable
 fun TopOperations() {
+    val context = LocalContext.current
+
     Row(Modifier.fillMaxWidth()) {
-        OperationItem(R.drawable.ic_home_create_room, R.string.create_room)
-        OperationItem(R.drawable.ic_home_join_room, R.string.join_room)
-        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room)
+        OperationItem(R.drawable.ic_home_create_room, R.string.create_room, {})
+        OperationItem(
+            R.drawable.ic_home_join_room,
+            R.string.join_room
+        ) { Navigator.launchJoinRoomActivity(context) }
+        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room, {})
     }
 }
 
 @Composable
-private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int) {
+private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, onClick: () -> Unit) {
     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
         Column(
-            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
+            modifier = Modifier
+                .padding(top = 16.dp, bottom = 24.dp)
+                .clickable(onClick = onClick),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 painter = painterResource(id),
                 contentDescription = "",
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(stringResource(id = tip), style = FlatSmallTextStyle)

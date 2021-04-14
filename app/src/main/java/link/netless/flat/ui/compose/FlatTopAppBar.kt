@@ -7,13 +7,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import link.netless.flat.ui.activity.ui.theme.FlatAndroidTheme
 import link.netless.flat.ui.activity.ui.theme.FlatTitleTextStyle
 
 @Composable
@@ -70,11 +70,32 @@ fun BackTopAppBar(
     )
 }
 
+@Composable
+fun CloseTopAppBar(
+    title: String,
+    onClose: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    FlatTopAppBar(
+        title = {
+            Text(text = title, style = FlatTitleTextStyle)
+        },
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(Icons.Rounded.Close, contentDescription = null)
+            }
+        },
+        actions = actions
+    )
+}
+
+
 @Preview
 @Composable
 fun DefaultPreview() {
-    FlatAndroidTheme {
+    FlatColumnPage {
         BackTopAppBar("Hello", {})
+        CloseTopAppBar("Hello", {})
     }
 }
 

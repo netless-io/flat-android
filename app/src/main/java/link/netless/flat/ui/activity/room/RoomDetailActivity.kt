@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import link.netless.flat.R
 import link.netless.flat.common.Navigator
+import link.netless.flat.common.rememberAndroidClipboardController
 import link.netless.flat.data.model.*
 import link.netless.flat.ui.activity.ui.theme.*
 import link.netless.flat.ui.compose.*
@@ -41,6 +42,7 @@ import link.netless.flat.ui.viewmodel.RoomDetailViewModel
 import link.netless.flat.ui.viewmodel.UIRoomInfo
 import link.netless.flat.ui.viewmodel.UserViewModel
 import link.netless.flat.util.FlatDataTimeFormatter
+import link.netless.flat.util.showToast
 import java.util.*
 
 @AndroidEntryPoint
@@ -429,7 +431,11 @@ private fun Operations(
 
 @Composable
 private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo) {
+    val clipboard = rememberAndroidClipboardController()
     val viewModel: UserViewModel = viewModel()
+    val context = LocalContext.current
+    val username = viewModel.userInfo.value.name
+
 
     Dialog(onDismissRequest = { openDialog.value = false }) {
         Surface(
@@ -443,13 +449,20 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
                     roomInfo.endTime
                 )
             }"
+            val copyText = """
+                            |${username} 邀请你加入 Flat 房间
+                            |房间主题：${roomInfo.title}
+                            |开始时间：${timeDuring}
+                            |房间号：${roomInfo.roomUUID}
+                            |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
+                        """.trimMargin()
             Column(
                 Modifier
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 val enabled = remember { mutableStateOf(true) }
 
-                Text("${viewModel.userInfo.value.name} 邀请您参加 Flat 房间")
+                Text("${username} 邀请您参加 Flat 房间")
                 FlatLargeVerticalSpacer()
                 Box(Modifier.fillMaxWidth()) {
                     Text("房间主题", Modifier.align(Alignment.TopStart))
@@ -472,7 +485,10 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
                 FlatPrimaryTextButton(
                     text = if (enabled.value) "复制邀请链接" else "已经复制",
                     enabled = enabled.value,
-                    onClick = { enabled.value = false },
+                    onClick = {
+                        enabled.value = false
+                        clipboard.putText(copyText)
+                    },
                 )
             }
         }

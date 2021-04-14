@@ -6,6 +6,7 @@
     <string name="title_setting">Setting</string>
     <string name="title_room_detail" translatable="false">房间详情</string>
     <string name="title_room_all" translatable="false">全部房间</string>
+    <string name="title_join_room" translatable="false">加入房间</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
     <string name="create_room" translatable="false">创建房间</string>
     <string name="join_room" translatable="false">加入房间</string>

@@ -26,6 +26,7 @@ fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -
 
 @Composable
 fun FlatColumnPage(
+    modifier: Modifier = Modifier,
     statusBarColor: Color = FlatColorWhite,
     content: @Composable() ColumnScope.() -> Unit
 ) {
@@ -34,7 +35,7 @@ fun FlatColumnPage(
 
     FlatAndroidTheme() {
         Surface(color = MaterialTheme.colors.background) {
-            Column(Modifier.fillMaxSize()) {
+            Column(modifier.fillMaxSize()) {
                 content()
             }
         }

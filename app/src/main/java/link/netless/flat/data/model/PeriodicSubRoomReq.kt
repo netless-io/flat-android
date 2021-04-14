@@ -1,6 +1,6 @@
 package link.netless.flat.data.model
 
-data class PeriodicSubRoomReq constructor(
+data class PeriodicSubRoomReq(
     val periodicUUID: String,
     val roomUUID: String,
     val needOtherRoomTimeInfo: Boolean?,

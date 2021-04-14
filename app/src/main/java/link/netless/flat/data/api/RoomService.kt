@@ -49,4 +49,10 @@ interface RoomService {
     fun cancelPeriodicSubRoom(
         @Body cancelRoomReq: CancelRoomReq
     ): Call<BaseResp<RespNoData>>
+
+    // 加入房间
+    @POST("v1/room/join")
+    fun joinRoom(
+        @Body joinRoomReq: JoinRoomReq
+    ): Call<BaseResp<RoomPlayInfo>>
 }
