@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="link.netless.flat">
+    package="io.agora.flat">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Agora -->
@@ -19,7 +19,7 @@
     </queries>
 
     <application
-        android:name=".MainApplication"
+        android:name="io.agora.flat.MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -28,40 +28,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
-            android:name=".ui.activity.play.ClassRoomActivity"
+            android:name="io.agora.flat.ui.activity.play.ClassRoomActivity"
             android:exported="true"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".ui.activity.play.PlaybackActivity"
+            android:name="io.agora.flat.ui.activity.play.PlaybackActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.room.CreateRoomActivity"
+            android:name="io.agora.flat.ui.activity.room.CreateRoomActivity"
             android:exported="true"
             android:label="@string/title_activity_create_room"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
-        <activity android:name=".ui.activity.room.JoinRoomActivity" />
+        <activity android:name="io.agora.flat.ui.activity.room.JoinRoomActivity" />
         <activity
-            android:name=".ui.activity.FeedbackActivity"
+            android:name="io.agora.flat.ui.activity.FeedbackActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.AboutUsActivity"
+            android:name="io.agora.flat.ui.activity.AboutUsActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.DevToolsActivity"
+            android:name="io.agora.flat.ui.activity.DevToolsActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.LoginActivity"
+            android:name="io.agora.flat.ui.activity.LoginActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.SettingActivity"
+            android:name="io.agora.flat.ui.activity.SettingActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.ComposeTestActivity"
+            android:name="io.agora.flat.ui.activity.ComposeTestActivity"
             android:exported="true"
             android:label="@string/title_activity_compose_test"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
-            android:name=".ui.activity.home.HomeActivity"
+            android:name="io.agora.flat.ui.activity.home.HomeActivity"
             android:exported="true"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.FlatAndroid.NoActionBar">
@@ -71,15 +71,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.UserProfileActivity" />
+        <activity android:name="io.agora.flat.ui.activity.UserProfileActivity" />
         <activity
-            android:name=".wxapi.WXEntryActivity"
+            android:name="io.agora.flat.wxapi.WXEntryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:taskAffinity="link.netless.flat"
+            android:taskAffinity="io.agora.flat"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name=".ui.activity.room.RoomDetailActivity" />
+        <activity android:name="io.agora.flat.ui.activity.room.RoomDetailActivity" />
     </application>
 
 </manifest>
