@@ -30,3 +30,6 @@
 -keep class com.tencent.mm.sdk.** {
     *;
 }
+
+# Agora RTC
+-keep class io.agora.**{*;}

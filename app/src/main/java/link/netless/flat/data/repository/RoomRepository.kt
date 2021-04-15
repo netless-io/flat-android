@@ -60,4 +60,18 @@ class RoomRepository @Inject constructor(
                 .executeOnce().toResult()
         }
     }
+
+    suspend fun joinRoom(uuid: String): Result<RoomPlayInfo> {
+        return withContext(Dispatchers.IO) {
+            roomService.joinRoom(JoinRoomReq(uuid))
+                .executeOnce().toResult()
+        }
+    }
+
+    suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>): Result<Map<String, RtcUser>> {
+        return withContext(Dispatchers.IO) {
+            roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID))
+                .executeOnce().toResult()
+        }
+    }
 }

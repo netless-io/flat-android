@@ -55,4 +55,10 @@ interface RoomService {
     fun joinRoom(
         @Body joinRoomReq: JoinRoomReq
     ): Call<BaseResp<RoomPlayInfo>>
+
+    // 获取房间内所有用户的信息
+    @POST("v1/room/info/users")
+    fun getRoomUsers(
+        @Body roomUsersReq: RoomUsersReq
+    ): Call<BaseResp<Map<String, RtcUser>>>
 }

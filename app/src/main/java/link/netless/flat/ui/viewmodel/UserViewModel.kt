@@ -12,7 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
     private val _userInfo = MutableStateFlow(userRepository.getUserInfo())
-    val userInfo: StateFlow<UserInfo>
+    val userInfo: StateFlow<UserInfo?>
         get() = _userInfo
 
     init {

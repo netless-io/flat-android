@@ -37,7 +37,9 @@ class UserProfileActivity : ComponentActivity() {
                 val userInfo = viewModel.userInfo.collectAsState()
 
                 BackTopAppBar(stringResource(id = R.string.title_user_profile), { finish() })
-                SettingList(userInfo.value.name)
+                userInfo.value?.apply {
+                    SettingList(name)
+                }
             }
         }
     }

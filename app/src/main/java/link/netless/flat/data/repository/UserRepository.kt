@@ -40,8 +40,8 @@ class UserRepository @Inject constructor(
         appDataCenter.setLogout()
     }
 
-    fun getUserInfo(): UserInfo {
-        return appDataCenter.getUserInfo()!!
+    fun getUserInfo(): UserInfo? {
+        return appDataCenter.getUserInfo()
     }
 
     suspend fun loginWeChatSetAuthId(authID: String): Result<RespNoData> {

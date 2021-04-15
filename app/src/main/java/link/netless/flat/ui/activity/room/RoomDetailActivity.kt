@@ -434,7 +434,7 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
     val clipboard = rememberAndroidClipboardController()
     val viewModel: UserViewModel = viewModel()
     val context = LocalContext.current
-    val username = viewModel.userInfo.value.name
+    val username = viewModel.userInfo.value!!.name
 
 
     Dialog(onDismissRequest = { openDialog.value = false }) {
