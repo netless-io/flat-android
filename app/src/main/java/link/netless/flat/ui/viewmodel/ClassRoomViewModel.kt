@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import link.netless.flat.Constants
 import link.netless.flat.data.ErrorResult
 import link.netless.flat.data.Success
+import link.netless.flat.data.model.RoomInfo
 import link.netless.flat.data.model.RoomPlayInfo
 import link.netless.flat.data.model.RtcUser
 import link.netless.flat.data.repository.RoomRepository
@@ -21,13 +23,13 @@ class ClassRoomViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
-    val roomPlayInfo: SharedFlow<RoomPlayInfo?> = _roomPlayInfo
+    val roomPlayInfo = _roomPlayInfo.asStateFlow()
 
     private var _joining = MutableStateFlow<Boolean>(true)
     val joining: SharedFlow<Boolean> = _joining
 
     private var _roomUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val roomUsersMap: SharedFlow<Map<String, RtcUser>> = _roomUsersMap
+    val roomUsersMap = _roomUsersMap.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -41,6 +43,10 @@ class ClassRoomViewModel @Inject constructor(
                 }
             }
             _joining.value = false
+        }
+
+        viewModelScope.launch {
+            fetchRoomInfo(intentValue(Constants.IntentKey.ROOM_UUID))
         }
     }
 
@@ -59,5 +65,9 @@ class ClassRoomViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    suspend fun fetchRoomInfo(roomUUID: String): RoomInfo? {
+        return null;
     }
 }

@@ -9,4 +9,6 @@
     <color name="flat_white">#FFFFFFFF</color>
     <color name="flat_black">#FF000000</color>
     <color name="flat_gray">#FFCCCCCC</color>
+
+    <color name="flat_white_50">#7FFFFFFF</color>
 </resources>

@@ -3,13 +3,18 @@ package link.netless.flat.ui.activity.play
 import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtm.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import link.netless.flat.Constants
@@ -21,14 +26,16 @@ import kotlin.coroutines.suspendCoroutine
 
 
 class RtcComponent(
-    val activityClass: ClassRoomActivity,
+    val activity: ClassRoomActivity,
     val rootView: FrameLayout,
-) {
+) : LifecycleOwner {
     companion object {
         val TAG = RtcComponent::class.simpleName
     }
 
     private val viewModel: ClassRoomViewModel
+
+    private val PERMISSION_REQ_ID = 22
 
     // App 运行时确认麦克风和摄像头设备的使用权限。
     private val REQUESTED_PERMISSIONS = arrayOf<String>(
@@ -37,7 +44,8 @@ class RtcComponent(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
-    private val PERMISSION_REQ_ID = 22
+    private var recyclerView: RecyclerView
+    private var adpater: UserVideoAdapter = UserVideoAdapter(ArrayList(), application().rtcEngine())
 
     init {
         if (checkSelfPermission(REQUESTED_PERMISSIONS[0], PERMISSION_REQ_ID) &&
@@ -46,26 +54,30 @@ class RtcComponent(
         ) {
             initEngineAndJoinChannel();
         }
-        viewModel = ViewModelProvider(activityClass).get(ClassRoomViewModel::class.java)
-
-        GlobalScope.launch {
+        viewModel = ViewModelProvider(activity).get(ClassRoomViewModel::class.java)
+        lifecycleScope.launch {
             viewModel.roomUsersMap.collect {
                 it.map { entry ->
                     Log.d(TAG, "${entry.key} ${entry.value.name}")
                 }
+                adpater.setDataSet(ArrayList(it.values))
             }
         }
+        recyclerView = RecyclerView(activity)
+        rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adpater
     }
 
     private fun checkSelfPermission(permission: String, requestCode: Int): Boolean {
         Log.i(TAG, "checkSelfPermission $permission $requestCode")
         if (ContextCompat.checkSelfPermission(
-                activityClass,
+                activity,
                 permission
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                activityClass,
+                activity,
                 arrayOf(permission),
                 requestCode
             )
@@ -91,6 +103,7 @@ class RtcComponent(
 
             override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
                 Log.d(TAG, "onJoinChannelSuccess:$channel\t$uid\t$elapsed")
+                adpater.notifyDataSetChanged()
             }
 
             override fun onUserOffline(uid: Int, reason: Int) {
@@ -100,28 +113,6 @@ class RtcComponent(
             override fun onUserJoined(uid: Int, elapsed: Int) {
                 Log.d(TAG, "onUserJoined:$uid $elapsed")
             }
-
-            override fun onLastmileQuality(quality: Int) {
-            }
-
-            override fun onLastmileProbeResult(result: IRtcEngineEventHandler.LastmileProbeResult?) {
-            }
-
-            override fun onLocalVideoStats(stats: IRtcEngineEventHandler.LocalVideoStats?) {
-            }
-
-            override fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats?) {
-            }
-
-            override fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {
-            }
-
-            override fun onRemoteVideoStats(stats: IRtcEngineEventHandler.RemoteVideoStats?) {
-            }
-
-            override fun onRemoteAudioStats(stats: IRtcEngineEventHandler.RemoteAudioStats?) {
-            }
-
         })
     }
 
@@ -166,7 +157,7 @@ class RtcComponent(
     private var channel: RtmChannel? = null
 
     fun enterChannel(rtcUID: Long, rtcToken: String, rtmToken: String, uuid: String) {
-        GlobalScope.launch {
+        lifecycleScope.launch {
             if (login(rtmToken, Constants.User_UUID)) {
                 channel = joinChannel(uuid)
                 if (channel != null) {
@@ -174,6 +165,12 @@ class RtcComponent(
                     members?.map { it.userId }
                     viewModel.requestRoomUsers(uuid, members?.map { it.userId } ?: emptyList())
                 }
+
+                application().rtcEngine()?.joinChannel(
+                    rtcToken, uuid,
+                    "{}}",
+                    rtcUID.toInt()
+                )
             }
         }
     }
@@ -229,7 +226,7 @@ class RtcComponent(
     }
 
     private fun application(): MainApplication {
-        return activityClass.application as MainApplication
+        return activity.application as MainApplication
     }
 
     fun onActivityDestroy() {
@@ -242,5 +239,10 @@ class RtcComponent(
 
             }
         })
+        application().rtcEngine()?.leaveChannel()
+    }
+
+    override fun getLifecycle(): Lifecycle {
+        return activity.lifecycle
     }
 }

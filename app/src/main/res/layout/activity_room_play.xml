@@ -14,8 +14,9 @@
         android:visibility="visible" />
 
     <FrameLayout
-        android:id="@+id/videoContainer"
+        android:id="@+id/userVideoLayout"
         android:layout_width="200dp"
         android:layout_height="match_parent"
+        android:background="@color/flat_white_50"
         app:layout_constraintRight_toRightOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

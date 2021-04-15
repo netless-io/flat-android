@@ -7,6 +7,10 @@ import io.agora.rtc.RtcEngine
 import io.agora.rtm.*
 import link.netless.flat.common.AgoraEventHandler
 import link.netless.flat.common.EventHandler
+import io.agora.rtc.video.VideoEncoderConfiguration
+
+
+
 
 
 @HiltAndroidApp
@@ -28,6 +32,8 @@ class MainApplication : Application() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        setupVideoConfig()
 
         try {
             mRtmClient = RtmClient.createInstance(
@@ -71,6 +77,19 @@ class MainApplication : Application() {
             throw RuntimeException("You need to check the RTM init process.")
         }
     }
+
+    private fun setupVideoConfig() {
+        mRtcEngine.enableVideo()
+        mRtcEngine.setVideoEncoderConfiguration(
+            VideoEncoderConfiguration(
+                VideoEncoderConfiguration.VD_640x360,
+                VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
+                VideoEncoderConfiguration.STANDARD_BITRATE,
+                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT
+            )
+        )
+    }
+
 
     fun rtcEngine(): RtcEngine? {
         return mRtcEngine

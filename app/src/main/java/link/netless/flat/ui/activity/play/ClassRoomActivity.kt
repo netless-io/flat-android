@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.herewhite.sdk.WhiteboardView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -31,14 +32,13 @@ class ClassRoomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_room_play)
         supportActionBar?.hide()
 
-
         whiteboard = findViewById(R.id.whiteboard)
         whiteboardComponent = WhiteboardComponent(this, whiteboard)
 
-        rtcRoot = findViewById(R.id.videoContainer)
+        rtcRoot = findViewById(R.id.userVideoLayout)
         rtcComponent = RtcComponent(this, rtcRoot)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             viewModel.roomPlayInfo.collect {
                 it?.apply {
                     whiteboardComponent.join(whiteboardRoomUUID, whiteboardRoomToken)

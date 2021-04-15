@@ -1,6 +1,8 @@
 package link.netless.flat.ui.activity.play
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.Promise
 import com.herewhite.sdk.domain.RoomPhase
@@ -11,9 +13,9 @@ import org.json.JSONObject
 
 
 class WhiteboardComponent(
-    activityClass: ClassRoomActivity,
-    whiteboard: WhiteboardView,
-) {
+    val activity: ClassRoomActivity,
+    val whiteboard: WhiteboardView,
+) : LifecycleOwner {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName
     }
@@ -25,7 +27,7 @@ class WhiteboardComponent(
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
 
-        whiteSdk = WhiteSdk(whiteboard, activityClass, configuration)
+        whiteSdk = WhiteSdk(whiteboard, activity, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallbacks {
             override fun urlInterrupter(sourceUrl: String): String {
                 return sourceUrl
@@ -99,5 +101,9 @@ class WhiteboardComponent(
 
     fun onActivityDestroy() {
         whiteSdk.releaseRoom()
+    }
+
+    override fun getLifecycle(): Lifecycle {
+        return activity.lifecycle
     }
 }

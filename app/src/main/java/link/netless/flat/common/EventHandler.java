@@ -13,18 +13,24 @@ public interface EventHandler {
 
     void onUserJoined(int uid, int elapsed);
 
-    void onLastmileQuality(int quality);
+    default void onLastmileQuality(int quality) {
+    }
 
-    void onLastmileProbeResult(IRtcEngineEventHandler.LastmileProbeResult result);
+    default void onLastmileProbeResult(IRtcEngineEventHandler.LastmileProbeResult result) {
+    }
 
-    void onLocalVideoStats(IRtcEngineEventHandler.LocalVideoStats stats);
+    default void onLocalVideoStats(IRtcEngineEventHandler.LocalVideoStats stats) {
+    }
 
-    void onRtcStats(IRtcEngineEventHandler.RtcStats stats);
+    default void onRtcStats(IRtcEngineEventHandler.RtcStats stats) {
+    }
 
-    void onNetworkQuality(int uid, int txQuality, int rxQuality);
+    default void onNetworkQuality(int uid, int txQuality, int rxQuality) {
+    }
 
-    void onRemoteVideoStats(IRtcEngineEventHandler.RemoteVideoStats stats);
+    default void onRemoteVideoStats(IRtcEngineEventHandler.RemoteVideoStats stats) {
+    }
 
-    void onRemoteAudioStats(IRtcEngineEventHandler.RemoteAudioStats stats);
-
+    default void onRemoteAudioStats(IRtcEngineEventHandler.RemoteAudioStats stats) {
+    }
 }
