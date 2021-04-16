@@ -19,7 +19,7 @@
     </queries>
 
     <application
-        android:name="io.agora.flat.MainApplication"
+        android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -28,40 +28,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
-            android:name="io.agora.flat.ui.activity.play.ClassRoomActivity"
+            android:name=".ui.activity.play.ClassRoomActivity"
             android:exported="true"
             android:screenOrientation="landscape" />
         <activity
-            android:name="io.agora.flat.ui.activity.play.PlaybackActivity"
+            android:name=".ui.activity.playback.PlaybackActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.room.CreateRoomActivity"
+            android:name=".ui.activity.room.CreateRoomActivity"
             android:exported="true"
             android:label="@string/title_activity_create_room"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
-        <activity android:name="io.agora.flat.ui.activity.room.JoinRoomActivity" />
+        <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity
-            android:name="io.agora.flat.ui.activity.FeedbackActivity"
+            android:name=".ui.activity.FeedbackActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.AboutUsActivity"
+            android:name=".ui.activity.AboutUsActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.DevToolsActivity"
+            android:name=".ui.activity.DevToolsActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.LoginActivity"
+            android:name=".ui.activity.LoginActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.SettingActivity"
+            android:name=".ui.activity.SettingActivity"
             android:exported="true" />
         <activity
-            android:name="io.agora.flat.ui.activity.ComposeTestActivity"
+            android:name=".ui.activity.ComposeTestActivity"
             android:exported="true"
             android:label="@string/title_activity_compose_test"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity
-            android:name="io.agora.flat.ui.activity.home.HomeActivity"
+            android:name=".ui.activity.home.HomeActivity"
             android:exported="true"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.FlatAndroid.NoActionBar">
@@ -71,15 +71,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="io.agora.flat.ui.activity.UserProfileActivity" />
+        <activity android:name=".ui.activity.UserProfileActivity" />
         <activity
-            android:name="io.agora.flat.wxapi.WXEntryActivity"
+            android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:taskAffinity="io.agora.flat"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name="io.agora.flat.ui.activity.room.RoomDetailActivity" />
+        <activity android:name=".ui.activity.room.RoomDetailActivity" />
     </application>
 
 </manifest>

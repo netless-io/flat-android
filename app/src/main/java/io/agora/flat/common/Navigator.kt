@@ -9,7 +9,7 @@ import io.agora.flat.ui.activity.FeedbackActivity
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.SettingActivity
 import io.agora.flat.ui.activity.home.HomeActivity
-import io.agora.flat.ui.activity.play.PlaybackActivity
+import io.agora.flat.ui.activity.playback.PlaybackActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.room.JoinRoomActivity
 import io.agora.flat.ui.activity.room.RoomDetailActivity

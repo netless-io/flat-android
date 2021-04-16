@@ -1,4 +1,4 @@
-package io.agora.flat.ui.activity.play
+package io.agora.flat.ui.activity.playback
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

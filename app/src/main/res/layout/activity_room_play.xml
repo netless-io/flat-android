@@ -14,7 +14,11 @@
         android:visibility="visible" />
 
     <FrameLayout
-        android:id="@+id/userVideoLayout"
+        android:id="@+id/whiteboardContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <FrameLayout
+        android:id="@+id/userVideoContainer"
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:background="@color/flat_white_50"

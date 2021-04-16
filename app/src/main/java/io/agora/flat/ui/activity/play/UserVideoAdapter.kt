@@ -9,10 +9,10 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import io.agora.rtc.RtcEngine
-import io.agora.rtc.video.VideoCanvas
 import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
+import io.agora.rtc.RtcEngine
+import io.agora.rtc.video.VideoCanvas
 
 class UserVideoAdapter(
     private val dataSet: MutableList<RtcUser>,
@@ -70,7 +70,7 @@ class UserVideoAdapter(
     fun setDataSet(data: List<RtcUser>) {
         dataSet.clear()
 //        repeat(10) {
-            dataSet.addAll(data)
+        dataSet.addAll(data)
 //        }
         notifyDataSetChanged()
     }

@@ -3,25 +3,17 @@ package io.agora.flat.ui.activity.play
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.herewhite.sdk.WhiteboardView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import io.agora.flat.R
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 
 @AndroidEntryPoint
 class ClassRoomActivity : AppCompatActivity() {
-    private val viewModel: ClassRoomViewModel by viewModels()
-
-    private lateinit var whiteboardComponent: WhiteboardComponent
-    private lateinit var whiteboard: WhiteboardView
-
+    private lateinit var whiteboardRoot: FrameLayout
     private lateinit var rtcRoot: FrameLayout
-    private lateinit var rtcComponent: RtcComponent
+    private lateinit var rtmRoot: FrameLayout
+
+    private var componentSet: MutableSet<BaseComponent> = mutableSetOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,31 +22,15 @@ class ClassRoomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_room_play)
         supportActionBar?.hide()
 
-        whiteboard = findViewById(R.id.whiteboard)
-        whiteboardComponent = WhiteboardComponent(this, whiteboard)
+        whiteboardRoot = findViewById(R.id.whiteboardContainer)
+        rtcRoot = findViewById(R.id.userVideoContainer)
+        rtmRoot = findViewById(R.id.userVideoContainer)
 
-        rtcRoot = findViewById(R.id.userVideoLayout)
-        rtcComponent = RtcComponent(this, rtcRoot)
+        componentSet.add(WhiteboardComponent(this, whiteboardRoot))
+        componentSet.add(RtcComponent(this, rtcRoot))
+        componentSet.add(RtmComponent(this, rtmRoot))
 
-        lifecycleScope.launch {
-            viewModel.roomPlayInfo.collect {
-                it?.apply {
-                    whiteboardComponent.join(whiteboardRoomUUID, whiteboardRoomToken)
-                    rtcComponent.enterChannel(
-                        rtcUID = rtcUID,
-                        rtcToken = rtcToken,
-                        uuid = roomUUID,
-                        rtmToken = rtmToken
-                    )
-                }
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        whiteboardComponent.onActivityDestroy()
-        rtcComponent.onActivityDestroy()
+        componentSet.forEach { lifecycle.addObserver(it) }
     }
 
     private fun hideSystemUI() {

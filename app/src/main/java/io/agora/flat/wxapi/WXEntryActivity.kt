@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
-    val TAG = WXEntryActivity::class.simpleName
+    private val TAG = WXEntryActivity::class.simpleName
 
     @Inject
     lateinit var userRepository: UserRepository

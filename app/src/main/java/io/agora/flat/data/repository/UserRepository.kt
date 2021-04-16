@@ -1,14 +1,14 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import io.agora.flat.data.api.UserService
 import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import io.agora.flat.data.model.WeChatSetAuthIdReq
 import io.agora.flat.di.AppModule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
