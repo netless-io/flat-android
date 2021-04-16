@@ -11,7 +11,6 @@ import javax.inject.Inject
 /**
  * 提供App级别的KV存储
  */
-
 class AppDataCenter @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences =
         context.getSharedPreferences("global_kv_data", Context.MODE_PRIVATE)
@@ -91,7 +90,7 @@ class MockData() {
 
     fun getUserInfo(): UserInfo {
         val userInfoJson =
-            "{\"status\":0,\"data\":{\"name\":\"一生何求\",\"sex\":\"Woman\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/lgQPSTL3aTUKbFVWibYLibg1fRQaOhKs7oCXSbHYYvG3ozI3AF47vGngqiaXHypachKM2h0VAcMXT8FXnT9iaFRKAw/132\",\"userUUID\":\"fb48fa37-aa9b-4b5f-8100-9e6c3bd41115\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImZiNDhmYTM3LWFhOWItNGI1Zi04MTAwLTllNmMzYmQ0MTExNSIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE4NDc1MDE3LCJleHAiOjE2MjA5ODA2MTcsImlzcyI6ImZsYXQtc2VydmVyIn0.srW5y4TstK5Y_BrAQz2JT9I_HZXT7zz5cXa7zpqJEEA\"}}"
+            "{\"name\":\"一生何求\",\"sex\":\"Woman\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/lgQPSTL3aTUKbFVWibYLibg1fRQaOhKs7oCXSbHYYvG3ozI3AF47vGngqiaXHypachKM2h0VAcMXT8FXnT9iaFRKAw/132\",\"userUUID\":\"fb48fa37-aa9b-4b5f-8100-9e6c3bd41115\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImZiNDhmYTM3LWFhOWItNGI1Zi04MTAwLTllNmMzYmQ0MTExNSIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE4NDc1MDE3LCJleHAiOjE2MjA5ODA2MTcsImlzcyI6ImZsYXQtc2VydmVyIn0.srW5y4TstK5Y_BrAQz2JT9I_HZXT7zz5cXa7zpqJEEA\"}"
         return gson.fromJson(userInfoJson, UserInfo::class.java)
     }
 

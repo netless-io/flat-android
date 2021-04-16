@@ -5,22 +5,26 @@
     android:id="@+id/roomPlayRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity">
-
-    <com.herewhite.sdk.WhiteboardView
-        android:id="@+id/whiteboard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible" />
+    tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity"
+    tools:viewBindingIgnore="true">
 
     <FrameLayout
         android:id="@+id/whiteboardContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <FrameLayout
         android:id="@+id/userVideoContainer"
-        android:layout_width="200dp"
+        android:layout_width="180dp"
         android:layout_height="match_parent"
         android:background="@color/flat_white_50"
+        android:visibility="gone"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/messageContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

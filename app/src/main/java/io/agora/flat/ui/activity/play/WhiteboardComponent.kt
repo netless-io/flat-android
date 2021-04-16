@@ -1,22 +1,20 @@
 package io.agora.flat.ui.activity.play
 
 import android.util.Log
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.herewhite.sdk.*
-import com.herewhite.sdk.domain.Promise
-import com.herewhite.sdk.domain.RoomPhase
-import com.herewhite.sdk.domain.RoomState
-import com.herewhite.sdk.domain.SDKError
+import com.herewhite.sdk.domain.*
 import io.agora.flat.Constants
+import io.agora.flat.R
+import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
@@ -26,8 +24,9 @@ class WhiteboardComponent(
         val TAG = WhiteboardComponent::class.simpleName
     }
 
+    private lateinit var binding: ComponentWhiteboardBinding
+
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private lateinit var whiteboard: WhiteboardView
     private lateinit var whiteSdk: WhiteSdk
     private var room: Room? = null
 
@@ -40,8 +39,75 @@ class WhiteboardComponent(
     }
 
     private fun initView() {
-        whiteboard = WhiteboardView(activity)
-        rootView.addView(whiteboard, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
+        val map: Map<View, (View) -> Unit> = mapOf(
+            binding.undo to { room?.undo() },
+            binding.redo to { room?.redo() },
+            binding.pagePreview to { room?.pptPreviousStep() },
+            binding.pageNext to { room?.pptNextStep() },
+
+            binding.tools to { binding.toolsLayout.visibility = View.VISIBLE },
+            binding.fileUpload to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_file_upload)
+            },
+            binding.clear to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_clear)
+
+                room?.cleanScene(true)
+            },
+            binding.clicker to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_clicker)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = "clicker"
+                }
+            },
+            binding.text to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_text)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.TEXT
+                }
+            },
+            binding.selector to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_selector)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.SELECTOR
+                }
+            },
+            binding.eraser to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_eraser)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.ERASER
+                }
+            },
+            binding.pencil to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_pencil)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.PENCIL
+                }
+            },
+            binding.laser to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_laser)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.LASER_POINTER
+                }
+            },
+        )
+
+        map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
     }
 
     private fun loadData() {
@@ -57,7 +123,8 @@ class WhiteboardComponent(
     private fun initWhiteboard() {
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
-        whiteSdk = WhiteSdk(whiteboard, activity, configuration)
+
+        whiteSdk = WhiteSdk(binding.whiteboardView, activity, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallbacks {
             override fun urlInterrupter(sourceUrl: String): String {
                 return sourceUrl
@@ -86,8 +153,20 @@ class WhiteboardComponent(
     }
 
     private var roomListener = object : RoomListener {
-        override fun onPhaseChanged(phase: RoomPhase?) {
-            Log.d(TAG, "onPhaseChanged:${phase?.name}")
+        override fun onPhaseChanged(phase: RoomPhase) {
+            Log.d(TAG, "onPhaseChanged:${phase.name}")
+            when (phase) {
+                RoomPhase.connecting -> {
+                }
+                RoomPhase.connected -> {
+                }
+                RoomPhase.reconnecting -> {
+                }
+                RoomPhase.disconnecting -> {
+                }
+                RoomPhase.disconnected -> {
+                }
+            }
         }
 
         override fun onDisconnectWithError(e: Exception?) {
@@ -98,7 +177,7 @@ class WhiteboardComponent(
             Log.d(TAG, "onKickedWithReason:${reason}")
         }
 
-        override fun onRoomStateChanged(modifyState: RoomState?) {
+        override fun onRoomStateChanged(modifyState: RoomState) {
             Log.d(TAG, "onRoomStateChanged:${modifyState}")
         }
 
@@ -118,10 +197,11 @@ class WhiteboardComponent(
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
             this@WhiteboardComponent.room = room
+            room.disableSerialization(false)
         }
 
         override fun catchEx(t: SDKError) {
-
+            // showError Dialog & restart activity
         }
     }
 

@@ -29,7 +29,7 @@
         android:theme="@style/Theme.FlatAndroid">
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
-            android:exported="true"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape" />
         <activity
             android:name=".ui.activity.playback.PlaybackActivity"

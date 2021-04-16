@@ -2,10 +2,12 @@ package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
+
 
 @AndroidEntryPoint
 class ClassRoomActivity : AppCompatActivity() {
@@ -17,20 +19,25 @@ class ClassRoomActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        hideSystemUI()
-
         setContentView(R.layout.activity_room_play)
-        supportActionBar?.hide()
+
+        initSystemUI()
 
         whiteboardRoot = findViewById(R.id.whiteboardContainer)
         rtcRoot = findViewById(R.id.userVideoContainer)
-        rtmRoot = findViewById(R.id.userVideoContainer)
+        rtmRoot = findViewById(R.id.messageContainer)
 
         componentSet.add(WhiteboardComponent(this, whiteboardRoot))
         componentSet.add(RtcComponent(this, rtcRoot))
         componentSet.add(RtmComponent(this, rtmRoot))
 
         componentSet.forEach { lifecycle.addObserver(it) }
+    }
+
+    private fun initSystemUI() {
+        hideSystemUI()
+        supportActionBar?.hide()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private fun hideSystemUI() {
