@@ -45,21 +45,28 @@ class WhiteboardComponent(
             binding.redo to { room?.redo() },
             binding.pagePreview to { room?.pptPreviousStep() },
             binding.pageNext to { room?.pptNextStep() },
+            binding.reset to { room?.scalePptToFit() },
 
             binding.tools to { binding.toolsLayout.visibility = View.VISIBLE },
             binding.fileUpload to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_file_upload)
             },
             binding.clear to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_clear)
 
                 room?.cleanScene(true)
             },
+            binding.hand to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_hand_selected)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.HAND
+                }
+            },
             binding.clicker to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_clicker)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_clicker_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = "clicker"
@@ -67,7 +74,7 @@ class WhiteboardComponent(
             },
             binding.text to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_text)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_text_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = Appliance.TEXT
@@ -75,7 +82,7 @@ class WhiteboardComponent(
             },
             binding.selector to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_selector)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_selector_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = Appliance.SELECTOR
@@ -83,7 +90,7 @@ class WhiteboardComponent(
             },
             binding.eraser to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_eraser)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_eraser_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = Appliance.ERASER
@@ -91,7 +98,7 @@ class WhiteboardComponent(
             },
             binding.pencil to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_pencil)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_pencil_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = Appliance.PENCIL
@@ -99,10 +106,42 @@ class WhiteboardComponent(
             },
             binding.laser to {
                 binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_laser)
+                binding.tools.setImageResource(R.drawable.ic_toolbox_laser_selected)
 
                 room?.memberState = MemberState().apply {
                     currentApplianceName = Appliance.LASER_POINTER
+                }
+            },
+            binding.rectangle to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_rectangle_selected)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.RECTANGLE
+                }
+            },
+            binding.arrow to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_arrow_selected)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.ARROW
+                }
+            },
+            binding.circle to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_circle_selected)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.ELLIPSE
+                }
+            },
+            binding.line to {
+                binding.toolsLayout.visibility = View.GONE
+                binding.tools.setImageResource(R.drawable.ic_toolbox_line_selected)
+
+                room?.memberState = MemberState().apply {
+                    currentApplianceName = Appliance.STRAIGHT
                 }
             },
         )
