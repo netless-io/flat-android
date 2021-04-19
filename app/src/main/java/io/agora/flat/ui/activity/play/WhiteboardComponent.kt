@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.annotation.UiThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.herewhite.sdk.*
@@ -43,11 +44,25 @@ class WhiteboardComponent(
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.undo to { room?.undo() },
             binding.redo to { room?.redo() },
+            binding.pageStart to { room?.setSceneIndex(0, null) },
             binding.pagePreview to { room?.pptPreviousStep() },
             binding.pageNext to { room?.pptNextStep() },
+            binding.pageEnd to {
+                room?.sceneState?.apply {
+                    room?.setSceneIndex(scenes.size - 1, null)
+                }
+            },
             binding.reset to { room?.scalePptToFit() },
 
-            binding.tools to { binding.toolsLayout.visibility = View.VISIBLE },
+            binding.tools to {
+                binding.toolsLayout.apply {
+                    visibility = if (visibility == View.VISIBLE) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
+                }
+            },
             binding.fileUpload to {
                 binding.toolsLayout.visibility = View.GONE
             },
@@ -218,29 +233,90 @@ class WhiteboardComponent(
 
         override fun onRoomStateChanged(modifyState: RoomState) {
             Log.d(TAG, "onRoomStateChanged:${modifyState}")
+            activity.runOnUiThread {
+                room?.roomState?.let(this@WhiteboardComponent::onRoomStateChanged)
+            }
         }
 
         override fun onCanUndoStepsUpdate(canUndoSteps: Long) {
             Log.d(TAG, "onCanUndoStepsUpdate:${canUndoSteps}")
+            activity.runOnUiThread { onUndoStepsChanged(canUndoSteps) }
         }
 
         override fun onCanRedoStepsUpdate(canRedoSteps: Long) {
             Log.d(TAG, "onCanRedoStepsUpdate:${canRedoSteps}")
+            activity.runOnUiThread { onRedoStepsChanged(canRedoSteps) }
         }
 
         override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
-            Log.d(TAG, "onCatchErrorWhenAppendFrame:${error}")
+            Log.w(TAG, "onCatchErrorWhenAppendFrame:${error}")
         }
+    }
+
+    @UiThread
+    private fun onUndoStepsChanged(canUndoSteps: Long) {
+        binding.undo.isEnabled = canUndoSteps != 0L
+    }
+
+    @UiThread
+    private fun onRedoStepsChanged(canRedoSteps: Long) {
+        binding.redo.isEnabled = canRedoSteps != 0L
     }
 
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
             this@WhiteboardComponent.room = room
             room.disableSerialization(false)
+            // On Room Ready
+            room.getRoomState(object : Promise<RoomState> {
+                override fun then(roomState: RoomState) {
+                    onRoomStateChanged(roomState)
+                }
+
+                override fun catchEx(t: SDKError?) {
+                }
+            })
         }
 
         override fun catchEx(t: SDKError) {
             // showError Dialog & restart activity
+        }
+    }
+
+    private fun onRoomStateChanged(roomState: RoomState) {
+        roomState.memberState?.let(::onMemberStateChanged)
+        roomState.sceneState?.let(::onSceneStateChanged)
+    }
+
+    private fun onMemberStateChanged(memberState: MemberState) {
+        val applianceMap = mapOf(
+            Appliance.PENCIL to R.drawable.ic_toolbox_pencil_selected,
+            Appliance.SELECTOR to R.drawable.ic_toolbox_selector_selected,
+            Appliance.RECTANGLE to R.drawable.ic_toolbox_rectangle_selected,
+            Appliance.ELLIPSE to R.drawable.ic_toolbox_circle_selected,
+            Appliance.ERASER to R.drawable.ic_toolbox_eraser_selected,
+            Appliance.TEXT to R.drawable.ic_toolbox_text_selected,
+            Appliance.STRAIGHT to R.drawable.ic_toolbox_line_selected,
+            Appliance.ARROW to R.drawable.ic_toolbox_arrow_selected,
+            Appliance.HAND to R.drawable.ic_toolbox_hand_selected,
+            Appliance.LASER_POINTER to R.drawable.ic_toolbox_laser_selected,
+            "clicker" to R.drawable.ic_toolbox_clicker_selected,
+        )
+        applianceMap[memberState.currentApplianceName]?.let {
+            binding.tools.setImageResource(it)
+        } ?: binding.tools.setImageDrawable(null)
+    }
+
+    private fun onSceneStateChanged(sceneState: SceneState) {
+        sceneState.apply {
+            val currentDisplay = index + 1
+            val lastDisplay = scenes.size
+            binding.pageIndicate.text = "${currentDisplay}/${lastDisplay}"
+            // TODO 单页面分步
+            binding.pagePreview.isEnabled = currentDisplay != 1
+            binding.pageNext.isEnabled = currentDisplay != lastDisplay
+            binding.pageStart.isEnabled = currentDisplay != 1
+            binding.pageEnd.isEnabled = currentDisplay != lastDisplay
         }
     }
 
