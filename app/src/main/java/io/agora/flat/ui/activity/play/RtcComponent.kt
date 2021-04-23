@@ -17,6 +17,7 @@ import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
+import io.agora.rtc.video.VideoCanvas
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ class RtcComponent(
     )
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    
+
     private lateinit var recyclerView: RecyclerView
     private var adpater: UserVideoAdapter = UserVideoAdapter(ArrayList(), application().rtcEngine())
 
@@ -144,7 +145,7 @@ class RtcComponent(
 
         override fun onUserOffline(uid: Int, reason: Int) {
             Log.d(TAG, "onUserOffline:$uid $reason")
-            // adpater.userLeft(uid)
+            application().rtcEngine().setupRemoteVideo(VideoCanvas(null, 0, uid))
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {

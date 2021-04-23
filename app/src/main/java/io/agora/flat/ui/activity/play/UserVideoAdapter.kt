@@ -75,9 +75,7 @@ class UserVideoAdapter(
 
     fun setDataSet(data: List<RtcUser>) {
         dataSet.clear()
-        //repeat(10) {
         dataSet.addAll(data)
-        //}
         notifyDataSetChanged()
     }
 
