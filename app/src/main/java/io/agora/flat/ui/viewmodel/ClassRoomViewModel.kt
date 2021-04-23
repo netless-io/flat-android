@@ -12,7 +12,6 @@ import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,16 +27,20 @@ class ClassRoomViewModel @Inject constructor(
     private var _roomInfo = MutableStateFlow<RoomInfo?>(null)
     val roomInfo = _roomInfo.asStateFlow()
 
-    private var _roomUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val roomUsersMap = _roomUsersMap.asStateFlow()
+    private var _usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf()
+    private var _currentUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
+    val currentUsersMap = _currentUsersMap.asStateFlow()
 
-    private var _joining = MutableStateFlow<Boolean>(true)
-    val joining: SharedFlow<Boolean> = _joining
+    private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
+    val roomEvent = _roomEvent.asStateFlow()
+
+    private val roomUUID: String
 
     init {
+        roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
         viewModelScope.launch {
             when (val result =
-                roomRepository.joinRoom(intentValue(Constants.IntentKey.ROOM_UUID))) {
+                roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
                     _roomPlayInfo.value = result.data
                 }
@@ -45,12 +48,11 @@ class ClassRoomViewModel @Inject constructor(
 
                 }
             }
-            _joining.value = false
         }
 
         viewModelScope.launch {
             when (val result =
-                roomRepository.getOrdinaryRoomInfo(intentValue(Constants.IntentKey.ROOM_UUID))) {
+                roomRepository.getOrdinaryRoomInfo(roomUUID)) {
                 is Success -> {
                     _roomInfo.value = result.data.roomInfo;
                 }
@@ -59,13 +61,17 @@ class ClassRoomViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            _roomEvent.value = ClassRoomEvent.EnterRoom
+        }
     }
 
-    fun requestRoomUsers(roomUUID: String, usersUUID: List<String>) {
+    fun requestRoomUsers(usersUUID: List<String>) {
         viewModelScope.launch {
             when (val result = roomRepository.getRoomUsers(roomUUID, usersUUID)) {
                 is Success -> {
-                    _roomUsersMap.value = result.data;
+                    addToCache(result.data)
+                    addToCurrent(result.data)
                 }
                 is ErrorResult -> {
 
@@ -74,7 +80,47 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun onEvent(event: ClassRoomEvent) {
+        viewModelScope.launch {
+            _roomEvent.value = event
+        }
+    }
+
+    private fun addToCurrent(userMap: Map<String, RtcUser>) {
+        val map = _currentUsersMap.value.toMutableMap()
+        userMap.forEach { (uuid, user) -> map[uuid] = user }
+        _currentUsersMap.value = map
+    }
+
+    private fun addToCache(userMap: Map<String, RtcUser>) {
+        userMap.forEach { (uuid, user) -> _usersCacheMap[uuid] = user }
+    }
+
+    fun removeRtmMember(userUUID: String) {
+        val map = _currentUsersMap.value.toMutableMap()
+        map.remove(userUUID)
+        _currentUsersMap.value = map
+    }
+
+    fun addRtmMember(userUUID: String) {
+        viewModelScope.launch {
+            when (val result = roomRepository.getRoomUsers(roomUUID, listOf(userUUID))) {
+                is Success -> {
+                    addToCache(result.data)
+                    addToCurrent(result.data)
+                }
+                is ErrorResult -> {
+                }
+            }
+        }
+    }
+
     private fun intentValue(key: String): String {
         return savedStateHandle.get<String>(key)!!
     }
+}
+
+sealed class ClassRoomEvent {
+    object EnterRoom : ClassRoomEvent()
+    object RtmChannelJoined : ClassRoomEvent()
 }

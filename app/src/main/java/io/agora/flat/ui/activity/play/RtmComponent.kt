@@ -5,7 +5,8 @@ import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.agora.flat.data.MockData
+import io.agora.flat.data.AppDataCenter
+import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.rtm.*
 import kotlinx.coroutines.flow.collect
@@ -22,27 +23,16 @@ class RtmComponent(
     }
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private var adpater: UserVideoAdapter = UserVideoAdapter(ArrayList(), application().rtcEngine())
+    private var appDataCenter = AppDataCenter(activity.applicationContext)
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
 
         lifecycleScope.launch {
-            viewModel.roomUsersMap.collect {
-                it.map { entry ->
-                    Log.d(TAG, "${entry.key} ${entry.value.name}")
-                }
-                adpater.setDataSet(ArrayList(it.values))
-            }
-        }
-
-        lifecycleScope.launch {
             viewModel.roomPlayInfo.collect {
                 it?.apply {
                     enterChannel(
-                        rtcUID = rtcUID,
-                        rtcToken = rtcToken,
-                        uuid = roomUUID,
+                        channelId = roomUUID,
                         rtmToken = rtmToken
                     )
                 }
@@ -52,7 +42,7 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        application().rtmClient()?.logout(object : ResultCallback<Void> {
+        application().rtmClient().logout(object : ResultCallback<Void> {
             override fun onSuccess(p0: Void?) {
 
             }
@@ -73,59 +63,54 @@ class RtmComponent(
         }
 
         override fun onMessageReceived(
-            p0: RtmMessage?,
-            p1: RtmChannelMember?
+            message: RtmMessage,
+            member: RtmChannelMember
         ) {
-            Log.d(TAG, "onMessageReceived")
+            Log.d(TAG, "onMessageReceived ${message.rawMessage}")
         }
 
         override fun onImageMessageReceived(
-            p0: RtmImageMessage?,
-            p1: RtmChannelMember?
+            imageMessage: RtmImageMessage,
+            member: RtmChannelMember
         ) {
             Log.d(TAG, "onImageMessageReceived")
         }
 
         override fun onFileMessageReceived(
-            p0: RtmFileMessage?,
-            p1: RtmChannelMember?
+            fileMessage: RtmFileMessage,
+            member: RtmChannelMember
         ) {
             Log.d(TAG, "onFileMessageReceived")
         }
 
-        override fun onMemberJoined(p0: RtmChannelMember?) {
-            Log.d(TAG, "onMemberJoined")
+        override fun onMemberJoined(member: RtmChannelMember) {
+            Log.d(TAG, "onMemberJoined ${member.userId}")
+            viewModel.addRtmMember(member.userId)
         }
 
-        override fun onMemberLeft(p0: RtmChannelMember?) {
-            Log.d(TAG, "onMemberLeft")
+        override fun onMemberLeft(member: RtmChannelMember) {
+            Log.d(TAG, "onMemberLeft ${member.userId}")
+            viewModel.removeRtmMember(member.userId)
         }
     }
     private var channel: RtmChannel? = null
 
-    private fun enterChannel(rtcUID: Long, rtcToken: String, rtmToken: String, uuid: String) {
+    private fun enterChannel(rtmToken: String, channelId: String) {
         lifecycleScope.launch {
-            if (login(rtmToken, MockData.USER_UUID)) {
-                channel = joinChannel(uuid)
+            if (login(rtmToken, appDataCenter.getUserInfo()!!.uuid)) {
+                channel = joinChannel(channelId)
                 if (channel != null) {
-                    val members = getMembers()
-                    members?.map { it.userId }
-                    viewModel.requestRoomUsers(uuid, members?.map { it.userId } ?: emptyList())
+                    viewModel.requestRoomUsers(getMembers()?.map { it.userId } ?: emptyList())
+                    Log.d(TAG, "notify rtm joined success")
+                    viewModel.onEvent(ClassRoomEvent.RtmChannelJoined)
                 }
-
-                application().rtcEngine()?.joinChannel(
-                    rtcToken,
-                    uuid,
-                    "{}",
-                    rtcUID.toInt()
-                )
             }
         }
     }
 
     private suspend fun login(rtmToken: String, userUUID: String): Boolean =
         suspendCoroutine { cont ->
-            application().rtmClient()?.login(
+            application().rtmClient().login(
                 rtmToken,
                 userUUID,
                 object : ResultCallback<Void> {
@@ -140,7 +125,7 @@ class RtmComponent(
         }
 
     private suspend fun joinChannel(channelId: String): RtmChannel? = suspendCoroutine {
-        application().rtmClient()?.apply {
+        application().rtmClient().apply {
             val channel = createChannel(channelId, rtmChannelListener)
             channel.join(object : ResultCallback<Void> {
                 override fun onSuccess(p0: Void?) {
@@ -153,7 +138,7 @@ class RtmComponent(
                     it.resumeWith(Result.success(null))
                 }
             })
-        } ?: it.resume(null)
+        }
     }
 
     private suspend fun getMembers(): List<RtmChannelMember>? = suspendCoroutine { cont ->

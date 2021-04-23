@@ -87,11 +87,11 @@ class MainApplication : Application() {
     }
 
 
-    fun rtcEngine(): RtcEngine? {
+    fun rtcEngine(): RtcEngine {
         return mRtcEngine
     }
 
-    fun rtmClient(): RtmClient? {
+    fun rtmClient(): RtmClient {
         return mRtmClient
     }
 

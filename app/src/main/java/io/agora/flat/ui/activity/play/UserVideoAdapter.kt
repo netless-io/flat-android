@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
@@ -16,7 +17,7 @@ import io.agora.rtc.video.VideoCanvas
 
 class UserVideoAdapter(
     private val dataSet: MutableList<RtcUser>,
-    private val rtcEngine: RtcEngine?
+    private val rtcEngine: RtcEngine
 ) :
     RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
@@ -40,7 +41,9 @@ class UserVideoAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.user.load(dataSet[position].avatarURL) {
+        var itemData = dataSet[position]
+
+        viewHolder.profile.load(itemData.avatarURL) {
             crossfade(true)
             transformations(CircleCropTransformation())
         }
@@ -52,13 +55,16 @@ class UserVideoAdapter(
             val surfaceView = RtcEngine.CreateRendererView(context)
             viewHolder.videoContainer.addView(surfaceView)
         }
-        // 设置远端视图。
-        rtcEngine!!.setupRemoteVideo(
-            VideoCanvas(
-                viewHolder.videoContainer.getChildAt(0), VideoCanvas.RENDER_MODE_HIDDEN,
-                dataSet[position].rtcUID.toInt()
-            )
+
+        var videoCanvas = VideoCanvas(
+            viewHolder.videoContainer.getChildAt(0), VideoCanvas.RENDER_MODE_HIDDEN,
+            itemData.rtcUID
         )
+        if (itemData.rtcUID == localUid) {
+            rtcEngine.setupLocalVideo(videoCanvas)
+        } else {
+            rtcEngine.setupRemoteVideo(videoCanvas)
+        }
     }
 
     override fun getItemId(position: Int): Long {
@@ -69,14 +75,37 @@ class UserVideoAdapter(
 
     fun setDataSet(data: List<RtcUser>) {
         dataSet.clear()
-//        repeat(10) {
+        //repeat(10) {
         dataSet.addAll(data)
-//        }
+        //}
         notifyDataSetChanged()
+    }
+
+    private var localUid: Int = 0
+
+    fun setLocalUid(localUid: Int) {
+        this.localUid = localUid;
+        notifyDataSetChanged()
+    }
+
+    fun userLeft(uid: Int) {
+        val iterator = dataSet.iterator()
+        while (iterator.hasNext()) {
+            val next = iterator.next()
+            if (next.rtcUID == uid) {
+                iterator.remove()
+            }
+        }
+        notifyDataSetChanged()
+    }
+
+    fun onUserJoined(uid: Int) {
+
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
-        val user: ImageView = view.findViewById(R.id.user)
+        val profile: ImageView = view.findViewById(R.id.profile)
+        val username: TextView = view.findViewById(R.id.username)
     }
 }

@@ -68,19 +68,16 @@ class AppDataCenter @Inject constructor(@ApplicationContext context: Context) {
     }
 }
 
-class MockData() {
+class MockData {
     companion object {
-        // const val LOGGEDIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6IjcyMmY3ZjZkLWNjMGYtNGU2My1hNTQzLTQ0NmEzYjdiZDY1OSIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE3ODc0NTMxLCJleHAiOjE2MjAzODAxMzEsImlzcyI6ImZsYXQtc2VydmVyIn0.v3SaPYMLRGqlWyOeLHFWTm4i3KVyjpo7QyX8SpewNq0"
-        // yangliu
-        const val LOGGEDIN_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImZiNDhmYTM3LWFhOWItNGI1Zi04MTAwLTllNmMzYmQ0MTExNSIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE4NDc1MDE3LCJleHAiOjE2MjA5ODA2MTcsImlzcyI6ImZsYXQtc2VydmVyIn0.srW5y4TstK5Y_BrAQz2JT9I_HZXT7zz5cXa7zpqJEEA"
-        const val USER_UUID = "fb48fa37-aa9b-4b5f-8100-9e6c3bd41115"
+        const val LOGGED_IN_TOKEN =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImFmZWU4Njk1LTc4N2EtNDIyMS05NzU2LWMzYjhiOWIxZDJjNiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5MTU4NzYzLCJleHAiOjE2MjE2NjQzNjMsImlzcyI6ImZsYXQtc2VydmVyIn0.Rt9b1AjPfgWAFK6bsSpQHNnV7Ye6m7Du-dzP6k7Gmtw"
     }
 
     private val gson = Gson()
 
     fun isMockEnable(): Boolean {
-        return false;
+        return true;
     }
 
     fun isUserLoggedIn(): Boolean {
@@ -89,11 +86,11 @@ class MockData() {
 
     fun getUserInfo(): UserInfo {
         val userInfoJson =
-            "{\"name\":\"一生何求\",\"sex\":\"Woman\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/lgQPSTL3aTUKbFVWibYLibg1fRQaOhKs7oCXSbHYYvG3ozI3AF47vGngqiaXHypachKM2h0VAcMXT8FXnT9iaFRKAw/132\",\"userUUID\":\"fb48fa37-aa9b-4b5f-8100-9e6c3bd41115\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImZiNDhmYTM3LWFhOWItNGI1Zi04MTAwLTllNmMzYmQ0MTExNSIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE4NDc1MDE3LCJleHAiOjE2MjA5ODA2MTcsImlzcyI6ImZsYXQtc2VydmVyIn0.srW5y4TstK5Y_BrAQz2JT9I_HZXT7zz5cXa7zpqJEEA\"}"
+            "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/zscTBLOCMOXw8XYOwToAGcE2utFMomr6CPBA9U5USgEXS532uYMibfrceS4hFhxEWSL1xYcrzTsRLHubc9Tauug/132\",\"userUUID\":\"afee8695-787a-4221-9756-c3b8b9b1d2c6\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImFmZWU4Njk1LTc4N2EtNDIyMS05NzU2LWMzYjhiOWIxZDJjNiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5MTU4NzYzLCJleHAiOjE2MjE2NjQzNjMsImlzcyI6ImZsYXQtc2VydmVyIn0.Rt9b1AjPfgWAFK6bsSpQHNnV7Ye6m7Du-dzP6k7Gmtw\"}"
         return gson.fromJson(userInfoJson, UserInfo::class.java)
     }
 
-    fun getToken(): String? {
-        return LOGGEDIN_TOKEN
+    fun getToken(): String {
+        return LOGGED_IN_TOKEN
     }
 }

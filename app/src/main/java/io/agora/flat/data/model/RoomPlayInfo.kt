@@ -15,7 +15,7 @@ data class RoomPlayInfo(
     // 白板的 room uuid
     val whiteboardRoomUUID: String,
     // rtc 的 uid
-    val rtcUID: Long,
+    val rtcUID: Int,
     // rtc token
     val rtcToken: String,
     // rtm token

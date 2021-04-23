@@ -6,13 +6,14 @@ import android.util.Log
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.common.EventHandler
+import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
@@ -33,27 +34,48 @@ class RtcComponent(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
-    private var viewModel: ClassRoomViewModel =
-        ViewModelProvider(activity).get(ClassRoomViewModel::class.java)
+    private val viewModel: ClassRoomViewModel by activity.viewModels()
+    
     private lateinit var recyclerView: RecyclerView
     private var adpater: UserVideoAdapter = UserVideoAdapter(ArrayList(), application().rtcEngine())
 
     override fun onCreate(owner: LifecycleOwner) {
         initView()
-        // loadData()
-        // updateView()
         initListener()
         checkPermission(::actionAfterPermission)
     }
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.roomUsersMap.collect {
-                it.map { entry ->
-                    Log.d(TAG, "${entry.key} ${entry.value.name}")
-                }
+            viewModel.currentUsersMap.collect {
+                Log.d(TAG, "currentUsersMap $it")
                 adpater.setDataSet(ArrayList(it.values))
             }
+        }
+
+        lifecycleScope.launch {
+            viewModel.roomEvent.collect {
+                when (it) {
+                    is ClassRoomEvent.RtmChannelJoined -> {
+                        joinRtcChannel()
+                    }
+                    else -> {
+                    }
+                }
+            }
+        }
+    }
+
+    private fun joinRtcChannel() {
+        Log.d(TAG, "call rtc joinChannel")
+        viewModel.roomPlayInfo.value?.apply {
+            application().rtcEngine().joinChannel(
+                rtcToken,
+                roomUUID,
+                "{}",
+                rtcUID
+            )
+            adpater.setLocalUid(rtcUID)
         }
     }
 
@@ -62,10 +84,13 @@ class RtcComponent(
         rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adpater
+
+        application().rtcEngine().muteLocalAudioStream(true)
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        application().rtcEngine()?.leaveChannel()
+        application().rtcEngine().leaveChannel()
+        application().removeEventHandler(eventHandler)
     }
 
     private fun checkPermission(actionAfterPermission: () -> Unit) {
@@ -96,32 +121,35 @@ class RtcComponent(
     }
 
     private fun initListener() {
-        application().registerEventHandler(object : EventHandler {
-            override fun onFirstRemoteVideoDecoded(
-                uid: Int,
-                width: Int,
-                height: Int,
-                elapsed: Int
-            ) {
-                Log.d(TAG, "onFirstRemoteVideoDecoded")
-            }
+        application().registerEventHandler(eventHandler)
+    }
 
-            override fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {
-                Log.d(TAG, "onLeaveChannel")
-            }
+    private var eventHandler = object : EventHandler {
+        override fun onFirstRemoteVideoDecoded(
+            uid: Int,
+            width: Int,
+            height: Int,
+            elapsed: Int
+        ) {
+            Log.d(TAG, "onFirstRemoteVideoDecoded")
+        }
 
-            override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
-                Log.d(TAG, "onJoinChannelSuccess:$channel\t$uid\t$elapsed")
-                adpater.notifyDataSetChanged()
-            }
+        override fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {
+            Log.d(TAG, "onLeaveChannel")
+        }
 
-            override fun onUserOffline(uid: Int, reason: Int) {
-                Log.d(TAG, "onUserOffline:$uid $reason")
-            }
+        override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
+            Log.d(TAG, "onJoinChannelSuccess:$channel\t$uid\t$elapsed")
+        }
 
-            override fun onUserJoined(uid: Int, elapsed: Int) {
-                Log.d(TAG, "onUserJoined:$uid $elapsed")
-            }
-        })
+        override fun onUserOffline(uid: Int, reason: Int) {
+            Log.d(TAG, "onUserOffline:$uid $reason")
+            // adpater.userLeft(uid)
+        }
+
+        override fun onUserJoined(uid: Int, elapsed: Int) {
+            Log.d(TAG, "onUserJoined:$uid $elapsed")
+            // adpater.onUserJoined(uid)
+        }
     }
 }
