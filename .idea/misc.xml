@@ -171,8 +171,10 @@
         <entry key="../../../../layout/compose-model-1618545971648.xml" value="0.8740740740740741" />
         <entry key="../../../../layout/compose-model-1618545987593.xml" value="0.8740740740740741" />
         <entry key="../../../../layout/compose-model-1618550439483.xml" value="0.8740740740740741" />
+        <entry key="../../../../layout/compose-model-1619056918976.xml" value="0.43327702702702703" />
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.29444444444444445" />
+        <entry key="app/src/main/res/drawable/ic_color.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.29444444444444445" />
         <entry key="app/src/main/res/drawable/ic_toobox_hand_normal.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toobox_hand_selected.xml" value="0.5239583333333333" />
@@ -189,6 +191,18 @@
         <entry key="app/src/main/res/drawable/ic_toolbox_clear_selector.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_clicker_selected.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_clicker_selector.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_black.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_blue.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_blue_gray.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_cyan.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_deep_purple.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_gray.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_green.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_orange.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_purple.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_red.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_white.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_color_yellow.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_normal.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_selected.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_selector.xml" value="0.5239583333333333" />
@@ -246,6 +260,7 @@
         <entry key="app/src/main/res/drawable/ic_toolbox_undo_enable.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_undo_selector.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/selector_gray_border_bg.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/shape_blue_border_round_4_bg.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/shape_gray_border_round_16_bg.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/shape_gray_border_round_4_bg.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/shape_gray_border_round_bg.xml" value="0.5239583333333333" />
@@ -253,8 +268,9 @@
         <entry key="app/src/main/res/layout/activity_playback.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_room_play.xml" value="0.3165784832451499" />
         <entry key="app/src/main/res/layout/activity_wechat_login.xml" value="0.2826086956521739" />
-        <entry key="app/src/main/res/layout/component_whiteboard.xml" value="0.4145917776491025" />
+        <entry key="app/src/main/res/layout/component_whiteboard.xml" value="0.37091425864519184" />
         <entry key="app/src/main/res/layout/item_class_rtc_video.xml" value="0.5078125" />
+        <entry key="app/src/main/res/layout/item_toolbox_color.xml" value="0.5078125" />
       </map>
     </option>
   </component>

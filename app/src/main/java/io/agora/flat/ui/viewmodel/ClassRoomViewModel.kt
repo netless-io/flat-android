@@ -34,7 +34,6 @@ class ClassRoomViewModel @Inject constructor(
     private var _joining = MutableStateFlow<Boolean>(true)
     val joining: SharedFlow<Boolean> = _joining
 
-
     init {
         viewModelScope.launch {
             when (val result =

@@ -2,9 +2,15 @@ package io.agora.flat
 
 class Constants {
     companion object {
-        const val FLAT_SERVICE_URL = "https://api-flat.netless.group/"
+        // dev 环境
+        const val FLAT_SERVER_URL_DEV = "https://flat-api-dev.whiteboard.agora.io/"
 
-        const val WX_APP_ID = "wx545fb5ad1d1ff8b9"
+        // prod 环境
+        const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
+
+        const val FLAT_SERVICE_URL = FLAT_SERVER_URL_PROD
+
+        const val WX_APP_ID = "wx09437693798bc108"
 
         const val NETLESS_APP_IDENTIFIER = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug"
 

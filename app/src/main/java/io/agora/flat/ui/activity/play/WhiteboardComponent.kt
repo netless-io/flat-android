@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.annotation.UiThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import com.agora.netless.simpleui.StrokeSeeker
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.*
 import io.agora.flat.Constants
@@ -38,6 +40,13 @@ class WhiteboardComponent(
         initWhiteboard()
         loadData()
     }
+
+    private sealed class ToolExtension {
+        object Null : ToolExtension();
+        object Detete : ToolExtension();
+    }
+
+    private var currentToolExtension: ToolExtension = ToolExtension.Null
 
     private fun initView() {
         binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
@@ -159,9 +168,36 @@ class WhiteboardComponent(
                     currentApplianceName = Appliance.STRAIGHT
                 }
             },
+
+            binding.toolsSub to {
+                binding.toolsSubLayout.apply {
+                    visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                }
+            }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
+
+        val colorAdapter = ColorAdapter(ColorItem.colors)
+        colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
+            override fun onColorSelected(item: ColorItem) {
+                binding.toolsSubLayout.visibility = View.GONE
+                room?.memberState = room?.memberState?.apply {
+                    strokeColor = item.color
+                }
+                binding.toolsSub.setImageResource(item.drawableRes)
+            }
+        })
+        binding.colorRecyclerView.adapter = colorAdapter
+        binding.colorRecyclerView.layoutManager = GridLayoutManager(activity, 4)
+        binding.seeker.setOnStrokeChangedListener(object : StrokeSeeker.OnStrokeChangedListener {
+            override fun onStroke(width: Int) {
+                Log.e("Test", "stroke $width")
+                room?.memberState = room?.memberState?.apply {
+                    strokeWidth = width.toDouble()
+                }
+            }
+        })
     }
 
     private fun loadData() {
@@ -312,7 +348,6 @@ class WhiteboardComponent(
             val currentDisplay = index + 1
             val lastDisplay = scenes.size
             binding.pageIndicate.text = "${currentDisplay}/${lastDisplay}"
-            // TODO 单页面分步
             binding.pagePreview.isEnabled = currentDisplay != 1
             binding.pageNext.isEnabled = currentDisplay != lastDisplay
             binding.pageStart.isEnabled = currentDisplay != 1

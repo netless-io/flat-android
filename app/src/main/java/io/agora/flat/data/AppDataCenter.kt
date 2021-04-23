@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.agora.flat.BuildConfig
 import io.agora.flat.data.model.UserInfo
 import javax.inject.Inject
 
@@ -81,7 +80,7 @@ class MockData() {
     private val gson = Gson()
 
     fun isMockEnable(): Boolean {
-        return BuildConfig.DEBUG;
+        return false;
     }
 
     fun isUserLoggedIn(): Boolean {

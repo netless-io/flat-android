@@ -39,7 +39,7 @@ class RtmComponent(
         lifecycleScope.launch {
             viewModel.roomPlayInfo.collect {
                 it?.apply {
-                    this@RtmComponent.enterChannel(
+                    enterChannel(
                         rtcUID = rtcUID,
                         rtcToken = rtcToken,
                         uuid = roomUUID,
@@ -103,7 +103,7 @@ class RtmComponent(
     }
     private var channel: RtmChannel? = null
 
-    fun enterChannel(rtcUID: Long, rtcToken: String, rtmToken: String, uuid: String) {
+    private fun enterChannel(rtcUID: Long, rtcToken: String, rtmToken: String, uuid: String) {
         lifecycleScope.launch {
             if (login(rtmToken, MockData.USER_UUID)) {
                 channel = joinChannel(uuid)

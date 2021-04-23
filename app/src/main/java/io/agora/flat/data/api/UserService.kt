@@ -14,7 +14,7 @@ interface UserService {
         @Body empty: BaseReq = BaseReq.EMPTY
     ): Call<BaseResp<UserInfo>>
 
-    @POST("v1//login/weChat/set-auth-id")
+    @POST("v1/login/set-auth-uuid")
     fun loginWeChatSetAuthId(
         @Body req: WeChatSetAuthIdReq
     ): Call<BaseResp<RespNoData>>

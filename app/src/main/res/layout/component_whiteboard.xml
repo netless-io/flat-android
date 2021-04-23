@@ -130,7 +130,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/tools"
         app:layout_constraintEnd_toEndOf="@+id/tools"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -242,4 +242,56 @@
                 android:src="@drawable/ic_toolbox_hand_selector" />
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/toolsSub"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/shape_gray_border_round_16_bg"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tools"
+        tools:src="@drawable/ic_toolbox_pencil_selector" />
+
+    <LinearLayout
+        android:id="@+id/toolsSubLayout"
+        android:layout_width="128dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/shape_gray_border_round_4_bg"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/toolsSub"
+        app:layout_constraintEnd_toEndOf="@+id/toolsSub"
+        tools:visibility="visible">
+
+        <com.agora.netless.simpleui.StrokeSeeker
+            android:id="@+id/seeker"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#DBE1EA" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/colorRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:itemCount="12"
+            tools:listitem="@layout/item_toolbox_color" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

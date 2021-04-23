@@ -71,7 +71,6 @@ class UserRepository @Inject constructor(
     private fun UserInfoWithToken.mapToUserInfo(): UserInfo {
         return UserInfo(
             name = this.name,
-            sex = this.sex,
             uuid = this.uuid,
             avatar = this.avatar
         )

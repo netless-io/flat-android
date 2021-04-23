@@ -11,4 +11,17 @@
     <color name="flat_gray">#FFCCCCCC</color>
 
     <color name="flat_white_50">#7FFFFFFF</color>
+
+    <color name="flat_pencil_color_red">#E02020</color>
+    <color name="flat_pencil_color_orange">#FA6400</color>
+    <color name="flat_pencil_color_yellow">#F7B500</color>
+    <color name="flat_pencil_color_green">#6DD400</color>
+    <color name="flat_pencil_color_cyan">#44D7B6</color>
+    <color name="flat_pencil_color_blue">#0091FF</color>
+    <color name="flat_pencil_color_deep_purple">#6236FF</color>
+    <color name="flat_pencil_color_purple">#B620E0</color>
+    <color name="flat_pencil_color_blue_gray">#BCC0C6</color>
+    <color name="flat_pencil_color_gray">#6D7278</color>
+    <color name="flat_pencil_color_black">#000</color>
+    <color name="flat_pencil_color_white">#FFF</color>
 </resources>
