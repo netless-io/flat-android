@@ -22,6 +22,8 @@ class UserVideoAdapter(
     RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
     private var context: Context? = null
+    private var localUid: Int = 0
+    private var fullScreenUid: Int = 0
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -47,23 +49,51 @@ class UserVideoAdapter(
             crossfade(true)
             transformations(CircleCropTransformation())
         }
-        viewHolder.videoContainer.apply {
+
+        setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+
+        viewHolder.itemView.setOnClickListener {
+            fullScreenUid = itemData.rtcUID
+            removeUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+            listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
+        }
+    }
+
+    fun setupUserVideo(videoContainer: FrameLayout, rtcUID: Int) {
+        videoContainer.apply {
             if (childCount >= 1) {
                 return
             }
 
-            val surfaceView = RtcEngine.CreateRendererView(context)
-            viewHolder.videoContainer.addView(surfaceView)
+            val surfaceView = RtcEngine.CreateTextureView(context)
+            videoContainer.addView(
+                surfaceView,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            )
         }
 
         var videoCanvas = VideoCanvas(
-            viewHolder.videoContainer.getChildAt(0), VideoCanvas.RENDER_MODE_HIDDEN,
-            itemData.rtcUID
+            videoContainer.getChildAt(0), VideoCanvas.RENDER_MODE_HIDDEN,
+            rtcUID
         )
-        if (itemData.rtcUID == localUid) {
+        if (rtcUID == localUid) {
             rtcEngine.setupLocalVideo(videoCanvas)
         } else {
             rtcEngine.setupRemoteVideo(videoCanvas)
+        }
+    }
+
+    fun removeUserVideo(
+        videoContainer: FrameLayout,
+        rtcUID: Int
+    ) {
+        videoContainer.apply {
+            if (childCount >= 1) {
+                removeAllViews()
+            }
         }
     }
 
@@ -79,10 +109,13 @@ class UserVideoAdapter(
         notifyDataSetChanged()
     }
 
-    private var localUid: Int = 0
-
     fun setLocalUid(localUid: Int) {
         this.localUid = localUid;
+        notifyDataSetChanged()
+    }
+
+    fun setFullScreenUid(uid: Int) {
+        this.fullScreenUid = uid
         notifyDataSetChanged()
     }
 
@@ -97,13 +130,18 @@ class UserVideoAdapter(
         notifyDataSetChanged()
     }
 
-    fun onUserJoined(uid: Int) {
-
-    }
-
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
         val profile: ImageView = view.findViewById(R.id.profile)
         val username: TextView = view.findViewById(R.id.username)
+    }
+
+    var listener: Listener? = null
+        set(value) {
+            field = value
+        }
+
+    interface Listener {
+        fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser)
     }
 }

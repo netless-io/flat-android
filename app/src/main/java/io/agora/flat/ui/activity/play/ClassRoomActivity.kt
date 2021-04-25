@@ -14,6 +14,7 @@ class ClassRoomActivity : AppCompatActivity() {
     private lateinit var whiteboardRoot: FrameLayout
     private lateinit var rtcRoot: FrameLayout
     private lateinit var rtmRoot: FrameLayout
+    private lateinit var fullVideoRoot: FrameLayout
 
     private var componentSet: MutableSet<BaseComponent> = mutableSetOf()
 
@@ -26,16 +27,21 @@ class ClassRoomActivity : AppCompatActivity() {
         whiteboardRoot = findViewById(R.id.whiteboardContainer)
         rtcRoot = findViewById(R.id.userVideoContainer)
         rtmRoot = findViewById(R.id.messageContainer)
+        fullVideoRoot = findViewById(R.id.fullVideoContainer)
 
         componentSet.add(WhiteboardComponent(this, whiteboardRoot))
-        componentSet.add(RtcComponent(this, rtcRoot))
+        componentSet.add(RtcComponent(this, rtcRoot, fullVideoRoot))
         componentSet.add(RtmComponent(this, rtmRoot))
 
         componentSet.forEach { lifecycle.addObserver(it) }
     }
 
-    private fun initSystemUI() {
+    override fun onResume() {
+        super.onResume()
         hideSystemUI()
+    }
+
+    private fun initSystemUI() {
         supportActionBar?.hide()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }

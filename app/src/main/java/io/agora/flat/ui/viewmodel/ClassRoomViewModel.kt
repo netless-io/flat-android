@@ -103,6 +103,10 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun addRtmMember(userUUID: String) {
+        if (_usersCacheMap.containsKey(userUUID)) {
+            addToCurrent(mapOf(userUUID to _usersCacheMap[userUUID]!!))
+            return
+        }
         viewModelScope.launch {
             when (val result = roomRepository.getRoomUsers(roomUUID, listOf(userUUID))) {
                 is Success -> {

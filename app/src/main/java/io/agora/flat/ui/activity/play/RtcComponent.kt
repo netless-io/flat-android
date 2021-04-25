@@ -1,18 +1,25 @@
 package io.agora.flat.ui.activity.play
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.agora.flat.R
 import io.agora.flat.common.EventHandler
+import io.agora.flat.data.model.RtcUser
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
@@ -24,6 +31,7 @@ import kotlinx.coroutines.launch
 class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
+    val rootFullVideo: FrameLayout
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = RtcComponent::class.simpleName
@@ -81,12 +89,98 @@ class RtcComponent(
     }
 
     private fun initView() {
+        fullVideoView = rootFullVideo.findViewById(R.id.fullVideoView) as FrameLayout
+        fullVideoView.setOnClickListener {
+            exitFullScreen()
+        }
+
         recyclerView = RecyclerView(activity)
         rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adpater
 
+        adpater.listener = object : UserVideoAdapter.Listener {
+            override fun onFullScreen(position: Int, startView: ViewGroup, rtcUser: RtcUser) {
+                this@RtcComponent.rtcUser = rtcUser
+
+                startRect.set(getViewRect(startView, rootFullVideo))
+                endRect.set(0, 0, rootFullVideo.width, rootFullVideo.height)
+
+                enterFullScreen()
+            }
+        }
+
+        // TODO mute for dev
         application().rtcEngine().muteLocalAudioStream(true)
+    }
+
+    private fun getViewRect(view: ViewGroup, anchorView: View): Rect {
+        var array = IntArray(2)
+        view.getLocationOnScreen(array)
+
+        var arrayP = IntArray(2)
+        anchorView.getLocationOnScreen(arrayP)
+
+        return Rect(
+            array[0] - arrayP[0],
+            array[1] - arrayP[1],
+            array[0] - arrayP[0] + view.width,
+            array[1] - arrayP[1] + view.height
+        )
+    }
+
+    lateinit var fullVideoView: FrameLayout
+    private var startRect = Rect();
+    private var endRect = Rect();
+    lateinit var rtcUser: RtcUser
+
+    private fun exitFullScreen() {
+        val animator = ValueAnimator.ofFloat(1F, 0F)
+        animator.duration = 300
+        animator.addUpdateListener {
+            val value = it.animatedValue as Float
+            updateView(value)
+        }
+        animator.addListener(onEnd = {
+            updateView(0f)
+            application().rtcEngine().setupLocalVideo(VideoCanvas(null, 0, rtcUser.rtcUID))
+            fullVideoView.removeAllViews()
+            fullVideoView.visibility = View.GONE
+            adpater.setFullScreenUid(0)
+        })
+        animator.start()
+    }
+
+    private fun enterFullScreen() {
+        val animator = ValueAnimator.ofFloat(0F, 1F)
+        animator.duration = 300
+        animator.addUpdateListener {
+            updateView(it.animatedValue as Float)
+        }
+        animator.addListener(
+            onEnd = {
+                updateView(1f)
+            }, onStart = {
+                fullVideoView.visibility = View.VISIBLE
+                adpater.setupUserVideo(fullVideoView, rtcUser.rtcUID)
+            })
+        animator.start()
+    }
+
+    private fun updateView(value: Float) {
+        val left = startRect.left + (endRect.left - startRect.left) * value
+        val right = startRect.right + (endRect.right - startRect.right) * value
+        val top = startRect.top + (endRect.top - startRect.top) * value
+        val bottom = startRect.bottom + (endRect.bottom - startRect.bottom) * value
+
+        Log.d(TAG, "left:$left,right:$right,top:$top,bottom:$bottom")
+
+        val layoutParams = fullVideoView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.width = (right - left).toInt()
+        layoutParams.height = (bottom - top).toInt()
+        layoutParams.leftMargin = left.toInt()
+        layoutParams.topMargin = top.toInt()
+        fullVideoView.layoutParams = layoutParams
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
