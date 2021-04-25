@@ -17,9 +17,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.EntryPointAccessors
 import io.agora.flat.R
 import io.agora.flat.common.EventHandler
 import io.agora.flat.data.model.RtcUser
+import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
@@ -43,12 +45,19 @@ class RtcComponent(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
+    lateinit var rtcApi: RtcEngineProvider
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
     private lateinit var recyclerView: RecyclerView
-    private var adpater: UserVideoAdapter = UserVideoAdapter(ArrayList(), application().rtcEngine())
+    private lateinit var adpater: UserVideoAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
+        val entryPoint = EntryPointAccessors.fromApplication(
+            activity.applicationContext,
+            ComponentEntryPoint::class.java
+        )
+        rtcApi = entryPoint.rtcApi()
+
         initView()
         initListener()
         checkPermission(::actionAfterPermission)
@@ -78,7 +87,7 @@ class RtcComponent(
     private fun joinRtcChannel() {
         Log.d(TAG, "call rtc joinChannel")
         viewModel.roomPlayInfo.value?.apply {
-            application().rtcEngine().joinChannel(
+            rtcApi.rtcEngine().joinChannel(
                 rtcToken,
                 roomUUID,
                 "{}",
@@ -94,11 +103,7 @@ class RtcComponent(
             exitFullScreen()
         }
 
-        recyclerView = RecyclerView(activity)
-        rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adpater
-
+        adpater = UserVideoAdapter(ArrayList(), rtcApi.rtcEngine())
         adpater.listener = object : UserVideoAdapter.Listener {
             override fun onFullScreen(position: Int, startView: ViewGroup, rtcUser: RtcUser) {
                 this@RtcComponent.rtcUser = rtcUser
@@ -110,8 +115,13 @@ class RtcComponent(
             }
         }
 
+        recyclerView = RecyclerView(activity)
+        rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adpater
+
         // TODO mute for dev
-        application().rtcEngine().muteLocalAudioStream(true)
+        rtcApi.rtcEngine().muteLocalAudioStream(true)
     }
 
     private fun getViewRect(view: ViewGroup, anchorView: View): Rect {
@@ -143,7 +153,7 @@ class RtcComponent(
         }
         animator.addListener(onEnd = {
             updateView(0f)
-            application().rtcEngine().setupLocalVideo(VideoCanvas(null, 0, rtcUser.rtcUID))
+            rtcApi.rtcEngine().setupLocalVideo(VideoCanvas(null, 0, rtcUser.rtcUID))
             fullVideoView.removeAllViews()
             fullVideoView.visibility = View.GONE
             adpater.setFullScreenUid(0)
@@ -184,8 +194,8 @@ class RtcComponent(
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        application().rtcEngine().leaveChannel()
-        application().removeEventHandler(eventHandler)
+        rtcApi.rtcEngine().leaveChannel()
+        rtcApi.removeEventHandler(eventHandler)
     }
 
     private fun checkPermission(actionAfterPermission: () -> Unit) {
@@ -216,7 +226,7 @@ class RtcComponent(
     }
 
     private fun initListener() {
-        application().registerEventHandler(eventHandler)
+        rtcApi.registerEventHandler(eventHandler)
     }
 
     private var eventHandler = object : EventHandler {
@@ -239,7 +249,7 @@ class RtcComponent(
 
         override fun onUserOffline(uid: Int, reason: Int) {
             Log.d(TAG, "onUserOffline:$uid $reason")
-            application().rtcEngine().setupRemoteVideo(VideoCanvas(null, 0, uid))
+            rtcApi.rtcEngine().setupRemoteVideo(VideoCanvas(null, 0, uid))
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {

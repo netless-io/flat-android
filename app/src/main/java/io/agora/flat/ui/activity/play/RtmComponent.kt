@@ -5,7 +5,9 @@ import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.EntryPointAccessors
 import io.agora.flat.data.AppDataCenter
+import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.rtm.*
@@ -25,8 +27,16 @@ class RtmComponent(
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private var appDataCenter = AppDataCenter(activity.applicationContext)
 
+    lateinit var rtmApi: RtmEngineProvider
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+
+        val entryPoint = EntryPointAccessors.fromApplication(
+            activity.applicationContext,
+            ComponentEntryPoint::class.java
+        )
+        rtmApi = entryPoint.rtmApi()
 
         lifecycleScope.launch {
             viewModel.roomPlayInfo.collect {
@@ -42,7 +52,7 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        application().rtmClient().logout(object : ResultCallback<Void> {
+        rtmApi.rtmEngine().logout(object : ResultCallback<Void> {
             override fun onSuccess(p0: Void?) {
 
             }
@@ -110,7 +120,7 @@ class RtmComponent(
 
     private suspend fun login(rtmToken: String, userUUID: String): Boolean =
         suspendCoroutine { cont ->
-            application().rtmClient().login(
+            rtmApi.rtmEngine().login(
                 rtmToken,
                 userUUID,
                 object : ResultCallback<Void> {
@@ -125,7 +135,7 @@ class RtmComponent(
         }
 
     private suspend fun joinChannel(channelId: String): RtmChannel? = suspendCoroutine {
-        application().rtmClient().apply {
+        rtmApi.rtmEngine().apply {
             val channel = createChannel(channelId, rtmChannelListener)
             channel.join(object : ResultCallback<Void> {
                 override fun onSuccess(p0: Void?) {
