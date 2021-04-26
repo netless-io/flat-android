@@ -24,9 +24,9 @@ import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
-import io.agora.rtc.video.VideoCanvas
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -45,8 +45,9 @@ class RtcComponent(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
-    lateinit var rtcApi: RtcEngineProvider
+    lateinit private var rtcApi: RtcEngineProvider
     private val viewModel: ClassRoomViewModel by activity.viewModels()
+    private val rtcVideoController: RtcVideoController by activity.viewModels()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adpater: UserVideoAdapter
@@ -93,25 +94,23 @@ class RtcComponent(
                 "{}",
                 rtcUID
             )
-            adpater.setLocalUid(rtcUID)
+            rtcVideoController.setLocalUid(rtcUID)
         }
     }
 
     private fun initView() {
         fullVideoView = rootFullVideo.findViewById(R.id.fullVideoView) as FrameLayout
         fullVideoView.setOnClickListener {
-            exitFullScreen()
+            onExitFullScreen()
         }
 
-        adpater = UserVideoAdapter(ArrayList(), rtcApi.rtcEngine())
+        adpater = UserVideoAdapter(ArrayList(), rtcVideoController)
         adpater.listener = object : UserVideoAdapter.Listener {
             override fun onFullScreen(position: Int, startView: ViewGroup, rtcUser: RtcUser) {
-                this@RtcComponent.rtcUser = rtcUser
-
-                startRect.set(getViewRect(startView, rootFullVideo))
-                endRect.set(0, 0, rootFullVideo.width, rootFullVideo.height)
-
-                enterFullScreen()
+                user = rtcUser
+                start.set(getViewRect(startView, rootFullVideo))
+                end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
+                onEnterFullScreen()
             }
         }
 
@@ -140,11 +139,11 @@ class RtcComponent(
     }
 
     lateinit var fullVideoView: FrameLayout
-    private var startRect = Rect();
-    private var endRect = Rect();
-    lateinit var rtcUser: RtcUser
+    private var start = Rect();
+    private var end = Rect();
+    lateinit var user: RtcUser
 
-    private fun exitFullScreen() {
+    private fun onExitFullScreen() {
         val animator = ValueAnimator.ofFloat(1F, 0F)
         animator.duration = 300
         animator.addUpdateListener {
@@ -153,15 +152,14 @@ class RtcComponent(
         }
         animator.addListener(onEnd = {
             updateView(0f)
-            rtcApi.rtcEngine().setupLocalVideo(VideoCanvas(null, 0, rtcUser.rtcUID))
-            fullVideoView.removeAllViews()
             fullVideoView.visibility = View.GONE
-            adpater.setFullScreenUid(0)
+            rtcVideoController.exitFullScreen()
+            adpater.updateVideoView(user.rtcUID)
         })
         animator.start()
     }
 
-    private fun enterFullScreen() {
+    private fun onEnterFullScreen() {
         val animator = ValueAnimator.ofFloat(0F, 1F)
         animator.duration = 300
         animator.addUpdateListener {
@@ -172,16 +170,16 @@ class RtcComponent(
                 updateView(1f)
             }, onStart = {
                 fullVideoView.visibility = View.VISIBLE
-                adpater.setupUserVideo(fullVideoView, rtcUser.rtcUID)
+                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
             })
         animator.start()
     }
 
     private fun updateView(value: Float) {
-        val left = startRect.left + (endRect.left - startRect.left) * value
-        val right = startRect.right + (endRect.right - startRect.right) * value
-        val top = startRect.top + (endRect.top - startRect.top) * value
-        val bottom = startRect.bottom + (endRect.bottom - startRect.bottom) * value
+        val left = start.left + (end.left - start.left) * value
+        val right = start.right + (end.right - start.right) * value
+        val top = start.top + (end.top - start.top) * value
+        val bottom = start.bottom + (end.bottom - start.bottom) * value
 
         Log.d(TAG, "left:$left,right:$right,top:$top,bottom:$bottom")
 
@@ -249,7 +247,9 @@ class RtcComponent(
 
         override fun onUserOffline(uid: Int, reason: Int) {
             Log.d(TAG, "onUserOffline:$uid $reason")
-            rtcApi.rtcEngine().setupRemoteVideo(VideoCanvas(null, 0, uid))
+            lifecycleScope.launch {
+                rtcVideoController.releaseVideo(uid)
+            }
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {

@@ -52,16 +52,19 @@ class AppModule {
         return RtcProviderImpl()
     }
 
-    @Provides
-    @IntoSet
-    fun provideRtcInitializer(rtcEngineProvider: RtcEngineProvider): StartupInitializer {
-        return rtcEngineProvider as StartupInitializer;
-    }
-
     @Singleton
     @Provides
     fun providerRtmProvider(): RtmEngineProvider {
         return RtmProviderImpl()
+    }
+
+    /**
+     * StartupInitializer Set
+     */
+    @Provides
+    @IntoSet
+    fun provideRtcInitializer(rtcEngineProvider: RtcEngineProvider): StartupInitializer {
+        return rtcEngineProvider as StartupInitializer;
     }
 
     @Provides

@@ -5,7 +5,5 @@ import android.content.Context
 interface StartupInitializer {
     fun onCreate(context: Context)
 
-    fun onTerminate() {
-
-    }
+    fun onTerminate() {}
 }

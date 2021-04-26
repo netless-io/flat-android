@@ -12,26 +12,29 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
-import io.agora.rtc.RtcEngine
-import io.agora.rtc.video.VideoCanvas
+import io.agora.flat.ui.viewmodel.RtcVideoController
 
 class UserVideoAdapter(
     private val dataSet: MutableList<RtcUser>,
-    private val rtcEngine: RtcEngine
-) :
-    RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
+    private val rtcVideoController: RtcVideoController
+) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
+
+    init {
+        setHasStableIds(true);
+    }
 
     private var context: Context? = null
-    private var localUid: Int = 0
-    private var fullScreenUid: Int = 0
+    private var recyclerView: RecyclerView? = null
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         context = recyclerView.context
+        this.recyclerView = recyclerView
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         context = null
+        this.recyclerView = null
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -50,84 +53,31 @@ class UserVideoAdapter(
             transformations(CircleCropTransformation())
         }
 
-        setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+        rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
 
         viewHolder.itemView.setOnClickListener {
-            fullScreenUid = itemData.rtcUID
-            removeUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+            rtcVideoController.enterFullScreen(itemData.rtcUID)
             listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
         }
     }
 
-    fun setupUserVideo(videoContainer: FrameLayout, rtcUID: Int) {
-        videoContainer.apply {
-            if (childCount >= 1) {
-                return
-            }
-
-            val surfaceView = RtcEngine.CreateTextureView(context)
-            videoContainer.addView(
-                surfaceView,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            )
-        }
-
-        var videoCanvas = VideoCanvas(
-            videoContainer.getChildAt(0), VideoCanvas.RENDER_MODE_HIDDEN,
-            rtcUID
-        )
-        if (rtcUID == localUid) {
-            rtcEngine.setupLocalVideo(videoCanvas)
-        } else {
-            rtcEngine.setupRemoteVideo(videoCanvas)
-        }
-    }
-
-    fun removeUserVideo(
-        videoContainer: FrameLayout,
-        rtcUID: Int
-    ) {
-        videoContainer.apply {
-            if (childCount >= 1) {
-                removeAllViews()
-            }
-        }
-    }
-
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return dataSet[position].rtcUID.toLong()
     }
 
     override fun getItemCount() = dataSet.size
 
     fun setDataSet(data: List<RtcUser>) {
         dataSet.clear()
-        dataSet.addAll(data)
+        dataSet.addAll(data.distinctBy { it.rtcUID })
         notifyDataSetChanged()
     }
 
-    fun setLocalUid(localUid: Int) {
-        this.localUid = localUid;
-        notifyDataSetChanged()
-    }
-
-    fun setFullScreenUid(uid: Int) {
-        this.fullScreenUid = uid
-        notifyDataSetChanged()
-    }
-
-    fun userLeft(uid: Int) {
-        val iterator = dataSet.iterator()
-        while (iterator.hasNext()) {
-            val next = iterator.next()
-            if (next.rtcUID == uid) {
-                iterator.remove()
-            }
+    fun updateVideoView(uid: Int) {
+        recyclerView?.findViewHolderForItemId(uid.toLong())?.apply {
+            val viewHolder = this as ViewHolder
+            rtcVideoController.setupUserVideo(viewHolder.videoContainer, uid)
         }
-        notifyDataSetChanged()
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
