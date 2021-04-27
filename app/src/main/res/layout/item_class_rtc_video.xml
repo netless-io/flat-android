@@ -20,16 +20,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/profile"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="@+id/videoContainer"
-        app:layout_constraintEnd_toEndOf="@+id/videoContainer"
-        app:layout_constraintStart_toStartOf="@+id/videoContainer"
-        app:layout_constraintTop_toTopOf="@+id/videoContainer" />
-
     <TextView
         android:id="@+id/username"
         android:layout_width="wrap_content"
@@ -37,9 +27,21 @@
         android:src="@drawable/ic_user_profile_head"
         android:textColor="@color/flat_white"
         android:textSize="14sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/videoContainer"
         app:layout_constraintEnd_toEndOf="@+id/videoContainer"
         app:layout_constraintStart_toStartOf="@+id/videoContainer"
         app:layout_constraintTop_toTopOf="@+id/videoContainer"
         tools:text="用户匿名" />
+
+    <ImageView
+        android:id="@+id/profile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/videoContainer"
+        app:layout_constraintEnd_toEndOf="@+id/videoContainer"
+        app:layout_constraintStart_toStartOf="@+id/videoContainer"
+        app:layout_constraintTop_toTopOf="@+id/videoContainer" />
 </androidx.constraintlayout.widget.ConstraintLayout>

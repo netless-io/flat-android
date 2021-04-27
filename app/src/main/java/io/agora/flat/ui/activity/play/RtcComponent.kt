@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.play
 import android.Manifest
 import android.animation.ValueAnimator
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
@@ -64,6 +65,11 @@ class RtcComponent(
         checkPermission(::actionAfterPermission)
     }
 
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        showVideoContainer()
+    }
+
     private fun loadData() {
         lifecycleScope.launch {
             viewModel.currentUsersMap.collect {
@@ -78,11 +84,77 @@ class RtcComponent(
                     is ClassRoomEvent.RtmChannelJoined -> {
                         joinRtcChannel()
                     }
+                    is ClassRoomEvent.ChangeVideoDisplay -> changeVideoDisplay()
                     else -> {
                     }
                 }
             }
         }
+    }
+
+    private fun changeVideoDisplay() {
+        if (videoAnimator?.isRunning == true) {
+            return
+        }
+        if (videoShown) {
+            hideVideoContainer()
+        } else {
+            showVideoContainer()
+        }
+    }
+
+    private val expandWidth = dp2px(120)
+    private var videoAnimator: ValueAnimator? = null
+    private var videoShown = false
+
+    private fun showVideoContainer() {
+        videoShown = true
+        videoAnimator = ValueAnimator.ofInt(0, expandWidth)
+        videoAnimator?.apply {
+            duration = 300
+            addUpdateListener {
+                updateVideoContainer(it.animatedValue as Int)
+            }
+            addListener(
+                onEnd = {
+                    updateVideoContainer(expandWidth)
+                },
+                onStart = {
+                    updateVideoContainer(0)
+                    rootView.visibility = View.VISIBLE
+                })
+            start()
+        }
+    }
+
+    private fun hideVideoContainer() {
+        videoShown = false
+        videoAnimator = ValueAnimator.ofInt(expandWidth, 0)
+        videoAnimator?.apply {
+            duration = 300
+            addUpdateListener {
+                updateVideoContainer(it.animatedValue as Int)
+            }
+            addListener(
+                onEnd = {
+                    updateVideoContainer(0)
+                    rootView.visibility = View.GONE
+                },
+                onStart = {
+                    updateVideoContainer(0)
+                })
+            start()
+        }
+    }
+
+    private fun updateVideoContainer(width: Int) {
+        val layoutParams = rootView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.width = width
+        rootView.layoutParams = layoutParams
+    }
+
+    private fun dp2px(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
     private fun joinRtcChannel() {

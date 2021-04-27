@@ -14,6 +14,7 @@ import io.agora.flat.data.repository.RoomRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,9 +33,11 @@ class ClassRoomViewModel @Inject constructor(
     val currentUsersMap = _currentUsersMap.asStateFlow()
 
     private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
-    val roomEvent = _roomEvent.asStateFlow()
+    val roomEvent = _roomEvent
+    val uuid = AtomicInteger(0)
 
     private val roomUUID: String
+    private var videoShown: Boolean = false
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
@@ -122,9 +125,14 @@ class ClassRoomViewModel @Inject constructor(
     private fun intentValue(key: String): String {
         return savedStateHandle.get<String>(key)!!
     }
+
+    fun changeVideoDisplay() {
+        _roomEvent.value = ClassRoomEvent.ChangeVideoDisplay(uuid.incrementAndGet())
+    }
 }
 
 sealed class ClassRoomEvent {
     object EnterRoom : ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
+    data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
 }

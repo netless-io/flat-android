@@ -7,6 +7,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
+import io.agora.flat.databinding.ComponentToolBinding
 
 
 @AndroidEntryPoint
@@ -15,6 +16,7 @@ class ClassRoomActivity : AppCompatActivity() {
     private lateinit var rtcRoot: FrameLayout
     private lateinit var rtmRoot: FrameLayout
     private lateinit var fullVideoRoot: FrameLayout
+    private lateinit var extToolRoot: FrameLayout
 
     private var componentSet: MutableSet<BaseComponent> = mutableSetOf()
 
@@ -28,10 +30,12 @@ class ClassRoomActivity : AppCompatActivity() {
         rtcRoot = findViewById(R.id.userVideoContainer)
         rtmRoot = findViewById(R.id.messageContainer)
         fullVideoRoot = findViewById(R.id.fullVideoContainer)
+        extToolRoot = findViewById(R.id.extToolContainer)
 
         componentSet.add(WhiteboardComponent(this, whiteboardRoot))
         componentSet.add(RtcComponent(this, rtcRoot, fullVideoRoot))
         componentSet.add(RtmComponent(this, rtmRoot))
+        componentSet.add(ToolComponent(this, extToolRoot))
 
         componentSet.forEach { lifecycle.addObserver(it) }
     }

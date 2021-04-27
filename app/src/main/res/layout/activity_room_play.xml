@@ -5,8 +5,7 @@
     android:id="@+id/roomPlayRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity"
-    tools:viewBindingIgnore="true">
+    tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity">
 
     <FrameLayout
         android:id="@+id/userVideoContainer"
@@ -40,5 +39,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/extToolContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/userVideoContainer"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
