@@ -1,6 +1,7 @@
 package io.agora.flat.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.widget.Toast
 import io.agora.flat.BuildConfig
 
@@ -20,7 +21,10 @@ fun Context.showDebugToast(message: String) {
     }
 }
 
-
 fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+fun Context.dp2px(dp: Int): Int {
+    return (dp * Resources.getSystem().displayMetrics.density).toInt()
 }

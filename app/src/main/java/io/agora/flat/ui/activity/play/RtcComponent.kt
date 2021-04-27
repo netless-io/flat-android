@@ -1,9 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
@@ -12,7 +10,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -23,9 +20,11 @@ import io.agora.flat.R
 import io.agora.flat.common.EventHandler
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcEngineProvider
+import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
 import kotlinx.coroutines.flow.collect
@@ -53,6 +52,9 @@ class RtcComponent(
     private lateinit var recyclerView: RecyclerView
     private lateinit var adpater: UserVideoAdapter
 
+    private lateinit var videoLayoutAnimator: SimpleAnimator
+    private lateinit var fullScreenAnimator: SimpleAnimator
+
     override fun onCreate(owner: LifecycleOwner) {
         val entryPoint = EntryPointAccessors.fromApplication(
             activity.applicationContext,
@@ -67,7 +69,7 @@ class RtcComponent(
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        showVideoContainer()
+        videoLayoutAnimator.show()
     }
 
     private fun loadData() {
@@ -84,7 +86,7 @@ class RtcComponent(
                     is ClassRoomEvent.RtmChannelJoined -> {
                         joinRtcChannel()
                     }
-                    is ClassRoomEvent.ChangeVideoDisplay -> changeVideoDisplay()
+                    is ClassRoomEvent.ChangeVideoDisplay -> videoLayoutAnimator.switch()
                     else -> {
                     }
                 }
@@ -92,69 +94,13 @@ class RtcComponent(
         }
     }
 
-    private fun changeVideoDisplay() {
-        if (videoAnimator?.isRunning == true) {
-            return
-        }
-        if (videoShown) {
-            hideVideoContainer()
-        } else {
-            showVideoContainer()
-        }
-    }
+    private val expandWidth = activity.dp2px(120)
+    private fun updateVideoContainer(value: Float) {
+        val width = (value * expandWidth).toInt()
 
-    private val expandWidth = dp2px(120)
-    private var videoAnimator: ValueAnimator? = null
-    private var videoShown = false
-
-    private fun showVideoContainer() {
-        videoShown = true
-        videoAnimator = ValueAnimator.ofInt(0, expandWidth)
-        videoAnimator?.apply {
-            duration = 300
-            addUpdateListener {
-                updateVideoContainer(it.animatedValue as Int)
-            }
-            addListener(
-                onEnd = {
-                    updateVideoContainer(expandWidth)
-                },
-                onStart = {
-                    updateVideoContainer(0)
-                    rootView.visibility = View.VISIBLE
-                })
-            start()
-        }
-    }
-
-    private fun hideVideoContainer() {
-        videoShown = false
-        videoAnimator = ValueAnimator.ofInt(expandWidth, 0)
-        videoAnimator?.apply {
-            duration = 300
-            addUpdateListener {
-                updateVideoContainer(it.animatedValue as Int)
-            }
-            addListener(
-                onEnd = {
-                    updateVideoContainer(0)
-                    rootView.visibility = View.GONE
-                },
-                onStart = {
-                    updateVideoContainer(0)
-                })
-            start()
-        }
-    }
-
-    private fun updateVideoContainer(width: Int) {
         val layoutParams = rootView.layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.width = width
         rootView.layoutParams = layoutParams
-    }
-
-    private fun dp2px(dp: Int): Int {
-        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
     private fun joinRtcChannel() {
@@ -173,7 +119,7 @@ class RtcComponent(
     private fun initView() {
         fullVideoView = rootFullVideo.findViewById(R.id.fullVideoView) as FrameLayout
         fullVideoView.setOnClickListener {
-            onExitFullScreen()
+            fullScreenAnimator.hide()
         }
 
         adpater = UserVideoAdapter(ArrayList(), rtcVideoController)
@@ -182,7 +128,7 @@ class RtcComponent(
                 user = rtcUser
                 start.set(getViewRect(startView, rootFullVideo))
                 end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
-                onEnterFullScreen()
+                fullScreenAnimator.show()
             }
         }
 
@@ -193,6 +139,25 @@ class RtcComponent(
 
         // TODO mute for dev
         rtcApi.rtcEngine().muteLocalAudioStream(true)
+
+        videoLayoutAnimator = SimpleAnimator(
+            onUpdate = ::updateVideoContainer,
+            onShowStart = { rootView.visibility = View.VISIBLE },
+            onHideEnd = { rootView.visibility = View.GONE }
+        )
+
+        fullScreenAnimator = SimpleAnimator(
+            onUpdate = ::updateView,
+            onShowStart = {
+                fullVideoView.visibility = View.VISIBLE
+                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
+            },
+            onHideEnd = {
+                fullVideoView.visibility = View.GONE
+                rtcVideoController.exitFullScreen()
+                adpater.updateVideoView(user.rtcUID)
+            }
+        )
     }
 
     private fun getViewRect(view: ViewGroup, anchorView: View): Rect {
@@ -215,37 +180,37 @@ class RtcComponent(
     private var end = Rect();
     lateinit var user: RtcUser
 
-    private fun onExitFullScreen() {
-        val animator = ValueAnimator.ofFloat(1F, 0F)
-        animator.duration = 300
-        animator.addUpdateListener {
-            val value = it.animatedValue as Float
-            updateView(value)
-        }
-        animator.addListener(onEnd = {
-            updateView(0f)
-            fullVideoView.visibility = View.GONE
-            rtcVideoController.exitFullScreen()
-            adpater.updateVideoView(user.rtcUID)
-        })
-        animator.start()
-    }
-
-    private fun onEnterFullScreen() {
-        val animator = ValueAnimator.ofFloat(0F, 1F)
-        animator.duration = 300
-        animator.addUpdateListener {
-            updateView(it.animatedValue as Float)
-        }
-        animator.addListener(
-            onEnd = {
-                updateView(1f)
-            }, onStart = {
-                fullVideoView.visibility = View.VISIBLE
-                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
-            })
-        animator.start()
-    }
+//    private fun onExitFullScreen() {
+//        val animator = ValueAnimator.ofFloat(1F, 0F)
+//        animator.duration = 300
+//        animator.addUpdateListener {
+//            val value = it.animatedValue as Float
+//            updateView(value)
+//        }
+//        animator.addListener(onEnd = {
+//            updateView(0f)
+//            fullVideoView.visibility = View.GONE
+//            rtcVideoController.exitFullScreen()
+//            adpater.updateVideoView(user.rtcUID)
+//        })
+//        animator.start()
+//    }
+//
+//    private fun onEnterFullScreen() {
+//        val animator = ValueAnimator.ofFloat(0F, 1F)
+//        animator.duration = 300
+//        animator.addUpdateListener {
+//            updateView(it.animatedValue as Float)
+//        }
+//        animator.addListener(
+//            onEnd = {
+//                updateView(1f)
+//            }, onStart = {
+//                fullVideoView.visibility = View.VISIBLE
+//                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
+//            })
+//        animator.start()
+//    }
 
     private fun updateView(value: Float) {
         val left = start.left + (end.left - start.left) * value

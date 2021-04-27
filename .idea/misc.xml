@@ -172,6 +172,7 @@
         <entry key="../../../../layout/compose-model-1618545987593.xml" value="0.8740740740740741" />
         <entry key="../../../../layout/compose-model-1618550439483.xml" value="0.8740740740740741" />
         <entry key="../../../../layout/compose-model-1619056918976.xml" value="0.43327702702702703" />
+        <entry key="../../../../layout/compose-model-1619344444024.xml" value="0.43327702702702703" />
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.29444444444444445" />
         <entry key="app/src/main/res/drawable/ic_color.xml" value="0.5239583333333333" />
@@ -206,6 +207,7 @@
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_normal.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_selected.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_eraser_selector.xml" value="0.5239583333333333" />
+        <entry key="app/src/main/res/drawable/ic_toolbox_ext_collapse.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_file_upload_normal.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_file_upload_selected.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/drawable/ic_toolbox_file_upload_selector.xml" value="0.5239583333333333" />
@@ -266,8 +268,9 @@
         <entry key="app/src/main/res/drawable/shape_gray_border_round_bg.xml" value="0.5239583333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3" />
         <entry key="app/src/main/res/layout/activity_playback.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_room_play.xml" value="0.27733686067019403" />
+        <entry key="app/src/main/res/layout/activity_room_play.xml" value="0.4046875" />
         <entry key="app/src/main/res/layout/activity_wechat_login.xml" value="0.2826086956521739" />
+        <entry key="app/src/main/res/layout/component_tool.xml" value="0.4046875" />
         <entry key="app/src/main/res/layout/component_whiteboard.xml" value="0.37091425864519184" />
         <entry key="app/src/main/res/layout/item_class_rtc_video.xml" value="0.5078125" />
         <entry key="app/src/main/res/layout/item_toolbox_color.xml" value="0.5078125" />

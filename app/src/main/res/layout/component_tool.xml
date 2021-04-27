@@ -7,7 +7,6 @@
     tools:context="io.agora.flat.MainActivity">
 
     <LinearLayout
-        android:id="@+id/extTools"
         android:layout_width="32dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -17,40 +16,47 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/message"
+        <LinearLayout
+            android:id="@+id/extTools"
             android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_ext_message_normal" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/video"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_ext_hide_video" />
+            <ImageView
+                android:id="@+id/message"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_ext_message_normal" />
 
-        <ImageView
-            android:id="@+id/cloudservice"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_ext_cloudservice" />
+            <ImageView
+                android:id="@+id/video"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_ext_hide_video" />
 
-        <ImageView
-            android:id="@+id/invite"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_ext_invite_normal" />
+            <ImageView
+                android:id="@+id/cloudservice"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_ext_cloudservice" />
 
-        <ImageView
-            android:id="@+id/setting"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_ext_setting" />
+            <ImageView
+                android:id="@+id/invite"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_ext_invite_normal" />
+
+            <ImageView
+                android:id="@+id/setting"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_ext_setting" />
+        </LinearLayout>
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -72,5 +78,4 @@
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

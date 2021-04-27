@@ -208,7 +208,6 @@ class WhiteboardComponent(
                 }
             }
         }
-
     }
 
     private fun initWhiteboard() {
