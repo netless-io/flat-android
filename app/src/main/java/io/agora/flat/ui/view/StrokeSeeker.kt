@@ -39,7 +39,7 @@ class StrokeSeeker @JvmOverloads constructor(
 
     private var minStroke = 1
     private var maxStroke = 12
-    private var lastStrokeWidth = -1
+    private var currentStrokeWidth = -1
 
     init {
         indicatorPaint.isAntiAlias = true
@@ -77,6 +77,8 @@ class StrokeSeeker @JvmOverloads constructor(
         seekerPath.arcTo(rightRect, 270f, 180f)
         seekerPath.lineTo(offsetLeftX, baseY + leftBarHeight / 2)
         seekerPath.arcTo(leftRect, 90f, 180f)
+
+        setStrokeWidth(currentStrokeWidth)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -130,8 +132,8 @@ class StrokeSeeker @JvmOverloads constructor(
 
         var per = (currentX - leftLimit) / (rightLimit - leftLimit)
         var result = (rangeSize() * per + minStroke).coerceAtMost(maxStroke.toFloat()).toInt()
-        if (result != lastStrokeWidth) {
-            lastStrokeWidth = result
+        if (result != currentStrokeWidth) {
+            currentStrokeWidth = result
             onStrokeChangedListener?.onStroke(result)
         }
     }
@@ -152,8 +154,8 @@ class StrokeSeeker @JvmOverloads constructor(
     }
 
     fun setStrokeWidth(strokeWidth: Int) {
-        lastStrokeWidth = strokeWidth
-        currentX = (strokeWidth - minStroke) / rangeSize() * (rightLimit - leftLimit) + leftLimit
+        currentStrokeWidth = strokeWidth
+        currentX = (strokeWidth - minStroke).toFloat() / rangeSize() * (rightLimit - leftLimit) + leftLimit
         invalidate()
     }
 

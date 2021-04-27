@@ -180,38 +180,6 @@ class RtcComponent(
     private var end = Rect();
     lateinit var user: RtcUser
 
-//    private fun onExitFullScreen() {
-//        val animator = ValueAnimator.ofFloat(1F, 0F)
-//        animator.duration = 300
-//        animator.addUpdateListener {
-//            val value = it.animatedValue as Float
-//            updateView(value)
-//        }
-//        animator.addListener(onEnd = {
-//            updateView(0f)
-//            fullVideoView.visibility = View.GONE
-//            rtcVideoController.exitFullScreen()
-//            adpater.updateVideoView(user.rtcUID)
-//        })
-//        animator.start()
-//    }
-//
-//    private fun onEnterFullScreen() {
-//        val animator = ValueAnimator.ofFloat(0F, 1F)
-//        animator.duration = 300
-//        animator.addUpdateListener {
-//            updateView(it.animatedValue as Float)
-//        }
-//        animator.addListener(
-//            onEnd = {
-//                updateView(1f)
-//            }, onStart = {
-//                fullVideoView.visibility = View.VISIBLE
-//                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
-//            })
-//        animator.start()
-//    }
-
     private fun updateView(value: Float) {
         val left = start.left + (end.left - start.left) * value
         val right = start.right + (end.right - start.right) * value

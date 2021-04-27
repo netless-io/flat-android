@@ -151,7 +151,7 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.5'
 
     // agora
-    implementation 'com.github.duty-os:white-sdk-android:2.12.18'
+    implementation 'com.github.netless-io:whiteboard-android:2.12.24'
     implementation 'io.agora.rtc:full-sdk:3.3.0'
     implementation 'io.agora.rtm:rtm-sdk:1.4.1'
 }

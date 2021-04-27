@@ -28,3 +28,9 @@ fun Context.showToast(message: String) {
 fun Context.dp2px(dp: Int): Int {
     return (dp * Resources.getSystem().displayMetrics.density).toInt()
 }
+
+fun Context.px2dp(px: Int): Int {
+    return Resources.getSystem().displayMetrics.density.let {
+        (px.toFloat() / it + 0.5).toInt()
+    }
+}

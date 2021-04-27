@@ -7,7 +7,6 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
-import io.agora.flat.databinding.ComponentToolBinding
 
 
 @AndroidEntryPoint
@@ -23,7 +22,6 @@ class ClassRoomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_room_play)
-
         initSystemUI()
 
         whiteboardRoot = findViewById(R.id.whiteboardContainer)

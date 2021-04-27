@@ -2,6 +2,7 @@ package io.agora.flat.ui.activity.play
 
 import android.util.Log
 import android.view.View
+import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.annotation.UiThread
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.agora.netless.simpleui.StrokeSeeker
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.*
+import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
@@ -32,6 +34,7 @@ class WhiteboardComponent(
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var whiteSdk: WhiteSdk
     private var room: Room? = null
+    private lateinit var colorAdapter: ColorAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -178,7 +181,7 @@ class WhiteboardComponent(
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
 
-        val colorAdapter = ColorAdapter(ColorItem.colors)
+        colorAdapter = ColorAdapter(ColorItem.colors)
         colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
             override fun onColorSelected(item: ColorItem) {
                 binding.toolsSubLayout.visibility = View.GONE
@@ -211,6 +214,8 @@ class WhiteboardComponent(
     }
 
     private fun initWhiteboard() {
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
 
@@ -270,7 +275,7 @@ class WhiteboardComponent(
         override fun onRoomStateChanged(modifyState: RoomState) {
             Log.d(TAG, "onRoomStateChanged:${modifyState}")
             activity.runOnUiThread {
-                room?.roomState?.let(this@WhiteboardComponent::onRoomStateChanged)
+                room?.roomState?.sceneState?.let(::onSceneStateChanged)
             }
         }
 
@@ -306,7 +311,7 @@ class WhiteboardComponent(
             // On Room Ready
             room.getRoomState(object : Promise<RoomState> {
                 override fun then(roomState: RoomState) {
-                    onRoomStateChanged(roomState)
+                    onInitRoomState(roomState)
                 }
 
                 override fun catchEx(t: SDKError?) {
@@ -319,7 +324,7 @@ class WhiteboardComponent(
         }
     }
 
-    private fun onRoomStateChanged(roomState: RoomState) {
+    private fun onInitRoomState(roomState: RoomState) {
         roomState.memberState?.let(::onMemberStateChanged)
         roomState.sceneState?.let(::onSceneStateChanged)
     }
@@ -341,6 +346,15 @@ class WhiteboardComponent(
         applianceMap[memberState.currentApplianceName]?.let {
             binding.tools.setImageResource(it)
         } ?: binding.tools.setImageDrawable(null)
+
+        memberState.apply {
+            binding.seeker.setStrokeWidth(strokeWidth.toInt())
+            val item = ColorItem.colors.find {
+                it.color.contentEquals(strokeColor)
+            } ?: ColorItem.colors[0]
+            colorAdapter.setCurrentColor(item.color)
+            binding.toolsSub.setImageResource(item.drawableRes)
+        }
     }
 
     private fun onSceneStateChanged(sceneState: SceneState) {

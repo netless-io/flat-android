@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 
@@ -13,7 +12,6 @@ class ColorAdapter(
     private val dataSet: List<ColorItem>,
 ) : RecyclerView.Adapter<ColorAdapter.ViewHolder>() {
 
-    @DrawableRes
     private var currentColor: IntArray? = null
     private var context: Context? = null
     private var onItemClickListener: OnItemClickListener? = null
