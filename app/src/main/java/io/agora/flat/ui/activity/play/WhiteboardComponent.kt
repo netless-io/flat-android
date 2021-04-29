@@ -9,6 +9,8 @@ import androidx.annotation.UiThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.agora.netless.simpleui.StrokeSeeker
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.*
@@ -16,10 +18,13 @@ import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
+import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.util.dp2px
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.util.*
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
@@ -35,6 +40,8 @@ class WhiteboardComponent(
     private lateinit var whiteSdk: WhiteSdk
     private var room: Room? = null
     private lateinit var colorAdapter: ColorAdapter
+    private lateinit var slideAdapter: SceneAdapter
+    private lateinit var slideAnimator: SimpleAnimator
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -43,13 +50,6 @@ class WhiteboardComponent(
         initWhiteboard()
         loadData()
     }
-
-    private sealed class ToolExtension {
-        object Null : ToolExtension();
-        object Detete : ToolExtension();
-    }
-
-    private var currentToolExtension: ToolExtension = ToolExtension.Null
 
     private fun initView() {
         binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
@@ -65,6 +65,8 @@ class WhiteboardComponent(
                 }
             },
             binding.reset to { room?.scalePptToFit() },
+            binding.showScenes to { previewSlide() },
+
 
             binding.tools to {
                 binding.toolsLayout.apply {
@@ -176,6 +178,20 @@ class WhiteboardComponent(
                 binding.toolsSubLayout.apply {
                     visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 }
+            },
+
+            // slide
+            binding.scenePreview to {
+
+            },
+            binding.sceneAdd to {
+                addSlideToNext()
+            },
+            binding.sceneDelete to {
+                deleteCurrentSlide()
+            },
+            binding.sceneCover to {
+                slideAnimator.hide()
             }
         )
 
@@ -199,6 +215,98 @@ class WhiteboardComponent(
                 room?.memberState = room?.memberState?.apply {
                     strokeWidth = width.toDouble()
                 }
+            }
+        })
+
+        slideAdapter = SceneAdapter()
+        slideAdapter.setOnItemClickListener(object : SceneAdapter.OnItemClickListener {
+            override fun onItemClick(index: Int, item: SceneItem) {
+                room?.setSceneIndex(index, null)
+            }
+        })
+        binding.sceneRecyclerView.adapter = slideAdapter
+        binding.sceneRecyclerView.layoutManager =
+            LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
+        slideAnimator = SimpleAnimator(
+            onUpdate = ::updateSlide,
+            onShowStart = {
+                binding.scenePreviewLayout.visibility = View.VISIBLE
+            },
+            onHideEnd = {
+                binding.scenePreviewLayout.visibility = View.GONE
+            }
+        )
+    }
+
+    private val previewWidth = activity.dp2px(128)
+
+    private fun updateSlide(value: Float) {
+        val layoutParams = binding.scenePreview.layoutParams
+        layoutParams.height = (previewWidth * value).toInt()
+        binding.scenePreview.layoutParams = layoutParams
+
+        binding.sceneCover.alpha = value
+    }
+
+    private fun previewSlide() {
+        slideAnimator.show()
+
+        room?.getSceneState(object : Promise<SceneState> {
+            override fun then(sceneState: SceneState) {
+                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
+                val list = sceneState.scenes.filterNotNull().map {
+                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
+                }
+                slideAdapter.setDataSetAndIndex(list, sceneState.index)
+            }
+
+            override fun catchEx(t: SDKError?) {
+            }
+        })
+    }
+
+    private var targetIndex: Int = 0
+
+    // TODO 限制多次点击
+    private fun addSlideToNext() {
+        room?.getSceneState(object : Promise<SceneState> {
+            override fun then(sceneState: SceneState) {
+                val sceneList = sceneState.scenes.toMutableList()
+                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
+                targetIndex = sceneState.index + 1
+
+                val scene = Scene(UUID.randomUUID().toString())
+                room?.putScenes(sceneDir, arrayOf(scene), targetIndex)
+                room?.setSceneIndex(targetIndex, null)
+
+                sceneList.add(targetIndex, scene)
+                val list = sceneList.filterNotNull().map {
+                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
+                }
+                slideAdapter.setDataSetAndIndex(list, targetIndex)
+            }
+
+            override fun catchEx(t: SDKError?) {
+            }
+        })
+    }
+
+    private fun deleteCurrentSlide() {
+        room?.getSceneState(object : Promise<SceneState> {
+            override fun then(sceneState: SceneState) {
+                val sceneList = sceneState.scenes.toMutableList()
+                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
+
+                room?.removeScenes(sceneState.scenePath)
+                sceneList.removeAt(sceneState.index)
+
+                val list = sceneList.filterNotNull().map {
+                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
+                }
+                slideAdapter.setDataSetAndIndex(list, sceneState.index)
+            }
+
+            override fun catchEx(t: SDKError?) {
             }
         })
     }

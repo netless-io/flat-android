@@ -45,7 +45,7 @@ class RtcComponent(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
-    lateinit private var rtcApi: RtcEngineProvider
+    private lateinit var rtcApi: RtcEngineProvider
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val rtcVideoController: RtcVideoController by activity.viewModels()
 

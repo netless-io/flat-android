@@ -71,7 +71,7 @@ class AppDataCenter @Inject constructor(@ApplicationContext context: Context) {
 class MockData {
     companion object {
         const val LOGGED_IN_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImFmZWU4Njk1LTc4N2EtNDIyMS05NzU2LWMzYjhiOWIxZDJjNiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5MTU4NzYzLCJleHAiOjE2MjE2NjQzNjMsImlzcyI6ImZsYXQtc2VydmVyIn0.Rt9b1AjPfgWAFK6bsSpQHNnV7Ye6m7Du-dzP6k7Gmtw"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
     }
 
     private val gson = Gson()
@@ -86,7 +86,7 @@ class MockData {
 
     fun getUserInfo(): UserInfo {
         val userInfoJson =
-            "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/zscTBLOCMOXw8XYOwToAGcE2utFMomr6CPBA9U5USgEXS532uYMibfrceS4hFhxEWSL1xYcrzTsRLHubc9Tauug/132\",\"userUUID\":\"afee8695-787a-4221-9756-c3b8b9b1d2c6\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImFmZWU4Njk1LTc4N2EtNDIyMS05NzU2LWMzYjhiOWIxZDJjNiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5MTU4NzYzLCJleHAiOjE2MjE2NjQzNjMsImlzcyI6ImZsYXQtc2VydmVyIn0.Rt9b1AjPfgWAFK6bsSpQHNnV7Ye6m7Du-dzP6k7Gmtw\"}"
+            "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/GDpXrJ10nia06eLjbh7BJYyRpXq2jJmNEia2CztyayjWD63eX9RkIa9iaDMOZV8VZ7bLANibm33wicFmutTomYvcicuQ/132\",\"userUUID\":\"c94270a4-2e69-4535-bec0-9a2c6548a72b\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4\"}"
         return gson.fromJson(userInfoJson, UserInfo::class.java)
     }
 

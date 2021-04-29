@@ -8,7 +8,7 @@ class Constants {
         // prod 环境
         const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
 
-        const val FLAT_SERVICE_URL = FLAT_SERVER_URL_PROD
+        const val FLAT_SERVICE_URL = FLAT_SERVER_URL_DEV
 
         const val WX_APP_ID = "wx09437693798bc108"
 

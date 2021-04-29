@@ -21,10 +21,9 @@
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_flat"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
         <activity
@@ -37,7 +36,6 @@
         <activity
             android:name=".ui.activity.room.CreateRoomActivity"
             android:exported="true"
-            android:label="@string/title_activity_create_room"
             android:theme="@style/Theme.FlatAndroid.NoActionBar" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity
@@ -63,7 +61,6 @@
         <activity
             android:name=".ui.activity.home.HomeActivity"
             android:exported="true"
-            android:label="@string/title_activity_home"
             android:theme="@style/Theme.FlatAndroid.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

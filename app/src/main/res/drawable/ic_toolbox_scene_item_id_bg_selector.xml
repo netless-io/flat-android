@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_toolbox_scene_item_id_bg_selected" android:state_selected="true" />
+    <item android:drawable="@drawable/ic_toolbox_scene_item_id_bg_normal" />
+</selector>

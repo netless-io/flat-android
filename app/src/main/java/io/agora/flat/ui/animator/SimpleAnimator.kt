@@ -68,4 +68,8 @@ class SimpleAnimator(
             start()
         }
     }
+
+    fun isShown(): Boolean {
+        return shown
+    }
 }
