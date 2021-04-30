@@ -15,8 +15,9 @@ class SceneAdapter : RecyclerView.Adapter<SceneAdapter.ViewHolder>() {
     private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.item_scene_preview, viewGroup, false)
+        val view = LayoutInflater.from(viewGroup.context).inflate(
+            R.layout.item_scene_preview, viewGroup, false
+        )
 
         return ViewHolder(view)
     }

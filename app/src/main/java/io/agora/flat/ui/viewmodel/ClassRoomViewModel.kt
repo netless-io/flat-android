@@ -32,6 +32,9 @@ class ClassRoomViewModel @Inject constructor(
     private var _currentUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val currentUsersMap = _currentUsersMap.asStateFlow()
 
+    private var _videoAreaShown = MutableStateFlow<Boolean>(false)
+    val videoAreaShown = _videoAreaShown.asStateFlow()
+
     private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
     val roomEvent = _roomEvent
     val uuid = AtomicInteger(0)
@@ -126,8 +129,8 @@ class ClassRoomViewModel @Inject constructor(
         return savedStateHandle.get<String>(key)!!
     }
 
-    fun changeVideoDisplay() {
-        _roomEvent.value = ClassRoomEvent.ChangeVideoDisplay(uuid.incrementAndGet())
+    fun setVideoShown(shown: Boolean) {
+        _videoAreaShown.value = shown
     }
 }
 

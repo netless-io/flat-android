@@ -12,7 +12,7 @@ data class ColorItem(val color: IntArray, @DrawableRes val drawableRes: Int) {
             ColorItem(arrayOf(0x6D, 0xD4, 0x00).toIntArray(), R.drawable.ic_toolbox_color_green),
             ColorItem(arrayOf(0x44, 0xD7, 0xB6).toIntArray(), R.drawable.ic_toolbox_color_cyan),
             ColorItem(arrayOf(0x00, 0x91, 0xFF).toIntArray(), R.drawable.ic_toolbox_color_blue),
-            ColorItem(arrayOf(0x62, 0x36, 0xFF).toIntArray(), R.drawable.ic_toolbox_color_deep_purple,),
+            ColorItem(arrayOf(0x62, 0x36, 0xFF).toIntArray(), R.drawable.ic_toolbox_color_deep_purple),
             ColorItem(arrayOf(0xB6, 0x20, 0xE0).toIntArray(), R.drawable.ic_toolbox_color_purple),
             ColorItem(arrayOf(0xBC, 0xC0, 0xC6).toIntArray(), R.drawable.ic_toolbox_color_blue_gray),
             ColorItem(arrayOf(0x6D, 0x72, 0x78).toIntArray(), R.drawable.ic_toolbox_color_gray),

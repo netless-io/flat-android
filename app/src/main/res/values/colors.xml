@@ -11,6 +11,7 @@
     <color name="flat_gray">#FFCCCCCC</color>
 
     <color name="flat_white_50">#7FFFFFFF</color>
+    <color name="flat_blue_50">#603381FF</color>
 
     <color name="flat_pencil_color_red">#E02020</color>
     <color name="flat_pencil_color_orange">#FA6400</color>

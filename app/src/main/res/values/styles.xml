@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="SwitchStyle" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/flat_blue</item>
+        <item name="colorSwitchThumbNormal">@color/flat_white</item>
+        <item name="android:colorForeground">@color/flat_gray</item>
+    </style>
+</resources>

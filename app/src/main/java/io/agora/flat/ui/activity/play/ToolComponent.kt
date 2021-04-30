@@ -31,6 +31,10 @@ class ToolComponent(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         initView()
+        loadData()
+    }
+
+    private fun loadData() {
     }
 
     private fun initView() {
@@ -39,11 +43,22 @@ class ToolComponent(
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.message to {},
             binding.cloudservice to { activity.showDebugToast("uploadFile") },
-            binding.video to { viewModel.changeVideoDisplay() },
+            // binding.video to { viewModel.changeVideoDisplay() },
             binding.invite to { activity.showDebugToast("show invite dialog") },
-            binding.setting to { activity.showDebugToast("setting") },
+            binding.setting to {
+                binding.settingLayout.apply {
+                    visibility = if (visibility == View.VISIBLE) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
+                }
+            },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
+            binding.exit to {
+                activity.finish()
+            }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
@@ -59,12 +74,20 @@ class ToolComponent(
                 binding.expand.visibility = View.VISIBLE
             }
         )
+
+        binding.switchVideoArea.isChecked = viewModel.videoAreaShown.value
+        binding.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setVideoShown(isChecked)
+            binding.settingLayout.visibility = View.GONE
+        }
     }
 
-    private val expandHeight = activity.dp2px(160)
+    private val expandHeight = activity.dp2px(128)
+    private val collapseHeight = activity.dp2px(32)
+
     private fun onUpdateTool(value: Float) {
         val layoutParams = binding.extTools.layoutParams
-        layoutParams.height = (value * expandHeight).toInt()
+        layoutParams.height = collapseHeight + (value * (expandHeight - collapseHeight)).toInt()
         binding.extTools.layoutParams = layoutParams
     }
 

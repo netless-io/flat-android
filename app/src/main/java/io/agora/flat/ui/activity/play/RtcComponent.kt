@@ -52,7 +52,7 @@ class RtcComponent(
     private lateinit var recyclerView: RecyclerView
     private lateinit var adpater: UserVideoAdapter
 
-    private lateinit var videoLayoutAnimator: SimpleAnimator
+    private lateinit var videoAreaAnimator: SimpleAnimator
     private lateinit var fullScreenAnimator: SimpleAnimator
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -69,7 +69,6 @@ class RtcComponent(
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        videoLayoutAnimator.show()
     }
 
     private fun loadData() {
@@ -86,9 +85,18 @@ class RtcComponent(
                     is ClassRoomEvent.RtmChannelJoined -> {
                         joinRtcChannel()
                     }
-                    is ClassRoomEvent.ChangeVideoDisplay -> videoLayoutAnimator.switch()
+                    is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
                     else -> {
                     }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.videoAreaShown.collect { shown ->
+                if (shown) {
+                    videoAreaAnimator.show()
+                } else {
+                    videoAreaAnimator.hide()
                 }
             }
         }
@@ -123,13 +131,11 @@ class RtcComponent(
         }
 
         adpater = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adpater.listener = object : UserVideoAdapter.Listener {
-            override fun onFullScreen(position: Int, startView: ViewGroup, rtcUser: RtcUser) {
-                user = rtcUser
-                start.set(getViewRect(startView, rootFullVideo))
-                end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
-                fullScreenAnimator.show()
-            }
+        adpater.listener = UserVideoAdapter.Listener { _, view, rtcUser ->
+            user = rtcUser
+            start.set(getViewRect(view, rootFullVideo))
+            end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
+            fullScreenAnimator.show()
         }
 
         recyclerView = RecyclerView(activity)
@@ -140,7 +146,7 @@ class RtcComponent(
         // TODO mute for dev
         rtcApi.rtcEngine().muteLocalAudioStream(true)
 
-        videoLayoutAnimator = SimpleAnimator(
+        videoAreaAnimator = SimpleAnimator(
             onUpdate = ::updateVideoContainer,
             onShowStart = { rootView.visibility = View.VISIBLE },
             onHideEnd = { rootView.visibility = View.GONE }
@@ -233,12 +239,7 @@ class RtcComponent(
     }
 
     private var eventHandler = object : EventHandler {
-        override fun onFirstRemoteVideoDecoded(
-            uid: Int,
-            width: Int,
-            height: Int,
-            elapsed: Int
-        ) {
+        override fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {
             Log.d(TAG, "onFirstRemoteVideoDecoded")
         }
 
