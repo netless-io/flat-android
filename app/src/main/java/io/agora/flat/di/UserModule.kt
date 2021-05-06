@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.agora.flat.Constants
-import io.agora.flat.data.AppDataCenter
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.api.UserService
 import io.agora.flat.http.HeaderProvider
 import okhttp3.OkHttpClient
@@ -31,10 +31,10 @@ object UserModule {
 
     @Provides
     @IntoSet
-    fun provideUserHeaderProvider(appDataCenter: AppDataCenter): HeaderProvider {
+    fun provideUserHeaderProvider(appKVCenter: AppKVCenter): HeaderProvider {
         return object : HeaderProvider {
             override fun getHeaders(): Set<Pair<String, String>> {
-                return appDataCenter.getToken()?.let {
+                return appKVCenter.getToken()?.let {
                     setOf("Authorization" to String.format("Bearer %s", it))
                 } ?: emptySet()
             }

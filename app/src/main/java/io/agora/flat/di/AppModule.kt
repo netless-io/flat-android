@@ -1,13 +1,15 @@
 package io.agora.flat.di
 
 import android.content.Context
+import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.agora.flat.data.AppDataCenter
+import io.agora.flat.data.AppDatabase
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.RtcProviderImpl
 import io.agora.flat.di.impl.RtmProviderImpl
 import io.agora.flat.di.interfaces.RtcEngineProvider
@@ -42,8 +44,14 @@ class AppModule {
     @GlobalData
     @Singleton
     @Provides
-    fun provideAppDataCenter(@ApplicationContext context: Context): AppDataCenter {
-        return AppDataCenter(context)
+    fun provideKVCenter(@ApplicationContext context: Context): AppKVCenter {
+        return AppKVCenter(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providerAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(context, AppDatabase::class.java, "flat-database").build()
     }
 
     @Singleton

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.EntryPointAccessors
 import io.agora.flat.R
 import io.agora.flat.common.EventHandler
+import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
@@ -27,6 +28,7 @@ import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -46,6 +48,7 @@ class RtcComponent(
     )
 
     private lateinit var rtcApi: RtcEngineProvider
+    private lateinit var database: AppDatabase
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val rtcVideoController: RtcVideoController by activity.viewModels()
 
@@ -61,6 +64,7 @@ class RtcComponent(
             ComponentEntryPoint::class.java
         )
         rtcApi = entryPoint.rtcApi()
+        database = entryPoint.database()
 
         initView()
         initListener()
@@ -91,6 +95,7 @@ class RtcComponent(
                 }
             }
         }
+
         lifecycleScope.launch {
             viewModel.videoAreaShown.collect { shown ->
                 if (shown) {

@@ -17,21 +17,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.AndroidClipboardController
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.compose.*
+import io.agora.flat.data.AppDatabase
+import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.ui.activity.ui.theme.FlatColorBorder
 import io.agora.flat.ui.activity.ui.theme.FlatColorGray
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.compose.*
+import io.agora.flat.util.showToast
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class JoinRoomActivity : ComponentActivity() {
     private lateinit var clipboard: AndroidClipboardController
+
+    @Inject
+    lateinit var datebase: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JoinRoomPage(::providerClipboardText)
+            JoinRoomPage(::providerClipboardText, datebase)
         }
         clipboard = AndroidClipboardController(this)
     }
@@ -51,7 +62,7 @@ class JoinRoomActivity : ComponentActivity() {
 }
 
 @Composable
-private fun JoinRoomPage(textProvider: () -> String) {
+private fun JoinRoomPage(textProvider: () -> String, datebase: AppDatabase) {
     var copied by remember { mutableStateOf(false) }
 
     var uuid by remember { mutableStateOf("") }
@@ -130,7 +141,14 @@ private fun JoinRoomPage(textProvider: () -> String) {
             }
             Spacer(modifier = Modifier.height(32.dp))
             FlatPrimaryTextButton(text = "加入") {
-                Navigator.launchRoomPlayActivity(context, roomUUID = uuid)
+                if (uuid.isNotBlank()) {
+                    GlobalScope.launch {
+                        datebase.roomConfigDao().insertOrUpdate(RoomConfig(uuid, openVoice, openCamera))
+                    }
+                    Navigator.launchRoomPlayActivity(context, roomUUID = uuid)
+                } else {
+                    context.showToast("room uuid should not empty")
+                }
             }
         }
     }
@@ -139,5 +157,5 @@ private fun JoinRoomPage(textProvider: () -> String) {
 @Composable
 @Preview
 private fun PagePreview() {
-    JoinRoomPage { "" }
+    // JoinRoomPage({ "" }, null)
 }

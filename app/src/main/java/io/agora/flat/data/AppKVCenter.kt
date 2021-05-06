@@ -10,9 +10,9 @@ import javax.inject.Inject
 /**
  * 提供App级别的KV存储
  */
-class AppDataCenter @Inject constructor(@ApplicationContext context: Context) {
+class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences =
-        context.getSharedPreferences("global_kv_data", Context.MODE_PRIVATE)
+        context.getSharedPreferences("flat_kv_data", Context.MODE_PRIVATE)
     private val gson = Gson()
     private val mockData = MockData()
 

@@ -6,9 +6,7 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.agora.flat.data.AppDataCenter
 import io.agora.flat.databinding.ComponentToolBinding
-import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
@@ -29,9 +27,6 @@ class ToolComponent(
     private lateinit var toolAnimator: SimpleAnimator
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private var appDataCenter = AppDataCenter(activity.applicationContext)
-
-    lateinit var rtmApi: RtmEngineProvider
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)

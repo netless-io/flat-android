@@ -6,7 +6,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.EntryPointAccessors
-import io.agora.flat.data.AppDataCenter
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
@@ -25,9 +25,9 @@ class RtmComponent(
     }
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private var appDataCenter = AppDataCenter(activity.applicationContext)
 
-    lateinit var rtmApi: RtmEngineProvider
+    private lateinit var rtmApi: RtmEngineProvider
+    private lateinit var kvCenter: AppKVCenter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -37,6 +37,7 @@ class RtmComponent(
             ComponentEntryPoint::class.java
         )
         rtmApi = entryPoint.rtmApi()
+        kvCenter = entryPoint.kvCenter()
 
         lifecycleScope.launch {
             viewModel.roomPlayInfo.collect {
@@ -107,7 +108,7 @@ class RtmComponent(
 
     private fun enterChannel(rtmToken: String, channelId: String) {
         lifecycleScope.launch {
-            if (login(rtmToken, appDataCenter.getUserInfo()!!.uuid)) {
+            if (login(rtmToken, kvCenter.getUserInfo()!!.uuid)) {
                 channel = joinChannel(channelId)
                 if (channel != null) {
                     viewModel.requestRoomUsers(getMembers()?.map { it.userId } ?: emptyList())

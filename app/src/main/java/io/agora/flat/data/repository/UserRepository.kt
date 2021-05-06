@@ -15,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService,
-    @AppModule.GlobalData private val appDataCenter: AppDataCenter
+    @AppModule.GlobalData private val appKVCenter: AppKVCenter
 ) {
     suspend fun login(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
@@ -23,7 +23,7 @@ class UserRepository @Inject constructor(
         }
         return when (result) {
             is Success -> {
-                appDataCenter.setUserInfo(result.data)
+                appKVCenter.setUserInfo(result.data)
                 Success(true)
             }
             is ErrorResult -> {
@@ -33,15 +33,15 @@ class UserRepository @Inject constructor(
     }
 
     fun isLoggedIn(): Boolean {
-        return appDataCenter.isUserLoggedIn()
+        return appKVCenter.isUserLoggedIn()
     }
 
     fun logout() {
-        appDataCenter.setLogout()
+        appKVCenter.setLogout()
     }
 
     fun getUserInfo(): UserInfo? {
-        return appDataCenter.getUserInfo()
+        return appKVCenter.getUserInfo()
     }
 
     suspend fun loginWeChatSetAuthId(authID: String): Result<RespNoData> {
@@ -58,8 +58,8 @@ class UserRepository @Inject constructor(
         }
         return when (result) {
             is Success -> {
-                appDataCenter.setToken(result.data.token)
-                appDataCenter.setUserInfo(result.data.mapToUserInfo())
+                appKVCenter.setToken(result.data.token)
+                appKVCenter.setUserInfo(result.data.mapToUserInfo())
                 Success(true)
             }
             is ErrorResult -> {
