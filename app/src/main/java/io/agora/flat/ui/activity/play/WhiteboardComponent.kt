@@ -6,6 +6,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.annotation.UiThread
+import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,6 +20,7 @@ import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
 import kotlinx.coroutines.flow.collect
@@ -32,6 +34,7 @@ class WhiteboardComponent(
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName
+
         // TODO fix by sdk update
         const val CLICKER = "clicker"
     }
@@ -77,6 +80,7 @@ class WhiteboardComponent(
                         View.VISIBLE
                     }
                 }
+                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
             },
             binding.clear to {
                 binding.toolsLayout.visibility = View.GONE
@@ -99,6 +103,7 @@ class WhiteboardComponent(
                 binding.toolsSubLayout.apply {
                     visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 }
+                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_PAINT)
             },
             binding.toolsSubDelete to {
                 room?.deleteOperation()
@@ -269,6 +274,25 @@ class WhiteboardComponent(
                     join(whiteboardRoomUUID, whiteboardRoomToken)
                 }
             }
+        }
+
+        lifecycleScope.launch {
+            viewModel.roomEvent.collect() {
+                when (it) {
+                    is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
+                    else -> {
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleAreaShown(areaId: Int) {
+        if (binding.toolsLayout.isVisible) {
+            binding.toolsLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_APPLIANCE)
+        }
+        if (binding.toolsSubLayout.isVisible) {
+            binding.toolsSubLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_PAINT)
         }
     }
 

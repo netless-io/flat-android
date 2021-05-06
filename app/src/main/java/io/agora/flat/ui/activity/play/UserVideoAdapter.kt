@@ -91,7 +91,7 @@ class UserVideoAdapter(
             field = value
         }
 
-    interface Listener {
+    fun interface Listener {
         fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser)
     }
 }

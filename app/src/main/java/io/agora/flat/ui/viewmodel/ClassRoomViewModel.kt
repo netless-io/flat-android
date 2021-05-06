@@ -92,6 +92,10 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun onOperationAreaShown(areaId: Int) {
+        onEvent(ClassRoomEvent.OperationAreaShown(areaId))
+    }
+
     private fun addToCurrent(userMap: Map<String, RtcUser>) {
         val map = _currentUsersMap.value.toMutableMap()
         userMap.forEach { (uuid, user) -> map[uuid] = user }
@@ -135,7 +139,16 @@ class ClassRoomViewModel @Inject constructor(
 }
 
 sealed class ClassRoomEvent {
+    companion object {
+        const val AREA_ID_APPLIANCE = 1
+        const val AREA_ID_PAINT = 2
+        const val AREA_ID_SETTING = 3
+        const val AREA_ID_MESSAGE = 4
+        const val AREA_ID_CLOUD_STORAGE = 4
+    }
+
     object EnterRoom : ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
     data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
+    data class OperationAreaShown(val areaId: Int) : ClassRoomEvent()
 }

@@ -3,14 +3,19 @@ package io.agora.flat.ui.activity.play
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import io.agora.flat.data.AppDataCenter
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showDebugToast
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class ToolComponent(
     activity: ClassRoomActivity,
@@ -35,6 +40,21 @@ class ToolComponent(
     }
 
     private fun loadData() {
+        lifecycleScope.launch {
+            viewModel.roomEvent.collect {
+                when (it) {
+                    is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
+                    else -> {
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleAreaShown(areaId: Int) {
+        if (binding.settingLayout.isVisible) {
+            binding.settingLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_SETTING)
+        }
     }
 
     private fun initView() {
@@ -53,6 +73,7 @@ class ToolComponent(
                         View.VISIBLE
                     }
                 }
+                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_SETTING)
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
