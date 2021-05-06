@@ -220,13 +220,6 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/fileUpload"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_file_upload_normal" />
-
-            <ImageView
                 android:id="@+id/clear"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -242,17 +235,33 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
+    <FrameLayout
         android:id="@+id/toolsSub"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/shape_gray_border_round_16_bg"
-        android:padding="4dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/tools"
-        tools:src="@drawable/ic_toolbox_pencil_selector" />
+        app:layout_constraintEnd_toStartOf="@id/tools">
+
+        <ImageView
+            android:id="@+id/toolsSubPaint"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            tools:src="@drawable/ic_toolbox_color_blue"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/toolsSubDelete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_toolbox_scene_delete"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/toolsSubLayout"
@@ -299,7 +308,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="invisible"
-        tools:visibility="visible">
+        tools:visibility="invisible">
 
         <View
             android:id="@+id/sceneCover"

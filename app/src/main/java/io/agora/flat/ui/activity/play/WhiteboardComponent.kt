@@ -32,6 +32,8 @@ class WhiteboardComponent(
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName
+        // TODO fix by sdk update
+        const val CLICKER = "clicker"
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
@@ -67,7 +69,6 @@ class WhiteboardComponent(
             binding.reset to { room?.scalePptToFit() },
             binding.showScenes to { previewSlide() },
 
-
             binding.tools to {
                 binding.toolsLayout.apply {
                     visibility = if (visibility == View.VISIBLE) {
@@ -77,109 +78,31 @@ class WhiteboardComponent(
                     }
                 }
             },
-            binding.fileUpload to {
-                binding.toolsLayout.visibility = View.GONE
-            },
             binding.clear to {
                 binding.toolsLayout.visibility = View.GONE
 
                 room?.cleanScene(true)
             },
-            binding.hand to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_hand_selected)
+            binding.hand to { onSelectAppliance(Appliance.HAND) },
+            binding.clicker to { onSelectAppliance(CLICKER) },
+            binding.text to { onSelectAppliance(Appliance.TEXT) },
+            binding.selector to { onSelectAppliance(Appliance.SELECTOR) },
+            binding.eraser to { onSelectAppliance(Appliance.ERASER) },
+            binding.pencil to { onSelectAppliance(Appliance.PENCIL) },
+            binding.laser to { onSelectAppliance(Appliance.LASER_POINTER) },
+            binding.rectangle to { onSelectAppliance(Appliance.RECTANGLE) },
+            binding.arrow to { onSelectAppliance(Appliance.ARROW) },
+            binding.circle to { onSelectAppliance(Appliance.ELLIPSE) },
+            binding.line to { onSelectAppliance(Appliance.STRAIGHT) },
 
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.HAND
-                }
-            },
-            binding.clicker to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_clicker_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = "clicker"
-                }
-            },
-            binding.text to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_text_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.TEXT
-                }
-            },
-            binding.selector to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_selector_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.SELECTOR
-                }
-            },
-            binding.eraser to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_eraser_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.ERASER
-                }
-            },
-            binding.pencil to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_pencil_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.PENCIL
-                }
-            },
-            binding.laser to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_laser_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.LASER_POINTER
-                }
-            },
-            binding.rectangle to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_rectangle_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.RECTANGLE
-                }
-            },
-            binding.arrow to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_arrow_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.ARROW
-                }
-            },
-            binding.circle to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_circle_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.ELLIPSE
-                }
-            },
-            binding.line to {
-                binding.toolsLayout.visibility = View.GONE
-                binding.tools.setImageResource(R.drawable.ic_toolbox_line_selected)
-
-                room?.memberState = MemberState().apply {
-                    currentApplianceName = Appliance.STRAIGHT
-                }
-            },
-
-            binding.toolsSub to {
+            binding.toolsSubPaint to {
                 binding.toolsSubLayout.apply {
                     visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 }
             },
-
+            binding.toolsSubDelete to {
+                room?.deleteOperation()
+            },
             // slide
             binding.scenePreview to {
 
@@ -204,7 +127,7 @@ class WhiteboardComponent(
                 room?.memberState = room?.memberState?.apply {
                     strokeColor = item.color
                 }
-                binding.toolsSub.setImageResource(item.drawableRes)
+                binding.toolsSubPaint.setImageResource(item.drawableRes)
             }
         })
         binding.colorRecyclerView.adapter = colorAdapter
@@ -236,6 +159,34 @@ class WhiteboardComponent(
                 binding.scenePreviewLayout.visibility = View.GONE
             }
         )
+    }
+
+    private fun onSelectAppliance(appliance: String) {
+        binding.toolsLayout.visibility = View.GONE
+        updateApplicance(appliance)
+        room?.memberState = MemberState().apply {
+            currentApplianceName = appliance
+        }
+    }
+
+    private fun updateApplicance(appliance: String) {
+        binding.tools.setImageResource(applianceResource(appliance))
+
+        when (appliance) {
+            Appliance.SELECTOR -> {
+                binding.toolsSub.visibility = View.VISIBLE
+                binding.toolsSubDelete.visibility = View.VISIBLE
+                binding.toolsSubPaint.visibility = View.GONE
+            }
+            Appliance.LASER_POINTER, Appliance.ERASER, Appliance.HAND, CLICKER -> {
+                binding.toolsSub.visibility = View.INVISIBLE
+            }
+            else -> {
+                binding.toolsSub.visibility = View.VISIBLE
+                binding.toolsSubDelete.visibility = View.GONE
+                binding.toolsSubPaint.visibility = View.VISIBLE
+            }
+        }
     }
 
     private val previewWidth = activity.dp2px(128)
@@ -437,31 +388,33 @@ class WhiteboardComponent(
         roomState.sceneState?.let(::onSceneStateChanged)
     }
 
-    private fun onMemberStateChanged(memberState: MemberState) {
-        val applianceMap = mapOf(
-            Appliance.PENCIL to R.drawable.ic_toolbox_pencil_selected,
-            Appliance.SELECTOR to R.drawable.ic_toolbox_selector_selected,
-            Appliance.RECTANGLE to R.drawable.ic_toolbox_rectangle_selected,
-            Appliance.ELLIPSE to R.drawable.ic_toolbox_circle_selected,
-            Appliance.ERASER to R.drawable.ic_toolbox_eraser_selected,
-            Appliance.TEXT to R.drawable.ic_toolbox_text_selected,
-            Appliance.STRAIGHT to R.drawable.ic_toolbox_line_selected,
-            Appliance.ARROW to R.drawable.ic_toolbox_arrow_selected,
-            Appliance.HAND to R.drawable.ic_toolbox_hand_selected,
-            Appliance.LASER_POINTER to R.drawable.ic_toolbox_laser_selected,
-            "clicker" to R.drawable.ic_toolbox_clicker_selected,
-        )
-        applianceMap[memberState.currentApplianceName]?.let {
-            binding.tools.setImageResource(it)
-        } ?: binding.tools.setImageDrawable(null)
+    private val applianceMap = mapOf(
+        Appliance.PENCIL to R.drawable.ic_toolbox_pencil_selected,
+        Appliance.SELECTOR to R.drawable.ic_toolbox_selector_selected,
+        Appliance.RECTANGLE to R.drawable.ic_toolbox_rectangle_selected,
+        Appliance.ELLIPSE to R.drawable.ic_toolbox_circle_selected,
+        Appliance.ERASER to R.drawable.ic_toolbox_eraser_selected,
+        Appliance.TEXT to R.drawable.ic_toolbox_text_selected,
+        Appliance.STRAIGHT to R.drawable.ic_toolbox_line_selected,
+        Appliance.ARROW to R.drawable.ic_toolbox_arrow_selected,
+        Appliance.HAND to R.drawable.ic_toolbox_hand_selected,
+        Appliance.LASER_POINTER to R.drawable.ic_toolbox_laser_selected,
+        CLICKER to R.drawable.ic_toolbox_clicker_selected,
+    )
 
+    private fun applianceResource(appliance: String): Int {
+        return applianceMap[appliance] ?: 0
+    }
+
+    private fun onMemberStateChanged(memberState: MemberState) {
+        updateApplicance(memberState.currentApplianceName)
         memberState.apply {
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
             val item = ColorItem.colors.find {
                 it.color.contentEquals(strokeColor)
             } ?: ColorItem.colors[0]
             colorAdapter.setCurrentColor(item.color)
-            binding.toolsSub.setImageResource(item.drawableRes)
+            binding.toolsSubPaint.setImageResource(item.drawableRes)
         }
     }
 
