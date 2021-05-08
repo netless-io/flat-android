@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
@@ -39,6 +40,7 @@ class DevToolsActivity : ComponentActivity() {
                 ) {
                     item {
                         UserLoginFlag()
+                        MockEnableFlag()
                     }
                 }
             }
@@ -51,12 +53,9 @@ fun UserLoginFlag() {
     val userViewModel: UserViewModel = viewModel()
     val loggedInData = userViewModel.loggedInData.observeAsState()
 
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(Modifier
+        .fillMaxWidth()
+        .height(56.dp), verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = "设置User", style = FlatCommonTextStyle)
         Spacer(modifier = Modifier.weight(1f))
@@ -64,6 +63,28 @@ fun UserLoginFlag() {
             checked = loggedInData.value ?: false,
             enabled = loggedInData.value ?: true,
             onCheckedChange = { userViewModel.logout() })
+        Spacer(modifier = Modifier.width(16.dp))
+    }
+}
+
+@Composable
+fun MockEnableFlag() {
+    val userViewModel: UserViewModel = viewModel()
+    var mockEnable by remember { mutableStateOf(AppKVCenter.MockData.mockEnable) }
+
+    Row(Modifier
+        .fillMaxWidth()
+        .height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = "登录Mock", style = FlatCommonTextStyle)
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            checked = mockEnable,
+            onCheckedChange = {
+                mockEnable = it
+                AppKVCenter.MockData.mockEnable = it
+                userViewModel.logout()
+            })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }

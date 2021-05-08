@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
+import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
+import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -20,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val database: AppDatabase,
 ) : ViewModel() {
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
@@ -32,7 +36,7 @@ class ClassRoomViewModel @Inject constructor(
     private var _currentUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val currentUsersMap = _currentUsersMap.asStateFlow()
 
-    private var _videoAreaShown = MutableStateFlow<Boolean>(false)
+    private var _videoAreaShown = MutableStateFlow(false)
     val videoAreaShown = _videoAreaShown.asStateFlow()
 
     private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
@@ -40,7 +44,10 @@ class ClassRoomViewModel @Inject constructor(
     val uuid = AtomicInteger(0)
 
     private val roomUUID: String
-    private var videoShown: Boolean = false
+
+    // TODO
+    private var _roomConfig = MutableStateFlow(RoomConfig(""))
+    val roomConfig = _roomConfig.asStateFlow()
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
@@ -67,8 +74,36 @@ class ClassRoomViewModel @Inject constructor(
                 }
             }
         }
-        viewModelScope.launch {
-            _roomEvent.value = ClassRoomEvent.EnterRoom
+
+        viewModelScope.launch(Dispatchers.IO) {
+            _roomConfig.value =
+                database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
+        }
+    }
+
+    fun isVideoEnable(): Boolean {
+        return _roomConfig.value.enableVideo
+    }
+
+    fun isAudioEnable(): Boolean {
+        return _roomConfig.value.enableVideo
+    }
+
+    fun enableVideo(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val config = _roomConfig.value.copy(enableVideo = enable)
+
+            database.roomConfigDao().insertOrUpdate(config)
+            _roomConfig.value = config
+        }
+    }
+
+    fun enableAudio(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val config = _roomConfig.value.copy(enableAudio = enable)
+
+            database.roomConfigDao().insertOrUpdate(config)
+            _roomConfig.value = config
         }
     }
 

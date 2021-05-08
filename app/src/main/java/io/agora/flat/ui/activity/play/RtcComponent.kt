@@ -28,14 +28,13 @@ import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import io.agora.rtc.IRtcEngineEventHandler
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    val rootFullVideo: FrameLayout
+    val rootFullVideo: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = RtcComponent::class.simpleName
@@ -90,8 +89,6 @@ class RtcComponent(
                         joinRtcChannel()
                     }
                     is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
-                    else -> {
-                    }
                 }
             }
         }
@@ -103,6 +100,13 @@ class RtcComponent(
                 } else {
                     videoAreaAnimator.hide()
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.roomConfig.collect {
+                rtcApi.rtcEngine().muteLocalAudioStream(!it.enableAudio)
+                rtcApi.rtcEngine().muteLocalVideoStream(!it.enableVideo)
             }
         }
     }
@@ -147,9 +151,6 @@ class RtcComponent(
         rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adpater
-
-        // TODO mute for dev
-        rtcApi.rtcEngine().muteLocalAudioStream(true)
 
         videoAreaAnimator = SimpleAnimator(
             onUpdate = ::updateVideoContainer,

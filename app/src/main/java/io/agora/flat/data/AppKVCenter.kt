@@ -66,31 +66,32 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
 
         const val KEY_LOGIN_USER_INFO = "key_login_user_info"
     }
-}
 
-class MockData {
-    companion object {
-        const val LOGGED_IN_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
-    }
+    class MockData {
+        companion object {
+            const val LOGGED_IN_TOKEN =
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
+            var mockEnable = true;
+        }
 
-    private val gson = Gson()
+        private val gson = Gson()
 
-    fun isMockEnable(): Boolean {
-        return true;
-    }
+        fun isMockEnable(): Boolean {
+            return mockEnable;
+        }
 
-    fun isUserLoggedIn(): Boolean {
-        return true
-    }
+        fun isUserLoggedIn(): Boolean {
+            return true
+        }
 
-    fun getUserInfo(): UserInfo {
-        val userInfoJson =
-            "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/GDpXrJ10nia06eLjbh7BJYyRpXq2jJmNEia2CztyayjWD63eX9RkIa9iaDMOZV8VZ7bLANibm33wicFmutTomYvcicuQ/132\",\"userUUID\":\"c94270a4-2e69-4535-bec0-9a2c6548a72b\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4\"}"
-        return gson.fromJson(userInfoJson, UserInfo::class.java)
-    }
+        fun getUserInfo(): UserInfo {
+            val userInfoJson =
+                "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/GDpXrJ10nia06eLjbh7BJYyRpXq2jJmNEia2CztyayjWD63eX9RkIa9iaDMOZV8VZ7bLANibm33wicFmutTomYvcicuQ/132\",\"userUUID\":\"c94270a4-2e69-4535-bec0-9a2c6548a72b\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4\"}"
+            return gson.fromJson(userInfoJson, UserInfo::class.java)
+        }
 
-    fun getToken(): String {
-        return LOGGED_IN_TOKEN
+        fun getToken(): String {
+            return LOGGED_IN_TOKEN
+        }
     }
 }

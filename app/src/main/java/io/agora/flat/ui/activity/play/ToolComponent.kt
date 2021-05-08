@@ -39,9 +39,14 @@ class ToolComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
-                    else -> {
-                    }
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.roomConfig.collect {
+                binding.switchVideo.isChecked = it.enableVideo
+                binding.switchAudio.isChecked = it.enableAudio
             }
         }
     }
@@ -95,6 +100,14 @@ class ToolComponent(
         binding.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setVideoShown(isChecked)
             binding.settingLayout.visibility = View.GONE
+        }
+
+        binding.switchVideo.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.enableVideo(isChecked)
+        }
+
+        binding.switchAudio.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.enableAudio(isChecked)
         }
     }
 
