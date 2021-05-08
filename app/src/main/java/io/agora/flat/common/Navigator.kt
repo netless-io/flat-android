@@ -11,6 +11,7 @@ import io.agora.flat.ui.activity.SettingActivity
 import io.agora.flat.ui.activity.home.HomeActivity
 import io.agora.flat.ui.activity.playback.PlaybackActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
+import io.agora.flat.ui.activity.room.CreateRoomActivity
 import io.agora.flat.ui.activity.room.JoinRoomActivity
 import io.agora.flat.ui.activity.room.RoomDetailActivity
 
@@ -76,6 +77,11 @@ object Navigator {
 
     fun launchJoinRoomActivity(context: Context) {
         val intent = Intent(context, JoinRoomActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchCreateRoomActivity(context: Context) {
+        val intent = Intent(context, CreateRoomActivity::class.java)
         context.startActivity(intent)
     }
 }

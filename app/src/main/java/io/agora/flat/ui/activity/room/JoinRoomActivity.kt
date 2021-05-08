@@ -23,6 +23,7 @@ import io.agora.flat.common.AndroidClipboardController
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RoomConfig
+import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
 import io.agora.flat.ui.activity.ui.theme.FlatColorBorder
 import io.agora.flat.ui.activity.ui.theme.FlatColorGray
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
@@ -62,24 +63,23 @@ class JoinRoomActivity : ComponentActivity() {
 }
 
 @Composable
-private fun JoinRoomPage(textProvider: () -> String, datebase: AppDatabase) {
+private fun JoinRoomPage(textProvider: () -> String, database: AppDatabase) {
     var copied by remember { mutableStateOf(false) }
 
     var uuid by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    var openVoice by remember { mutableStateOf(true) }
-    var openCamera by remember { mutableStateOf(true) }
+    var openVoice by remember { mutableStateOf(false) }
+    var openCamera by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     FlatColumnPage {
         CloseTopAppBar(
             title = stringResource(id = R.string.title_join_room),
-            onClose = { })
+            onClose = {})
         Column(
             Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)
-        ) {
+                .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
             Text("房间号")
             FlatSmallVerticalSpacer()
@@ -96,7 +96,8 @@ private fun JoinRoomPage(textProvider: () -> String, datebase: AppDatabase) {
                     },
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = FlatColorBorder,
-                    unfocusedIndicatorColor = FlatColorBorder
+                    unfocusedIndicatorColor = FlatColorBorder,
+                    cursorColor = FlatColorBlue,
                 ),
                 textStyle = FlatCommonTextStyle,
                 singleLine = true,
@@ -109,11 +110,11 @@ private fun JoinRoomPage(textProvider: () -> String, datebase: AppDatabase) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = FlatColorBorder,
-                    unfocusedIndicatorColor = FlatColorBorder
+                    unfocusedIndicatorColor = FlatColorBorder,
+                    cursorColor = FlatColorBlue,
                 ),
                 textStyle = FlatCommonTextStyle,
                 singleLine = true,
@@ -143,11 +144,12 @@ private fun JoinRoomPage(textProvider: () -> String, datebase: AppDatabase) {
             FlatPrimaryTextButton(text = "加入") {
                 if (uuid.isNotBlank()) {
                     GlobalScope.launch {
-                        datebase.roomConfigDao().insertOrUpdate(RoomConfig(uuid, openVoice, openCamera))
+                        database.roomConfigDao()
+                            .insertOrUpdate(RoomConfig(uuid, openVoice, openCamera))
                     }
                     Navigator.launchRoomPlayActivity(context, roomUUID = uuid)
                 } else {
-                    context.showToast("room uuid should not empty")
+                    context.showToast("room uuid should not be empty")
                 }
             }
         }

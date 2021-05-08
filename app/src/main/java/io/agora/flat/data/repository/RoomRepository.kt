@@ -1,18 +1,18 @@
 package io.agora.flat.data.repository
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import io.agora.flat.data.Result
 import io.agora.flat.data.api.RoomService
-import io.agora.flat.data.model.*
 import io.agora.flat.data.executeOnce
+import io.agora.flat.data.model.*
 import io.agora.flat.data.toResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class RoomRepository @Inject constructor(
-    private val roomService: RoomService
+    private val roomService: RoomService,
 ) {
     suspend fun getRoomListAll(page: Int): Result<List<RoomInfo>> {
         return withContext(Dispatchers.IO) {
@@ -71,6 +71,15 @@ class RoomRepository @Inject constructor(
     suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>): Result<Map<String, RtcUser>> {
         return withContext(Dispatchers.IO) {
             roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID))
+                .executeOnce().toResult()
+        }
+    }
+
+    suspend fun createOrdinary(title: String, type: RoomType): Result<RoomCreateRespData> {
+        return withContext(Dispatchers.IO) {
+            roomService.createOrdinary(RoomCreateReq(title,
+                type,
+                System.currentTimeMillis()))
                 .executeOnce().toResult()
         }
     }

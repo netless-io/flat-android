@@ -130,7 +130,9 @@ fun TopOperations() {
     val context = LocalContext.current
 
     Row(Modifier.fillMaxWidth()) {
-        OperationItem(R.drawable.ic_home_create_room, R.string.create_room, {})
+        OperationItem(R.drawable.ic_home_create_room, R.string.create_room) {
+            Navigator.launchCreateRoomActivity(context)
+        }
         OperationItem(
             R.drawable.ic_home_join_room,
             R.string.join_room
