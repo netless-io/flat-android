@@ -2,12 +2,13 @@ package io.agora.flat.data.repository
 
 import io.agora.flat.data.*
 import io.agora.flat.data.api.UserService
+import io.agora.flat.data.model.AuthUUIDReq
 import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
-import io.agora.flat.data.model.WeChatSetAuthIdReq
 import io.agora.flat.di.AppModule
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +18,7 @@ class UserRepository @Inject constructor(
     private val userService: UserService,
     @AppModule.GlobalData private val appKVCenter: AppKVCenter
 ) {
-    suspend fun login(): Result<Boolean> {
+    suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
             userService.loginCheck().executeOnce().toResult()
         }
@@ -44,9 +45,9 @@ class UserRepository @Inject constructor(
         return appKVCenter.getUserInfo()
     }
 
-    suspend fun loginWeChatSetAuthId(authID: String): Result<RespNoData> {
+    suspend fun loginSetAuthUUID(authUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.loginWeChatSetAuthId(WeChatSetAuthIdReq(authID))
+            userService.loginSetAuthUUID(AuthUUIDReq(authUUID))
                 .executeOnce().toResult()
         }
     }
@@ -65,6 +66,22 @@ class UserRepository @Inject constructor(
             is ErrorResult -> {
                 ErrorResult(result.throwable, result.error)
             }
+        }
+    }
+
+    suspend fun loginProcess(authUUID: String, times: Int = 20): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            repeat(times) {
+                val result =
+                    userService.loginProcess(AuthUUIDReq(authUUID)).executeOnce().toResult()
+                if (result is Success) {
+                    appKVCenter.setToken(result.data.token)
+                    appKVCenter.setUserInfo(result.data.mapToUserInfo())
+                    return@withContext Success(true)
+                }
+                delay(2000)
+            }
+            return@withContext ErrorResult(RuntimeException("process timeout"))
         }
     }
 

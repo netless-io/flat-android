@@ -61,23 +61,36 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
     }
     // endregion
 
+    // TODO 临时全局变量的存放
+    fun setAuthUUID(authUUID: String) {
+        store.edit().apply {
+            putString(KEY_AUTH_UUID, authUUID)
+        }.apply()
+    }
+
+    fun getAuthUUID(): String {
+        return store.getString(KEY_AUTH_UUID, "") ?: ""
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
         const val KEY_LOGIN_USER_INFO = "key_login_user_info"
+
+        const val KEY_AUTH_UUID = "key_auth_uuid"
     }
 
     class MockData {
         companion object {
             const val LOGGED_IN_TOKEN =
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
-            var mockEnable = true;
+            var mockEnable = true
         }
 
         private val gson = Gson()
 
         fun isMockEnable(): Boolean {
-            return mockEnable;
+            return mockEnable
         }
 
         fun isUserLoggedIn(): Boolean {

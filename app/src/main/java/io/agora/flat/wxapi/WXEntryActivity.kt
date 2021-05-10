@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
@@ -11,15 +12,13 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import io.agora.flat.Constants
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.util.showToast
-import java.util.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -29,6 +28,10 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
 
     @Inject
     lateinit var userRepository: UserRepository
+
+    @Inject
+    lateinit var appKVCenter: AppKVCenter
+
     private lateinit var api: IWXAPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,19 +71,10 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
     }
 
     private fun authWeChat(code: String) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val state = UUID.randomUUID().toString()
-            when (val resp = userRepository.loginWeChatSetAuthId(state)) {
-                is Success -> {
-                    when (val respAuth =
-                        userRepository.loginWeChatCallback(state = state, code = code)) {
-                        is Success -> onAuthSuccess("登录成功")
-                        is ErrorResult -> onAuthFail("授权失败（${respAuth.error.code}）")
-                    }
-                }
-                is ErrorResult -> {
-                    onAuthFail("授权失败（${resp.error.code}）")
-                }
+        lifecycleScope.launch {
+            when (val resp = userRepository.loginWeChatCallback(appKVCenter.getAuthUUID(), code)) {
+                is Success -> onAuthSuccess("登录成功")
+                is ErrorResult -> onAuthFail("授权失败（${resp.error.code}）")
             }
         }
     }

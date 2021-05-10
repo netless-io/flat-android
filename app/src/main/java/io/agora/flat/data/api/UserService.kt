@@ -15,13 +15,18 @@ interface UserService {
     ): Call<BaseResp<UserInfo>>
 
     @POST("v1/login/set-auth-uuid")
-    fun loginWeChatSetAuthId(
-        @Body req: WeChatSetAuthIdReq
+    fun loginSetAuthUUID(
+        @Body req: AuthUUIDReq
     ): Call<BaseResp<RespNoData>>
 
     @GET("v1/login/weChat/mobile/callback")
     fun loginWeChatCallback(
         @Query("state") state: String,
         @Query("code") code: String,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v1/login/process")
+    fun loginProcess(
+        @Body req: AuthUUIDReq
     ): Call<BaseResp<UserInfoWithToken>>
 }
