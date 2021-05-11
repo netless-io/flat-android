@@ -26,10 +26,7 @@ fun FlatTopAppBar(
         if (navigationIcon == null) {
             Spacer(TitleInsetWithoutIcon)
         } else {
-            Row(
-                TitleIconModifier,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(TitleIconModifier, verticalAlignment = Alignment.CenterVertically) {
                 navigationIcon()
             }
         }

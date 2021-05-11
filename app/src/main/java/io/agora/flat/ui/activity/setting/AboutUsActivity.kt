@@ -1,4 +1,4 @@
-package io.agora.flat.ui.activity
+package io.agora.flat.ui.activity.setting
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

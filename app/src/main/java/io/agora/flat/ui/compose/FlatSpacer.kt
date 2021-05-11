@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import io.agora.flat.ui.theme.*
 
-
 @Composable
 fun FlatNormalHorizontalSpacer() {
     Spacer(NormalHorizontalModifier)

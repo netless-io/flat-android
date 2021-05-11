@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,11 +41,11 @@ import io.agora.flat.util.formatToMMDDWeek
 @Composable
 fun Home() {
     val viewModel = viewModel(HomeViewModel::class.java)
-    val viewState = viewModel.state.collectAsState()
+    val viewState by viewModel.state.collectAsState()
 
     PullToRefresh(
         progressColor = FlatColorBlue,
-        isRefreshing = viewState.value.refreshing,
+        isRefreshing = viewState.refreshing,
         onRefresh = {
             viewModel.reloadRoomList()
         }) {
@@ -58,10 +59,10 @@ fun Home() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                selectedHomeCategory = viewState.value.selectedHomeCategory,
+                selectedHomeCategory = viewState.selectedHomeCategory,
                 onCategorySelected = viewModel::onRoomCategorySelected,
-                roomList = viewState.value.roomList,
-                roomHistory = viewState.value.roomHistoryList
+                roomList = viewState.roomList,
+                roomHistory = viewState.roomHistoryList
             )
         }
     }
@@ -78,7 +79,9 @@ private fun TopOperations() {
         OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {
             Navigator.launchJoinRoomActivity(context)
         }
-        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room, {})
+        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
+            Navigator.launchSubscribeRoomActivity(context)
+        }
     }
 }
 
@@ -210,6 +213,7 @@ private fun HomeRoomTabs(
     TabRow(
         selectedTabIndex = selectedIndex,
         indicator = indicator,
+        backgroundColor = MaterialTheme.colors.surface,
         divider = {},
         modifier = modifier
     ) {

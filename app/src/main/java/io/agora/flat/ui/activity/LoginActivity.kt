@@ -34,7 +34,6 @@ import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
 
-
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
     companion object {

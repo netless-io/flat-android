@@ -116,7 +116,7 @@ fun HomePage() {
 }
 
 @Composable
-fun FlatHomeBottomBar(
+private fun FlatHomeBottomBar(
     selectedTab: MainTab,
     onTabSelected: (MainTab) -> Unit
 ) {

@@ -1,4 +1,4 @@
-  package io.agora.flat.ui.activity.ui.theme
+package io.agora.flat.ui.activity.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
@@ -15,8 +15,8 @@ private val DarkColorPalette = darkColors(
  * See <a href="https://material.io/design/material-theming/implementing-your-theme.html">Material Theming</a>
  */
 private val LightColorPalette = lightColors(
-    primary = FlatColorWhite,
-    primaryVariant = FlatColorWhite,
+    primary = FlatColorBlue,
+    primaryVariant = FlatColorBlue,
     secondary = FlatColorBlue,
     secondaryVariant = FlatColorBlue,
 

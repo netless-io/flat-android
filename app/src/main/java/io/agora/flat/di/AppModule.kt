@@ -25,15 +25,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-
-    @Qualifier
-    @Retention(AnnotationRetention.RUNTIME)
-    annotation class RemoteUserDataSource
-
-    @Qualifier
-    @Retention(AnnotationRetention.RUNTIME)
-    annotation class LocalUserDataSource
-
     @Qualifier
     @Retention(AnnotationRetention.RUNTIME)
     annotation class GlobalData

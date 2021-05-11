@@ -39,40 +39,39 @@
             android:exported="true" />
         <activity
             android:name=".ui.activity.room.CreateRoomActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FlatAndroid.NoActionBar" />
+            android:exported="true" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
+        <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
         <activity
-            android:name=".ui.activity.FeedbackActivity"
+            android:name=".ui.activity.setting.FeedbackActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.AboutUsActivity"
+            android:name=".ui.activity.setting.AboutUsActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.DevToolsActivity"
+            android:name=".ui.activity.dev.DevToolsActivity"
             android:exported="true" />
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.SettingActivity"
+            android:name=".ui.activity.setting.SettingActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.activity.ComposeTestActivity"
+            android:name=".ui.activity.dev.ComposeTestActivity"
             android:exported="true"
-            android:label="@string/title_activity_compose_test"
-            android:theme="@style/Theme.FlatAndroid.NoActionBar" />
+            android:label="@string/title_activity_compose_test" />
         <activity
             android:name=".ui.activity.home.HomeActivity"
             android:exported="true"
-            android:theme="@style/Theme.FlatAndroid.NoActionBar">
+            android:theme="@style/Theme.FlatAndroid.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.UserProfileActivity" />
+        <activity android:name=".ui.activity.setting.UserProfileActivity" />
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"

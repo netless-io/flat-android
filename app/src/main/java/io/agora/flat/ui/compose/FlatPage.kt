@@ -1,5 +1,6 @@
 package io.agora.flat.ui.compose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,25 +18,26 @@ fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -
     val controller = rememberAndroidSystemUiController()
     controller.setStatusBarColor(statusBarColor)
 
-    FlatAndroidTheme() {
+    FlatAndroidTheme {
         Surface(color = MaterialTheme.colors.background) {
-            content()
+            Box(Modifier.fillMaxSize()) {
+                content()
+            }
         }
     }
 }
 
 @Composable
 fun FlatColumnPage(
-    modifier: Modifier = Modifier,
     statusBarColor: Color = FlatColorWhite,
     content: @Composable() ColumnScope.() -> Unit
 ) {
     val controller = rememberAndroidSystemUiController()
     controller.setStatusBarColor(statusBarColor)
 
-    FlatAndroidTheme() {
+    FlatAndroidTheme {
         Surface(color = MaterialTheme.colors.background) {
-            Column(modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize()) {
                 content()
             }
         }

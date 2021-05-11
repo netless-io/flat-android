@@ -84,7 +84,7 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         companion object {
             const val LOGGED_IN_TOKEN =
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
-            var mockEnable = true
+            var mockEnable = false
         }
 
         private val gson = Gson()

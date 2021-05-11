@@ -10,13 +10,14 @@
         <item name="colorSecondaryVariant">@color/flat_blue</item>
         <item name="colorOnSecondary">@color/flat_text_secondary</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.FlatAndroid.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="Theme.FlatAndroid.Launch">
+        <item name="android:windowBackground">@drawable/lanuch_bg</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:clipToPadding">true</item>
     </style>
 
     <style name="Theme.FlatAndroid.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

@@ -3,17 +3,19 @@ package io.agora.flat.common
 import android.content.Context
 import android.content.Intent
 import io.agora.flat.Constants
-import io.agora.flat.ui.activity.UserProfileActivity
-import io.agora.flat.ui.activity.DevToolsActivity
-import io.agora.flat.ui.activity.FeedbackActivity
 import io.agora.flat.ui.activity.LoginActivity
-import io.agora.flat.ui.activity.SettingActivity
+import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.HomeActivity
-import io.agora.flat.ui.activity.playback.PlaybackActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
+import io.agora.flat.ui.activity.playback.PlaybackActivity
 import io.agora.flat.ui.activity.room.CreateRoomActivity
 import io.agora.flat.ui.activity.room.JoinRoomActivity
 import io.agora.flat.ui.activity.room.RoomDetailActivity
+import io.agora.flat.ui.activity.room.SubscribeRoomActivity
+import io.agora.flat.ui.activity.setting.AboutUsActivity
+import io.agora.flat.ui.activity.setting.FeedbackActivity
+import io.agora.flat.ui.activity.setting.SettingActivity
+import io.agora.flat.ui.activity.setting.UserProfileActivity
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
@@ -70,7 +72,7 @@ object Navigator {
     }
 
     fun launchAboutUsActivity(context: Context) {
-        val intent = Intent(context, UserProfileActivity::class.java)
+        val intent = Intent(context, AboutUsActivity::class.java)
         context.startActivity(intent)
     }
 
@@ -81,6 +83,11 @@ object Navigator {
 
     fun launchCreateRoomActivity(context: Context) {
         val intent = Intent(context, CreateRoomActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchSubscribeRoomActivity(context: Context) {
+        val intent = Intent(context, SubscribeRoomActivity::class.java)
         context.startActivity(intent)
     }
 }
