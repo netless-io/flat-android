@@ -1,5 +1,7 @@
 package io.agora.flat.ui.activity.home
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,24 +10,152 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
+import com.puculek.pulltorefresh.PullToRefresh
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
 import io.agora.flat.ui.activity.ui.theme.FlatColorDivider
+import io.agora.flat.ui.activity.ui.theme.FlatSmallTextStyle
+import io.agora.flat.ui.activity.ui.theme.FlatTitleTextStyle
+import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatRoomStatusText
+import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.util.formatToHHmm
 import io.agora.flat.util.formatToMMDDWeek
+
+@Composable
+fun Home() {
+    val viewModel = viewModel(HomeViewModel::class.java)
+    val viewState = viewModel.state.collectAsState()
+
+    PullToRefresh(
+        progressColor = FlatColorBlue,
+        isRefreshing = viewState.value.refreshing,
+        onRefresh = {
+            viewModel.reloadRoomList()
+        }) {
+        FlatColumnPage {
+            // 顶部栏
+            FlatHomeTopBar()
+            // 操作区
+            TopOperations()
+            // 房间列表区
+            HomeRoomLists(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                selectedHomeCategory = viewState.value.selectedHomeCategory,
+                onCategorySelected = viewModel::onRoomCategorySelected,
+                roomList = viewState.value.roomList,
+                roomHistory = viewState.value.roomHistoryList
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopOperations() {
+    val context = LocalContext.current
+
+    Row(Modifier.fillMaxWidth()) {
+        OperationItem(R.drawable.ic_home_create_room, R.string.create_room) {
+            Navigator.launchCreateRoomActivity(context)
+        }
+        OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {
+            Navigator.launchJoinRoomActivity(context)
+        }
+        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room, {})
+    }
+}
+
+@Composable
+private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, onClick: () -> Unit) {
+    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier
+                .padding(top = 16.dp, bottom = 24.dp)
+                .clickable(onClick = onClick),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id),
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(stringResource(id = tip), style = FlatSmallTextStyle)
+        }
+    }
+}
+
+@Composable
+fun FlatHomeTopBar() {
+    FlatTopAppBar(
+        title = {
+            Text(stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
+        },
+        actions = {
+            Box {
+                val context = LocalContext.current
+                var expanded by remember { mutableStateOf(false) }
+
+                IconButton(
+                    onClick = { expanded = true }) {
+                    Image(
+                        modifier = Modifier
+                            .size(24.dp, 24.dp)
+                            .clip(shape = RoundedCornerShape(12.dp)),
+                        painter = painterResource(id = R.drawable.header),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null
+                    )
+                }
+                DropdownMenu(
+                    modifier = Modifier.wrapContentSize(),
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        Navigator.launchSettingActivity(context)
+                    }) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_user_profile_head),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("我的资料", Modifier.width(100.dp))
+                    }
+                    DropdownMenuItem(
+                        onClick = { /* Handle settings! */ },
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_user_profile_aboutus),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        // TODO
+                        Text("个人信息", Modifier.width(100.dp))
+                    }
+                }
+            }
+        }
+    )
+}
 
 @Composable
 fun HomeRoomLists(
@@ -117,7 +247,7 @@ fun HomeTabIndicator(
 fun CurrentRoomList(modifier: Modifier, roomList: List<RoomInfo>) {
     val context = LocalContext.current
 
-    LazyColumn {
+    LazyColumn(modifier) {
         items(count = roomList.size, key = { index: Int ->
             roomList[index].roomUUID
         }) {
@@ -171,7 +301,10 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 text = "${roomInfo.beginTime.formatToHHmm()} ~ ${roomInfo.endTime.formatToHHmm()}",
                 style = typography.body2
             )
-            FlatRoomStatusText(roomStatus = roomInfo.roomStatus, modifier = Modifier.align(Alignment.BottomEnd))
+            FlatRoomStatusText(
+                roomStatus = roomInfo.roomStatus,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
         }
         Spacer(
             modifier = Modifier
@@ -182,7 +315,6 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
         )
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -202,4 +334,10 @@ fun RoomListItemPreview() {
     val roomInfo = Gson().fromJson(roomStr, RoomInfo::class.java)
     roomInfo.showDayHead = true
     RoomListItem(roomInfo, Modifier)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    FlatHomeTopBar()
 }

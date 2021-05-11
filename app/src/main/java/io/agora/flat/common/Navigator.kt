@@ -49,7 +49,6 @@ object Navigator {
         context.startActivity(intent)
     }
 
-
     fun launchSettingActivity(context: Context) {
         val intent = Intent(context, SettingActivity::class.java)
         context.startActivity(intent)

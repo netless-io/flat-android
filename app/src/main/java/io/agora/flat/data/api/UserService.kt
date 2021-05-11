@@ -11,7 +11,7 @@ interface UserService {
 
     @POST("v1/login")
     fun loginCheck(
-        @Body empty: BaseReq = BaseReq.EMPTY
+        @Body req: LoginCheckReq = LoginCheckReq()
     ): Call<BaseResp<UserInfo>>
 
     @POST("v1/login/set-auth-uuid")

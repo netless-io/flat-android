@@ -2,6 +2,7 @@
     <string name="app_name">FlatAndroid</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
+    <string name="title_cloud_storage" translatable="false">云盘</string>
     <string name="title_user_profile">个人设置</string>
     <string name="title_setting">Setting</string>
     <string name="title_room_detail" translatable="false">房间详情</string>

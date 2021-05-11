@@ -1,14 +1,18 @@
 package io.agora.flat.di.impl
 
 import android.content.Context
-import com.tencent.mm.opensdk.utils.Log
+import android.util.Log
 import io.agora.flat.Constants
-import io.agora.flat.MainApplication
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtm.*
 
 class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
+
+    companion object {
+        val TAG = RtmProviderImpl::class.simpleName
+    }
+
     private lateinit var mRtmClient: RtmClient
 
     override fun onCreate(context: Context) {
@@ -18,17 +22,11 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
                 Constants.AGORA_APP_ID,
                 object : RtmClientListener {
                     override fun onConnectionStateChanged(state: Int, reason: Int) {
-                        Log.d(
-                            MainApplication.TAG,
-                            "Connection state changes to $state reason:$reason"
-                        )
+                        Log.d(TAG, "Connection state changes to $state reason:$reason")
                     }
 
                     override fun onMessageReceived(rtmMessage: RtmMessage, peerId: String) {
-                        Log.d(
-                            MainApplication.TAG,
-                            "Message received  from $peerId ${rtmMessage.text}"
-                        )
+                        Log.d(TAG, "Message received  from $peerId ${rtmMessage.text}")
                     }
 
                     override fun onImageMessageReceivedFromPeer(p0: RtmImageMessage?, p1: String?) {
@@ -38,13 +36,13 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
                     }
 
                     override fun onMediaUploadingProgress(
-                        p0: RtmMediaOperationProgress?,
+                        p0: RtmMediaOperationProgress,
                         p1: Long
                     ) {
                     }
 
                     override fun onMediaDownloadingProgress(
-                        p0: RtmMediaOperationProgress?,
+                        p0: RtmMediaOperationProgress,
                         p1: Long
                     ) {
                     }
@@ -56,7 +54,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
                     }
                 })
         } catch (e: java.lang.Exception) {
-            Log.d(MainApplication.TAG, "RTM SDK init fatal error!")
+            Log.d(TAG, "RTM SDK init fatal error!")
             throw RuntimeException("You need to check the RTM init process.")
         }
     }

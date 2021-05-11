@@ -5,12 +5,12 @@ class Constants {
         var useDev = true
 
         // dev 环境
-        const val FLAT_SERVER_URL_DEV = "https://flat-api-dev.whiteboard.agora.io/"
-        const val GITHUB_CLIENT_ID_DEV = "9821657775fbc74773f1"
+        private const val FLAT_SERVER_URL_DEV = "https://flat-api-dev.whiteboard.agora.io/"
+        private const val GITHUB_CLIENT_ID_DEV = "9821657775fbc74773f1"
 
         // prod 环境
-        const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
-        const val GITHUB_CLIENT_ID_PROD = "71a29285a437998bdfe0"
+        private const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
+        private const val GITHUB_CLIENT_ID_PROD = "71a29285a437998bdfe0"
 
         val FLAT_SERVICE_URL = if (useDev) FLAT_SERVER_URL_DEV else FLAT_SERVER_URL_PROD
 

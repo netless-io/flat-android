@@ -51,9 +51,7 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
     var version = context.getAppVersion()
 
     FlatColumnPage() {
-        BackTopAppBar(
-            title = stringResource(R.string.title_about_us),
-            { actioner(AboutUiAction.Back) });
+        BackTopAppBar(stringResource(R.string.title_about_us), { actioner(AboutUiAction.Back) });
         Box(
             modifier = Modifier
                 .weight(1f)

@@ -79,7 +79,8 @@ private fun JoinRoomPage(textProvider: () -> String, database: AppDatabase) {
         Column(
             Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)) {
+                .padding(horizontal = 16.dp)
+        ) {
             FlatNormalVerticalSpacer()
             Text("房间号")
             FlatSmallVerticalSpacer()

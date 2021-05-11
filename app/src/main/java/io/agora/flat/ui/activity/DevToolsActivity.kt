@@ -53,9 +53,7 @@ fun UserLoginFlag() {
     val userViewModel: UserViewModel = viewModel()
     val loggedInData = userViewModel.loggedInData.observeAsState()
 
-    Row(Modifier
-        .fillMaxWidth()
-        .height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = "设置User", style = FlatCommonTextStyle)
         Spacer(modifier = Modifier.weight(1f))

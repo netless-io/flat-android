@@ -3,21 +3,23 @@ package io.agora.flat.ui.activity.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.util.formatToMMDD
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * Here Use StateFlow To Manage State
  */
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val roomRepository: RoomRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val roomRepository: RoomRepository
+) : ViewModel() {
     private val selectedCategory = MutableStateFlow(RoomCategory.Current)
     private val roomList = MutableStateFlow(listOf<RoomInfo>())
     private val roomHistoryList = MutableStateFlow(listOf<RoomInfo>())
@@ -27,6 +29,10 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
 
     val state: StateFlow<HomeViewState>
         get() = _state
+
+    // TODO
+    private var page: Int = 1;
+    private var historyPage: Int = 1;
 
     init {
         viewModelScope.launch {
@@ -49,15 +55,13 @@ class HomeViewModel @Inject constructor(private val roomRepository: RoomReposito
                 _state.value = it
             }
         }
+
+        reloadRoomList()
     }
 
     fun onRoomCategorySelected(category: RoomCategory) {
         selectedCategory.value = category
     }
-
-    // TODO
-    private var page: Int = 1;
-    private var historyPage: Int = 1;
 
     fun reloadRoomList() {
         viewModelScope.launch {

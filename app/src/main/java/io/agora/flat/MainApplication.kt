@@ -7,10 +7,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class MainApplication : Application() {
-    companion object {
-        val TAG = "MainApplication"
-    }
-
     @Inject
     lateinit var initializerSet: Set<@JvmSuppressWildcards StartupInitializer>
 
