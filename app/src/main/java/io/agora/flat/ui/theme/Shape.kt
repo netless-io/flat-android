@@ -1,4 +1,4 @@
-package io.agora.flat.ui.activity.ui.theme
+package io.agora.flat.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

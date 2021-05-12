@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import io.agora.flat.common.AndroidClipboardController
+import io.agora.flat.common.ClipboardController
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.RtcProviderImpl
@@ -70,5 +72,11 @@ class AppModule {
     @IntoSet
     fun provideRtmInitializer(rtmEngineProvider: RtmEngineProvider): StartupInitializer {
         return rtmEngineProvider as StartupInitializer;
+    }
+
+    @Singleton
+    @Provides
+    fun providerClipboardController(@ApplicationContext context: Context): ClipboardController {
+        return AndroidClipboardController(context)
     }
 }

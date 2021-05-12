@@ -90,3 +90,9 @@ data class ViewState(
         const val STATE_CREATE_FAIL = 1;
     }
 }
+
+internal sealed class CreateRoomAction {
+    object Close : CreateRoomAction()
+    data class JoinRoom(val roomUUID: String, val openVideo: Boolean) : CreateRoomAction()
+    data class CreateRoom(val title: String, val roomType: RoomType) : CreateRoomAction()
+}

@@ -14,17 +14,23 @@ fun rememberAndroidClipboardController(
     AndroidClipboardController(context)
 }
 
-class AndroidClipboardController(context: Context) {
+class AndroidClipboardController(context: Context) : ClipboardController {
     private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
-    fun putText(text: CharSequence) {
+    override fun putText(text: CharSequence) {
         val clip: ClipData = ClipData.newPlainText("FlatInvite", text)
         clipboard.setPrimaryClip(clip)
     }
 
-    fun getText(): CharSequence {
+    override fun getText(): CharSequence {
         if (!clipboard.hasPrimaryClip())
             return ""
         return clipboard.primaryClip?.getItemAt(0)?.text ?: ""
     }
+}
+
+interface ClipboardController {
+    fun putText(text: CharSequence)
+
+    fun getText(): CharSequence
 }

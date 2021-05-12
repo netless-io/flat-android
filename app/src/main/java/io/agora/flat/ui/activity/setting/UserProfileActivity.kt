@@ -49,7 +49,7 @@ class UserProfileActivity : ComponentActivity() {
 private fun SettingList(name: String) {
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            Item("匿名", "Hello", onClickOrNull = {})
+            Item(stringResource(R.string.nickname), "", onClickOrNull = {})
             Divider(Modifier.padding(start = 16.dp, end = 16.dp), thickness = 1.dp)
             Item("微信", name)
         }
@@ -62,16 +62,12 @@ private fun Item(
     desc: String = "",
     onClickOrNull: (() -> Unit)? = null
 ) {
-    // TODO
-    val modifier = if (onClickOrNull != null) {
-        Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .clickable(onClick = onClickOrNull)
-    } else {
-        Modifier
-            .fillMaxWidth()
-            .height(48.dp)
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp)
+
+    if (onClickOrNull != null) {
+        modifier.clickable(onClick = onClickOrNull)
     }
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -91,6 +87,6 @@ private fun Item(
 @Composable
 fun DefaultPreview() {
     FlatColumnPage {
-        SettingList("Preview Name")
+        SettingList("PreviewName")
     }
 }

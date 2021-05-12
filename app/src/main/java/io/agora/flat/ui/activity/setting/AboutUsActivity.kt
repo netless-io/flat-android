@@ -99,7 +99,7 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
 @Composable
 @Preview
 private fun AboutUsPagePreview() {
-    AboutUsPage() { }
+    AboutUsPage { }
 }
 
 private val ProtocolTextStyle = TextStyle(

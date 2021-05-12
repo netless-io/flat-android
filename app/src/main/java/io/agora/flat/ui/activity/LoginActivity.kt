@@ -28,8 +28,8 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.ui.theme.FlatColorGray
 import io.agora.flat.ui.activity.ui.theme.FlatColorTextPrimary
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.activity.ui.theme.Shapes
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
@@ -180,7 +180,6 @@ private fun LoginPagePreview() {
         }
     }
 }
-
 
 sealed class LoginUIAction {
     object WeChatLogin : LoginUIAction()

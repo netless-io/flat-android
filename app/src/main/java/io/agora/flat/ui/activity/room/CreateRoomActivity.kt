@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.room
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,98 +25,94 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorBorder
 import io.agora.flat.ui.activity.ui.theme.FlatColorGray
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.viewmodel.CreateRoomAction
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import io.agora.flat.ui.viewmodel.ViewState
 
 @AndroidEntryPoint
 class CreateRoomActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CreateRoomPage()
+            val viewModel: CreateRoomViewModel = viewModel()
+            val viewState by viewModel.state.collectAsState()
+
+            CreateRoomPage(viewState) { action ->
+                when (action) {
+                    CreateRoomAction.Close -> finish()
+                    is CreateRoomAction.JoinRoom -> {
+                        viewModel.enableVideo(action.openVideo)
+                        Navigator.launchRoomPlayActivity(this, viewState.roomUUID)
+                        finish()
+                    }
+                    is CreateRoomAction.CreateRoom -> viewModel.createRoom(
+                        action.title,
+                        action.roomType
+                    )
+                }
+            }
         }
     }
 }
 
-@Preview
 @Composable
-private fun CreateRoomPage() {
-    val viewModel: CreateRoomViewModel = viewModel()
-    val viewState = viewModel.state.collectAsState()
-    val scope = rememberCoroutineScope()
-
+private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
     var title by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(RoomType.OneToOne) }
     var openVideo by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
-    if (viewState.value.roomUUID.isNotBlank()) {
+    if (viewState.roomUUID.isNotBlank()) {
         LaunchedEffect(true) {
-            // TODO 正确切换协程、处理finish操作
-            GlobalScope.launch {
-                scope.launch {
-                    viewModel.enableVideo(openVideo)
-                    Navigator.launchRoomPlayActivity(context, roomUUID = viewState.value.roomUUID)
-                    (context as Activity).finish()
-                }
-            }
+            actioner(CreateRoomAction.JoinRoom(viewState.roomUUID, openVideo))
         }
     }
 
     FlatColumnPage {
         CloseTopAppBar(
-            title = stringResource(id = R.string.create_room),
-            onClose = {})
+            title = stringResource(R.string.create_room),
+            onClose = { actioner(CreateRoomAction.Close) })
         Column(
             Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)) {
+                .padding(horizontal = 16.dp)
+        ) {
             FlatNormalVerticalSpacer()
-            Text("主题")
+            Text(stringResource(R.string.create_room_topic))
             FlatSmallVerticalSpacer()
-            OutlinedTextField(
+            FlatPrimaryTextField(
                 value = title,
                 onValueChange = { title = it },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = FlatColorBorder,
-                    unfocusedIndicatorColor = FlatColorBorder,
-                    cursorColor = FlatColorBlue,
-                ),
-                textStyle = FlatCommonTextStyle,
-                singleLine = true,
-                placeholder = {
-                    Text("请输入房间主题", style = FlatCommonTextStyle, color = FlatColorGray)
-                }
+                placeholderValue = stringResource(R.string.create_room_input_topic_hint)
             )
             FlatNormalVerticalSpacer()
             Text("类型")
             FlatSmallVerticalSpacer()
-            TypeCheckLayout(type, onTypeChange = { type = it })
+            TypeCheckLayout(type) { type = it }
             FlatNormalVerticalSpacer()
-            Text("加入选项")
+            Text(stringResource(R.string.join_room_join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = openVideo,
                     onCheckedChange = { openVideo = it }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("开启摄像头")
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(id = R.string.open_video))
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(Modifier.height(32.dp))
             // TODO Loading
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                FlatPrimaryTextButton(text = "创建", enabled = !viewState.value.loading) {
-                    viewModel.createRoom(title, type)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                FlatPrimaryTextButton(text = "创建", enabled = !viewState.loading) {
+                    actioner(CreateRoomAction.CreateRoom(title, type))
                 }
-                if (viewState.value.loading) {
-                    FlatPageLoading()
+                if (viewState.loading) {
+                    CircularProgressIndicator(Modifier.size(24.dp))
                 }
             }
         }
@@ -126,7 +120,7 @@ private fun CreateRoomPage() {
 }
 
 @Composable
-private fun ColumnScope.TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
+private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
     Row(Modifier.fillMaxWidth()) {
         TypeItem(
             checked = type == RoomType.OneToOne,
@@ -155,7 +149,7 @@ private fun ColumnScope.TypeCheckLayout(type: RoomType, onTypeChange: (RoomType)
 }
 
 @Composable
-private fun RowScope.TypeItem(
+private fun TypeItem(
     checked: Boolean,
     text: String,
     @DrawableRes id: Int,
@@ -166,8 +160,10 @@ private fun RowScope.TypeItem(
     val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Column(Modifier.border(border, shape = MaterialTheme.shapes.small),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.border(border, shape = MaterialTheme.shapes.small),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Image(
                 painter = painterResource(id),
                 contentDescription = null,
@@ -175,7 +171,8 @@ private fun RowScope.TypeItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .aspectRatio(1f))
+                    .aspectRatio(1f)
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(text, style = FlatCommonTextStyle)
             Spacer(modifier = Modifier.height(12.dp))
@@ -183,4 +180,10 @@ private fun RowScope.TypeItem(
         Spacer(modifier = Modifier.height(8.dp))
         Icon(painter = painterResource(icon), contentDescription = null, tint = Color.Unspecified)
     }
+}
+
+@Composable
+@Preview
+private fun CreateRoomPagePreview() {
+    CreateRoomPage(ViewState()) {}
 }

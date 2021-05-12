@@ -5,150 +5,121 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Checkbox
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.isFocused
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
-import io.agora.flat.common.AndroidClipboardController
 import io.agora.flat.common.Navigator
-import io.agora.flat.data.AppDatabase
-import io.agora.flat.data.model.RoomConfig
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorBorder
-import io.agora.flat.ui.activity.ui.theme.FlatColorGray
-import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.viewmodel.JoinRoomAction
+import io.agora.flat.ui.viewmodel.JoinRoomViewModel
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class JoinRoomActivity : ComponentActivity() {
-    private lateinit var clipboard: AndroidClipboardController
-
-    @Inject
-    lateinit var datebase: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JoinRoomPage(::providerClipboardText, datebase)
-        }
-        clipboard = AndroidClipboardController(this)
-    }
+            val viewModel = viewModel<JoinRoomViewModel>()
+            val clipboardText by viewModel.roomUUID.collectAsState()
 
-    // TODO
-    private fun providerClipboardText(): String {
-        if (clipboard.getText().isNotBlank()) {
-            val regex =
-                """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}""".toRegex()
-            val matchEntire = regex.find(clipboard.getText())
-            if (matchEntire != null) {
-                return matchEntire.value
+            JoinRoomPage(clipboardText) { action ->
+                when (action) {
+                    JoinRoomAction.Close -> finish()
+                    is JoinRoomAction.JoinRoom -> {
+                        viewModel.updateRoomConfig(
+                            action.roomUUID,
+                            action.openVideo,
+                            action.openAudio
+                        )
+                        Navigator.launchRoomPlayActivity(this, roomUUID = action.roomUUID)
+                    }
+                    JoinRoomAction.CheckClipboardText -> viewModel.checkClipboardText()
+                }
             }
         }
-        return ""
     }
 }
 
 @Composable
-private fun JoinRoomPage(textProvider: () -> String, database: AppDatabase) {
+private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Unit) {
     var copied by remember { mutableStateOf(false) }
 
     var uuid by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var openVoice by remember { mutableStateOf(false) }
-    var openCamera by remember { mutableStateOf(false) }
+    var nickname by remember { mutableStateOf("") }
+    var openAudio by remember { mutableStateOf(false) }
+    var openVideo by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    /**
+     * TODO Question Twice Render
+     * 1. call VM getClipboardText and change uuid locally
+     * 2. hoist uuid to VM
+     */
+    if (clipboardText.isNotBlank()) {
+        uuid = clipboardText
+    }
 
     FlatColumnPage {
         CloseTopAppBar(
-            title = stringResource(id = R.string.title_join_room),
-            onClose = {})
+            title = stringResource(R.string.title_join_room),
+            onClose = { actioner(JoinRoomAction.Close) })
         Column(
             Modifier
                 .weight(1f)
                 .padding(horizontal = 16.dp)
         ) {
             FlatNormalVerticalSpacer()
-            Text("房间号")
+            Text(stringResource(R.string.room_number))
             FlatSmallVerticalSpacer()
-            OutlinedTextField(
+            FlatPrimaryTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged {
-                        if (it.isFocused && !copied) {
-                            uuid = textProvider()
-                            copied = true
-                        }
-                    },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = FlatColorBorder,
-                    unfocusedIndicatorColor = FlatColorBorder,
-                    cursorColor = FlatColorBlue,
-                ),
-                textStyle = FlatCommonTextStyle,
-                singleLine = true,
-                placeholder = {
-                    Text("请输入房间号", style = FlatCommonTextStyle, color = FlatColorGray)
-                }
+                placeholderValue = stringResource(R.string.input_room_number_hint),
+                onFocusChanged = {
+                    if (it.isFocused && !copied) {
+                        actioner(JoinRoomAction.CheckClipboardText)
+                        copied = true
+                    }
+                })
+            FlatNormalVerticalSpacer()
+            Text(stringResource(R.string.nickname))
+            FlatPrimaryTextField(
+                value = nickname,
+                onValueChange = { nickname = it },
+                placeholderValue = stringResource(R.string.input_nickname_hint)
             )
             FlatNormalVerticalSpacer()
-            Text("匿名")
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = FlatColorBorder,
-                    unfocusedIndicatorColor = FlatColorBorder,
-                    cursorColor = FlatColorBlue,
-                ),
-                textStyle = FlatCommonTextStyle,
-                singleLine = true,
-                placeholder = {
-                    Text("请输入匿名", style = FlatCommonTextStyle, color = FlatColorGray)
-                }
-            )
-            FlatNormalVerticalSpacer()
-            Text("加入选项")
+            Text(stringResource(R.string.join_room_join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
-                    checked = openVoice,
-                    onCheckedChange = { openVoice = it }
+                    checked = openAudio,
+                    onCheckedChange = { openAudio = it }
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("开启麦克风")
+                Text(stringResource(R.string.open_audio))
                 Spacer(modifier = Modifier.width(40.dp))
                 Checkbox(
-                    checked = openCamera,
-                    onCheckedChange = { openCamera = it }
+                    checked = openVideo,
+                    onCheckedChange = { openVideo = it }
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("开启摄像头")
+                Text(stringResource(R.string.open_video))
             }
             Spacer(modifier = Modifier.height(32.dp))
-            FlatPrimaryTextButton(text = "加入") {
+            FlatPrimaryTextButton(stringResource(R.string.join_room_join)) {
                 if (uuid.isNotBlank()) {
-                    GlobalScope.launch {
-                        database.roomConfigDao()
-                            .insertOrUpdate(RoomConfig(uuid, openVoice, openCamera))
-                    }
-                    Navigator.launchRoomPlayActivity(context, roomUUID = uuid)
+                    actioner(JoinRoomAction.JoinRoom(uuid, openVideo, openAudio))
                 } else {
                     context.showToast("room uuid should not be empty")
                 }
@@ -160,5 +131,5 @@ private fun JoinRoomPage(textProvider: () -> String, database: AppDatabase) {
 @Composable
 @Preview
 private fun PagePreview() {
-    // JoinRoomPage({ "" }, null)
+    JoinRoomPage("1234", {})
 }

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">FlatAndroid</string>
+
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
     <string name="title_cloud_storage" translatable="false">云盘</string>
@@ -10,11 +11,20 @@
     <string name="title_join_room" translatable="false">加入房间</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>
     <string name="create_room" translatable="false">创建房间</string>
+    <string name="create_room_topic" translatable="false">主题</string>
+    <string name="create_room_input_topic_hint" translatable="false">请输入房间主题</string>
     <string name="join_room" translatable="false">加入房间</string>
     <string name="subscribe_room" translatable="false">预约房间</string>
 
     <string name="room_number" translatable="false">房间号</string>
+    <string name="input_room_number_hint" translatable="false">请输入房间号</string>
     <string name="room_type" translatable="false">房间类型</string>
+    <string name="nickname" translatable="false">匿名</string>
+    <string name="input_nickname_hint" translatable="false">请输入匿名</string>
+    <string name="join_room_join" translatable="false">加入</string>
+    <string name="join_room_join_option" translatable="false">加入选项</string>
+    <string name="open_video" translatable="false">开启摄像头</string>
+    <string name="open_audio" translatable="false">开启麦克风</string>
 
     <string name="home_room_list" translatable="false">房间列表</string>
     <string name="home_history_record" translatable="false">历史记录</string>

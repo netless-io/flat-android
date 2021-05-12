@@ -34,12 +34,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.data.model.*
-import io.agora.flat.ui.compose.*
 import io.agora.flat.common.rememberAndroidClipboardController
 import io.agora.flat.data.model.*
 import io.agora.flat.ui.activity.ui.theme.*
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.ui.viewmodel.UserViewModel
@@ -386,47 +385,26 @@ private fun Operations(
         Column(modifier) {
             val openDialog = remember { mutableStateOf(false) }
 
-            OutlinedButton(modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-                shape = Shapes.small,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
-                onClick = { openDialog.value = true }) {
-                Text("邀请", style = FlatCommonTextStyle, color = FlatColorTextPrimary)
-            }
             if (openDialog.value) {
-                InviteDialog(
-                    openDialog,
-                    roomInfo
-                )
+                InviteDialog(openDialog, roomInfo)
             }
+
+            FlatSecondaryTextButton(text = "邀请", onClick = { openDialog.value = true })
             FlatNormalVerticalSpacer()
-            TextButton(modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-                colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
-                shape = Shapes.small,
-                onClick = {
-                    actioner(
-                        DetailUiAction.EnterRoom(
-                            roomInfo.roomUUID,
-                            roomInfo.periodicUUID
-                        )
+            FlatPrimaryTextButton(text = "进入房间", onClick = {
+                actioner(
+                    DetailUiAction.EnterRoom(
+                        roomInfo.roomUUID,
+                        roomInfo.periodicUUID
                     )
-                }) {
-                Text("进入房间", style = FlatCommonTextStyle, color = FlatColorWhite)
-            }
+                )
+            })
         }
     RoomStatus.Stopped ->
         Column(modifier) {
-            TextButton(modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-                colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
-                shape = Shapes.small,
-                onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) }) {
-                Text("回放", style = FlatCommonTextStyle, color = FlatColorWhite)
-            }
+            FlatPrimaryTextButton(
+                text = "回放",
+                onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) })
         }
 }
 
@@ -434,9 +412,7 @@ private fun Operations(
 private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo) {
     val clipboard = rememberAndroidClipboardController()
     val viewModel: UserViewModel = viewModel()
-    val context = LocalContext.current
     val username = viewModel.userInfo.value!!.name
-
 
     Dialog(onDismissRequest = { openDialog.value = false }) {
         Surface(
@@ -451,19 +427,16 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
                 )
             }"
             val copyText = """
-                            |${username} 邀请你加入 Flat 房间
+                            |$username 邀请你加入 Flat 房间
                             |房间主题：${roomInfo.title}
                             |开始时间：${timeDuring}
                             |房间号：${roomInfo.roomUUID}
                             |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
                         """.trimMargin()
-            Column(
-                Modifier
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
-            ) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
                 val enabled = remember { mutableStateOf(true) }
 
-                Text("${username} 邀请您参加 Flat 房间")
+                Text("$username 邀请您参加 Flat 房间")
                 FlatLargeVerticalSpacer()
                 Box(Modifier.fillMaxWidth()) {
                     Text("房间主题", Modifier.align(Alignment.TopStart))
