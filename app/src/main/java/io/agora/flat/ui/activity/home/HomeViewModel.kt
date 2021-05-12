@@ -3,9 +3,11 @@ package io.agora.flat.ui.activity.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
+import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.util.formatToMMDD
 import kotlinx.coroutines.delay
@@ -18,8 +20,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val appKVCenter: AppKVCenter
 ) : ViewModel() {
+    private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
     private val selectedCategory = MutableStateFlow(RoomCategory.Current)
     private val roomList = MutableStateFlow(listOf<RoomInfo>())
     private val roomHistoryList = MutableStateFlow(listOf<RoomInfo>())
@@ -41,12 +45,14 @@ class HomeViewModel @Inject constructor(
                 roomList,
                 roomHistoryList,
                 refreshing,
-            ) { selectedCategory, roomLists, roomHistoryList, refreshing ->
+                userInfo,
+            ) { selectedCategory, roomLists, roomHistoryList, refreshing, userInfo ->
                 HomeViewState(
                     selectedHomeCategory = selectedCategory,
                     roomList = roomLists,
                     roomHistoryList = roomHistoryList,
                     refreshing = refreshing,
+                    userInfo = userInfo,
                     errorMessage = null /* TODO */
                 )
             }.catch { throwable ->
@@ -141,5 +147,6 @@ data class HomeViewState(
     val selectedHomeCategory: RoomCategory = RoomCategory.Current,
     val roomList: List<RoomInfo> = listOf(),
     val roomHistoryList: List<RoomInfo> = listOf(),
+    val userInfo: UserInfo = UserInfo("", "", ""),
     val errorMessage: String? = null
 )

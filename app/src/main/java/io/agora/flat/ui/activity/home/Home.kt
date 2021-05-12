@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,8 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.gson.Gson
-import com.puculek.pulltorefresh.PullToRefresh
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
@@ -43,15 +45,19 @@ fun Home() {
     val viewModel = viewModel(HomeViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 
-    PullToRefresh(
-        progressColor = FlatColorBlue,
-        isRefreshing = viewState.refreshing,
-        onRefresh = {
-            viewModel.reloadRoomList()
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(viewState.refreshing),
+        onRefresh = { viewModel.reloadRoomList() },
+        indicator = { state, trigger ->
+            SwipeRefreshIndicator(
+                state = state,
+                refreshTriggerDistance = trigger,
+                contentColor = MaterialTheme.colors.primary,
+            )
         }) {
         FlatColumnPage {
             // 顶部栏
-            FlatHomeTopBar()
+            FlatHomeTopBar(userAvatar = viewState.userInfo.avatar)
             // 操作区
             TopOperations()
             // 房间列表区
@@ -106,7 +112,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
 }
 
 @Composable
-fun FlatHomeTopBar() {
+fun FlatHomeTopBar(userAvatar: String) {
     FlatTopAppBar(
         title = {
             Text(stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
@@ -122,7 +128,7 @@ fun FlatHomeTopBar() {
                         modifier = Modifier
                             .size(24.dp, 24.dp)
                             .clip(shape = RoundedCornerShape(12.dp)),
-                        painter = painterResource(id = R.drawable.header),
+                        painter = rememberCoilPainter(userAvatar),
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
@@ -343,5 +349,5 @@ fun RoomListItemPreview() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    FlatHomeTopBar()
+    FlatHomeTopBar("")
 }

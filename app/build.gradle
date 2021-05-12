@@ -15,8 +15,15 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        // multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
+        }
     }
 
     viewBinding {
@@ -94,6 +101,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
     implementation 'androidx.activity:activity-compose:1.3.0-alpha02'
+    // implementation "androidx.multidex:multidex:2.0.1"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -116,11 +124,16 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:1.0.0-beta01"
     implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03'
 
+    // room
+    def room_version = "2.3.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
     // network
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation "com.squareup.okhttp3:logging-interceptor:4.7.2"
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.1"
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
@@ -137,21 +150,24 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha05'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha02"
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta02'
-    // TODO PullToRefresh
-    implementation 'com.puculek.pulltorefresh:pull-to-refresh-compose:1.0.5'
 
-    // imageloader
+    // Image Loader
     implementation "io.coil-kt:coil:1.2.0"
 
     // Google Accompanist
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.7.0'
     implementation "com.google.accompanist:accompanist-pager:0.7.0"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.7.0"
+    // PullToRefresh
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.9.1"
+    implementation "com.google.accompanist:accompanist-coil:0.9.1"
+
     // tencent
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.5'
 
     // agora
     implementation 'com.github.netless-io:whiteboard-android:2.12.24'
+    // implementation project(':sdk')
     implementation 'io.agora.rtc:full-sdk:3.3.0'
     implementation 'io.agora.rtm:rtm-sdk:1.4.1'
 }
