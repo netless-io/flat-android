@@ -6,20 +6,20 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.EntryPointAccessors
-import io.agora.flat.R
 import io.agora.flat.common.EventHandler
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RtcUser
+import io.agora.flat.databinding.ComponentFullscreenBinding
+import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
@@ -34,25 +34,27 @@ import kotlinx.coroutines.launch
 class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    val rootFullVideo: FrameLayout,
+    private val rootFullVideo: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = RtcComponent::class.simpleName
+
+        val REQUESTED_PERMISSIONS = arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
     }
 
-    private val REQUESTED_PERMISSIONS = arrayOf(
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.CAMERA,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
+    private lateinit var fullScreenBinding: ComponentFullscreenBinding
+    private lateinit var videoListBinding: ComponentVideoListBinding
 
     private lateinit var rtcApi: RtcEngineProvider
     private lateinit var database: AppDatabase
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val rtcVideoController: RtcVideoController by activity.viewModels()
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adpater: UserVideoAdapter
+    private lateinit var adapter: UserVideoAdapter
 
     private lateinit var videoAreaAnimator: SimpleAnimator
     private lateinit var fullScreenAnimator: SimpleAnimator
@@ -70,15 +72,11 @@ class RtcComponent(
         checkPermission(::actionAfterPermission)
     }
 
-    override fun onResume(owner: LifecycleOwner) {
-        super.onResume(owner)
-    }
-
     private fun loadData() {
         lifecycleScope.launch {
             viewModel.currentUsersMap.collect {
                 Log.d(TAG, "currentUsersMap $it")
-                adpater.setDataSet(ArrayList(it.values))
+                adapter.setDataSet(ArrayList(it.values))
             }
         }
 
@@ -133,50 +131,85 @@ class RtcComponent(
         }
     }
 
-    private fun initView() {
-        fullVideoView = rootFullVideo.findViewById(R.id.fullVideoView) as FrameLayout
-        fullVideoView.setOnClickListener {
-            fullScreenAnimator.hide()
-        }
+    private val onClickListener = View.OnClickListener {
+        when (it) {
+            fullScreenBinding.fullAudioOpt -> {
+            }
+            fullScreenBinding.fullVideoOpt -> {
+            }
+            fullScreenBinding.exitFullScreen -> fullScreenAnimator.hide()
 
-        adpater = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adpater.listener = UserVideoAdapter.Listener { _, view, rtcUser ->
+            videoListBinding.videoOpt -> {
+
+            }
+            videoListBinding.audioOpt -> {
+
+            }
+            videoListBinding.enterFullScreen -> {
+                hideVideoListOptArea()
+                fullScreenAnimator.show()
+            }
+        }
+    }
+
+    private fun initView() {
+        fullScreenBinding = ComponentFullscreenBinding.inflate(activity.layoutInflater, rootFullVideo, true)
+        fullScreenBinding.exitFullScreen.setOnClickListener(onClickListener)
+        fullScreenBinding.fullAudioOpt.setOnClickListener(onClickListener)
+        fullScreenBinding.fullVideoOpt.setOnClickListener(onClickListener)
+
+        videoListBinding = ComponentVideoListBinding.inflate(activity.layoutInflater, rootView, true)
+        videoListBinding.videoOpt.setOnClickListener(onClickListener)
+        videoListBinding.audioOpt.setOnClickListener(onClickListener)
+        videoListBinding.enterFullScreen.setOnClickListener(onClickListener)
+
+        adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
+        adapter.listener = UserVideoAdapter.Listener { _, view, rtcUser ->
             user = rtcUser
             start.set(getViewRect(view, rootFullVideo))
             end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
-            fullScreenAnimator.show()
+
+            if (videoListBinding.videoListOptArea.isVisible) {
+                hideVideoListOptArea()
+            } else {
+                showVideoListOptArea(start)
+            }
         }
 
-        recyclerView = RecyclerView(activity)
-        rootView.addView(recyclerView, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adpater
+        videoListBinding.videoList.layoutManager = LinearLayoutManager(activity)
+        videoListBinding.videoList.adapter = adapter
 
         videoAreaAnimator = SimpleAnimator(
             onUpdate = ::updateVideoContainer,
-            onShowStart = { rootView.visibility = View.VISIBLE },
-            onHideEnd = { rootView.visibility = View.GONE }
+            onShowStart = { rootView.isVisible = true },
+            onHideEnd = { rootView.isVisible = false }
         )
 
         fullScreenAnimator = SimpleAnimator(
             onUpdate = ::updateView,
             onShowStart = {
-                fullVideoView.visibility = View.VISIBLE
-                rtcVideoController.setupUserVideo(fullVideoView, user.rtcUID, true)
+                fullScreenBinding.fullVideoView.isVisible = true
+                rtcVideoController.setupUserVideo(fullScreenBinding.fullVideoView, user.rtcUID, true)
+            },
+            onShowEnd = {
+                fullScreenBinding.fullVideoOptArea.isVisible = true
+            },
+            onHideStart = {
+                fullScreenBinding.fullVideoOptArea.isVisible = false
             },
             onHideEnd = {
-                fullVideoView.visibility = View.GONE
+                fullScreenBinding.fullVideoView.isVisible = false
                 rtcVideoController.exitFullScreen()
-                adpater.updateVideoView(user.rtcUID)
+                adapter.updateVideoView(user.rtcUID)
             }
         )
     }
 
     private fun getViewRect(view: ViewGroup, anchorView: View): Rect {
-        var array = IntArray(2)
+        val array = IntArray(2)
         view.getLocationOnScreen(array)
 
-        var arrayP = IntArray(2)
+        val arrayP = IntArray(2)
         anchorView.getLocationOnScreen(arrayP)
 
         return Rect(
@@ -187,10 +220,22 @@ class RtcComponent(
         )
     }
 
-    lateinit var fullVideoView: FrameLayout
-    private var start = Rect();
-    private var end = Rect();
-    lateinit var user: RtcUser
+    private fun showVideoListOptArea(videoArea: Rect) {
+        val layoutParams = videoListBinding.videoListOptArea.layoutParams as FrameLayout.LayoutParams
+        layoutParams.topMargin = videoArea.bottom
+        videoListBinding.videoListOptArea.layoutParams = layoutParams
+
+        videoListBinding.videoListOptArea.isVisible = true
+    }
+
+    private fun hideVideoListOptArea() {
+        videoListBinding.videoListOptArea.isVisible = false
+    }
+
+
+    private var start = Rect()
+    private var end = Rect()
+    private lateinit var user: RtcUser
 
     private fun updateView(value: Float) {
         val left = start.left + (end.left - start.left) * value
@@ -200,12 +245,12 @@ class RtcComponent(
 
         Log.d(TAG, "left:$left,right:$right,top:$top,bottom:$bottom")
 
-        val layoutParams = fullVideoView.layoutParams as ViewGroup.MarginLayoutParams
+        val layoutParams = fullScreenBinding.fullVideoView.layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.width = (right - left).toInt()
         layoutParams.height = (bottom - top).toInt()
         layoutParams.leftMargin = left.toInt()
         layoutParams.topMargin = top.toInt()
-        fullVideoView.layoutParams = layoutParams
+        fullScreenBinding.fullVideoView.layoutParams = layoutParams
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -266,7 +311,7 @@ class RtcComponent(
 
         override fun onUserJoined(uid: Int, elapsed: Int) {
             Log.d(TAG, "onUserJoined:$uid $elapsed")
-            // adpater.onUserJoined(uid)
+            // adapter.onUserJoined(uid)
         }
     }
 }

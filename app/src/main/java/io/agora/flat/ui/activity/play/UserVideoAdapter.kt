@@ -82,6 +82,7 @@ class UserVideoAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
+        val videoClosedLayout: FrameLayout = view.findViewById(R.id.videoClosedLayout)
         val profile: ImageView = view.findViewById(R.id.profile)
         val username: TextView = view.findViewById(R.id.username)
     }

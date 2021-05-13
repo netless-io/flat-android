@@ -69,15 +69,11 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> {
                     _roomInfo.value = result.data.roomInfo;
                 }
-                is ErrorResult -> {
-
-                }
             }
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            _roomConfig.value =
-                database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
+            _roomConfig.value = database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
         }
     }
 
