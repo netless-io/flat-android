@@ -36,7 +36,8 @@ object FlatDataTimeFormatter {
     fun diffTime(begin: Long, end: Long): String {
         val diff = end - begin
         if (diff < 0) {
-            throw RuntimeException("end need large than begin")
+            // throw RuntimeException("end need large than begin")
+            return "0分"
         }
         // 显示分钟
         if (diff < 3600_000) {

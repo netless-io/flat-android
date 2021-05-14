@@ -1,5 +1,2 @@
-include ':app', ':sdk'
+include ':app'
 rootProject.name = "FlatAndroid"
-
-project(':sdk').projectDir = file('/Users/fenglibin/Agora/whiteboard-android/sdk')
-
