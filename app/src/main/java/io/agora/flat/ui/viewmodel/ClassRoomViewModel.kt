@@ -16,6 +16,7 @@ import io.agora.flat.di.AppModule
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
@@ -35,12 +36,14 @@ class ClassRoomViewModel @Inject constructor(
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
 
-    private var _roomInfo = MutableStateFlow<RoomInfo?>(null)
-    val roomInfo = _roomInfo.asStateFlow()
+    private var _state: MutableStateFlow<ClassRoomState>
+    val state: StateFlow<ClassRoomState>
+        get() = _state
 
+    // 缓存用户信息，降低web服务压力
     private var _usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf()
-    private var _currentUsersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val currentUsersMap = _currentUsersMap.asStateFlow()
+    private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
+    val usersMap = _usersMap.asStateFlow()
 
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
@@ -49,13 +52,17 @@ class ClassRoomViewModel @Inject constructor(
     val roomEvent = _roomEvent
     val uuid = AtomicInteger(0)
 
-    var roomUUID: String
-
     private var _roomConfig = MutableStateFlow(RoomConfig(""))
     val roomConfig = _roomConfig.asStateFlow()
 
+    var roomUUID: String
+    var currentUserUUID: String
+
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
+        currentUserUUID = appKVCenter.getUserInfo()!!.uuid
+        _state = MutableStateFlow(ClassRoomState(roomUUID = roomUUID, currentUserUUID = currentUserUUID))
+
         viewModelScope.launch {
             when (val result =
                 roomRepository.joinRoom(roomUUID)) {
@@ -69,10 +76,17 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            when (val result =
-                roomRepository.getOrdinaryRoomInfo(roomUUID)) {
-                is Success -> {
-                    _roomInfo.value = result.data.roomInfo;
+            when (val result = roomRepository.getOrdinaryRoomInfo(roomUUID)) {
+                is Success -> result.data.run {
+                    _state.value = _state.value.copy(
+                        roomType = roomInfo.roomType,
+                        ownerUUID = roomInfo.ownerUUID,
+                        ownerName = roomInfo.ownerName,
+                        title = roomInfo.title,
+                        beginTime = roomInfo.beginTime,
+                        endTime = roomInfo.endTime,
+                        roomStatus = roomInfo.roomStatus,
+                    )
                 }
             }
         }
@@ -101,6 +115,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    // 发送本地音视频状态更新消息
     private suspend fun sendDeviceState(config: RoomConfig) {
         val event = RTMEvent.DeviceState(
             DeviceStateValue(
@@ -151,9 +166,9 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun addToCurrent(userMap: Map<String, RtcUser>) {
-        val map = _currentUsersMap.value.toMutableMap()
+        val map = _usersMap.value.toMutableMap()
         userMap.forEach { (uuid, user) -> map[uuid] = user }
-        _currentUsersMap.value = map
+        _usersMap.value = map
     }
 
     private fun addToCache(userMap: Map<String, RtcUser>) {
@@ -161,9 +176,9 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun removeRtmMember(userUUID: String) {
-        val map = _currentUsersMap.value.toMutableMap()
+        val map = _usersMap.value.toMutableMap()
         map.remove(userUUID)
-        _currentUsersMap.value = map
+        _usersMap.value = map
     }
 
     fun addRtmMember(userUUID: String) {
@@ -193,63 +208,184 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     // RTCCommand Handle
-    fun updateDeviceState(value: DeviceStateValue) {
-        val map = _currentUsersMap.value.toMutableMap()
-        val user = map[value.userUUID]
+    private fun updateDeviceState(value: DeviceStateValue) {
+        val user = _usersMap.value[value.userUUID]
         if (user != null) {
-            val copy = user.copy(audioOpen = value.mic, videoOpen = value.camera)
-            map[value.userUUID] = copy
+            val map = _usersMap.value.toMutableMap()
+            map[value.userUUID] = user.copy(audioOpen = value.mic, videoOpen = value.camera)
+            _usersMap.value = map
         }
-        _currentUsersMap.value = map
     }
 
-    fun updateUserState(userUUID: String, state: RTMUserState) {
-        val map = _currentUsersMap.value.toMutableMap()
-        val user = map[userUUID]
+    private fun updateUserState(userUUID: String, state: RTMUserState) {
+        val user = _usersMap.value[userUUID]
         if (user != null) {
-            val copy = user.copy(
+            val map = _usersMap.value.toMutableMap()
+            map[userUUID] = user.copy(
                 audioOpen = state.mic,
                 videoOpen = state.camera,
                 name = state.name,
                 isSpeak = state.isSpeak
             )
-            map[userUUID] = copy
-            _currentUsersMap.value = map
+            _usersMap.value = map
         }
     }
 
-    fun updateChannelState(status: ChannelStatusValue) {
-        val map = _currentUsersMap.value.toMutableMap()
+    private fun updateChannelState(status: ChannelStatusValue) {
+        val map = _usersMap.value.toMutableMap()
         status.uStates.forEach { (userId, s) ->
-            run {
-                val user = map[userId]
-                if (user != null) {
-                    user.videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true)
-                    user.audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true)
-                    user.isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true)
-                    user.isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true)
-                }
+            map[userId]?.run {
+                videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true)
+                audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true)
+                isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true)
+                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true)
             }
         }
-        _currentUsersMap.value = map
+        _usersMap.value = map
+        _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
     }
 
     fun requestChannelStatus() {
         viewModelScope.launch {
-            val user =
-                _currentUsersMap.value.values.firstOrNull { rtcUser -> rtcUser.userUUID != appKVCenter.getUserInfo()!!.uuid }
-            if (user != null) {
+            val user = _usersMap.value.values.firstOrNull { user ->
+                user.userUUID != _state.value.currentUserUUID
+            }
+            user?.run {
                 val roomUUID = roomUUID;
                 val userInfo = appKVCenter.getUserInfo()!!
-                val state = RTMUserState(userInfo.name, camera = false, mic = false, isSpeak = false)
-                val value = RequestChannelStatusValue(roomUUID, listOf(user.userUUID), state)
+                val state = RTMUserState(
+                    userInfo.name,
+                    camera = _roomConfig.value.enableVideo,
+                    mic = _roomConfig.value.enableAudio,
+                    isSpeak = isRoomOwner(),
+                )
+                val value = RequestChannelStatusValue(roomUUID, listOf(userUUID), state)
                 val event = RTMEvent.RequestChannelStatus(value)
 
                 rtmApi.sendChannelCommand(event)
             }
         }
     }
+
+    private fun isRoomOwner(): Boolean {
+        return _state.value.ownerUUID == _state.value.currentUserUUID
+    }
+
+    fun onRTMEvent(event: RTMEvent, senderId: String) {
+        when (event) {
+            is RTMEvent.ChannelMessage -> {
+                // TODO
+            }
+            is RTMEvent.ChannelStatus -> {
+                updateChannelState(event.value)
+            }
+            is RTMEvent.RequestChannelStatus -> {
+                updateUserState(event.value.roomUUID, event.value.user)
+                if (event.value.userUUIDs.contains(currentUserUUID)) {
+                    sendChannelStatus(senderId)
+                }
+            }
+            is RTMEvent.DeviceState -> {
+                updateDeviceState(event.value)
+            }
+            is RTMEvent.AcceptRaiseHand -> {
+                if (senderId == _state.value.ownerUUID) {
+                    val user = _usersMap.value[event.value.userUUID]
+                    user?.run {
+                        val map = _usersMap.value.toMutableMap()
+                        map[senderId] = copy(isSpeak = event.value.accept)
+                        _usersMap.value = map
+                    }
+                }
+            }
+            is RTMEvent.BanText -> _state.value = _state.value.copy(ban = event.v)
+            is RTMEvent.CancelAllHandRaising -> {
+                if (senderId == _state.value.ownerUUID) {
+                    val map = _usersMap.value.toMutableMap()
+                    map.forEach { (uuid, u) -> map[uuid] = u.copy(isRaiseHand = false) }
+                    _usersMap.value = map
+                }
+            }
+            is RTMEvent.ClassMode -> {
+                if (senderId == _state.value.ownerUUID) {
+                    _state.value = state.value.copy(classMode = event.classModeType)
+                }
+            }
+            is RTMEvent.Notice -> {
+
+            }
+            is RTMEvent.RaiseHand -> {
+                val user = _usersMap.value[senderId]
+                user?.run {
+                    val map = _usersMap.value.toMutableMap()
+                    map[senderId] = copy(isRaiseHand = event.v)
+                    _usersMap.value = map
+                }
+            }
+            is RTMEvent.RoomStatus -> {
+                if (senderId == _state.value.ownerUUID) {
+                    _state.value = _state.value.copy(roomStatus = event.roomStatus)
+                }
+            }
+            is RTMEvent.Speak -> {
+                val user = _usersMap.value[senderId]
+                user?.run {
+                    val map = _usersMap.value.toMutableMap()
+                    map[senderId] = copy(isSpeak = event.v)
+                    _usersMap.value = map
+                }
+            }
+        }
+    }
+
+    private fun sendChannelStatus(senderId: String) {
+        viewModelScope.launch {
+            val uStates = HashMap<String, String>()
+            usersMap.value.values.forEach {
+                uStates[it.userUUID] = StringBuilder().apply {
+                    if (it.isSpeak) append(RTMUserProp.IsSpeak.flag)
+                    if (it.isRaiseHand) append(RTMUserProp.IsRaiseHand.flag)
+                    if (it.videoOpen) append(RTMUserProp.Camera.flag)
+                    if (it.audioOpen) append(RTMUserProp.Mic.flag)
+                }.toString()
+            }
+            var channelState = RTMEvent.ChannelStatus(
+                ChannelStatusValue(
+                    ban = _state.value.ban,
+                    rStatus = _state.value.roomStatus,
+                    rMode = _state.value.classMode,
+                    uStates = uStates
+                )
+            )
+            rtmApi.sendPeerCommand(channelState, senderId)
+        }
+    }
 }
+
+data class ClassRoomState(
+    // 房间的 uuid
+    val roomUUID: String = "",
+    // 房间类型
+    val roomType: RoomType = RoomType.SmallClass,
+    // 房间状态
+    val roomStatus: RoomStatus = RoomStatus.Idle,
+    // 房间所有者
+    val ownerUUID: String = "",
+    // 当前用户
+    val currentUserUUID: String = "",
+    // 房间所有者的名称
+    val ownerName: String? = null,
+    // 房间标题
+    val title: String = "",
+    // 房间开始时间
+    val beginTime: Long = 0L,
+    // 结束时间
+    val endTime: Long = 0L,
+    // 禁用
+    val ban: Boolean = true,
+    // 交互模式
+    val classMode: ClassModeType = ClassModeType.Lecture,
+)
 
 sealed class ClassRoomEvent {
     companion object {

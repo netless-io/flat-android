@@ -13,7 +13,7 @@ data class RoomInfo(
     // 房间所有者的名称
     val ownerUUID: String,
     // 房间所有者的名称
-    val ownerName: String,
+    val ownerName: String? = null,
     // 房间标题
     val title: String,
     // 房间开始时间

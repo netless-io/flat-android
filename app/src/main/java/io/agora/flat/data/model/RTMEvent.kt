@@ -29,7 +29,7 @@ sealed class RTMEvent {
     data class Speak(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.Speak)
     data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent(RTMessageType.DeviceState)
     data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent(RTMessageType.ClassMode)
-    data class RoomStatus(@SerializedName("v") val roomStatus: RoomStatus) : RTMEvent(RTMessageType.RoomStatus)
+    data class RoomStatus(@SerializedName("v") val roomStatus: io.agora.flat.data.model.RoomStatus) : RTMEvent(RTMessageType.RoomStatus)
     data class RequestChannelStatus(@SerializedName("v") val value: RequestChannelStatusValue) :
         RTMEvent(RTMessageType.RequestChannelStatus)
 

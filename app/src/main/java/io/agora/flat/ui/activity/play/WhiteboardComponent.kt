@@ -18,6 +18,7 @@ import com.herewhite.sdk.domain.*
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
@@ -277,7 +278,7 @@ class WhiteboardComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.roomEvent.collect() {
+            viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
                     else -> {
@@ -285,6 +286,29 @@ class WhiteboardComponent(
                 }
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.state.collect {
+                updateClassMode(it.classMode)
+            }
+        }
+    }
+
+    private fun updateClassMode(classMode: ClassModeType) {
+        when (classMode) {
+            ClassModeType.Lecture -> setRoomWritable(false)
+            ClassModeType.Interaction -> setRoomWritable(true)
+        }
+    }
+
+    private fun setRoomWritable(writable: Boolean) {
+        room?.setWritable(writable, object : Promise<Boolean> {
+            override fun then(p0: Boolean?) {
+            }
+
+            override fun catchEx(p0: SDKError?) {
+            }
+        })
     }
 
     private fun handleAreaShown(areaId: Int) {
@@ -400,6 +424,8 @@ class WhiteboardComponent(
                 override fun catchEx(t: SDKError?) {
                 }
             })
+
+            updateClassMode(viewModel.state.value.classMode)
         }
 
         override fun catchEx(t: SDKError) {

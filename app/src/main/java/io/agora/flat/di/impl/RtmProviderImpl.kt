@@ -35,7 +35,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
                     try {
                         val event = RTMEvent.parseRTMEvent(message.text)
                         if (channelCommandID == event.r) {
-                            flatRTMListeners.forEach { it.onRTMEvent(event) }
+                            flatRTMListeners.forEach { it.onRTMEvent(event, peerId) }
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Message parse error $peerId ${message.text}")
@@ -83,7 +83,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
     private var commandListener = object : RtmChannelListenerAdapter {
         override fun onMessageReceived(message: RtmMessage, member: RtmChannelMember) {
             super.onMessageReceived(message, member)
-            flatRTMListeners.forEach { it.onRTMEvent(RTMEvent.parseRTMEvent(message.text)) }
+            flatRTMListeners.forEach { it.onRTMEvent(RTMEvent.parseRTMEvent(message.text), member.userId) }
         }
     }
 

@@ -66,22 +66,9 @@ class RtmComponent(
     }
 
     private val flatRTMListener = object : FlatRTMListener {
-        override fun onRTMEvent(event: RTMEvent) {
-            when (event) {
-                is RTMEvent.ChannelStatus -> {
-                    viewModel.updateChannelState(event.value)
-                }
-                is RTMEvent.RequestChannelStatus -> {
-                    viewModel.updateUserState(event.value.roomUUID, event.value.user)
-                    if (event.value.userUUIDs.contains(currentUUID())) {
-                        // TODO
-                    }
-                }
-                is RTMEvent.DeviceState -> {
-                    Log.e(TAG, "event is $event")
-                    viewModel.updateDeviceState(event.value);
-                }
-            }
+        override fun onRTMEvent(event: RTMEvent, senderId: String) {
+            Log.d(TAG, "event is $event")
+            viewModel.onRTMEvent(event,senderId)
         }
 
         override fun onMemberJoined(userId: String, channelId: String) {

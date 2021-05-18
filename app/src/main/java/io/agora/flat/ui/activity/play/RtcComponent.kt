@@ -74,7 +74,7 @@ class RtcComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.currentUsersMap.collect { it ->
+            viewModel.usersMap.collect { it ->
                 Log.d(TAG, "currentUsersMap $it")
                 adapter.setDataSet(ArrayList(it.values))
                 // TODO Update When CallOut Rtc Changed
