@@ -74,18 +74,17 @@ class RtcComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.currentUsersMap.collect {
+            viewModel.currentUsersMap.collect { it ->
                 Log.d(TAG, "currentUsersMap $it")
                 adapter.setDataSet(ArrayList(it.values))
+                // TODO Update When CallOut Rtc Changed
             }
         }
 
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.RtmChannelJoined -> {
-                        joinRtcChannel()
-                    }
+                    is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
                     is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
                 }
             }
@@ -121,12 +120,7 @@ class RtcComponent(
     private fun joinRtcChannel() {
         Log.d(TAG, "call rtc joinChannel")
         viewModel.roomPlayInfo.value?.apply {
-            rtcApi.rtcEngine().joinChannel(
-                rtcToken,
-                roomUUID,
-                "{}",
-                rtcUID
-            )
+            rtcApi.rtcEngine().joinChannel(rtcToken, roomUUID, "{}", rtcUID)
             rtcVideoController.setLocalUid(rtcUID)
         }
     }
@@ -134,16 +128,18 @@ class RtcComponent(
     private val onClickListener = View.OnClickListener {
         when (it) {
             fullScreenBinding.fullAudioOpt -> {
+                viewModel.enableVideo(!fullScreenBinding.fullAudioOpt.isSelected)
             }
             fullScreenBinding.fullVideoOpt -> {
+                viewModel.enableVideo(!fullScreenBinding.fullVideoOpt.isSelected)
             }
             fullScreenBinding.exitFullScreen -> fullScreenAnimator.hide()
 
             videoListBinding.videoOpt -> {
-
+                viewModel.enableVideo(!videoListBinding.videoOpt.isSelected)
             }
             videoListBinding.audioOpt -> {
-
+                viewModel.enableAudio(!videoListBinding.audioOpt.isSelected)
             }
             videoListBinding.enterFullScreen -> {
                 hideVideoListOptArea()
@@ -226,6 +222,11 @@ class RtcComponent(
         videoListBinding.videoListOptArea.layoutParams = layoutParams
 
         videoListBinding.videoListOptArea.isVisible = true
+        // TODO Need Update When Remote Change
+        videoListBinding.videoOpt.isSelected = user.videoOpen
+        videoListBinding.audioOpt.isSelected = user.audioOpen
+        fullScreenBinding.fullVideoOpt.isSelected = user.videoOpen
+        fullScreenBinding.fullAudioOpt.isSelected = user.audioOpen
     }
 
     private fun hideVideoListOptArea() {

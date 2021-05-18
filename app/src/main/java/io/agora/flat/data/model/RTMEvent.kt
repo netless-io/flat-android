@@ -5,18 +5,36 @@ import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
 
 sealed class RTMEvent {
+    @SerializedName("t")
+    var t = RTMessageType.ChannelMessage
+
+    // ChannelId
+    @SerializedName("r")
+    var r = ""
+
+    constructor()
+    constructor(type: RTMessageType) {
+        t = type
+    }
+
     data class ChannelMessage(@SerializedName("v") val text: String) : RTMEvent()
-    data class Notice(@SerializedName("v") val text: String) : RTMEvent()
-    data class RaiseHand(@SerializedName("v") val v: Boolean) : RTMEvent()
-    data class AcceptRaiseHand(@SerializedName("v") val value: AcceptRaiseHandValue) : RTMEvent()
-    data class CancelAllHandRaising(@SerializedName("v") val v: Boolean) : RTMEvent()
-    data class BanText(@SerializedName("v") val v: Boolean) : RTMEvent()
-    data class Speak(@SerializedName("v") val v: Boolean) : RTMEvent()
-    data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent()
-    data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent()
-    data class RoomStatus(@SerializedName("v") val roomStatus: RoomStatus) : RTMEvent()
-    data class RequestChannelStatus(@SerializedName("v") val value: RequestChannelStatusValue) : RTMEvent()
-    data class ChannelStatus(@SerializedName("v") val value: ChannelStatusValue) : RTMEvent()
+
+    data class Notice(@SerializedName("v") val text: String) : RTMEvent(RTMessageType.Notice)
+    data class RaiseHand(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.RaiseHand)
+    data class AcceptRaiseHand(@SerializedName("v") val value: AcceptRaiseHandValue) :
+        RTMEvent(RTMessageType.AcceptRaiseHand)
+
+    data class CancelAllHandRaising(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.CancelAllHandRaising)
+    data class BanText(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.BanText)
+    data class Speak(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.Speak)
+    data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent(RTMessageType.DeviceState)
+    data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent(RTMessageType.ClassMode)
+    data class RoomStatus(@SerializedName("v") val roomStatus: RoomStatus) : RTMEvent(RTMessageType.RoomStatus)
+    data class RequestChannelStatus(@SerializedName("v") val value: RequestChannelStatusValue) :
+        RTMEvent(RTMessageType.RequestChannelStatus)
+
+    data class ChannelStatus(@SerializedName("v") val value: ChannelStatusValue) :
+        RTMEvent(RTMessageType.ChannelStatus)
 
     companion object {
         val gson = Gson()
@@ -48,7 +66,7 @@ sealed class RTMEvent {
     }
 }
 
-data class RTMMessageUser(
+data class RTMUserState(
     val name: String,
     val camera: Boolean,
     val mic: Boolean,
@@ -72,15 +90,18 @@ data class RequestChannelStatusValue(
     /** these users should response */
     val userUUIDs: List<String>,
     /** also inform others about current user states */
-    val user: RTMMessageUser
+    val user: RTMUserState
 )
 
 data class ChannelStatusValue(
-    val roomUUID: String,
-    /** these users should response */
-    val userUUIDs: List<String>,
-    /** also inform others about current user states */
-    val user: RTMMessageUser
+    /** ban messaging */
+    val ban: Boolean,
+    /** room status */
+    val rStatus: RoomStatus,
+    /** class mode type */
+    val rMode: ClassModeType,
+    /** users with non-default states */
+    val uStates: HashMap<String, String>,
 )
 
 enum class RTMessageType {
@@ -124,3 +145,9 @@ enum class RTMessageType {
     ChannelStatus;
 }
 
+enum class RTMUserProp(val flag: String) {
+    IsSpeak("S"),
+    IsRaiseHand("R"),
+    Camera("C"),
+    Mic("M");
+}

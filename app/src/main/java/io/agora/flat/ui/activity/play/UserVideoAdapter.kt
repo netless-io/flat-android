@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
@@ -59,6 +60,8 @@ class UserVideoAdapter(
             rtcVideoController.enterFullScreen(itemData.rtcUID)
             listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
         }
+
+        viewHolder.videoClosedLayout.isVisible = !itemData.videoOpen
     }
 
     override fun getItemId(position: Int): Long {
