@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import io.agora.flat.Constants
-import io.agora.flat.common.FlatRTMListener
+import io.agora.flat.common.RTMListener
 import io.agora.flat.common.toFlatException
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.di.interfaces.RtmEngineProvider
@@ -206,13 +206,13 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         }
     }
 
-    private var flatRTMListeners = mutableListOf<FlatRTMListener>()
+    private var flatRTMListeners = mutableListOf<RTMListener>()
 
-    override fun addFlatRTMListener(listener: FlatRTMListener) {
+    override fun addFlatRTMListener(listener: RTMListener) {
         flatRTMListeners.add(listener)
     }
 
-    override fun removeFlatRTMListener(listener: FlatRTMListener) {
+    override fun removeFlatRTMListener(listener: RTMListener) {
         flatRTMListeners.remove(listener)
     }
 

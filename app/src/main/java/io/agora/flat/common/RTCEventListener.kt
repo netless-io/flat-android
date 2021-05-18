@@ -2,7 +2,7 @@ package io.agora.flat.common
 
 import io.agora.rtc.IRtcEngineEventHandler.*
 
-interface EventHandler {
+interface RTCEventListener {
     fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int)
     fun onLeaveChannel(stats: RtcStats?)
     fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int)

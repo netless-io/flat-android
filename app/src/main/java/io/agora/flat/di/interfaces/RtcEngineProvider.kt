@@ -1,12 +1,12 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.EventHandler
+import io.agora.flat.common.RTCEventListener
 import io.agora.rtc.RtcEngine
 
 interface RtcEngineProvider {
     fun rtcEngine(): RtcEngine
 
-    fun registerEventHandler(handler: EventHandler)
+    fun addEventListener(listener: RTCEventListener)
 
-    fun removeEventHandler(handler: EventHandler);
+    fun removeEventListener(listener: RTCEventListener);
 }

@@ -15,7 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.EntryPointAccessors
-import io.agora.flat.common.EventHandler
+import io.agora.flat.common.RTCEventListener
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.databinding.ComponentFullscreenBinding
@@ -297,7 +297,7 @@ class RtcComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         rtcApi.rtcEngine().leaveChannel()
-        rtcApi.removeEventHandler(eventHandler)
+        rtcApi.removeEventListener(eventListener)
     }
 
     private fun checkPermission(actionAfterPermission: () -> Unit) {
@@ -328,10 +328,10 @@ class RtcComponent(
     }
 
     private fun initListener() {
-        rtcApi.registerEventHandler(eventHandler)
+        rtcApi.addEventListener(eventListener)
     }
 
-    private var eventHandler = object : EventHandler {
+    private var eventListener = object : RTCEventListener {
         override fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {
             Log.d(TAG, "onFirstRemoteVideoDecoded")
         }

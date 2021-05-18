@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.EntryPointAccessors
 import io.agora.flat.common.FlatException
-import io.agora.flat.common.FlatRTMListener
+import io.agora.flat.common.RTMListener
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.di.interfaces.RtmEngineProvider
@@ -64,7 +64,7 @@ class RtmComponent(
         })
     }
 
-    private val flatRTMListener = object : FlatRTMListener {
+    private val flatRTMListener = object : RTMListener {
         override fun onRTMEvent(event: RTMEvent, senderId: String) {
             Log.d(TAG, "event is $event")
             viewModel.onRTMEvent(event,senderId)

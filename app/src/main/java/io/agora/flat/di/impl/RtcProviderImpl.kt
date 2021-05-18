@@ -2,8 +2,8 @@ package io.agora.flat.di.impl
 
 import android.content.Context
 import io.agora.flat.Constants
-import io.agora.flat.common.AgoraEventHandler
-import io.agora.flat.common.EventHandler
+import io.agora.flat.common.RTCEventHandler
+import io.agora.flat.common.RTCEventListener
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
@@ -11,7 +11,7 @@ import io.agora.rtc.video.VideoEncoderConfiguration
 
 class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
     private lateinit var mRtcEngine: RtcEngine
-    private val mHandler: AgoraEventHandler = AgoraEventHandler()
+    private val mHandler: RTCEventHandler = RTCEventHandler()
 
     override fun onCreate(context: Context) {
         try {
@@ -45,11 +45,11 @@ class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
         return mRtcEngine
     }
 
-    override fun registerEventHandler(handler: EventHandler) {
-        mHandler.addHandler(handler)
+    override fun addEventListener(listener: RTCEventListener) {
+        mHandler.addListener(listener)
     }
 
-    override fun removeEventHandler(handler: EventHandler) {
-        mHandler.removeHandler(handler)
+    override fun removeEventListener(listener: RTCEventListener) {
+        mHandler.removeListener(listener)
     }
 }
