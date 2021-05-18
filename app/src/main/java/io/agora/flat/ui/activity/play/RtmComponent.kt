@@ -11,7 +11,6 @@ import io.agora.flat.common.FlatRTMListener
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.di.interfaces.RtmEngineProvider
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.ResultCallback
@@ -91,7 +90,7 @@ class RtmComponent(
                 viewModel.initRoomUsers(rtmApi.getMembers().map { it.userId })
                 viewModel.requestChannelStatus()
                 Log.d(TAG, "notify rtm joined success")
-                viewModel.onEvent(ClassRoomEvent.RtmChannelJoined)
+                viewModel.notifyRTMChannelJoined()
             } catch (e: FlatException) {
                 // showExistDialog()
             }

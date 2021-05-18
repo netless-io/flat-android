@@ -3,6 +3,7 @@ package io.agora.flat.util
 import android.content.Context
 import android.content.res.Resources
 import android.widget.Toast
+import androidx.annotation.StringRes
 import io.agora.flat.BuildConfig
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
@@ -15,11 +16,22 @@ fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     return versionName ?: defaultVersion
 }
 
+fun Context.showDebugToast(@StringRes resId: Int) {
+    if (BuildConfig.DEBUG) {
+        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
+    }
+}
+
 fun Context.showDebugToast(message: String) {
     if (BuildConfig.DEBUG) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
+
+fun Context.showToast(@StringRes resId: Int) {
+    Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
+}
+
 
 fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

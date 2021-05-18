@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    private val rootFullVideo: FrameLayout,
+    private val fullScreenLayout: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = RtcComponent::class.simpleName
@@ -50,7 +50,7 @@ class RtcComponent(
     private lateinit var videoListBinding: ComponentVideoListBinding
 
     private lateinit var rtcApi: RtcEngineProvider
-    private lateinit var database: AppDatabase
+    private lateinit var appDatabase: AppDatabase
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val rtcVideoController: RtcVideoController by activity.viewModels()
 
@@ -65,7 +65,7 @@ class RtcComponent(
             ComponentEntryPoint::class.java
         )
         rtcApi = entryPoint.rtcApi()
-        database = entryPoint.database()
+        appDatabase = entryPoint.database()
 
         initView()
         initListener()
@@ -77,7 +77,16 @@ class RtcComponent(
             viewModel.usersMap.collect { it ->
                 Log.d(TAG, "currentUsersMap $it")
                 adapter.setDataSet(ArrayList(it.values))
-                // TODO Update When CallOut Rtc Changed
+                val findUser = userCallOut?.run {
+                    it.values.find { it.userUUID == this.userUUID }
+                }
+                if (findUser == null) {
+                    hideVideoListOptArea()
+                    fullScreenAnimator.hide()
+                } else {
+                    userCallOut = findUser
+                    updateCallOutUser()
+                }
             }
         }
 
@@ -86,6 +95,7 @@ class RtcComponent(
                 when (it) {
                     is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
                     is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
+                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                 }
             }
         }
@@ -127,20 +137,14 @@ class RtcComponent(
 
     private val onClickListener = View.OnClickListener {
         when (it) {
-            fullScreenBinding.fullAudioOpt -> {
-                viewModel.enableVideo(!fullScreenBinding.fullAudioOpt.isSelected)
+            fullScreenBinding.fullAudioOpt, videoListBinding.audioOpt -> userCallOut?.run {
+                viewModel.enableAudio(!it.isSelected, userUUID)
             }
-            fullScreenBinding.fullVideoOpt -> {
-                viewModel.enableVideo(!fullScreenBinding.fullVideoOpt.isSelected)
+            fullScreenBinding.fullVideoOpt, videoListBinding.videoOpt -> userCallOut?.run {
+                viewModel.enableVideo(!it.isSelected, userUUID)
             }
             fullScreenBinding.exitFullScreen -> fullScreenAnimator.hide()
 
-            videoListBinding.videoOpt -> {
-                viewModel.enableVideo(!videoListBinding.videoOpt.isSelected)
-            }
-            videoListBinding.audioOpt -> {
-                viewModel.enableAudio(!videoListBinding.audioOpt.isSelected)
-            }
             videoListBinding.enterFullScreen -> {
                 hideVideoListOptArea()
                 fullScreenAnimator.show()
@@ -149,10 +153,12 @@ class RtcComponent(
     }
 
     private fun initView() {
-        fullScreenBinding = ComponentFullscreenBinding.inflate(activity.layoutInflater, rootFullVideo, true)
+        fullScreenBinding = ComponentFullscreenBinding.inflate(activity.layoutInflater, fullScreenLayout, true)
         fullScreenBinding.exitFullScreen.setOnClickListener(onClickListener)
         fullScreenBinding.fullAudioOpt.setOnClickListener(onClickListener)
         fullScreenBinding.fullVideoOpt.setOnClickListener(onClickListener)
+        fullScreenBinding.root.setOnClickListener { /* disable click pass through */ }
+        fullScreenBinding.root.isVisible = false
 
         videoListBinding = ComponentVideoListBinding.inflate(activity.layoutInflater, rootView, true)
         videoListBinding.videoOpt.setOnClickListener(onClickListener)
@@ -160,15 +166,17 @@ class RtcComponent(
         videoListBinding.enterFullScreen.setOnClickListener(onClickListener)
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adapter.listener = UserVideoAdapter.Listener { _, view, rtcUser ->
-            user = rtcUser
-            start.set(getViewRect(view, rootFullVideo))
-            end.set(0, 0, rootFullVideo.width, rootFullVideo.height)
+        adapter.listener = UserVideoAdapter.Listener { _, view, user ->
+            start.set(getViewRect(view, fullScreenLayout))
+            end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
 
-            if (videoListBinding.videoListOptArea.isVisible) {
-                hideVideoListOptArea()
-            } else {
+            if (userCallOut == null || userCallOut != user) {
+                userCallOut = user
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
                 showVideoListOptArea(start)
+            } else {
+                userCallOut = null
+                hideVideoListOptArea()
             }
         }
 
@@ -184,8 +192,12 @@ class RtcComponent(
         fullScreenAnimator = SimpleAnimator(
             onUpdate = ::updateView,
             onShowStart = {
+                fullScreenBinding.root.isVisible = true
                 fullScreenBinding.fullVideoView.isVisible = true
-                rtcVideoController.setupUserVideo(fullScreenBinding.fullVideoView, user.rtcUID, true)
+                userCallOut?.run {
+                    fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
+                    rtcVideoController.setupUserVideo(fullScreenBinding.fullVideoView, rtcUID, true)
+                }
             },
             onShowEnd = {
                 fullScreenBinding.fullVideoOptArea.isVisible = true
@@ -194,14 +206,18 @@ class RtcComponent(
                 fullScreenBinding.fullVideoOptArea.isVisible = false
             },
             onHideEnd = {
+                fullScreenBinding.root.isVisible = false
                 fullScreenBinding.fullVideoView.isVisible = false
+                fullScreenBinding.fullVideoDisableLayout.isVisible = false
                 rtcVideoController.exitFullScreen()
-                adapter.updateVideoView(user.rtcUID)
+                userCallOut?.run {
+                    adapter.updateVideoView(rtcUID)
+                }
             }
         )
     }
 
-    private fun getViewRect(view: ViewGroup, anchorView: View): Rect {
+    private fun getViewRect(view: View, anchorView: View): Rect {
         val array = IntArray(2)
         view.getLocationOnScreen(array)
 
@@ -217,41 +233,66 @@ class RtcComponent(
     }
 
     private fun showVideoListOptArea(videoArea: Rect) {
-        val layoutParams = videoListBinding.videoListOptArea.layoutParams as FrameLayout.LayoutParams
-        layoutParams.topMargin = videoArea.bottom
-        videoListBinding.videoListOptArea.layoutParams = layoutParams
+        videoListBinding.videoListOptArea.run {
+            val lp = layoutParams as FrameLayout.LayoutParams
+            lp.topMargin = videoArea.bottom
+            layoutParams = lp
+            isVisible = true
+        }
 
-        videoListBinding.videoListOptArea.isVisible = true
-        // TODO Need Update When Remote Change
-        videoListBinding.videoOpt.isSelected = user.videoOpen
-        videoListBinding.audioOpt.isSelected = user.audioOpen
-        fullScreenBinding.fullVideoOpt.isSelected = user.videoOpen
-        fullScreenBinding.fullAudioOpt.isSelected = user.audioOpen
+        updateCallOutUser()
+    }
+
+    // 更新显示浮窗及全屏按钮状态
+    private fun updateCallOutUser() = userCallOut?.run {
+        videoListBinding.videoOpt.isSelected = videoOpen
+        videoListBinding.audioOpt.isSelected = audioOpen
+        fullScreenBinding.fullVideoOpt.isSelected = videoOpen
+        fullScreenBinding.fullAudioOpt.isSelected = audioOpen
+
+        if (fullScreenBinding.fullVideoView.isVisible) {
+            fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
+        }
     }
 
     private fun hideVideoListOptArea() {
         videoListBinding.videoListOptArea.isVisible = false
     }
 
+    private fun handleAreaShown(areaId: Int) {
+        if (videoListBinding.videoListOptArea.isVisible) {
+            videoListBinding.videoListOptArea.isVisible = (areaId == ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
+        }
+    }
 
     private var start = Rect()
     private var end = Rect()
-    private lateinit var user: RtcUser
+    private var userCallOut: RtcUser? = null
 
     private fun updateView(value: Float) {
         val left = start.left + (end.left - start.left) * value
         val right = start.right + (end.right - start.right) * value
         val top = start.top + (end.top - start.top) * value
         val bottom = start.bottom + (end.bottom - start.bottom) * value
-
         Log.d(TAG, "left:$left,right:$right,top:$top,bottom:$bottom")
 
-        val layoutParams = fullScreenBinding.fullVideoView.layoutParams as ViewGroup.MarginLayoutParams
-        layoutParams.width = (right - left).toInt()
-        layoutParams.height = (bottom - top).toInt()
-        layoutParams.leftMargin = left.toInt()
-        layoutParams.topMargin = top.toInt()
-        fullScreenBinding.fullVideoView.layoutParams = layoutParams
+        fullScreenBinding.fullVideoView.run {
+            val lp = layoutParams as ViewGroup.MarginLayoutParams
+            lp.width = (right - left).toInt()
+            lp.height = (bottom - top).toInt()
+            lp.leftMargin = left.toInt()
+            lp.topMargin = top.toInt()
+            layoutParams = lp
+        }
+
+        fullScreenBinding.fullVideoDisableLayout.run {
+            val lp = layoutParams as ViewGroup.MarginLayoutParams
+            lp.width = (right - left).toInt()
+            lp.height = (bottom - top).toInt()
+            lp.leftMargin = left.toInt()
+            lp.topMargin = top.toInt()
+            layoutParams = lp
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {

@@ -26,6 +26,8 @@
     <string name="open_video" translatable="false">开启摄像头</string>
     <string name="open_audio" translatable="false">开启麦克风</string>
 
+    <string name="class_room_no_operate_permission" translatable="false">无法操作</string>
+
     <string name="home_room_list" translatable="false">房间列表</string>
     <string name="home_history_record" translatable="false">历史记录</string>
     <string name="home_room_state_idle" translatable="false">待开始</string>

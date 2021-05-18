@@ -42,7 +42,7 @@ import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.ui.viewmodel.UserViewModel
-import io.agora.flat.util.FlatDataTimeFormatter
+import io.agora.flat.util.FlatFormatter
 import java.util.*
 
 @AndroidEntryPoint
@@ -356,7 +356,7 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
                 }
             }（周期）"
             val desc =
-                "结束于 ${FlatDataTimeFormatter.longDateWithWeek(roomPeriodic.endTime)}，共 $number 场会议"
+                "结束于 ${FlatFormatter.longDateWithWeek(roomPeriodic.endTime)}，共 $number 场会议"
             Text(
                 weekInfo,
                 Modifier.padding(2.dp),
@@ -420,8 +420,8 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
             color = MaterialTheme.colors.surface,
             contentColor = contentColorFor(MaterialTheme.colors.surface)
         ) {
-            val timeDuring = "${FlatDataTimeFormatter.date(roomInfo.beginTime)} ${
-                FlatDataTimeFormatter.timeDuring(
+            val timeDuring = "${FlatFormatter.date(roomInfo.beginTime)} ${
+                FlatFormatter.timeDuring(
                     roomInfo.beginTime,
                     roomInfo.endTime
                 )
@@ -542,9 +542,9 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(horizontalAlignment = Alignment.End) {
-            Text(FlatDataTimeFormatter.time(begin), style = timeTextStyle)
+            Text(FlatFormatter.time(begin), style = timeTextStyle)
             FlatSmallVerticalSpacer()
-            Text(FlatDataTimeFormatter.formatLongDate(begin), style = dateTextStyle)
+            Text(FlatFormatter.formatLongDate(begin), style = dateTextStyle)
         }
         FlatLargeHorizontalSpacer()
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -556,7 +556,7 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    FlatDataTimeFormatter.diffTime(begin, end),
+                    FlatFormatter.diffTime(begin, end),
                     Modifier.padding(horizontal = 18.dp, vertical = 3.dp),
                     style = FlatSmallTextStyle,
                 )
@@ -566,9 +566,9 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         }
         FlatLargeHorizontalSpacer()
         Column(horizontalAlignment = Alignment.Start) {
-            Text(FlatDataTimeFormatter.time(end), style = timeTextStyle)
+            Text(FlatFormatter.time(end), style = timeTextStyle)
             FlatSmallVerticalSpacer()
-            Text(FlatDataTimeFormatter.formatLongDate(end), style = dateTextStyle)
+            Text(FlatFormatter.formatLongDate(end), style = dateTextStyle)
         }
     }
 }

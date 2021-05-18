@@ -37,8 +37,7 @@ import io.agora.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatRoomStatusText
 import io.agora.flat.ui.compose.FlatTopAppBar
-import io.agora.flat.util.formatToHHmm
-import io.agora.flat.util.formatToMMDDWeek
+import io.agora.flat.util.FlatFormatter
 
 @Composable
 fun Home() {
@@ -290,7 +289,7 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 )
                 Spacer(modifier = Modifier.size(4.dp))
                 Text(
-                    text = roomInfo.beginTime.formatToMMDDWeek(),
+                    text = FlatFormatter.dateMisc(roomInfo.beginTime),
                     style = typography.body1
                 )
             }
@@ -308,7 +307,7 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
             )
             Text(
                 modifier = Modifier.align(Alignment.BottomStart),
-                text = "${roomInfo.beginTime.formatToHHmm()} ~ ${roomInfo.endTime.formatToHHmm()}",
+                text = "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
                 style = typography.body2
             )
             FlatRoomStatusText(

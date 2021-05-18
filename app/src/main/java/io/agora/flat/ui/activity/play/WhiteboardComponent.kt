@@ -24,6 +24,7 @@ import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
+import io.agora.flat.util.showDebugToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -81,7 +82,7 @@ class WhiteboardComponent(
                         View.VISIBLE
                     }
                 }
-                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
             },
             binding.clear to {
                 binding.toolsLayout.visibility = View.GONE
@@ -104,7 +105,7 @@ class WhiteboardComponent(
                 binding.toolsSubLayout.apply {
                     visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 }
-                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_PAINT)
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT)
             },
             binding.toolsSubDelete to {
                 room?.deleteOperation()
@@ -280,7 +281,8 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.NoOptPermission -> activity.showDebugToast(R.string.class_room_no_operate_permission)
                     else -> {
                     }
                 }

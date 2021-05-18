@@ -4,28 +4,37 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-object FlatDataTimeFormatter {
+object FlatFormatter {
     private val timeFormatter = SimpleDateFormat("HH:mm")
-
-    private val dateFormatter = SimpleDateFormat("MM/dd")
-    private val longDateFormatter = SimpleDateFormat("yyyy/MM/dd")
-
-    private val longDateWithWeekFormatter = SimpleDateFormat("yyyy/MM/dd EE", Locale.CHINA)
+    private val dateFormat = SimpleDateFormat("MM/dd")
+    private val dateDashFormat = SimpleDateFormat("MM-dd")
+    private val dateMiscFormat = SimpleDateFormat("MM月dd日")
+    private val longDateFormat = SimpleDateFormat("yyyy/MM/dd")
+    private val longDateWithWeekFormat = SimpleDateFormat("yyyy/MM/dd EE", Locale.CHINA)
 
     fun time(utcMs: Long): String {
         return timeFormatter.format(utcMs)
     }
 
     fun date(utcMs: Long): String {
-        return dateFormatter.format(utcMs)
+        return dateFormat.format(utcMs)
+    }
+
+    fun dateDash(utcMs: Long): String {
+        return dateDashFormat.format(utcMs)
+    }
+
+    // TODO to Support locale
+    fun dateMisc(utcMs: Long): String {
+        return dateMiscFormat.format(utcMs)
     }
 
     fun formatLongDate(utcMs: Long): String {
-        return longDateFormatter.format(utcMs)
+        return longDateFormat.format(utcMs)
     }
 
     fun longDateWithWeek(utcMs: Long): String {
-        return longDateWithWeekFormatter.format(utcMs)
+        return longDateWithWeekFormat.format(utcMs)
     }
 
     fun timeDuring(begin: Long, end: Long): String {

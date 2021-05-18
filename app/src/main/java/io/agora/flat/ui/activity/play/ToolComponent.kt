@@ -38,7 +38,7 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.OperationAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                 }
             }
         }
@@ -73,7 +73,7 @@ class ToolComponent(
                         View.VISIBLE
                     }
                 }
-                viewModel.onOperationAreaShown(ClassRoomEvent.AREA_ID_SETTING)
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING)
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },

@@ -11,8 +11,8 @@
 
     <FrameLayout
         android:id="@+id/fullVideoDisableLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         tools:visibility="visible">
 
@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/img_room_video_closed_head"
+            android:background="@drawable/img_room_video_closed_head_big"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -61,14 +61,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="4dp"
-            android:src="@drawable/ic_room_video_closed" />
+            android:src="@drawable/ic_room_video_state_selector" />
 
         <ImageView
             android:id="@+id/fullAudioOpt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="4dp"
-            android:src="@drawable/ic_room_audio_closed" />
+            android:src="@drawable/ic_room_audio_state_selector" />
 
         <ImageView
             android:id="@+id/exitFullScreen"

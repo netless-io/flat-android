@@ -50,8 +50,9 @@ class ClassRoomViewModel @Inject constructor(
 
     private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
     val roomEvent = _roomEvent
-    val uuid = AtomicInteger(0)
+    private val eventId = AtomicInteger(0)
 
+    // TODO 是否能处理变量
     private var _roomConfig = MutableStateFlow(RoomConfig(""))
     val roomConfig = _roomConfig.asStateFlow()
 
@@ -68,9 +69,6 @@ class ClassRoomViewModel @Inject constructor(
                 roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
                     _roomPlayInfo.value = result.data
-                }
-                is ErrorResult -> {
-
                 }
             }
         }
@@ -104,38 +102,45 @@ class ClassRoomViewModel @Inject constructor(
         return _roomConfig.value.enableVideo
     }
 
-    fun enableVideo(enable: Boolean) {
+    fun enableVideo(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            val config = _roomConfig.value.copy(enableVideo = enable)
+            if (uuid == _state.value.currentUserUUID) {
+                val config = _roomConfig.value.copy(enableVideo = enable)
+                database.roomConfigDao().insertOrUpdate(config)
+                _roomConfig.value = config
+            }
 
-            database.roomConfigDao().insertOrUpdate(config)
-            _roomConfig.value = config
-
-            sendDeviceState(config)
+            _usersMap.value[uuid]?.run {
+                if (uuid == _state.value.currentUserUUID) {
+                    sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
+                } else if (isRoomOwner() && !enable) {
+                    sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
+                } else {
+                    // no permission
+                    onEvent(ClassRoomEvent.NoOptPermission(eventId.incrementAndGet()))
+                }
+            }
         }
     }
 
-    // 发送本地音视频状态更新消息
-    private suspend fun sendDeviceState(config: RoomConfig) {
-        val event = RTMEvent.DeviceState(
-            DeviceStateValue(
-                userUUID = appKVCenter.getUserInfo()!!.uuid,
-                camera = config.enableVideo,
-                mic = config.enableAudio
-            )
-        )
-        rtmApi.sendChannelCommand(event)
-        updateDeviceState(event.value)
-    }
-
-    fun enableAudio(enable: Boolean) {
+    fun enableAudio(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            val config = _roomConfig.value.copy(enableAudio = enable)
+            if (uuid == _state.value.currentUserUUID) {
+                val config = _roomConfig.value.copy(enableAudio = enable)
+                database.roomConfigDao().insertOrUpdate(config)
+                _roomConfig.value = config
+            }
 
-            database.roomConfigDao().insertOrUpdate(config)
-            _roomConfig.value = config
-
-            sendDeviceState(config)
+            _usersMap.value[uuid]?.run {
+                if (uuid == _state.value.currentUserUUID) {
+                    sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
+                } else if (isRoomOwner() && !enable) {
+                    sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
+                } else {
+                    // no permission
+                    onEvent(ClassRoomEvent.NoOptPermission(eventId.incrementAndGet()))
+                }
+            }
         }
     }
 
@@ -155,14 +160,30 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: ClassRoomEvent) {
+    private suspend fun sendAndUpdateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
+        val event = RTMEvent.DeviceState(
+            DeviceStateValue(
+                userUUID = userUUID,
+                camera = enableVideo,
+                mic = enableAudio
+            )
+        )
+        rtmApi.sendChannelCommand(event)
+        updateDeviceState(event.value)
+    }
+
+    private fun onEvent(event: ClassRoomEvent) {
         viewModelScope.launch {
             _roomEvent.value = event
         }
     }
 
-    fun onOperationAreaShown(areaId: Int) {
-        onEvent(ClassRoomEvent.OperationAreaShown(areaId))
+    fun notifyOperatingAreaShown(areaId: Int) {
+        onEvent(ClassRoomEvent.OperatingAreaShown(areaId))
+    }
+
+    fun notifyRTMChannelJoined() {
+        onEvent(ClassRoomEvent.RtmChannelJoined)
     }
 
     private fun addToCurrent(userMap: Map<String, RtcUser>) {
@@ -267,7 +288,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun isRoomOwner(): Boolean {
+    fun isRoomOwner(): Boolean {
         return _state.value.ownerUUID == _state.value.currentUserUUID
     }
 
@@ -393,11 +414,12 @@ sealed class ClassRoomEvent {
         const val AREA_ID_PAINT = 2
         const val AREA_ID_SETTING = 3
         const val AREA_ID_MESSAGE = 4
-        const val AREA_ID_CLOUD_STORAGE = 4
+        const val AREA_ID_CLOUD_STORAGE = 5
+        const val AREA_ID_VIDEO_OP_CALL_OUT = 6
     }
 
-    object EnterRoom : ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
     data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
-    data class OperationAreaShown(val areaId: Int) : ClassRoomEvent()
+    data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
+    data class NoOptPermission(val id: Int) : ClassRoomEvent()
 }

@@ -9,7 +9,7 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.util.formatToMMDD
+import io.agora.flat.util.FlatFormatter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -122,7 +122,7 @@ class HomeViewModel @Inject constructor(
     private fun addShowDayHeadFlag(list: List<RoomInfo>): List<RoomInfo> {
         var lastDay = ""
         list.forEach { roomInfo ->
-            val formatToMMDD = roomInfo.beginTime.formatToMMDD()
+            val formatToMMDD = FlatFormatter.dateDash(roomInfo.beginTime)
             if (formatToMMDD != lastDay) {
                 roomInfo.showDayHead = true
                 lastDay = formatToMMDD
