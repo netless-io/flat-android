@@ -7,14 +7,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -23,15 +31,15 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
+import io.agora.flat.Constants.Login.AUTH_ERROR
+import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.activity.ui.theme.FlatColorGray
-import io.agora.flat.ui.activity.ui.theme.FlatColorTextPrimary
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.theme.Shapes
-import io.agora.flat.ui.viewmodel.UserViewModel
+import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -41,10 +49,9 @@ class LoginActivity : ComponentActivity() {
         const val LOGIN_GITHUB = 2
     }
 
-    private val userViewModel: UserViewModel by viewModels()
+    private val viewModel: LoginViewModel by viewModels()
     private lateinit var api: IWXAPI
 
-    // TODO
     private var currentLogin = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,25 +79,57 @@ class LoginActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // TODO 暂时不抽取
+
+        handleLoginResult()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
+    private fun handleLoginResult() {
         when (currentLogin) {
             LOGIN_WECHAT -> {
-                if (userViewModel.isLoggedIn()) {
-                    loginSuccess()
+                if (!intent.hasExtra(Constants.Login.KEY_LOGIN_STATE)) {
+                    return
+                }
+                val state = intent.getIntExtra(Constants.Login.KEY_LOGIN_STATE, AUTH_ERROR)
+                if (state != AUTH_SUCCESS) {
+                    showToast(R.string.login_fail)
+                    return
+                }
+                lifecycleScope.launch {
+                    val code = intent.getStringExtra(Constants.Login.KEY_LOGIN_RESP) ?: "";
+                    if (viewModel.loginWeChatCallback(code)) {
+                        loginSuccess()
+                    } else {
+                        showToast(R.string.login_fail)
+                    }
                 }
             }
             LOGIN_GITHUB -> {
+                if (intent.data?.scheme != "x-agora-flat-client") {
+                    return
+                }
                 lifecycleScope.launch {
-                    if (userViewModel.loginProcess()) {
+                    if (viewModel.loginProcess()) {
                         loginSuccess()
+                    } else {
+                        showToast(R.string.login_fail)
                     }
                 }
             }
         }
     }
 
+
     private fun loginSuccess() {
-        Navigator.launchHomeActivity(this)
+        lifecycleScope.launch {
+            showToast(R.string.login_success_and_jump)
+            delay(2000);
+            Navigator.launchHomeActivity(this@LoginActivity)
+        }
     }
 
     private fun callWeChatLogin() {
@@ -104,21 +143,21 @@ class LoginActivity : ComponentActivity() {
     private fun callGithubLogin() {
         val intent = Intent().apply {
             action = Intent.ACTION_VIEW
-            data = Uri.parse(userViewModel.githubLoginUrl())
+            data = Uri.parse(viewModel.githubLoginUrl())
         }
         if (intent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(intent, "Choose Browser"))
+            startActivity(Intent.createChooser(intent, getString(R.string.login_github_browser_choose_title)))
         } else {
-            showToast("链接错误或无浏览器")
+            showToast(R.string.login_github_no_browser)
         }
     }
 
     private fun loginAfterSetAuthUUID(call: () -> Unit) {
         lifecycleScope.launch {
-            if (userViewModel.loginSetAuthUUID()) {
+            if (viewModel.loginSetAuthUUID()) {
                 call()
             } else {
-                showToast("set auth uuid error")
+                showToast(R.string.login_set_auth_uuid_error)
             }
         }
     }
@@ -126,48 +165,61 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
+    val typography = MaterialTheme.typography
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(120.dp))
         Image(painterResource(R.drawable.img_login_logo), null)
-        Box(modifier = Modifier.padding(vertical = 24.dp)) {
-            Text(text = "在线互动，让想法同步", style = FlatCommonTextStyle)
+        Text("Flat", Modifier.offset(y = (-16).dp), style = typography.h5)
+        Box(modifier = Modifier.padding(top = 12.dp)) {
+            Text(text = stringResource(id = R.string.login_page_label_1), style = FlatCommonTextStyle)
         }
         Spacer(modifier = Modifier.weight(1f))
-        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-            OutlinedButton(modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-                shape = Shapes.small,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
-                onClick = { actioner(LoginUIAction.WeChatLogin) }) {
-                Text(
-                    "微信登录",
-                    style = FlatCommonTextStyle,
-                    color = FlatColorTextPrimary
-                )
-            }
+        Row {
+            Image(
+                painterResource(R.drawable.ic_wechat_login),
+                modifier = Modifier.clickable(onClick = { actioner(LoginUIAction.WeChatLogin) }),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(48.dp))
+            Image(
+                painterResource(R.drawable.ic_github_login),
+                modifier = Modifier.clickable(onClick = { actioner(LoginUIAction.GithubLogin) }),
+                contentDescription = null
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-            OutlinedButton(modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-                shape = Shapes.small,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
-                onClick = { actioner(LoginUIAction.GithubLogin) }) {
-                Text(
-                    "Github 登录",
-                    style = FlatCommonTextStyle,
-                    color = FlatColorTextPrimary
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(100.dp))
         Box(modifier = Modifier.padding(vertical = 24.dp)) {
-            Text(text = "powered by Agora", style = FlatCommonTextStyle)
+            Text(text = stringResource(id = R.string.login_page_label_2), style = FlatCommonTextStyle)
         }
+    }
+}
+
+@Composable
+private fun ImageButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clickable(
+                onClick = onClick,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interactionSource,
+                indication = rememberRipple(bounded = false, radius = 32.dp)
+            )
+            .then(Modifier.size(64.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
+        CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
     }
 }
 

@@ -12,6 +12,10 @@ class Constants {
         private const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
         private const val GITHUB_CLIENT_ID_PROD = "71a29285a437998bdfe0"
 
+        // local 环境
+        // private const val FLAT_SERVER_URL_LOCAL = "https://api-flat-local.netless.group/"
+        // private const val GITHUB_CLIENT_ID_LOCAL = "d07230378ca29cef90ee"
+
         val FLAT_SERVICE_URL = if (useDev) FLAT_SERVER_URL_DEV else FLAT_SERVER_URL_PROD
 
         val GITHUB_CALLBACK = "${FLAT_SERVICE_URL}v1/login/github/callback"
@@ -27,5 +31,17 @@ class Constants {
     object IntentKey {
         const val ROOM_UUID = "room_uuid"
         const val PERIODIC_UUID = "periodic_uuid"
+    }
+
+    object Login {
+        const val AUTH_SUCCESS = 0;
+        const val AUTH_DENIED = 1;
+        const val AUTH_CANCEL = 2;
+        const val AUTH_ERROR = 3;
+
+        const val KEY_LOGIN_STATE = "login_state";
+        const val KEY_LOGIN_RESP = "login_resp";
+        const val KEY_ERROR_CODE = "error_code";
+        const val KEY_ERROR_MESSAGE = "error_message";
     }
 }

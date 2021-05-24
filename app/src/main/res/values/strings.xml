@@ -37,4 +37,12 @@
     <string name="title_activity_create_room" translatable="false">CreateRoomActivity</string>
     <string name="title_feedback" translatable="false">吐个槽</string>
     <string name="title_about_us" translatable="false">关于我们</string>
+
+    <string name="login_github_no_browser" translatable="false">链接错误或无浏览器</string>
+    <string name="login_github_browser_choose_title" translatable="false">Choose Browser</string>
+    <string name="login_set_auth_uuid_error" translatable="false">set auth uuid error</string>
+    <string name="login_page_label_1" translatable="false">在线互动，让想法同步</string>
+    <string name="login_page_label_2" translatable="false">powered by Agora</string>
+    <string name="login_success_and_jump" translatable="false">登录成功，跳转...</string>
+    <string name="login_fail" translatable="false">登录失败</string>
 </resources>

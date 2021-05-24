@@ -74,7 +74,7 @@ class UserRepository @Inject constructor(
             repeat(times) {
                 val result =
                     userService.loginProcess(AuthUUIDReq(authUUID)).executeOnce().toResult()
-                if (result is Success) {
+                if (result is Success && result.data.token.isNotBlank()) {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.mapToUserInfo())
                     return@withContext Success(true)
