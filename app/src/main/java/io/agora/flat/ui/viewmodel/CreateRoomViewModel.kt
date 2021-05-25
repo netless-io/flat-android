@@ -8,66 +8,50 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.util.ObservableLoadingCounter
+import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val userRepository: UserRepository,
     private val database: AppDatabase,
 ) : ViewModel() {
-    private val roomUUID = MutableStateFlow<String>("")
-    private val loading = MutableStateFlow(false)
-    private val loadingCount = AtomicInteger(0)
+    private val roomUUID = MutableStateFlow("")
+    private val loadingCounter = ObservableLoadingCounter();
 
     private val _state = MutableStateFlow(ViewState())
-
     val state: StateFlow<ViewState>
         get() = _state
 
     init {
         viewModelScope.launch {
-            combine(roomUUID, loading) { roomUUID, loading ->
-                ViewState(
-                    roomUUID = roomUUID,
-                    loading = loading
-                )
-            }.catch { throwable ->
-                throw throwable
+            combine(roomUUID, loadingCounter.observable) { roomUUID, loading ->
+                _state.value.copy(roomUUID = roomUUID, loading = loading)
             }.collect {
                 _state.value = it
             }
         }
-    }
-
-    private fun incLoadingCount() {
-        loadingCount.incrementAndGet()
-        loading.value = true
-    }
-
-    private fun decLoadingCount() {
-        if (loadingCount.decrementAndGet() == 0) {
-            loading.value = false
-        }
+        _state.value = _state.value.copy(username = "${userRepository.getUserInfo()?.name}")
     }
 
     fun createRoom(title: String, type: RoomType) {
         viewModelScope.launch {
-            incLoadingCount()
-            // TODO
-            delay(5000)
-            when (val result = roomRepository.createOrdinary(title, type)) {
+            loadingCounter.addLoader()
+            when (val result = runAtLeast { roomRepository.createOrdinary(title, type) }) {
                 is Success -> {
                     roomUUID.value = result.get().roomUUID
                 }
-                else -> {
-                }
             }
-            decLoadingCount()
+            loadingCounter.removeLoader()
         }
     }
 
@@ -82,6 +66,7 @@ data class ViewState(
     val roomUUID: String = "",
     val loading: Boolean = false,
     val state: Int = 0,
+    val username: String = "",
 ) {
     companion object {
         const val STATE_IDLE = 0;
@@ -89,10 +74,4 @@ data class ViewState(
         const val STATE_CREATE_SUCCESS = 1;
         const val STATE_CREATE_FAIL = 1;
     }
-}
-
-internal sealed class CreateRoomAction {
-    object Close : CreateRoomAction()
-    data class JoinRoom(val roomUUID: String, val openVideo: Boolean) : CreateRoomAction()
-    data class CreateRoom(val title: String, val roomType: RoomType) : CreateRoomAction()
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +29,6 @@ import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
 import io.agora.flat.ui.activity.ui.theme.FlatColorGray
 import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.viewmodel.CreateRoomAction
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.ui.viewmodel.ViewState
 
@@ -50,7 +50,7 @@ class CreateRoomActivity : ComponentActivity() {
                     }
                     is CreateRoomAction.CreateRoom -> viewModel.createRoom(
                         action.title,
-                        action.roomType
+                        action.roomType,
                     )
                 }
             }
@@ -60,7 +60,15 @@ class CreateRoomActivity : ComponentActivity() {
 
 @Composable
 private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
-    var title by remember { mutableStateOf("") }
+    var context = LocalContext.current
+    var title by remember {
+        mutableStateOf(
+            context.getString(
+                R.string.join_room_default_time_format,
+                viewState.username
+            )
+        )
+    }
     var type by remember { mutableStateOf(RoomType.OneToOne) }
     var openVideo by remember { mutableStateOf(false) }
 
@@ -88,11 +96,11 @@ private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) ->
                 placeholderValue = stringResource(R.string.create_room_input_topic_hint)
             )
             FlatNormalVerticalSpacer()
-            Text("类型")
+            Text(stringResource(R.string.create_room_type))
             FlatSmallVerticalSpacer()
             TypeCheckLayout(type) { type = it }
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.join_room_join_option))
+            Text(stringResource(R.string.join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
@@ -186,4 +194,10 @@ private fun TypeItem(
 @Preview
 private fun CreateRoomPagePreview() {
     CreateRoomPage(ViewState()) {}
+}
+
+internal sealed class CreateRoomAction {
+    object Close : CreateRoomAction()
+    data class JoinRoom(val roomUUID: String, val openVideo: Boolean) : CreateRoomAction()
+    data class CreateRoom(val title: String, val roomType: RoomType) : CreateRoomAction()
 }

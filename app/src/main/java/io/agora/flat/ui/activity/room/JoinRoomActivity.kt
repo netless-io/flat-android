@@ -99,7 +99,7 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
                 placeholderValue = stringResource(R.string.input_nickname_hint)
             )
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.join_room_join_option))
+            Text(stringResource(R.string.join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(

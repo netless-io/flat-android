@@ -12,6 +12,7 @@
     <string name="title_activity_compose_test">ComposeTestActivity</string>
     <string name="create_room" translatable="false">创建房间</string>
     <string name="create_room_topic" translatable="false">主题</string>
+    <string name="create_room_type" translatable="false">类型</string>
     <string name="create_room_input_topic_hint" translatable="false">请输入房间主题</string>
     <string name="join_room" translatable="false">加入房间</string>
     <string name="subscribe_room" translatable="false">预约房间</string>
@@ -22,7 +23,7 @@
     <string name="nickname" translatable="false">匿名</string>
     <string name="input_nickname_hint" translatable="false">请输入匿名</string>
     <string name="join_room_join" translatable="false">加入</string>
-    <string name="join_room_join_option" translatable="false">加入选项</string>
+    <string name="join_option" translatable="false">加入选项</string>
     <string name="open_video" translatable="false">开启摄像头</string>
     <string name="open_audio" translatable="false">开启麦克风</string>
 
@@ -45,4 +46,6 @@
     <string name="login_page_label_2" translatable="false">powered by Agora</string>
     <string name="login_success_and_jump" translatable="false">登录成功，跳转...</string>
     <string name="login_fail" translatable="false">登录失败</string>
+
+    <string name="join_room_default_time_format" translatable="false">%1$s创建的房间</string>
 </resources>
