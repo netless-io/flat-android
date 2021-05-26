@@ -305,10 +305,13 @@ class WhiteboardComponent(
 
     private fun setRoomWritable(writable: Boolean) {
         room?.setWritable(writable, object : Promise<Boolean> {
-            override fun then(p0: Boolean?) {
+            override fun then(result: Boolean) {
+                if (result) {
+                    room?.disableSerialization(false)
+                }
             }
 
-            override fun catchEx(p0: SDKError?) {
+            override fun catchEx(error: SDKError) {
             }
         })
     }
@@ -416,7 +419,6 @@ class WhiteboardComponent(
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
             this@WhiteboardComponent.room = room
-            room.disableSerialization(false)
             // On Room Ready
             room.getRoomState(object : Promise<RoomState> {
                 override fun then(roomState: RoomState) {
