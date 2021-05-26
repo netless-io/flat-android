@@ -13,7 +13,9 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.AppModule
+import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.event.HomeRefreshEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,8 @@ class ClassRoomViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val database: AppDatabase,
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
-    private val rtmApi: RtmEngineProvider
+    private val rtmApi: RtmEngineProvider,
+    private val eventbus: EventBus,
 ) : ViewModel() {
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
@@ -94,14 +97,6 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun isVideoEnable(): Boolean {
-        return _roomConfig.value.enableVideo
-    }
-
-    fun isAudioEnable(): Boolean {
-        return _roomConfig.value.enableVideo
-    }
-
     fun enableVideo(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
         viewModelScope.launch(Dispatchers.IO) {
             if (uuid == _state.value.currentUserUUID) {
@@ -148,7 +143,16 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = roomRepository.getRoomUsers(roomUUID, usersUUIDs)) {
                 is Success -> {
-                    result.data.forEach { (uuid, user) -> user.userUUID = uuid }
+                    result.data.forEach { (uuid, user) ->
+                        run {
+                            user.userUUID = uuid
+                            if (user.userUUID == _state.value.currentUserUUID) {
+                                user.audioOpen = _roomConfig.value.enableAudio
+                                user.videoOpen = _roomConfig.value.enableVideo
+                            }
+                        }
+                    }
+
                     addToCache(result.data)
                     addToCurrent(result.data)
                     cont.resume(true)
@@ -188,12 +192,12 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun addToCurrent(userMap: Map<String, RtcUser>) {
         val map = _usersMap.value.toMutableMap()
-        userMap.forEach { (uuid, user) -> map[uuid] = user }
+        userMap.forEach { (uuid, user) -> map[uuid] = user.copy() }
         _usersMap.value = map
     }
 
     private fun addToCache(userMap: Map<String, RtcUser>) {
-        userMap.forEach { (uuid, user) -> _usersCacheMap[uuid] = user }
+        userMap.forEach { (uuid, user) -> _usersCacheMap[uuid] = user.copy() }
     }
 
     fun removeRtmMember(userUUID: String) {
@@ -346,6 +350,11 @@ class ClassRoomViewModel @Inject constructor(
             is RTMEvent.RoomStatus -> {
                 if (senderId == _state.value.ownerUUID) {
                     _state.value = _state.value.copy(roomStatus = event.roomStatus)
+                    if (_state.value.roomStatus == RoomStatus.Stopped) {
+                        viewModelScope.launch {
+                            eventbus.produceEvent(HomeRefreshEvent())
+                        }
+                    }
                 }
             }
             is RTMEvent.Speak -> {
@@ -405,7 +414,7 @@ data class ClassRoomState(
     // 禁用
     val ban: Boolean = true,
     // 交互模式
-    val classMode: ClassModeType = ClassModeType.Lecture,
+    val classMode: ClassModeType = ClassModeType.Interaction,
 )
 
 sealed class ClassRoomEvent {

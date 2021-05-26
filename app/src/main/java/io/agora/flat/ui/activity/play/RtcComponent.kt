@@ -77,6 +77,7 @@ class RtcComponent(
             viewModel.usersMap.collect { it ->
                 Log.d(TAG, "currentUsersMap $it")
                 adapter.setDataSet(ArrayList(it.values))
+                // 处理用户进出时的显示
                 val findUser = userCallOut?.run {
                     it.values.find { it.userUUID == this.userUUID }
                 }

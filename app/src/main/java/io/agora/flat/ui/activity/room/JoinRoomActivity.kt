@@ -42,6 +42,7 @@ class JoinRoomActivity : ComponentActivity() {
                             action.openAudio
                         )
                         Navigator.launchRoomPlayActivity(this, roomUUID = action.roomUUID)
+                        finish()
                     }
                     JoinRoomAction.CheckClipboardText -> viewModel.checkClipboardText()
                 }

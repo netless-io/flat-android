@@ -10,8 +10,10 @@ import io.agora.flat.common.FlatException
 import io.agora.flat.common.RTMListener
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.model.RTMEvent
+import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.util.delayAndFinish
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.ResultCallback
 import kotlinx.coroutines.flow.collect
@@ -48,6 +50,14 @@ class RtmComponent(
                 }
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.state.collect {
+                if (it.roomStatus == RoomStatus.Stopped) {
+                    activity.delayAndFinish(message = "房间结束，退出中...")
+                }
+            }
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -67,7 +77,7 @@ class RtmComponent(
     private val flatRTMListener = object : RTMListener {
         override fun onRTMEvent(event: RTMEvent, senderId: String) {
             Log.d(TAG, "event is $event")
-            viewModel.onRTMEvent(event,senderId)
+            viewModel.onRTMEvent(event, senderId)
         }
 
         override fun onMemberJoined(userId: String, channelId: String) {
