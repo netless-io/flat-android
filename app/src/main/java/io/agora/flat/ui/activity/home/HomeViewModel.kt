@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,7 +10,10 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.event.HomeRefreshEvent
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.ObservableLoadingCounter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,20 +25,24 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val eventBus: EventBus,
     private val appKVCenter: AppKVCenter
 ) : ViewModel() {
+    companion object {
+        val TAG = HomeViewModel.javaClass.simpleName;
+    }
+
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
     private val selectedCategory = MutableStateFlow(RoomCategory.Current)
     private val roomList = MutableStateFlow(listOf<RoomInfo>())
     private val roomHistoryList = MutableStateFlow(listOf<RoomInfo>())
-    private val refreshing = MutableStateFlow(false)
+    private val refreshing = ObservableLoadingCounter()
 
     private val _state = MutableStateFlow(HomeViewState())
 
     val state: StateFlow<HomeViewState>
         get() = _state
 
-    // TODO
     private var page: Int = 1;
     private var historyPage: Int = 1;
 
@@ -44,7 +52,7 @@ class HomeViewModel @Inject constructor(
                 selectedCategory,
                 roomList,
                 roomHistoryList,
-                refreshing,
+                refreshing.observable,
                 userInfo,
             ) { selectedCategory, roomLists, roomHistoryList, refreshing, userInfo ->
                 HomeViewState(
@@ -53,12 +61,16 @@ class HomeViewModel @Inject constructor(
                     roomHistoryList = roomHistoryList,
                     refreshing = refreshing,
                     userInfo = userInfo,
-                    errorMessage = null /* TODO */
+                    errorMessage = null,
                 )
-            }.catch { throwable ->
-                throw throwable
             }.collect {
                 _state.value = it
+            }
+        }
+
+        viewModelScope.launch {
+            eventBus.events.filter { it is HomeRefreshEvent }.collect {
+                reloadRoomList()
             }
         }
 
@@ -70,24 +82,22 @@ class HomeViewModel @Inject constructor(
     }
 
     fun reloadRoomList() {
+        Log.d(TAG, "reload room list start")
         viewModelScope.launch {
-            refreshing.value = true
-            // TODO
-            loadRooms()
-            loadHistoryRooms()
+            refreshing.addLoader()
+            reloadRooms()
+            reloadHistoryRooms()
             delay(2000)
-            refreshing.value = false
+            refreshing.removeLoader()
         }
     }
 
-    fun loadRooms() {
+    private fun reloadRooms() {
         viewModelScope.launch {
             when (val response = roomRepository.getRoomListAll(page)) {
                 is Success -> {
-                    // val list = ArrayList(response.data) + roomList.value
                     val list = ArrayList(response.data)
-                    addShowDayHeadFlag(list)
-                    roomList.value = list
+                    roomList.value = addShowDayHeadFlag(list)
                 }
                 is ErrorResult -> {
                     when (response.error.status) {
@@ -98,14 +108,20 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun loadHistoryRooms() {
+    fun loadMoreRooms() {
+
+    }
+
+    fun loadMoreHistoryRooms() {
+
+    }
+
+    private fun reloadHistoryRooms() {
         viewModelScope.launch {
             when (val response = roomRepository.getRoomListHistory(historyPage)) {
                 is Success -> {
-                    // val list = ArrayList(response.data) + roomHistoryList.value
                     val list = ArrayList(response.data)
-                    addShowDayHeadFlag(list)
-                    roomHistoryList.value = list
+                    roomHistoryList.value = addShowDayHeadFlag(list)
                 }
                 is ErrorResult -> {
                     when (response.error.status) {

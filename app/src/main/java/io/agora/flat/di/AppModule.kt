@@ -14,6 +14,7 @@ import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.RtcProviderImpl
 import io.agora.flat.di.impl.RtmProviderImpl
+import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
@@ -59,6 +60,12 @@ class AppModule {
         return RtmProviderImpl()
     }
 
+    @Singleton
+    @Provides
+    fun providerEventBus(): EventBus {
+        return EventBus()
+    }
+    
     /**
      * StartupInitializer Set
      */

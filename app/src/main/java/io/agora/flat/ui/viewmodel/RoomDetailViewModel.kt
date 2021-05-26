@@ -4,8 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import io.agora.flat.Constants
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomDetailPeriodic
@@ -13,13 +11,18 @@ import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.event.HomeRefreshEvent
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @HiltViewModel
 class RoomDetailViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val eventBus: EventBus,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val roomInfo = MutableStateFlow<UIRoomInfo?>(null)
     private val periodicRoomInfo = MutableStateFlow<RoomDetailPeriodic?>(null)
@@ -27,7 +30,6 @@ class RoomDetailViewModel @Inject constructor(
     private val loadingCount = AtomicInteger(0)
 
     private val _state = MutableStateFlow(RoomDetailViewState())
-
     val state: StateFlow<RoomDetailViewState>
         get() = _state
 
@@ -122,8 +124,9 @@ class RoomDetailViewModel @Inject constructor(
             }
             if (resp is Success) {
                 _cancelSuccess.value = true
+                eventBus.produceEvent(HomeRefreshEvent())
             } else {
-
+                // show cancel error
             }
             decLoadingCount()
         }
