@@ -46,7 +46,7 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            HomePage()
+            MainPage()
         }
 
         registerToWx()
@@ -91,7 +91,7 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomePage() {
+fun MainPage() {
     val viewModel = viewModel(MainViewModel::class.java)
     val mainTab by viewModel.mainTab.collectAsState()
     val loginState by viewModel.loginState.collectAsState()
