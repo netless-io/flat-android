@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
+import io.agora.flat.common.ClipboardController
 import io.agora.flat.common.FlatException
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppKVCenter
@@ -35,6 +36,7 @@ class ClassRoomViewModel @Inject constructor(
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
     private val rtmApi: RtmEngineProvider,
     private val eventbus: EventBus,
+    val clipboard: ClipboardController
 ) : ViewModel() {
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
@@ -60,12 +62,16 @@ class ClassRoomViewModel @Inject constructor(
     val roomConfig = _roomConfig.asStateFlow()
 
     var roomUUID: String
-    var currentUserUUID: String
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
-        currentUserUUID = appKVCenter.getUserInfo()!!.uuid
-        _state = MutableStateFlow(ClassRoomState(roomUUID = roomUUID, currentUserUUID = currentUserUUID))
+        _state = MutableStateFlow(
+            ClassRoomState(
+                roomUUID = roomUUID,
+                currentUserUUID = appKVCenter.getUserInfo()!!.uuid,
+                currentUserName = appKVCenter.getUserInfo()!!.name
+            )
+        )
 
         viewModelScope.launch {
             when (val result =
@@ -306,7 +312,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.RequestChannelStatus -> {
                 updateUserState(event.value.roomUUID, event.value.user)
-                if (event.value.userUUIDs.contains(currentUserUUID)) {
+                if (event.value.userUUIDs.contains(_state.value.currentUserUUID)) {
                     sendChannelStatus(senderId)
                 }
             }
@@ -390,6 +396,10 @@ class ClassRoomViewModel @Inject constructor(
             rtmApi.sendPeerCommand(channelState, senderId)
         }
     }
+
+    fun onCopyText(text: String) {
+        clipboard.putText(text)
+    }
 }
 
 data class ClassRoomState(
@@ -403,6 +413,8 @@ data class ClassRoomState(
     val ownerUUID: String = "",
     // 当前用户
     val currentUserUUID: String = "",
+    // 当前用户名
+    val currentUserName: String = "",
     // 房间所有者的名称
     val ownerName: String? = null,
     // 房间标题

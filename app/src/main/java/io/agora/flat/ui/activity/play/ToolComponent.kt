@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -8,10 +9,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showDebugToast
+import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -64,7 +68,7 @@ class ToolComponent(
             binding.message to {},
             binding.cloudservice to { activity.showDebugToast("uploadFile") },
             // binding.video to { viewModel.changeVideoDisplay() },
-            binding.invite to { activity.showDebugToast("show invite dialog") },
+            binding.invite to { showInviteDialog() },
             binding.setting to {
                 binding.settingLayout.apply {
                     visibility = if (visibility == View.VISIBLE) {
@@ -109,6 +113,44 @@ class ToolComponent(
         binding.switchAudio.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAudio(isChecked)
         }
+    }
+
+    private fun showInviteDialog() {
+        val state = viewModel.state.value
+        val inviteTitle = "${state.currentUserName} 邀请你加入 Flat 房间"
+        val roomTime = "${FlatFormatter.date(state.beginTime)} ${
+            FlatFormatter.timeDuring(
+                state.beginTime,
+                state.endTime
+            )
+        }"
+
+        val copyText = """
+                            |$inviteTitle
+                            |房间主题：${state.title}
+                            |开始时间：${roomTime}
+                            |房间号：${state.roomUUID}
+                            |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
+                        """.trimMargin()
+
+        val dialog = InviteDialog()
+        dialog.arguments = Bundle().apply {
+            putString(InviteDialog.INVITE_TITLE, inviteTitle)
+            putString(InviteDialog.ROOM_TITLE, state.title)
+            putString(InviteDialog.ROOM_NUMBER, state.roomUUID.substringAfterLast("-"))
+            putString(InviteDialog.ROOM_TIME, roomTime)
+        }
+        dialog.setListener(object : InviteDialog.Listener {
+            override fun onCopy() {
+                viewModel.onCopyText(copyText)
+                activity.showToast("复制成功")
+            }
+
+            override fun onHide() {
+
+            }
+        })
+        dialog.show(activity.supportFragmentManager, "InviteDialog")
     }
 
     private val expandHeight = activity.dp2px(128)

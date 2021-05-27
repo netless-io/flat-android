@@ -43,6 +43,7 @@ import io.agora.flat.ui.viewmodel.RoomDetailViewModel
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.showToast
 import java.util.*
 
 @AndroidEntryPoint
@@ -383,10 +384,16 @@ private fun Operations(
 ) = when (roomInfo.roomStatus) {
     RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
         Column(modifier) {
-            val openDialog = remember { mutableStateOf(false) }
+            var openDialog = remember { mutableStateOf(false) }
+            val clipboard = rememberAndroidClipboardController()
+            val context = LocalContext.current
 
             if (openDialog.value) {
-                InviteDialog(openDialog, roomInfo)
+                InviteDialog(openDialog, roomInfo) {
+                    clipboard.putText(it)
+                    openDialog.value = false
+                    context.showToast("复制成功")
+                }
             }
 
             FlatSecondaryTextButton(text = "邀请", onClick = { openDialog.value = true })
@@ -409,8 +416,7 @@ private fun Operations(
 }
 
 @Composable
-private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo) {
-    val clipboard = rememberAndroidClipboardController()
+private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo, onCopy: (String) -> Unit) {
     val viewModel: UserViewModel = viewModel()
     val username = viewModel.userInfo.value!!.name
 
@@ -434,8 +440,6 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
                             |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
                         """.trimMargin()
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                val enabled = remember { mutableStateOf(true) }
-
                 Text("$username 邀请您参加 Flat 房间")
                 FlatLargeVerticalSpacer()
                 Box(Modifier.fillMaxWidth()) {
@@ -457,12 +461,8 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
                 }
                 FlatLargeVerticalSpacer()
                 FlatPrimaryTextButton(
-                    text = if (enabled.value) "复制邀请链接" else "已经复制",
-                    enabled = enabled.value,
-                    onClick = {
-                        enabled.value = false
-                        clipboard.putText(copyText)
-                    },
+                    text = "复制邀请链接",
+                    onClick = { onCopy(copyText) },
                 )
             }
         }
