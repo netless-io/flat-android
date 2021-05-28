@@ -23,7 +23,7 @@ class InviteDialog : DialogFragment(R.layout.dialog_invite) {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         // TODO Dialog导致的Window切换处理
-        dialog.window?.setFlags(FLAG_NOT_FOCUSABLE, FLAG_NOT_FOCUSABLE)
+        // dialog.window?.setFlags(FLAG_NOT_FOCUSABLE, FLAG_NOT_FOCUSABLE)
         return dialog
     }
 

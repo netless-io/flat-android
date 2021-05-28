@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlueAlpha50
+import io.agora.flat.ui.activity.ui.theme.FlatColorWhite
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPageLoading
 import kotlinx.coroutines.flow.collect
@@ -120,12 +121,17 @@ private fun FlatHomeBottomBar(
     selectedTab: MainTab,
     onTabSelected: (MainTab) -> Unit
 ) {
-    val homeResId =
-        if (selectedTab == MainTab.Home) R.drawable.ic_home_main_selected else R.drawable.ic_home_main_normal
-    val csResId =
-        if (selectedTab == MainTab.CloudStorage) R.drawable.ic_home_cloudstorage_selected else R.drawable.ic_home_cloudstorage_normal
+    val homeResId = when (selectedTab) {
+        MainTab.Home -> R.drawable.ic_home_main_selected
+        MainTab.CloudStorage -> R.drawable.ic_home_main_normal
+    }
+    val csResId = when (selectedTab) {
+        MainTab.CloudStorage -> R.drawable.ic_home_cloudstorage_selected
+        MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
+    }
 
-    BottomAppBar(elevation = 0.dp, backgroundColor = FlatColorBlueAlpha50) {
+    Divider()
+    BottomAppBar(elevation = 0.dp, backgroundColor = FlatColorWhite) {
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { onTabSelected(MainTab.Home) }) {
                 Image(painterResource(homeResId), null)

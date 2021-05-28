@@ -5,7 +5,7 @@
             <item>
                 <shape android:shape="rectangle"></shape>
             </item>
-            <item android:bottom="3dp"  android:top="3dp" android:left="8dp" android:right="8dp">
+            <item android:bottom="3dp" android:left="8dp" android:right="8dp" android:top="3dp">
                 <shape android:shape="rectangle">
                     <solid android:color="#60000000" />
                     <corners android:radius="12dp" />
@@ -19,7 +19,7 @@
             <item>
                 <shape android:shape="rectangle"></shape>
             </item>
-            <item android:bottom="3dp"  android:top="3dp" android:left="8dp" android:right="8dp">
+            <item android:bottom="3dp" android:left="8dp" android:right="8dp" android:top="3dp">
                 <shape android:shape="rectangle">
                     <solid android:color="#603381FF" />
                     <corners android:radius="12dp" />

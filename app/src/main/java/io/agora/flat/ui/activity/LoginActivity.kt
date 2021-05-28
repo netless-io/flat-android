@@ -174,9 +174,7 @@ private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
         Spacer(modifier = Modifier.height(120.dp))
         Image(painterResource(R.drawable.img_login_logo), null)
         Text("Flat", Modifier.offset(y = (-16).dp), style = typography.h5)
-        Box(modifier = Modifier.padding(top = 12.dp)) {
-            Text(text = stringResource(id = R.string.login_page_label_1), style = FlatCommonTextStyle)
-        }
+        Text(text = stringResource(id = R.string.login_page_label_1), style = FlatCommonTextStyle)
         Spacer(modifier = Modifier.weight(1f))
         Row {
             Image(
