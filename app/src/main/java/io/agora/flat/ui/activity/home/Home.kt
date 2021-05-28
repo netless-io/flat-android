@@ -181,22 +181,21 @@ fun HomeRoomLists(
             Modifier.fillMaxWidth()
         )
 
-        when (selectedHomeCategory) {
-            RoomCategory.Current -> {
-                CurrentRoomList(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f), roomList
-                )
-            }
-            RoomCategory.History -> {
-                CurrentRoomList(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f), roomHistory
-                )
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            when (selectedHomeCategory) {
+                RoomCategory.Current -> {
+                    RoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current)
+                }
+                RoomCategory.History -> {
+                    RoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History)
+                }
             }
         }
+
     }
 }
 
@@ -248,14 +247,28 @@ fun HomeTabIndicator(
     Spacer(
         modifier
             .height(2.dp)
-            .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100))
+            .background(
+                color,
+                RoundedCornerShape(topStartPercent = 100, topEndPercent = 100),
+            )
     )
 }
 
 @Composable
-fun CurrentRoomList(modifier: Modifier, roomList: List<RoomInfo>) {
+fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategory) {
     val context = LocalContext.current
 
+    if (roomList.isEmpty()) {
+        val imgRes = when (category) {
+            RoomCategory.Current -> R.drawable.img_home_no_room
+            RoomCategory.History -> R.drawable.img_home_no_history
+        }
+        val message = when (category) {
+            RoomCategory.Current -> R.string.home_no_room_tip
+            RoomCategory.History -> R.string.home_no_history_room_tip
+        }
+        EmptyView(imgRes, message, modifier)
+    }
     LazyColumn(modifier) {
         items(count = roomList.size, key = { index: Int ->
             roomList[index].roomUUID
