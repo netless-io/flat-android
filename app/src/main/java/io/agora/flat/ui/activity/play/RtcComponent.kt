@@ -261,8 +261,9 @@ class RtcComponent(
     }
 
     private fun handleAreaShown(areaId: Int) {
-        if (videoListBinding.videoListOptArea.isVisible) {
-            videoListBinding.videoListOptArea.isVisible = (areaId == ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
+        if (areaId != ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT) {
+            hideVideoListOptArea()
+            userCallOut = null
         }
     }
 

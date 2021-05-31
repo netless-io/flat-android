@@ -56,8 +56,9 @@ class ToolComponent(
     }
 
     private fun handleAreaShown(areaId: Int) {
-        if (binding.settingLayout.isVisible) {
-            binding.settingLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_SETTING)
+        if (areaId != ClassRoomEvent.AREA_ID_SETTING) {
+            binding.settingLayout.isVisible = false
+            binding.setting.isSelected = false
         }
     }
 
@@ -65,25 +66,23 @@ class ToolComponent(
         binding = ComponentToolBinding.inflate(activity.layoutInflater, rootView, true)
 
         val map: Map<View, (View) -> Unit> = mapOf(
-            binding.message to {},
-            binding.cloudservice to { activity.showDebugToast("uploadFile") },
-            // binding.video to { viewModel.changeVideoDisplay() },
-            binding.invite to { showInviteDialog() },
+            binding.message to { activity.showDebugToast("Not Supported Yet") },
+            binding.cloudservice to { activity.showDebugToast("Not Supported Yet") },
+            binding.invite to {
+                showInviteDialog()
+                binding.invite.isSelected = true
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG)
+            },
             binding.setting to {
                 binding.settingLayout.apply {
-                    visibility = if (visibility == View.VISIBLE) {
-                        View.GONE
-                    } else {
-                        View.VISIBLE
-                    }
+                    isVisible = !isVisible
+                    binding.setting.isSelected = isVisible
                 }
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING)
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
-            binding.exit to {
-                activity.finish()
-            }
+            binding.exit to { activity.finish() },
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
@@ -147,7 +146,7 @@ class ToolComponent(
             }
 
             override fun onHide() {
-
+                binding.invite.isSelected = false
             }
         })
         dialog.show(activity.supportFragmentManager, "InviteDialog")

@@ -41,14 +41,14 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_invite_normal" />
+                android:src="@drawable/ic_toolbox_ext_invite_selector" />
 
             <ImageView
                 android:id="@+id/setting"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_setting" />
+                android:src="@drawable/ic_toolbox_ext_setting_selector" />
         </LinearLayout>
 
         <FrameLayout

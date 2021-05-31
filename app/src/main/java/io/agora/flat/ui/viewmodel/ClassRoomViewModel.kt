@@ -437,6 +437,7 @@ sealed class ClassRoomEvent {
         const val AREA_ID_MESSAGE = 4
         const val AREA_ID_CLOUD_STORAGE = 5
         const val AREA_ID_VIDEO_OP_CALL_OUT = 6
+        const val AREA_ID_INVITE_DIALOG = 7
     }
 
     object RtmChannelJoined : ClassRoomEvent()

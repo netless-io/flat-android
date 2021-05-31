@@ -27,16 +27,6 @@ class ClassRoomActivity : AppCompatActivity() {
         componentSet.forEach { lifecycle.addObserver(it) }
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            hideSystemUI()
-        }
-    }
     private fun initSystemUI() {
         supportActionBar?.hide()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

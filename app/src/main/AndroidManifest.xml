@@ -34,7 +34,8 @@
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.FlatAndroid.Fullscreen" />
         <activity
             android:name=".ui.activity.playback.PlaybackActivity"
             android:exported="true" />
