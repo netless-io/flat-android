@@ -18,9 +18,10 @@ import com.herewhite.sdk.domain.*
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
-import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.databinding.ComponentWhiteboardBinding
+import io.agora.flat.databinding.LayoutScenePreviewBinding
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
@@ -32,16 +33,15 @@ import java.util.*
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
-    rootView: FrameLayout
+    rootView: FrameLayout,
+    private val scenePreview: FrameLayout
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName
-
-        // TODO fix by sdk update
-        const val CLICKER = "clicker"
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
+    private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var whiteSdk: WhiteSdk
@@ -60,6 +60,7 @@ class WhiteboardComponent(
 
     private fun initView() {
         binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
+        scenePreviewBinding = LayoutScenePreviewBinding.inflate(activity.layoutInflater, scenePreview, true)
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.undo to { room?.undo() },
             binding.redo to { room?.redo() },
@@ -71,17 +72,31 @@ class WhiteboardComponent(
                     room?.setSceneIndex(scenes.size - 1, null)
                 }
             },
-            binding.reset to { room?.scalePptToFit() },
+            binding.reset to {
+                room?.getSceneState(object : Promise<SceneState> {
+                    override fun then(sceneState: SceneState) {
+                        val scene = sceneState.scenes[sceneState.index]
+                        if (scene.ppt != null) {
+                            room?.scalePptToFit()
+                        } else {
+                            room?.moveCamera(CameraConfig().apply {
+                                scale = 1.0
+                                centerX = 0.0
+                                centerY = 0.0
+                                animationMode = AnimationMode.Continuous
+                            })
+                        }
+                    }
+
+                    override fun catchEx(t: SDKError?) {
+                    }
+                })
+            },
             binding.showScenes to { previewSlide() },
 
             binding.tools to {
-                binding.toolsLayout.apply {
-                    visibility = if (visibility == View.VISIBLE) {
-                        View.GONE
-                    } else {
-                        View.VISIBLE
-                    }
-                }
+                binding.toolsLayout.apply { isVisible = !isVisible }
+
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
             },
             binding.clear to {
@@ -90,7 +105,7 @@ class WhiteboardComponent(
                 room?.cleanScene(true)
             },
             binding.hand to { onSelectAppliance(Appliance.HAND) },
-            binding.clicker to { onSelectAppliance(CLICKER) },
+            binding.clicker to { onSelectAppliance(Appliance.CLICKER) },
             binding.text to { onSelectAppliance(Appliance.TEXT) },
             binding.selector to { onSelectAppliance(Appliance.SELECTOR) },
             binding.eraser to { onSelectAppliance(Appliance.ERASER) },
@@ -102,25 +117,24 @@ class WhiteboardComponent(
             binding.line to { onSelectAppliance(Appliance.STRAIGHT) },
 
             binding.toolsSubPaint to {
-                binding.toolsSubLayout.apply {
-                    visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                }
+                binding.toolsSubLayout.apply { isVisible = !isVisible }
+
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT)
             },
             binding.toolsSubDelete to {
                 room?.deleteOperation()
             },
             // slide
-            binding.scenePreview to {
+            scenePreviewBinding.root to {
 
             },
-            binding.sceneAdd to {
+            scenePreviewBinding.sceneAdd to {
                 addSlideToNext()
             },
-            binding.sceneDelete to {
+            scenePreviewBinding.sceneDelete to {
                 deleteCurrentSlide()
             },
-            binding.sceneCover to {
+            scenePreviewBinding.sceneCover to {
                 slideAnimator.hide()
             }
         )
@@ -130,7 +144,7 @@ class WhiteboardComponent(
         colorAdapter = ColorAdapter(ColorItem.colors)
         colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
             override fun onColorSelected(item: ColorItem) {
-                binding.toolsSubLayout.visibility = View.GONE
+                binding.toolsSubLayout.isVisible = false
                 room?.memberState = room?.memberState?.apply {
                     strokeColor = item.color
                 }
@@ -141,7 +155,6 @@ class WhiteboardComponent(
         binding.colorRecyclerView.layoutManager = GridLayoutManager(activity, 4)
         binding.seeker.setOnStrokeChangedListener(object : StrokeSeeker.OnStrokeChangedListener {
             override fun onStroke(width: Int) {
-                Log.e("Test", "stroke $width")
                 room?.memberState = room?.memberState?.apply {
                     strokeWidth = width.toDouble()
                 }
@@ -154,22 +167,24 @@ class WhiteboardComponent(
                 room?.setSceneIndex(index, null)
             }
         })
-        binding.sceneRecyclerView.adapter = slideAdapter
-        binding.sceneRecyclerView.layoutManager =
+        scenePreviewBinding.sceneRecyclerView.adapter = slideAdapter
+        scenePreviewBinding.sceneRecyclerView.layoutManager =
             LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
+        scenePreviewBinding.sceneRecyclerView.addItemDecoration(PaddingItemDecoration(horizontal = activity.dp2px(8)))
+
         slideAnimator = SimpleAnimator(
             onUpdate = ::updateSlide,
             onShowStart = {
-                binding.scenePreviewLayout.visibility = View.VISIBLE
+                scenePreview.isVisible = true
             },
             onHideEnd = {
-                binding.scenePreviewLayout.visibility = View.GONE
+                scenePreview.isVisible = false
             }
         )
     }
 
     private fun onSelectAppliance(appliance: String) {
-        binding.toolsLayout.visibility = View.GONE
+        binding.toolsLayout.isVisible = false
         updateApplicance(appliance)
         room?.memberState = MemberState().apply {
             currentApplianceName = appliance
@@ -185,7 +200,7 @@ class WhiteboardComponent(
                 binding.toolsSubDelete.visibility = View.VISIBLE
                 binding.toolsSubPaint.visibility = View.GONE
             }
-            Appliance.LASER_POINTER, Appliance.ERASER, Appliance.HAND, CLICKER -> {
+            Appliance.LASER_POINTER, Appliance.ERASER, Appliance.HAND, Appliance.CLICKER -> {
                 binding.toolsSub.visibility = View.INVISIBLE
             }
             else -> {
@@ -199,11 +214,11 @@ class WhiteboardComponent(
     private val previewWidth = activity.dp2px(128)
 
     private fun updateSlide(value: Float) {
-        val layoutParams = binding.scenePreview.layoutParams
+        val layoutParams = scenePreviewBinding.scenePreview.layoutParams
         layoutParams.height = (previewWidth * value).toInt()
-        binding.scenePreview.layoutParams = layoutParams
+        scenePreviewBinding.scenePreview.layoutParams = layoutParams
 
-        binding.sceneCover.alpha = value
+        scenePreviewBinding.sceneCover.alpha = value
     }
 
     private fun previewSlide() {
@@ -291,15 +306,8 @@ class WhiteboardComponent(
 
         lifecycleScope.launch {
             viewModel.state.collect {
-                updateClassMode(it.classMode)
+                setRoomWritable(it.isWritable)
             }
-        }
-    }
-
-    private fun updateClassMode(classMode: ClassModeType) {
-        when (classMode) {
-            ClassModeType.Lecture -> setRoomWritable(false)
-            ClassModeType.Interaction -> setRoomWritable(true)
         }
     }
 
@@ -317,11 +325,11 @@ class WhiteboardComponent(
     }
 
     private fun handleAreaShown(areaId: Int) {
-        if (binding.toolsLayout.isVisible) {
-            binding.toolsLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_APPLIANCE)
+        if (areaId != ClassRoomEvent.AREA_ID_APPLIANCE) {
+            binding.toolsLayout.isVisible = false
         }
-        if (binding.toolsSubLayout.isVisible) {
-            binding.toolsSubLayout.isVisible = (areaId == ClassRoomEvent.AREA_ID_PAINT)
+        if (areaId == ClassRoomEvent.AREA_ID_PAINT) {
+            binding.toolsSubLayout.isVisible = false
         }
     }
 
@@ -429,7 +437,7 @@ class WhiteboardComponent(
                 }
             })
 
-            updateClassMode(viewModel.state.value.classMode)
+            setRoomWritable(viewModel.state.value.isWritable)
         }
 
         override fun catchEx(t: SDKError) {
@@ -453,7 +461,7 @@ class WhiteboardComponent(
         Appliance.ARROW to R.drawable.ic_toolbox_arrow_selected,
         Appliance.HAND to R.drawable.ic_toolbox_hand_selected,
         Appliance.LASER_POINTER to R.drawable.ic_toolbox_laser_selected,
-        CLICKER to R.drawable.ic_toolbox_clicker_selected,
+        Appliance.CLICKER to R.drawable.ic_toolbox_clicker_selected,
     )
 
     private fun applianceResource(appliance: String): Int {
@@ -464,9 +472,16 @@ class WhiteboardComponent(
         updateApplicance(memberState.currentApplianceName)
         memberState.apply {
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
-            val item = ColorItem.colors.find {
+            var item = ColorItem.colors.find {
                 it.color.contentEquals(strokeColor)
-            } ?: ColorItem.colors[0]
+            }
+            // 设置默认颜色
+            if (item == null) {
+                item = ColorItem.colors[0];
+                room?.memberState = room?.memberState?.apply {
+                    strokeColor = item.color
+                }
+            }
             colorAdapter.setCurrentColor(item.color)
             binding.toolsSubPaint.setImageResource(item.drawableRes)
         }

@@ -57,9 +57,18 @@ class ToolComponent(
 
     private fun handleAreaShown(areaId: Int) {
         if (areaId != ClassRoomEvent.AREA_ID_SETTING) {
-            binding.settingLayout.isVisible = false
-            binding.setting.isSelected = false
+            hideSettingLayout()
         }
+    }
+
+    private fun hideSettingLayout() {
+        binding.settingLayout.isVisible = false
+        binding.setting.isSelected = false
+    }
+
+    private fun showSettingLayout() {
+        binding.settingLayout.isVisible = true
+        binding.setting.isSelected = true
     }
 
     private fun initView() {
@@ -74,9 +83,10 @@ class ToolComponent(
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG)
             },
             binding.setting to {
-                binding.settingLayout.apply {
-                    isVisible = !isVisible
-                    binding.setting.isSelected = isVisible
+                if (binding.settingLayout.isVisible) {
+                    hideSettingLayout()
+                } else {
+                    showSettingLayout()
                 }
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING)
             },
@@ -102,7 +112,7 @@ class ToolComponent(
         binding.switchVideoArea.isChecked = viewModel.videoAreaShown.value
         binding.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setVideoShown(isChecked)
-            binding.settingLayout.visibility = View.GONE
+            hideSettingLayout()
         }
 
         binding.switchVideo.setOnCheckedChangeListener { _, isChecked ->

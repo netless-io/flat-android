@@ -427,7 +427,10 @@ data class ClassRoomState(
     val ban: Boolean = true,
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
-)
+) {
+    val isWritable: Boolean
+        get() = ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction
+}
 
 sealed class ClassRoomEvent {
     companion object {
@@ -441,7 +444,7 @@ sealed class ClassRoomEvent {
     }
 
     object RtmChannelJoined : ClassRoomEvent()
-    data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
+    // data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
 }

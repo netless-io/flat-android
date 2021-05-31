@@ -22,6 +22,7 @@ import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
@@ -95,7 +96,7 @@ class RtcComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
-                    is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
+                    // is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                 }
             }
@@ -123,9 +124,9 @@ class RtcComponent(
     private fun updateVideoContainer(value: Float) {
         val width = (value * expandWidth).toInt()
 
-        val layoutParams = rootView.layoutParams as ViewGroup.MarginLayoutParams
+        val layoutParams = videoListBinding.root.layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.width = width
-        rootView.layoutParams = layoutParams
+        videoListBinding.root.layoutParams = layoutParams
     }
 
     private fun joinRtcChannel() {
@@ -183,11 +184,12 @@ class RtcComponent(
 
         videoListBinding.videoList.layoutManager = LinearLayoutManager(activity)
         videoListBinding.videoList.adapter = adapter
+        videoListBinding.videoList.addItemDecoration(PaddingItemDecoration(vertical = activity.dp2px(4)))
 
         videoAreaAnimator = SimpleAnimator(
             onUpdate = ::updateVideoContainer,
-            onShowStart = { rootView.isVisible = true },
-            onHideEnd = { rootView.isVisible = false }
+            onShowStart = { videoListBinding.root.isVisible = true },
+            onHideEnd = { videoListBinding.root.isVisible = false }
         )
 
         fullScreenAnimator = SimpleAnimator(
@@ -214,6 +216,8 @@ class RtcComponent(
                 userCallOut?.run {
                     adapter.updateVideoView(rtcUID)
                 }
+                // call out 状态清除
+                userCallOut = null
             }
         )
     }

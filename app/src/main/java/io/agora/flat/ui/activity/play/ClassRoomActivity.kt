@@ -19,7 +19,7 @@ class ClassRoomActivity : AppCompatActivity() {
 
         initSystemUI()
 
-        componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer))
+        componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer, binding.scenePreviewContainer))
         componentSet.add(RtcComponent(this, binding.videoListContainer, binding.fullVideoContainer))
         componentSet.add(RtmComponent(this, binding.messageContainer))
         componentSet.add(ToolComponent(this, binding.extToolContainer))

@@ -42,4 +42,10 @@
         android:id="@+id/fullVideoContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/scenePreviewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
