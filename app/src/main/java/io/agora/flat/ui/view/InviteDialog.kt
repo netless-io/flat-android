@@ -19,6 +19,12 @@ class InviteDialog : DialogFragment(R.layout.dialog_invite) {
         const val ROOM_TIME = "room_time"
     }
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        return dialog
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = DialogInviteBinding.bind(view)

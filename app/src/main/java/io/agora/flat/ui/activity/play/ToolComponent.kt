@@ -7,9 +7,11 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import io.agora.flat.R
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.InviteDialog
+import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
@@ -43,6 +45,14 @@ class ToolComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.StartRoomResult -> {
+                        if (it.success) {
+                            activity.showToast(R.string.room_class_start_class_success)
+                            binding.roomStart.isVisible = false
+                        } else {
+                            activity.showToast(R.string.room_class_start_class_fail)
+                        }
+                    }
                 }
             }
         }
@@ -92,7 +102,8 @@ class ToolComponent(
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
-            binding.exit to { activity.finish() },
+            binding.exit to { handleExit() },
+            binding.roomStart to { viewModel.startRoomClass() }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
@@ -122,6 +133,42 @@ class ToolComponent(
         binding.switchAudio.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAudio(isChecked)
         }
+    }
+
+    private fun handleExit() {
+        if (viewModel.state.value.isOwner) {
+            showOwnerExitDialog()
+        } else {
+            activity.finish()
+            // showAudienceExitDialog()
+        }
+    }
+
+    private fun showOwnerExitDialog() {
+        val dialog = OwnerExitDialog()
+        dialog.setListener(object : OwnerExitDialog.Listener {
+            override fun onClose() {
+
+            }
+
+            // 挂起房间
+            override fun onLeftButtonClick() {
+                activity.finish()
+            }
+
+            // 结束房间
+            override fun onRightButtonClick() {
+                viewModel.stopRoomClass()
+                activity.finish()
+            }
+
+        })
+        dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
+        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG)
+    }
+
+    private fun showAudienceExitDialog() {
+
     }
 
     private fun showInviteDialog() {

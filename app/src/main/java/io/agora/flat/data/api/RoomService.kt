@@ -67,4 +67,20 @@ interface RoomService {
     fun createOrdinary(
         @Body romCreateReq: RoomCreateReq,
     ): Call<BaseResp<RoomCreateRespData>>
+
+    // 上课接口
+    @POST("v1/room/update-status/started")
+    fun startRoomClass(
+        @Body req: PureRoomReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/room/update-status/paused")
+    fun pauseRoomClass(
+        @Body req: PureRoomReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/room/update-status/stopped")
+    fun stopRoomClass(
+        @Body req: PureRoomReq,
+    ): Call<BaseResp<RespNoData>>
 }

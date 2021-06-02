@@ -298,7 +298,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun isRoomOwner(): Boolean {
+    private fun isRoomOwner(): Boolean {
         return _state.value.ownerUUID == _state.value.currentUserUUID
     }
 
@@ -397,6 +397,45 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun startRoomClass() {
+        viewModelScope.launch {
+            when (roomRepository.startRoomClass(roomUUID)) {
+                is Success -> {
+                    var status = RTMEvent.RoomStatus(RoomStatus.Started)
+                    rtmApi.sendChannelCommand(status)
+                    _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
+
+                    onEvent(ClassRoomEvent.StartRoomResult(true))
+                }
+                else -> {
+                    onEvent(ClassRoomEvent.StartRoomResult(false))
+                }
+            }
+        }
+    }
+
+    fun pauseRoomClass() {
+        viewModelScope.launch {
+            when (roomRepository.pauseRoomClass(roomUUID)) {
+                is Success -> {
+                    var status = RTMEvent.RoomStatus(RoomStatus.Paused)
+                    rtmApi.sendChannelCommand(status)
+                }
+            }
+        }
+    }
+
+    fun stopRoomClass() {
+        viewModelScope.launch {
+            when (roomRepository.stopRoomClass(roomUUID)) {
+                is Success -> {
+                    var status = RTMEvent.RoomStatus(RoomStatus.Stopped)
+                    rtmApi.sendChannelCommand(status)
+                }
+            }
+        }
+    }
+
     fun onCopyText(text: String) {
         clipboard.putText(text)
     }
@@ -430,6 +469,9 @@ data class ClassRoomState(
 ) {
     val isWritable: Boolean
         get() = ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction
+
+    val isOwner :Boolean
+        get() = ownerUUID == currentUserUUID
 }
 
 sealed class ClassRoomEvent {
@@ -441,10 +483,12 @@ sealed class ClassRoomEvent {
         const val AREA_ID_CLOUD_STORAGE = 5
         const val AREA_ID_VIDEO_OP_CALL_OUT = 6
         const val AREA_ID_INVITE_DIALOG = 7
+        const val AREA_ID_OWNER_EXIT_DIALOG = 8
     }
 
     object RtmChannelJoined : ClassRoomEvent()
-    // data class ChangeVideoDisplay(val id: Int) : ClassRoomEvent()
+    data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
+
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
 }

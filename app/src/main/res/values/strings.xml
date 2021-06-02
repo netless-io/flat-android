@@ -51,4 +51,7 @@
     <string name="login_fail" translatable="false">登录失败</string>
 
     <string name="join_room_default_time_format" translatable="false">%1$s创建的房间</string>
+
+    <string name="room_class_start_class_success" translatable="false">开始房间成功</string>
+    <string name="room_class_start_class_fail" translatable="false">开始房间失败</string>
 </resources>

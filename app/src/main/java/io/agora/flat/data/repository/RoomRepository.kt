@@ -77,10 +77,26 @@ class RoomRepository @Inject constructor(
 
     suspend fun createOrdinary(title: String, type: RoomType): Result<RoomCreateRespData> {
         return withContext(Dispatchers.IO) {
-            roomService.createOrdinary(RoomCreateReq(title,
-                type,
-                System.currentTimeMillis()))
+            roomService.createOrdinary(RoomCreateReq(title, type, System.currentTimeMillis()))
                 .executeOnce().toResult()
+        }
+    }
+
+    suspend fun startRoomClass(roomUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.startRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
+        }
+    }
+
+    suspend fun pauseRoomClass(roomUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.pauseRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
+        }
+    }
+
+    suspend fun stopRoomClass(roomUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            roomService.stopRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
         }
     }
 }

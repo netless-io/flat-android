@@ -3,8 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="io.agora.flat.MainActivity">
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/roomStart"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/shape_gray_border_round_16_bg"
+        android:padding="4dp"
+        android:src="@drawable/ic_room_class_start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="32dp"
@@ -83,7 +93,8 @@
         android:padding="8dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -190,7 +201,7 @@
             android:gravity="center"
             android:paddingHorizontal="14dp"
             android:text="退出教室"
-            android:textColor="#fff45454"
+            android:textColor="#f45454"
             android:textSize="14sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
