@@ -3,6 +3,12 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.herewhite.sdk.ConverterCallbacks
+import com.herewhite.sdk.converter.ConvertType
+import com.herewhite.sdk.converter.ConverterV5
+import com.herewhite.sdk.domain.ConversionInfo
+import com.herewhite.sdk.domain.ConvertException
+import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.ClipboardController
@@ -12,6 +18,7 @@ import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
+import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.AppModule
 import io.agora.flat.di.interfaces.EventBus
@@ -22,8 +29,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import kotlin.collections.HashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -31,6 +40,7 @@ import kotlin.coroutines.suspendCoroutine
 @HiltViewModel
 class ClassRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val cloudStorageRepository: CloudStorageRepository,
     private val savedStateHandle: SavedStateHandle,
     private val database: AppDatabase,
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
@@ -49,6 +59,9 @@ class ClassRoomViewModel @Inject constructor(
     private var _usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf()
     private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val usersMap = _usersMap.asStateFlow()
+
+    private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
+    val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
 
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
@@ -265,11 +278,13 @@ class ClassRoomViewModel @Inject constructor(
     private fun updateChannelState(status: ChannelStatusValue) {
         val map = _usersMap.value.toMutableMap()
         status.uStates.forEach { (userId, s) ->
-            map[userId]?.run {
-                videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true)
-                audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true)
-                isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true)
-                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true)
+            run {
+                usersMap.value[userId]?.copy(
+                    videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true),
+                    audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true),
+                    isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true),
+                    isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true),
+                )?.also { map[userId] = it }
             }
         }
         _usersMap.value = map
@@ -397,47 +412,90 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun startRoomClass() {
-        viewModelScope.launch {
-            when (roomRepository.startRoomClass(roomUUID)) {
-                is Success -> {
-                    var status = RTMEvent.RoomStatus(RoomStatus.Started)
-                    rtmApi.sendChannelCommand(status)
-                    _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
-
-                    onEvent(ClassRoomEvent.StartRoomResult(true))
-                }
-                else -> {
-                    onEvent(ClassRoomEvent.StartRoomResult(false))
-                }
+    suspend fun startRoomClass(): Boolean {
+        return when (roomRepository.startRoomClass(roomUUID)) {
+            is Success -> {
+                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
+                _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
+                true
             }
+            else -> false
         }
     }
 
-    fun pauseRoomClass() {
-        viewModelScope.launch {
-            when (roomRepository.pauseRoomClass(roomUUID)) {
-                is Success -> {
-                    var status = RTMEvent.RoomStatus(RoomStatus.Paused)
-                    rtmApi.sendChannelCommand(status)
-                }
+    suspend fun pauseRoomClass(): Boolean {
+        return when (roomRepository.pauseRoomClass(roomUUID)) {
+            is Success -> {
+                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Paused))
+                true
             }
+            else -> false
         }
     }
 
-    fun stopRoomClass() {
-        viewModelScope.launch {
-            when (roomRepository.stopRoomClass(roomUUID)) {
-                is Success -> {
-                    var status = RTMEvent.RoomStatus(RoomStatus.Stopped)
-                    rtmApi.sendChannelCommand(status)
-                }
+    suspend fun stopRoomClass(): Boolean {
+        return when (roomRepository.stopRoomClass(roomUUID)) {
+            is Success -> {
+                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Stopped))
+                true
             }
+            else -> false
         }
     }
 
     fun onCopyText(text: String) {
         clipboard.putText(text)
+    }
+
+    fun requestCloudStorageFiles() {
+        viewModelScope.launch {
+            when (val res = cloudStorageRepository.getFileList(1)) {
+                is Success -> {
+                    _cloudStorageFiles.value = res.data.files
+                }
+            }
+        }
+    }
+
+    fun insertCourseware(file: CloudStorageFile) {
+        if (file.convertStep == FileConvertStep.Converting) {
+            // "正在转码中，请稍后再试"
+            return
+        }
+        // "正在插入课件……"
+        val ext = file.fileURL.substringAfterLast('.').toLowerCase()
+        when (ext) {
+            "jpg", "jpeg", "png", "webp" -> {
+                onEvent(ClassRoomEvent.InsertImage(file.fileURL))
+            }
+            "doc", "docx", "ppt", "pptx", "pdf" -> {
+                insertDocs(file, ext)
+            }
+        }
+    }
+
+    private fun insertDocs(file: CloudStorageFile, ext: String) {
+        val convert = ConverterV5.Builder().apply {
+            setResource(file.fileURL)
+            setType(if (ext == "pptx") ConvertType.Dynamic else ConvertType.Static)
+            setTaskUuid(file.taskUUID)
+            setTaskToken(file.taskToken)
+            setCallback(object : ConverterCallbacks {
+                override fun onProgress(progress: Double, convertInfo: ConversionInfo?) {
+
+                }
+
+                override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
+                    val uuid = UUID.randomUUID().toString();
+                    onEvent(ClassRoomEvent.InsertPpt("/${file.taskUUID}/${uuid}", ppt))
+                }
+
+                override fun onFailure(e: ConvertException) {
+                    //
+                }
+            })
+        }.build()
+        convert.startConvertTask()
     }
 }
 
@@ -470,8 +528,13 @@ data class ClassRoomState(
     val isWritable: Boolean
         get() = ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction
 
-    val isOwner :Boolean
+    val isOwner: Boolean
         get() = ownerUUID == currentUserUUID
+
+    val showStartButton: Boolean
+        get() {
+            return isOwner && RoomStatus.Idle == roomStatus
+        }
 }
 
 sealed class ClassRoomEvent {
@@ -491,4 +554,6 @@ sealed class ClassRoomEvent {
 
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
+    data class InsertImage(val imageUrl: String) : ClassRoomEvent()
+    data class InsertPpt(val dirpath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }

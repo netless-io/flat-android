@@ -54,4 +54,5 @@
 
     <string name="room_class_start_class_success" translatable="false">开始房间成功</string>
     <string name="room_class_start_class_fail" translatable="false">开始房间失败</string>
+    <string name="room_class_stop_class_fail" translatable="false">结束房间失败</string>
 </resources>

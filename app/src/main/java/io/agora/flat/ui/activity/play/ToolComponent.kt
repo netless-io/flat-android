@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.ui.animator.SimpleAnimator
@@ -34,6 +35,8 @@ class ToolComponent(
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
+    private lateinit var cloudStorageAdapter: CloudStorageAdapter
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         initView()
@@ -46,12 +49,6 @@ class ToolComponent(
                 when (it) {
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                     is ClassRoomEvent.StartRoomResult -> {
-                        if (it.success) {
-                            activity.showToast(R.string.room_class_start_class_success)
-                            binding.roomStart.isVisible = false
-                        } else {
-                            activity.showToast(R.string.room_class_start_class_fail)
-                        }
                     }
                 }
             }
@@ -63,11 +60,27 @@ class ToolComponent(
                 binding.switchAudio.isChecked = it.enableAudio
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.state.collect {
+                binding.roomStart.isVisible = it.showStartButton
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.cloudStorageFiles.collect {
+                cloudStorageAdapter.setDataSet(it)
+            }
+        }
     }
 
     private fun handleAreaShown(areaId: Int) {
         if (areaId != ClassRoomEvent.AREA_ID_SETTING) {
             hideSettingLayout()
+        }
+
+        if (areaId != ClassRoomEvent.AREA_ID_CLOUD_STORAGE) {
+            hideCloudStorageLayout()
         }
     }
 
@@ -81,12 +94,30 @@ class ToolComponent(
         binding.setting.isSelected = true
     }
 
+    private fun hideCloudStorageLayout() {
+        binding.layoutCloudStorage.root.isVisible = false
+        binding.cloudservice.isSelected = false
+    }
+
+    private fun showCloudStorageLayout() {
+        binding.layoutCloudStorage.root.isVisible = true
+        binding.cloudservice.isSelected = true
+    }
+
     private fun initView() {
         binding = ComponentToolBinding.inflate(activity.layoutInflater, rootView, true)
 
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.message to { activity.showDebugToast("Not Supported Yet") },
-            binding.cloudservice to { activity.showDebugToast("Not Supported Yet") },
+            binding.cloudservice to {
+                if (binding.layoutCloudStorage.root.isVisible) {
+                    hideCloudStorageLayout()
+                } else {
+                    showCloudStorageLayout()
+                    viewModel.requestCloudStorageFiles()
+                }
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLOUD_STORAGE)
+            },
             binding.invite to {
                 showInviteDialog()
                 binding.invite.isSelected = true
@@ -103,7 +134,16 @@ class ToolComponent(
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
             binding.exit to { handleExit() },
-            binding.roomStart to { viewModel.startRoomClass() }
+            binding.roomStart to {
+                lifecycleScope.launch {
+                    if (viewModel.startRoomClass()) {
+                        activity.showToast(R.string.room_class_start_class_success)
+                        binding.roomStart.isVisible = false
+                    } else {
+                        activity.showToast(R.string.room_class_start_class_fail)
+                    }
+                }
+            }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
@@ -133,6 +173,14 @@ class ToolComponent(
         binding.switchAudio.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAudio(isChecked)
         }
+
+        cloudStorageAdapter = CloudStorageAdapter()
+        cloudStorageAdapter.setOnItemClickListener {
+            viewModel.insertCourseware(it)
+            hideCloudStorageLayout()
+        }
+        binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
+        binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
     }
 
     private fun handleExit() {
@@ -158,8 +206,13 @@ class ToolComponent(
 
             // 结束房间
             override fun onRightButtonClick() {
-                viewModel.stopRoomClass()
-                activity.finish()
+                lifecycleScope.launch {
+                    if (viewModel.stopRoomClass()) {
+                        activity.finish()
+                    } else {
+                        activity.showToast(R.string.room_class_stop_class_fail)
+                    }
+                }
             }
 
         })

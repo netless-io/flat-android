@@ -39,17 +39,15 @@ class UserVideoAdapter(
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(viewGroup.context)
-                .inflate(R.layout.item_class_rtc_video, viewGroup, false)
-
+        val inflater = LayoutInflater.from(context)
+        val view = inflater.inflate(R.layout.item_class_rtc_video, viewGroup, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         var itemData = dataSet[position]
 
-        viewHolder.profile.load(itemData.avatarURL) {
+        viewHolder.avatar.load(itemData.avatarURL) {
             crossfade(true)
             transformations(CircleCropTransformation())
         }
@@ -86,7 +84,7 @@ class UserVideoAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
         val videoClosedLayout: FrameLayout = view.findViewById(R.id.videoClosedLayout)
-        val profile: ImageView = view.findViewById(R.id.profile)
+        val avatar: ImageView = view.findViewById(R.id.avatar)
         val username: TextView = view.findViewById(R.id.username)
     }
 

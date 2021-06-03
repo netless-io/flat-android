@@ -14,6 +14,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
+import coil.transform.CircleCropTransformation
 import dagger.hilt.android.EntryPointAccessors
 import io.agora.flat.common.RTCEventListener
 import io.agora.flat.data.AppDatabase
@@ -200,6 +202,10 @@ class RtcComponent(
                 userCallOut?.run {
                     fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
                     rtcVideoController.setupUserVideo(fullScreenBinding.fullVideoView, rtcUID, true)
+                    fullScreenBinding.fullScreenAvatar.load(avatarURL) {
+                        crossfade(true)
+                        transformations(CircleCropTransformation())
+                    }
                 }
             },
             onShowEnd = {
@@ -297,6 +303,14 @@ class RtcComponent(
             lp.height = (bottom - top).toInt()
             lp.leftMargin = left.toInt()
             lp.topMargin = top.toInt()
+            layoutParams = lp
+        }
+
+        // 40dp -> 160dp
+        fullScreenBinding.fullScreenAvatar.run {
+            val lp = layoutParams as ViewGroup.MarginLayoutParams
+            lp.width = ((activity.dp2px(40)) + activity.dp2px(120) * value).toInt()
+            lp.height = ((activity.dp2px(40)) + activity.dp2px(120) * value).toInt()
             layoutParams = lp
         }
     }

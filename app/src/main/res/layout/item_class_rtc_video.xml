@@ -35,24 +35,27 @@
             android:visibility="gone"
             tools:text="用户名" />
 
-        <ImageView
-            android:id="@+id/profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone" />
-
         <FrameLayout
             android:id="@+id/videoClosedLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:background="@color/flat_black"
+            android:visibility="invisible">
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/img_room_video_closed_head" />
+                android:src="@drawable/img_room_video_closed_head"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:visibility="visible" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

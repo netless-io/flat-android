@@ -9,6 +9,7 @@ import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
+import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.event.HomeRefreshEvent
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val eventBus: EventBus,
-    private val appKVCenter: AppKVCenter
+    private val appKVCenter: AppKVCenter,
+    private val cloudStorageRepository: CloudStorageRepository,
 ) : ViewModel() {
     companion object {
         val TAG = HomeViewModel.javaClass.simpleName;
@@ -89,6 +91,10 @@ class HomeViewModel @Inject constructor(
             reloadHistoryRooms()
             delay(2000)
             refreshing.removeLoader()
+        }
+
+        viewModelScope.launch {
+            cloudStorageRepository.getFileList(1)
         }
     }
 

@@ -22,13 +22,15 @@
             android:layout_height="match_parent"
             android:background="#1A1E21" />
 
+        <!-- not used now -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/img_room_video_closed_head_big"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -43,6 +45,13 @@
                 android:textColor="@color/flat_white"
                 android:textSize="14sp" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/fullScreenAvatar"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop" />
     </FrameLayout>
 
     <LinearLayout

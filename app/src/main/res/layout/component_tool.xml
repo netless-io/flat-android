@@ -5,16 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <TextView
         android:id="@+id/roomStart"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_margin="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:background="@drawable/shape_gray_border_round_16_bg"
-        android:padding="4dp"
-        android:src="@drawable/ic_room_class_start"
+        android:drawableStart="@drawable/ic_room_start_class"
+        android:gravity="center"
+        android:paddingVertical="4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="12dp"
+        android:text="开始上课"
+        android:textColor="#444E60"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
     <LinearLayout
         android:layout_width="32dp"
@@ -44,7 +53,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_cloudservice" />
+                android:src="@drawable/ic_toolbox_ext_cloudservice_selector" />
 
             <ImageView
                 android:id="@+id/invite"
@@ -94,7 +103,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -204,4 +213,17 @@
             android:textColor="#f45454"
             android:textSize="14sp" />
     </LinearLayout>
+
+    <include
+        android:id="@+id/layout_cloud_storage"
+        layout="@layout/layout_room_cloud_storage"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginBottom="52dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

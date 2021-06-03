@@ -298,6 +298,11 @@ class WhiteboardComponent(
                 when (it) {
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                     is ClassRoomEvent.NoOptPermission -> activity.showDebugToast(R.string.class_room_no_operate_permission)
+                    is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl)
+                    is ClassRoomEvent.InsertPpt -> {
+                        insertPpt(it.dirpath, it.convertedFiles)
+                        room?.scalePptToFit()
+                    }
                     else -> {
                     }
                 }
@@ -309,6 +314,24 @@ class WhiteboardComponent(
                 setRoomWritable(it.isWritable)
             }
         }
+    }
+
+    private fun insertImage(imageUrl: String) {
+        val uuid = UUID.randomUUID().toString()
+        room?.insertImage(ImageInformation().apply {
+            this.uuid = uuid
+            // TODO FIX
+            width = 200.0
+            height = 200.0
+            centerX = 0.0
+            centerY = 0.0
+        })
+        room?.completeImageUpload(uuid, imageUrl);
+    }
+
+    private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles) {
+        room?.putScenes(dirpath, convertedFiles.scenes, 0)
+        room?.setScenePath("$dirpath/${convertedFiles.scenes[0].name}")
     }
 
     private fun setRoomWritable(writable: Boolean) {
