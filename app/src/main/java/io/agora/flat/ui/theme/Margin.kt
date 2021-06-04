@@ -1,5 +1,7 @@
 package io.agora.flat.ui.theme
 
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
@@ -24,3 +26,8 @@ val NormalHorizontalModifier = Modifier.width(
 val LargeHorizontalModifier = Modifier.width(
     32.dp
 )
+
+val ColumnScope.MaxWidthSpread
+    get() = Modifier
+        .fillMaxWidth()
+        .weight(1f)

@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.agora.flat.Constants
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.api.UserService
 import io.agora.flat.http.HeaderProvider
@@ -20,9 +21,9 @@ object UserModule {
 
     @Provides
     @Singleton
-    fun provideUserService(@NetworkModule.NormalOkHttpClient client: OkHttpClient): UserService {
+    fun provideUserService(@NetworkModule.NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): UserService {
         return Retrofit.Builder()
-            .baseUrl(Constants.FLAT_SERVICE_URL)
+            .baseUrl(appEnv.flatServiceUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.agora.flat.Constants
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.api.CloudStorageService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -17,9 +17,12 @@ object CloudStorageModule {
 
     @Provides
     @Singleton
-    fun provideCloudStorageService(@NetworkModule.NormalOkHttpClient client: OkHttpClient): CloudStorageService {
+    fun provideCloudStorageService(
+        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        appEnv: AppEnv
+    ): CloudStorageService {
         return Retrofit.Builder()
-            .baseUrl(Constants.FLAT_SERVICE_URL)
+            .baseUrl(appEnv.flatServiceUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

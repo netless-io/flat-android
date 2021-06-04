@@ -36,23 +36,13 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
-        <activity
-            android:name=".ui.activity.playback.PlaybackActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.activity.room.CreateRoomActivity"
-            android:exported="true" />
+        <activity android:name=".ui.activity.playback.PlaybackActivity" />
+        <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
-        <activity
-            android:name=".ui.activity.setting.FeedbackActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.activity.setting.AboutUsActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.activity.dev.DevToolsActivity"
-            android:exported="true" />
+        <activity android:name=".ui.activity.setting.FeedbackActivity" />
+        <activity android:name=".ui.activity.setting.AboutUsActivity" />
+        <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"
             android:launchMode="singleTask">
@@ -64,16 +54,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activity.setting.SettingActivity"
-            android:exported="true" />
+        <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity
             android:name=".ui.activity.dev.ComposeTestActivity"
-            android:exported="true"
+
             android:label="@string/title_activity_compose_test" />
         <activity
             android:name=".ui.activity.home.HomeActivity"
-            android:exported="true"
+
             android:theme="@style/Theme.FlatAndroid.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

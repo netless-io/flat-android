@@ -12,6 +12,4 @@ class EventBus {
     }
 }
 
-abstract class Event {
-
-}
+abstract class Event

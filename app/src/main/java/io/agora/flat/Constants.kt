@@ -2,25 +2,6 @@ package io.agora.flat
 
 class Constants {
     companion object {
-        var useDev = true
-
-        // dev 环境
-        private const val FLAT_SERVER_URL_DEV = "https://flat-api-dev.whiteboard.agora.io/"
-        private const val GITHUB_CLIENT_ID_DEV = "9821657775fbc74773f1"
-
-        // prod 环境
-        private const val FLAT_SERVER_URL_PROD = "https://flat-api.whiteboard.agora.io/"
-        private const val GITHUB_CLIENT_ID_PROD = "71a29285a437998bdfe0"
-
-        // local 环境
-        // private const val FLAT_SERVER_URL_LOCAL = "https://api-flat-local.netless.group/"
-        // private const val GITHUB_CLIENT_ID_LOCAL = "d07230378ca29cef90ee"
-
-        val FLAT_SERVICE_URL = if (useDev) FLAT_SERVER_URL_DEV else FLAT_SERVER_URL_PROD
-
-        val GITHUB_CALLBACK = "${FLAT_SERVICE_URL}v1/login/github/callback"
-        val GITHUB_CLIENT_ID = if (useDev) GITHUB_CLIENT_ID_DEV else GITHUB_CLIENT_ID_PROD
-
         const val WX_APP_ID = "wx09437693798bc108"
 
         const val NETLESS_APP_IDENTIFIER = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug"

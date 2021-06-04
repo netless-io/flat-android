@@ -11,6 +11,7 @@ import dagger.multibindings.IntoSet
 import io.agora.flat.common.AndroidClipboardController
 import io.agora.flat.common.ClipboardController
 import io.agora.flat.data.AppDatabase
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.RtcProviderImpl
 import io.agora.flat.di.impl.RtmProviderImpl
@@ -50,6 +51,12 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun providerAppEnv(@ApplicationContext context: Context): AppEnv {
+        return AppEnv(context)
+    }
+
+    @Singleton
+    @Provides
     fun providerRtcProvider(): RtcEngineProvider {
         return RtcProviderImpl()
     }
@@ -65,20 +72,20 @@ class AppModule {
     fun providerEventBus(): EventBus {
         return EventBus()
     }
-    
+
     /**
      * StartupInitializer Set
      */
     @Provides
     @IntoSet
     fun provideRtcInitializer(rtcEngineProvider: RtcEngineProvider): StartupInitializer {
-        return rtcEngineProvider as StartupInitializer;
+        return rtcEngineProvider as StartupInitializer
     }
 
     @Provides
     @IntoSet
     fun provideRtmInitializer(rtmEngineProvider: RtmEngineProvider): StartupInitializer {
-        return rtmEngineProvider as StartupInitializer;
+        return rtmEngineProvider as StartupInitializer
     }
 
     @Singleton

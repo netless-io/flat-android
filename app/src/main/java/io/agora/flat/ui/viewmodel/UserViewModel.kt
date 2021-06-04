@@ -61,13 +61,6 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun githubLoginUrl(): String {
-        return "https://github.com/login/oauth/authorize?" +
-                "client_id=${Constants.GITHUB_CLIENT_ID}&" +
-                "redirect_uri=${Constants.GITHUB_CALLBACK}&" +
-                "state=${appKVCenter.getAuthUUID()}"
-    }
-
     suspend fun loginProcess(): Boolean = suspendCoroutine { cont ->
         viewModelScope.launch {
             when (userRepository.loginProcess(appKVCenter.getAuthUUID())) {

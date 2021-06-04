@@ -3,15 +3,12 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.Constants
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.AppModule
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -21,7 +18,8 @@ import kotlin.coroutines.suspendCoroutine
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    @AppModule.GlobalData private val appKVCenter: AppKVCenter
+    @AppModule.GlobalData private val appKVCenter: AppKVCenter,
+    private val appEnv: AppEnv,
 ) : ViewModel() {
     init {
 
@@ -45,8 +43,8 @@ class LoginViewModel @Inject constructor(
 
     fun githubLoginUrl(): String {
         return "https://github.com/login/oauth/authorize?" +
-                "client_id=${Constants.GITHUB_CLIENT_ID}&" +
-                "redirect_uri=${Constants.GITHUB_CALLBACK}&" +
+                "client_id=${appEnv.githubClientID}&" +
+                "redirect_uri=${appEnv.githubCallback}&" +
                 "state=${appKVCenter.getAuthUUID()}"
     }
 
