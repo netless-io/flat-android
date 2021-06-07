@@ -10,10 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -177,17 +173,13 @@ private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
         Text(text = stringResource(id = R.string.login_page_label_1), style = FlatCommonTextStyle)
         Spacer(modifier = Modifier.weight(1f))
         Row {
-            Image(
-                painterResource(R.drawable.ic_wechat_login),
-                modifier = Modifier.clickable(onClick = { actioner(LoginUIAction.WeChatLogin) }),
-                contentDescription = null,
-            )
+            LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
+                Image(painterResource(R.drawable.ic_wechat_login), contentDescription = null)
+            }
             Spacer(modifier = Modifier.width(48.dp))
-            Image(
-                painterResource(R.drawable.ic_github_login),
-                modifier = Modifier.clickable(onClick = { actioner(LoginUIAction.GithubLogin) }),
-                contentDescription = null
-            )
+            LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
+                Image(painterResource(R.drawable.ic_github_login), contentDescription = null)
+            }
         }
         Spacer(modifier = Modifier.height(100.dp))
         Box(modifier = Modifier.padding(vertical = 24.dp)) {
@@ -197,23 +189,18 @@ private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
 }
 
 @Composable
-private fun ImageButton(
+private fun LoginImageButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = modifier
-            .clickable(
-                onClick = onClick,
-                enabled = enabled,
-                role = Role.Button,
-                interactionSource = interactionSource,
-                indication = rememberRipple(bounded = false, radius = 32.dp)
-            )
-            .then(Modifier.size(64.dp)),
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = rememberRipple(bounded = false, radius = 48.dp),
+            onClick = onClick,
+        ),
         contentAlignment = Alignment.Center
     ) {
         val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
@@ -225,9 +212,7 @@ private fun ImageButton(
 @Preview
 private fun LoginPagePreview() {
     FlatPage {
-        LoginContent {
-
-        }
+        LoginContent { }
     }
 }
 
