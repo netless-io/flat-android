@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     private lateinit var api: IWXAPI
@@ -54,7 +54,7 @@ class HomeActivity : ComponentActivity() {
         lifecycleScope.launch {
             mainViewModel.loginState.collect {
                 if (it == LoginError) {
-                    Navigator.launchLoginActivity(this@HomeActivity)
+                    Navigator.launchLoginActivity(this@MainActivity)
                 }
             }
         }

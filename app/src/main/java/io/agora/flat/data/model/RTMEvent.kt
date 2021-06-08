@@ -29,7 +29,9 @@ sealed class RTMEvent {
     data class Speak(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.Speak)
     data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent(RTMessageType.DeviceState)
     data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent(RTMessageType.ClassMode)
-    data class RoomStatus(@SerializedName("v") val roomStatus: io.agora.flat.data.model.RoomStatus) : RTMEvent(RTMessageType.RoomStatus)
+    data class RoomStatus(@SerializedName("v") val roomStatus: io.agora.flat.data.model.RoomStatus) :
+        RTMEvent(RTMessageType.RoomStatus)
+
     data class RequestChannelStatus(@SerializedName("v") val value: RequestChannelStatusValue) :
         RTMEvent(RTMessageType.RequestChannelStatus)
 
@@ -40,23 +42,27 @@ sealed class RTMEvent {
         val gson = Gson()
 
         fun parseRTMEvent(text: String): RTMEvent {
-            val jsonObject = JsonParser.parseString(text).asJsonObject
-            val type = jsonObject.get("t").asString
-            // val value = jsonObject.get("v")
-            return when (RTMessageType.valueOf(type)) {
-                RTMessageType.Notice -> gson.fromJson(jsonObject, Notice::class.java)
-                RTMessageType.RaiseHand -> gson.fromJson(jsonObject, RaiseHand::class.java)
-                RTMessageType.AcceptRaiseHand -> gson.fromJson(jsonObject, AcceptRaiseHand::class.java)
-                RTMessageType.CancelAllHandRaising -> gson.fromJson(jsonObject, CancelAllHandRaising::class.java)
-                RTMessageType.BanText -> gson.fromJson(jsonObject, BanText::class.java)
-                RTMessageType.Speak -> gson.fromJson(jsonObject, Speak::class.java)
-                RTMessageType.DeviceState -> gson.fromJson(jsonObject, DeviceState::class.java)
-                RTMessageType.ClassMode -> gson.fromJson(jsonObject, ClassMode::class.java)
-                RTMessageType.RoomStatus -> gson.fromJson(jsonObject, RoomStatus::class.java)
-                RTMessageType.RequestChannelStatus -> gson.fromJson(jsonObject, RequestChannelStatus::class.java)
-                RTMessageType.ChannelStatus -> gson.fromJson(jsonObject, ChannelStatus::class.java)
-                // TODO
-                else -> ChannelMessage(text)
+            try {
+                val jsonObject = JsonParser.parseString(text).asJsonObject
+                val type = jsonObject.get("t").asString
+                // val value = jsonObject.get("v")
+                return when (RTMessageType.valueOf(type)) {
+                    RTMessageType.Notice -> gson.fromJson(jsonObject, Notice::class.java)
+                    RTMessageType.RaiseHand -> gson.fromJson(jsonObject, RaiseHand::class.java)
+                    RTMessageType.AcceptRaiseHand -> gson.fromJson(jsonObject, AcceptRaiseHand::class.java)
+                    RTMessageType.CancelAllHandRaising -> gson.fromJson(jsonObject, CancelAllHandRaising::class.java)
+                    RTMessageType.BanText -> gson.fromJson(jsonObject, BanText::class.java)
+                    RTMessageType.Speak -> gson.fromJson(jsonObject, Speak::class.java)
+                    RTMessageType.DeviceState -> gson.fromJson(jsonObject, DeviceState::class.java)
+                    RTMessageType.ClassMode -> gson.fromJson(jsonObject, ClassMode::class.java)
+                    RTMessageType.RoomStatus -> gson.fromJson(jsonObject, RoomStatus::class.java)
+                    RTMessageType.RequestChannelStatus -> gson.fromJson(jsonObject, RequestChannelStatus::class.java)
+                    RTMessageType.ChannelStatus -> gson.fromJson(jsonObject, ChannelStatus::class.java)
+                    // TODO
+                    else -> ChannelMessage(text)
+                }
+            } catch (e: Exception) {
+                return ChannelMessage(text)
             }
         }
 

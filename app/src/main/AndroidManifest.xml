@@ -60,7 +60,7 @@
 
             android:label="@string/title_activity_compose_test" />
         <activity
-            android:name=".ui.activity.home.HomeActivity"
+            android:name=".ui.activity.home.MainActivity"
 
             android:theme="@style/Theme.FlatAndroid.Launch">
             <intent-filter>

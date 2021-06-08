@@ -5,7 +5,7 @@ import android.content.Intent
 import io.agora.flat.Constants
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
-import io.agora.flat.ui.activity.home.HomeActivity
+import io.agora.flat.ui.activity.home.MainActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.PlaybackActivity
 import io.agora.flat.ui.activity.room.CreateRoomActivity
@@ -20,7 +20,7 @@ import io.agora.flat.ui.activity.setting.MyProfileActivity
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
-        val intent = Intent(context, HomeActivity::class.java).apply {
+        val intent = Intent(context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
         context.startActivity(intent)

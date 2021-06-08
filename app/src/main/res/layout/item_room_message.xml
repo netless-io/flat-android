@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp"
+    tools:layout_width="240dp">
+
+    <LinearLayout
+        android:id="@+id/leftMessageLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginVertical="4dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#7A7B7C"
+            android:textSize="12sp"
+            tools:text="昵称" />
+
+        <TextView
+            android:id="@+id/leftMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/shape_gray_solid_round_16_bg"
+            android:maxWidth="220dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="5dp"
+            android:textColor="#444E60"
+            android:textSize="14sp"
+            tools:text="老师好" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rightMessageLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginVertical="4dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/rightMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_blue_solid_round_16_bg"
+            android:maxWidth="200dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="5dp"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            tools:text="同学们下课" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/noticeMessageLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginVertical="4dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/noticeMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_gray_light_solid_round_12_bg"
+            android:maxWidth="200dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="2dp"
+            android:textColor="#7A7B7C"
+            android:textSize="12sp"
+            tools:text="提醒消息" />
+    </LinearLayout>
+</FrameLayout>

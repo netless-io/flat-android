@@ -60,11 +60,17 @@ class ClassRoomViewModel @Inject constructor(
     private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val usersMap = _usersMap.asStateFlow()
 
+    private var _messageList = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val messageList = _messageList.asStateFlow()
+
     private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
     val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
 
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
+
+    private var _messageAreaShown = MutableStateFlow(false)
+    val messageAreaShown = _messageAreaShown.asStateFlow()
 
     private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
     val roomEvent = _roomEvent
@@ -203,6 +209,9 @@ class ClassRoomViewModel @Inject constructor(
 
     fun notifyOperatingAreaShown(areaId: Int) {
         onEvent(ClassRoomEvent.OperatingAreaShown(areaId))
+        if (areaId != ClassRoomEvent.AREA_ID_MESSAGE) {
+            _messageAreaShown.value = false
+        }
     }
 
     fun notifyRTMChannelJoined() {
@@ -249,6 +258,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun setVideoShown(shown: Boolean) {
         _videoAreaShown.value = shown
+    }
+
+    fun setMessageAreaShown(shown: Boolean) {
+        _messageAreaShown.value = shown
     }
 
     // RTCCommand Handle
@@ -313,6 +326,18 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun sendChatMessage(message: String) {
+        viewModelScope.launch {
+            rtmApi.sendChannelMessage(message)
+
+            _messageList.value = _messageList.value + ChatMessage(
+                _state.value.currentUserName,
+                message,
+                _state.value.ownerUUID == _state.value.currentUserUUID
+            )
+        }
+    }
+
     private fun isRoomOwner(): Boolean {
         return _state.value.ownerUUID == _state.value.currentUserUUID
     }
@@ -320,7 +345,11 @@ class ClassRoomViewModel @Inject constructor(
     fun onRTMEvent(event: RTMEvent, senderId: String) {
         when (event) {
             is RTMEvent.ChannelMessage -> {
-                // TODO
+                _messageList.value = _messageList.value + ChatMessage(
+                    _usersMap.value[senderId]?.name ?: "",
+                    event.text,
+                    _state.value.ownerUUID == senderId
+                )
             }
             is RTMEvent.ChannelStatus -> {
                 updateChannelState(event.value)
@@ -557,3 +586,5 @@ sealed class ClassRoomEvent {
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
     data class InsertPpt(val dirpath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
+
+data class ChatMessage(val name: String, val message: String, val isOwner: Boolean)

@@ -46,7 +46,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_message_normal" />
+                android:src="@drawable/ic_toolbox_ext_message_selector" />
 
             <ImageView
                 android:id="@+id/cloudservice"

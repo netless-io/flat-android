@@ -351,7 +351,7 @@ class WhiteboardComponent(
         if (areaId != ClassRoomEvent.AREA_ID_APPLIANCE) {
             binding.toolsLayout.isVisible = false
         }
-        if (areaId == ClassRoomEvent.AREA_ID_PAINT) {
+        if (areaId != ClassRoomEvent.AREA_ID_PAINT) {
             binding.toolsSubLayout.isVisible = false
         }
     }

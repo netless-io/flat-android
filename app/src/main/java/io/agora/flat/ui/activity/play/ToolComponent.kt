@@ -17,7 +17,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.dp2px
-import io.agora.flat.util.showDebugToast
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -72,6 +71,12 @@ class ToolComponent(
                 cloudStorageAdapter.setDataSet(it)
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.messageAreaShown.collect {
+                binding.message.isSelected = it
+            }
+        }
     }
 
     private fun handleAreaShown(areaId: Int) {
@@ -108,7 +113,10 @@ class ToolComponent(
         binding = ComponentToolBinding.inflate(activity.layoutInflater, rootView, true)
 
         val map: Map<View, (View) -> Unit> = mapOf(
-            binding.message to { activity.showDebugToast(R.string.toast_in_development) },
+            binding.message to {
+                val shown = !viewModel.messageAreaShown.value
+                viewModel.setMessageAreaShown(shown)
+            },
             binding.cloudservice to {
                 if (binding.layoutCloudStorage.root.isVisible) {
                     hideCloudStorageLayout()

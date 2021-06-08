@@ -78,6 +78,11 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
             super.onMemberLeft(member)
             flatRTMListeners.forEach { it.onMemberLeft(member.userId, member.channelId) }
         }
+
+        override fun onMessageReceived(message: RtmMessage, member: RtmChannelMember) {
+            super.onMessageReceived(message, member)
+            flatRTMListeners.forEach { it.onRTMEvent(RTMEvent.parseRTMEvent(message.text), member.userId) }
+        }
     }
 
     private var commandListener = object : RtmChannelListenerAdapter {
