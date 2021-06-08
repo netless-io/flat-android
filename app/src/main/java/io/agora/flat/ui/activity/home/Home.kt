@@ -38,6 +38,7 @@ import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatRoomStatusText
 import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.showDebugToast
 
 @Composable
 fun Home() {
@@ -85,7 +86,8 @@ private fun TopOperations() {
             Navigator.launchJoinRoomActivity(context)
         }
         OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
-            Navigator.launchSubscribeRoomActivity(context)
+            // Navigator.launchSubscribeRoomActivity(context)
+            context.showDebugToast(R.string.toast_in_development)
         }
     }
 }
@@ -138,25 +140,19 @@ fun FlatHomeTopBar(userAvatar: String) {
                     onDismissRequest = { expanded = false },
                 ) {
                     DropdownMenuItem(onClick = {
-                        expanded = false
                         Navigator.launchSettingActivity(context)
+                        expanded = false
                     }) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_user_profile_head),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
                         Text("我的资料", Modifier.width(100.dp))
                     }
-                    DropdownMenuItem(
-                        onClick = { /* Handle settings! */ },
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_user_profile_aboutus),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        // TODO
+                    DropdownMenuItem(onClick = {
+                        Navigator.launchMyProfileActivity(context)
+                        expanded = false
+                    }) {
+                        Image(painterResource(R.drawable.ic_user_profile_aboutus), contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
                         Text("个人信息", Modifier.width(100.dp))
                     }
                 }

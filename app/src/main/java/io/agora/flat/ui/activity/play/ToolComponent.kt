@@ -108,7 +108,7 @@ class ToolComponent(
         binding = ComponentToolBinding.inflate(activity.layoutInflater, rootView, true)
 
         val map: Map<View, (View) -> Unit> = mapOf(
-            binding.message to { activity.showDebugToast("Not Supported Yet") },
+            binding.message to { activity.showDebugToast(R.string.toast_in_development) },
             binding.cloudservice to {
                 if (binding.layoutCloudStorage.root.isVisible) {
                     hideCloudStorageLayout()

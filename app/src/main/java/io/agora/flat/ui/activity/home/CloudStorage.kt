@@ -33,9 +33,7 @@ fun CloudStorage() {
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
-                onClick = {
-                    context.showDebugToast("Not Supported Yet")
-                }
+                onClick = { context.showDebugToast(R.string.toast_in_development) },
             ) {
                 Icon(Icons.Outlined.Add, contentDescription = null, tint = FlatColorWhite)
             }
@@ -45,11 +43,7 @@ fun CloudStorage() {
 
 @Composable
 private fun FlatCloudStorageTopBar() {
-    FlatTopAppBar(
-        title = {
-            Text(stringResource(id = R.string.title_cloud_storage), style = FlatTitleTextStyle)
-        }
-    )
+    FlatTopAppBar(title = { Text(stringResource(id = R.string.title_cloud_storage), style = FlatTitleTextStyle) })
 }
 
 @Composable

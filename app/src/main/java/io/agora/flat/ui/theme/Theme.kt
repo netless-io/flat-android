@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.ui.theme
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -15,6 +16,7 @@ private val DarkColorPalette = darkColors(
 /**
  * See <a href="https://material.io/design/material-theming/implementing-your-theme.html">Material Theming</a>
  */
+@SuppressLint("ConflictingOnColor")
 private val LightColorPalette = lightColors(
     primary = FlatColorBlue,
     primaryVariant = FlatColorBlue,

@@ -69,7 +69,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.setting.UserProfileActivity" />
+        <activity android:name=".ui.activity.setting.UserInfoActivity" />
+        <activity android:name=".ui.activity.setting.MyProfileActivity" />
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"

@@ -15,7 +15,8 @@ import io.agora.flat.ui.activity.room.SubscribeRoomActivity
 import io.agora.flat.ui.activity.setting.AboutUsActivity
 import io.agora.flat.ui.activity.setting.FeedbackActivity
 import io.agora.flat.ui.activity.setting.SettingActivity
-import io.agora.flat.ui.activity.setting.UserProfileActivity
+import io.agora.flat.ui.activity.setting.UserInfoActivity
+import io.agora.flat.ui.activity.setting.MyProfileActivity
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
@@ -66,8 +67,13 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchUserProfileActivity(context: Context) {
-        val intent = Intent(context, UserProfileActivity::class.java)
+    fun launchUserInfoActivity(context: Context) {
+        val intent = Intent(context, UserInfoActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchMyProfileActivity(context: Context) {
+        val intent = Intent(context, MyProfileActivity::class.java)
         context.startActivity(intent)
     }
 

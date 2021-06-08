@@ -1,14 +1,15 @@
 package io.agora.flat.util
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.res.Resources
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
-import io.agora.flat.BuildConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     var versionName: String? = null
@@ -20,14 +21,22 @@ fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     return versionName ?: defaultVersion
 }
 
+fun Context.isApkInDebug(): Boolean {
+    return try {
+        applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+    } catch (e: java.lang.Exception) {
+        false
+    }
+}
+
 fun Context.showDebugToast(@StringRes resId: Int) {
-    if (BuildConfig.DEBUG) {
+    if (isApkInDebug()) {
         Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
     }
 }
 
 fun Context.showDebugToast(message: String) {
-    if (BuildConfig.DEBUG) {
+    if (isApkInDebug()) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

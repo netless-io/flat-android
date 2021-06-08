@@ -33,7 +33,7 @@ class FeedbackActivity : ComponentActivity() {
                 BackTopAppBar(title = stringResource(R.string.title_feedback), { finish() });
                 OutlinedTextField(
                     value = text,
-                    { text = it },
+                    onValueChange = { text = it },
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth()
@@ -54,7 +54,7 @@ class FeedbackActivity : ComponentActivity() {
                     colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
                     shape = MaterialTheme.shapes.small,
                     onClick = { viewModel.uploadFeedback(text) }) {
-                    Text(text = "提交", style = FlatCommonTextStyle, color = FlatColorWhite)
+                    Text(text = stringResource(id = R.string.commit), style = FlatCommonTextStyle, color = FlatColorWhite)
                 }
             }
         }

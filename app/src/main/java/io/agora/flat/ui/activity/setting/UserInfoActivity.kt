@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,7 +27,7 @@ import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.viewmodel.UserViewModel
 
 @AndroidEntryPoint
-class UserProfileActivity : ComponentActivity() {
+class UserInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -36,7 +35,7 @@ class UserProfileActivity : ComponentActivity() {
                 val viewModel = viewModel(UserViewModel::class.java)
                 val userInfo = viewModel.userInfo.collectAsState()
 
-                BackTopAppBar(stringResource(id = R.string.title_user_profile), { finish() })
+                BackTopAppBar(title = stringResource(R.string.title_user_info), onBackPressed = { finish() })
                 userInfo.value?.apply {
                     SettingList(name)
                 }
@@ -49,9 +48,9 @@ class UserProfileActivity : ComponentActivity() {
 private fun SettingList(name: String) {
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            Item(stringResource(R.string.nickname), "", onClickOrNull = {})
-            Divider(Modifier.padding(start = 16.dp, end = 16.dp), thickness = 1.dp)
-            Item("微信", name)
+            // Item(stringResource(R.string.nickname), "", onClickOrNull = {})
+            // Divider(Modifier.padding(start = 16.dp, end = 16.dp), thickness = 1.dp)
+            Item(tip = stringResource(R.string.username), desc = name)
         }
     }
 }
@@ -87,6 +86,6 @@ private fun Item(
 @Composable
 fun DefaultPreview() {
     FlatColumnPage {
-        SettingList("PreviewName")
+        SettingList("Name")
     }
 }
