@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FlatAndroid</string>
+    <string name="app_name">Flat</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">首页</string>
     <string name="title_activity_compose_test">ComposeTestActivity</string>

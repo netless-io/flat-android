@@ -333,7 +333,7 @@ class ClassRoomViewModel @Inject constructor(
             _messageList.value = _messageList.value + ChatMessage(
                 _state.value.currentUserName,
                 message,
-                _state.value.ownerUUID == _state.value.currentUserUUID
+                true
             )
         }
     }
@@ -348,7 +348,7 @@ class ClassRoomViewModel @Inject constructor(
                 _messageList.value = _messageList.value + ChatMessage(
                     _usersMap.value[senderId]?.name ?: "",
                     event.text,
-                    _state.value.ownerUUID == senderId
+                    _state.value.currentUserUUID == senderId
                 )
             }
             is RTMEvent.ChannelStatus -> {
@@ -564,6 +564,9 @@ data class ClassRoomState(
         get() {
             return isOwner && RoomStatus.Idle == roomStatus
         }
+
+    val needOwnerExitDialog: Boolean
+        get() = isOwner && RoomStatus.Idle != roomStatus
 }
 
 sealed class ClassRoomEvent {
@@ -587,4 +590,4 @@ sealed class ClassRoomEvent {
     data class InsertPpt(val dirpath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
 
-data class ChatMessage(val name: String, val message: String, val isOwner: Boolean)
+data class ChatMessage(val name: String, val message: String, val isSelf: Boolean)

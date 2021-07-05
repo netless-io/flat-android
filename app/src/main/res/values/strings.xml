@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FlatAndroid</string>
+    <string name="app_name">Flat</string>
 
     <!-- common -->
     <string name="commit" translatable="false">提交</string>

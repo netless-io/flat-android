@@ -192,7 +192,7 @@ class ToolComponent(
     }
 
     private fun handleExit() {
-        if (viewModel.state.value.isOwner) {
+        if (viewModel.state.value.needOwnerExitDialog) {
             showOwnerExitDialog()
         } else {
             activity.finish()

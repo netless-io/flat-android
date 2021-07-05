@@ -21,7 +21,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = dataSet[position]
-        if (item.isOwner) {
+        if (item.isSelf) {
             viewHolder.rightMessageLayout.isVisible = true
             viewHolder.leftMessageLayout.isVisible = false
             viewHolder.noticeMessageLayout.isVisible = false

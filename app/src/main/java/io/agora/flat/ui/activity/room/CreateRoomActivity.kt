@@ -69,7 +69,7 @@ private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) ->
             )
         )
     }
-    var type by remember { mutableStateOf(RoomType.OneToOne) }
+    var type by remember { mutableStateOf(RoomType.BigClass) }
     var openVideo by remember { mutableStateOf(false) }
 
     if (viewState.roomUUID.isNotBlank()) {
@@ -131,14 +131,6 @@ private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) ->
 private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
     Row(Modifier.fillMaxWidth()) {
         TypeItem(
-            checked = type == RoomType.OneToOne,
-            text = "一对一",
-            id = R.drawable.img_one_to_one,
-            modifier = Modifier
-                .weight(7f)
-                .clickable { onTypeChange(RoomType.OneToOne) })
-        Spacer(Modifier.weight(1f))
-        TypeItem(
             checked = type == RoomType.BigClass,
             text = "大班课",
             id = R.drawable.img_big_class,
@@ -153,6 +145,14 @@ private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
             modifier = Modifier
                 .weight(7f)
                 .clickable { onTypeChange(RoomType.SmallClass) })
+        Spacer(Modifier.weight(1f))
+        TypeItem(
+            checked = type == RoomType.OneToOne,
+            text = "一对一",
+            id = R.drawable.img_one_to_one,
+            modifier = Modifier
+                .weight(7f)
+                .clickable { onTypeChange(RoomType.OneToOne) })
     }
 }
 
