@@ -73,4 +73,5 @@
     <string name="message_muted" translatable="false">已禁言</string>
     <string name="message_unmuted" translatable="false">已解除禁言</string>
     <string name="class_room_message_muted" translatable="false">全员禁言中</string>
+    <string name="end" translatable="false">结束</string>
 </resources>

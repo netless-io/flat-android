@@ -24,9 +24,9 @@ sealed class RTMEvent {
     data class AcceptRaiseHand(@SerializedName("v") val value: AcceptRaiseHandValue) :
         RTMEvent(RTMessageType.AcceptRaiseHand)
 
-    data class CancelAllHandRaising(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.CancelAllHandRaising)
+    data class CancelHandRaising(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.CancelHandRaising)
     data class BanText(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.BanText)
-    data class Speak(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.Speak)
+    data class Speak(@SerializedName("v") val v: List<SpeakItem>) : RTMEvent(RTMessageType.Speak)
     data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent(RTMessageType.DeviceState)
     data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent(RTMessageType.ClassMode)
     data class RoomStatus(@SerializedName("v") val roomStatus: io.agora.flat.data.model.RoomStatus) :
@@ -50,7 +50,7 @@ sealed class RTMEvent {
                     RTMessageType.Notice -> gson.fromJson(jsonObject, Notice::class.java)
                     RTMessageType.RaiseHand -> gson.fromJson(jsonObject, RaiseHand::class.java)
                     RTMessageType.AcceptRaiseHand -> gson.fromJson(jsonObject, AcceptRaiseHand::class.java)
-                    RTMessageType.CancelAllHandRaising -> gson.fromJson(jsonObject, CancelAllHandRaising::class.java)
+                    RTMessageType.CancelHandRaising -> gson.fromJson(jsonObject, CancelHandRaising::class.java)
                     RTMessageType.BanText -> gson.fromJson(jsonObject, BanText::class.java)
                     RTMessageType.Speak -> gson.fromJson(jsonObject, Speak::class.java)
                     RTMessageType.DeviceState -> gson.fromJson(jsonObject, DeviceState::class.java)
@@ -83,6 +83,11 @@ data class RTMUserState(
 data class AcceptRaiseHandValue(
     val userUUID: String,
     val accept: Boolean
+)
+
+data class SpeakItem(
+    val userUUID: String,
+    val speak: Boolean,
 )
 
 data class DeviceStateValue(
@@ -124,7 +129,7 @@ enum class RTMessageType {
     AcceptRaiseHand,
 
     /** creator cancel all hand raising */
-    CancelAllHandRaising,
+    CancelHandRaising,
 
     /** creator ban all rtm */
     BanText,

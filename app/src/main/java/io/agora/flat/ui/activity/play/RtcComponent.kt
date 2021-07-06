@@ -170,17 +170,23 @@ class RtcComponent(
         videoListBinding.enterFullScreen.setOnClickListener(onClickListener)
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adapter.listener = UserVideoAdapter.Listener { _, view, user ->
-            start.set(getViewRect(view, fullScreenLayout))
-            end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
+        adapter.listener = object : UserVideoAdapter.Listener {
+            override fun onFullScreen(position: Int, view: ViewGroup, user: RtcUser) {
+                start.set(getViewRect(view, fullScreenLayout))
+                end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
 
-            if (userCallOut == null || userCallOut != user) {
-                userCallOut = user
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
-                showVideoListOptArea(start)
-            } else {
-                userCallOut = null
-                hideVideoListOptArea()
+                if (userCallOut == null || userCallOut != user) {
+                    userCallOut = user
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
+                    showVideoListOptArea(start)
+                } else {
+                    userCallOut = null
+                    hideVideoListOptArea()
+                }
+            }
+
+            override fun onCloseSpeak(position: Int, itemData: RtcUser) {
+                viewModel.closeSpeak(itemData.userUUID)
             }
         }
 

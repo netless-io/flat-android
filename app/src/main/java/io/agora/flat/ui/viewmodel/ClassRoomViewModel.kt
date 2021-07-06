@@ -25,9 +25,7 @@ import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.event.HomeRefreshEvent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -60,6 +58,9 @@ class ClassRoomViewModel @Inject constructor(
     private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val usersMap = _usersMap.asStateFlow()
 
+    private var _currentUser = MutableStateFlow<RtcUser?>(null)
+    val currentUser = _currentUser.asStateFlow()
+
     private var _messageList = MutableStateFlow<List<Message>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
@@ -91,6 +92,13 @@ class ClassRoomViewModel @Inject constructor(
                 currentUserName = appKVCenter.getUserInfo()!!.name
             )
         )
+
+        viewModelScope.launch {
+            usersMap.map { it[_state.value.currentUserUUID] }.filterNotNull().collect {
+                _currentUser.value = it
+                _state.value = _state.value.copy(isSpeak = it.isSpeak)
+            }
+        }
 
         viewModelScope.launch {
             when (val result =
@@ -337,6 +345,10 @@ class ClassRoomViewModel @Inject constructor(
         return _state.value.ownerUUID == _state.value.currentUserUUID
     }
 
+    private fun isCurrentUser(userUUID: String): Boolean {
+        return userUUID == _state.value.currentUserUUID
+    }
+
     fun onRTMEvent(event: RTMEvent, senderId: String) {
         when (event) {
             is RTMEvent.ChannelMessage -> {
@@ -365,9 +377,10 @@ class ClassRoomViewModel @Inject constructor(
                     val user = _usersMap.value[event.value.userUUID]
                     user?.run {
                         val map = _usersMap.value.toMutableMap()
-                        map[senderId] = copy(isSpeak = event.value.accept)
+                        map[event.value.userUUID] = copy(isSpeak = event.value.accept, isRaiseHand = false)
                         _usersMap.value = map
                     }
+
                 }
             }
             is RTMEvent.BanText -> {
@@ -375,7 +388,7 @@ class ClassRoomViewModel @Inject constructor(
 
                 appendMessage(NoticeMessage(ban = event.v))
             }
-            is RTMEvent.CancelAllHandRaising -> {
+            is RTMEvent.CancelHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
                     val map = _usersMap.value.toMutableMap()
                     map.forEach { (uuid, u) -> map[uuid] = u.copy(isRaiseHand = false) }
@@ -391,12 +404,7 @@ class ClassRoomViewModel @Inject constructor(
 
             }
             is RTMEvent.RaiseHand -> {
-                val user = _usersMap.value[senderId]
-                user?.run {
-                    val map = _usersMap.value.toMutableMap()
-                    map[senderId] = copy(isRaiseHand = event.v)
-                    _usersMap.value = map
-                }
+                updateRaiseHandStatus(senderId, event)
             }
             is RTMEvent.RoomStatus -> {
                 if (senderId == _state.value.ownerUUID) {
@@ -409,13 +417,30 @@ class ClassRoomViewModel @Inject constructor(
                 }
             }
             is RTMEvent.Speak -> {
-                val user = _usersMap.value[senderId]
-                user?.run {
-                    val map = _usersMap.value.toMutableMap()
-                    map[senderId] = copy(isSpeak = event.v)
-                    _usersMap.value = map
+                event.v.forEach {
+                    updateSpeakStatus(it)
                 }
             }
+            else -> {
+
+            }
+        }
+    }
+
+    private fun updateSpeakStatus(it: SpeakItem) {
+        _usersMap.value[it.userUUID]?.run {
+            val map = _usersMap.value.toMutableMap()
+            map[it.userUUID] = copy(isSpeak = it.speak)
+            _usersMap.value = map
+        }
+    }
+
+    private fun updateRaiseHandStatus(userUUID: String, event: RTMEvent.RaiseHand) {
+        val user = _usersMap.value[userUUID]
+        user?.run {
+            val map = _usersMap.value.toMutableMap()
+            map[userUUID] = copy(isRaiseHand = event.v)
+            _usersMap.value = map
         }
     }
 
@@ -439,6 +464,17 @@ class ClassRoomViewModel @Inject constructor(
                 )
             )
             rtmApi.sendPeerCommand(channelState, senderId)
+        }
+    }
+
+    fun sendRaiseHand() {
+        viewModelScope.launch {
+            val user = _usersMap.value[_state.value.currentUserUUID]
+            user?.run {
+                val event = RTMEvent.RaiseHand(!isRaiseHand)
+                rtmApi.sendChannelCommand(event)
+                updateRaiseHandStatus(_state.value.currentUserUUID, event)
+            }
         }
     }
 
@@ -526,6 +562,15 @@ class ClassRoomViewModel @Inject constructor(
         }.build()
         convert.startConvertTask()
     }
+
+    fun closeSpeak(userUUID: String) {
+        viewModelScope.launch {
+            if (isRoomOwner() || isCurrentUser(userUUID)) {
+                rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, false))))
+                updateSpeakStatus(SpeakItem(userUUID, false))
+            }
+        }
+    }
 }
 
 data class ClassRoomState(
@@ -553,9 +598,13 @@ data class ClassRoomState(
     val ban: Boolean = true,
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
+
+    val isSpeak: Boolean = false,
 ) {
     val isWritable: Boolean
-        get() = ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction
+        get() {
+            return ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction || isSpeak
+        }
 
     val isOwner: Boolean
         get() = ownerUUID == currentUserUUID
@@ -592,4 +641,4 @@ sealed class ClassRoomEvent {
 
 sealed class Message
 data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false) : Message()
-data class NoticeMessage(val ban: Boolean) :Message()
+data class NoticeMessage(val ban: Boolean) : Message()

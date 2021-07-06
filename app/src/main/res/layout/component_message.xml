@@ -46,7 +46,7 @@
                 android:background="@drawable/shape_gray_border_round_4_bg"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-
+                
                 <EditText
                     android:id="@+id/messageEdit"
                     android:layout_width="0dp"

@@ -136,6 +136,9 @@ class WhiteboardComponent(
             },
             scenePreviewBinding.sceneCover to {
                 slideAnimator.hide()
+            },
+            binding.handup to {
+                viewModel.sendRaiseHand()
             }
         )
 
@@ -312,6 +315,15 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.state.collect {
                 setRoomWritable(it.isWritable)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.currentUser.collect {
+                Log.d(RtcComponent.TAG, "currentUser $it")
+                it?.run {
+                    binding.handup.isSelected = isRaiseHand
+                }
             }
         }
     }

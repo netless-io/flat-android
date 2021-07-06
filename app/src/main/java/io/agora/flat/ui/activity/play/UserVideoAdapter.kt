@@ -58,7 +58,10 @@ class UserVideoAdapter(
             rtcVideoController.enterFullScreen(itemData.rtcUID)
             listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
         }
-
+        viewHolder.closeSpeak.isVisible = itemData.isSpeak
+        viewHolder.closeSpeak.setOnClickListener {
+            listener?.onCloseSpeak(position, itemData)
+        }
         viewHolder.videoClosedLayout.isVisible = !itemData.videoOpen
     }
 
@@ -86,6 +89,7 @@ class UserVideoAdapter(
         val videoClosedLayout: FrameLayout = view.findViewById(R.id.videoClosedLayout)
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val username: TextView = view.findViewById(R.id.username)
+        val closeSpeak: View = view.findViewById(R.id.close_speak)
     }
 
     var listener: Listener? = null
@@ -93,7 +97,9 @@ class UserVideoAdapter(
             field = value
         }
 
-    fun interface Listener {
+    interface Listener {
         fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser)
+
+        fun onCloseSpeak(position: Int, itemData: RtcUser)
     }
 }

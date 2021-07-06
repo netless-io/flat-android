@@ -57,5 +57,13 @@
                 android:scaleType="centerCrop"
                 android:visibility="visible" />
         </FrameLayout>
+
+        <ImageView
+            android:id="@+id/close_speak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:padding="4dp"
+            android:src="@drawable/ic_room_close_speak" />
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
