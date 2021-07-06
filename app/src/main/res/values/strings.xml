@@ -68,4 +68,9 @@
     <string name="cancel_room" translatable="false">取消房间</string>
     <string name="remove_room" translatable="false">移除房间</string>
     <string name="delete_history" translatable="false">删除记录</string>
+
+    <string name="say_something" translatable="false">说点什么…</string>
+    <string name="message_muted" translatable="false">已禁言</string>
+    <string name="message_unmuted" translatable="false">已解除禁言</string>
+    <string name="class_room_message_muted" translatable="false">全员禁言中</string>
 </resources>

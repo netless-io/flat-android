@@ -60,7 +60,7 @@ class ClassRoomViewModel @Inject constructor(
     private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
     val usersMap = _usersMap.asStateFlow()
 
-    private var _messageList = MutableStateFlow<List<ChatMessage>>(emptyList())
+    private var _messageList = MutableStateFlow<List<Message>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
     private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
@@ -191,11 +191,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private suspend fun sendAndUpdateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
         val event = RTMEvent.DeviceState(
-            DeviceStateValue(
-                userUUID = userUUID,
-                camera = enableVideo,
-                mic = enableAudio
-            )
+            DeviceStateValue(userUUID = userUUID, camera = enableVideo, mic = enableAudio)
         )
         rtmApi.sendChannelCommand(event)
         updateDeviceState(event.value)
@@ -329,13 +325,12 @@ class ClassRoomViewModel @Inject constructor(
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
             rtmApi.sendChannelMessage(message)
-
-            _messageList.value = _messageList.value + ChatMessage(
-                _state.value.currentUserName,
-                message,
-                true
-            )
+            appendMessage(ChatMessage(name = _state.value.currentUserName, message = message, isSelf = true))
         }
+    }
+
+    private fun appendMessage(message: Message) {
+        _messageList.value = _messageList.value + message
     }
 
     private fun isRoomOwner(): Boolean {
@@ -345,10 +340,12 @@ class ClassRoomViewModel @Inject constructor(
     fun onRTMEvent(event: RTMEvent, senderId: String) {
         when (event) {
             is RTMEvent.ChannelMessage -> {
-                _messageList.value = _messageList.value + ChatMessage(
-                    _usersMap.value[senderId]?.name ?: "",
-                    event.text,
-                    _state.value.currentUserUUID == senderId
+                appendMessage(
+                    ChatMessage(
+                        _usersMap.value[senderId]?.name ?: "",
+                        event.text,
+                        _state.value.currentUserUUID == senderId
+                    )
                 )
             }
             is RTMEvent.ChannelStatus -> {
@@ -373,7 +370,11 @@ class ClassRoomViewModel @Inject constructor(
                     }
                 }
             }
-            is RTMEvent.BanText -> _state.value = _state.value.copy(ban = event.v)
+            is RTMEvent.BanText -> {
+                _state.value = _state.value.copy(ban = event.v)
+
+                appendMessage(NoticeMessage(ban = event.v))
+            }
             is RTMEvent.CancelAllHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
                     val map = _usersMap.value.toMutableMap()
@@ -589,4 +590,6 @@ sealed class ClassRoomEvent {
     data class InsertPpt(val dirpath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
 
-data class ChatMessage(val name: String, val message: String, val isSelf: Boolean)
+sealed class Message
+data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false) : Message()
+data class NoticeMessage(val ban: Boolean) :Message()

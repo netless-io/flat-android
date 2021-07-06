@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.EntryPointAccessors
+import io.agora.flat.R
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.RTMListener
 import io.agora.flat.data.AppKVCenter
@@ -105,6 +106,11 @@ class RtmComponent(
                 if (it.roomStatus == RoomStatus.Stopped) {
                     activity.delayAndFinish(message = "房间结束，退出中...")
                 }
+
+                binding.messageEdit.isEnabled = !it.ban
+                binding.send.isEnabled = !it.ban
+                binding.messageEdit.hint =
+                    activity.getString(if (it.ban) R.string.class_room_message_muted else R.string.say_something)
             }
         }
 

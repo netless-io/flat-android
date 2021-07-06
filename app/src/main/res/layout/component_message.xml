@@ -56,7 +56,7 @@
                     android:layout_weight="1"
                     android:background="@null"
                     android:gravity="center|start"
-                    android:hint="说点什么…"
+                    android:hint="@string/say_something"
                     android:maxHeight="100dp"
                     android:textColor="@color/flat_black"
                     android:textSize="14sp" />

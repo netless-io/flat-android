@@ -8,9 +8,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.ui.viewmodel.ChatMessage
+import io.agora.flat.ui.viewmodel.Message
+import io.agora.flat.ui.viewmodel.NoticeMessage
 
 class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
-    private val dataSet: MutableList<ChatMessage> = mutableListOf()
+    private val dataSet: MutableList<Message> = mutableListOf()
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(viewGroup.context)
@@ -21,20 +23,38 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = dataSet[position]
-        if (item.isSelf) {
-            viewHolder.rightMessageLayout.isVisible = true
-            viewHolder.leftMessageLayout.isVisible = false
-            viewHolder.noticeMessageLayout.isVisible = false
 
-            viewHolder.rightMessage.text = item.message
-        } else {
-            viewHolder.rightMessageLayout.isVisible = false
-            viewHolder.leftMessageLayout.isVisible = true
-            viewHolder.noticeMessageLayout.isVisible = false
+        when (item) {
+            is ChatMessage -> {
+                if (item.isSelf) {
+                    viewHolder.rightMessageLayout.isVisible = true
+                    viewHolder.leftMessageLayout.isVisible = false
+                    viewHolder.noticeMessageLayout.isVisible = false
 
-            viewHolder.leftMessage.text = item.message
-            viewHolder.leftName.text = item.name
+                    viewHolder.rightMessage.text = item.message
+                } else {
+                    viewHolder.rightMessageLayout.isVisible = false
+                    viewHolder.leftMessageLayout.isVisible = true
+                    viewHolder.noticeMessageLayout.isVisible = false
+
+                    viewHolder.leftMessage.text = item.message
+                    viewHolder.leftName.text = item.name
+                }
+            }
+            is NoticeMessage -> {
+                viewHolder.rightMessageLayout.isVisible = false
+                viewHolder.leftMessageLayout.isVisible = false
+                viewHolder.noticeMessageLayout.isVisible = true
+
+                viewHolder.noticeMessage.run {
+                    text = if (item.ban)
+                        context.getString(R.string.message_muted)
+                    else
+                        context.getString(R.string.message_unmuted)
+                }
+            }
         }
+
     }
 
     override fun getItemId(position: Int): Long {
@@ -43,7 +63,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataList(it: List<ChatMessage>) {
+    fun setDataList(it: List<Message>) {
         dataSet.clear()
         dataSet.addAll(it)
         notifyDataSetChanged()
@@ -56,5 +76,6 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
         val rightMessageLayout: View = view.findViewById(R.id.rightMessageLayout)
         val rightMessage: TextView = view.findViewById(R.id.rightMessage)
         val noticeMessageLayout: View = view.findViewById(R.id.noticeMessageLayout)
+        val noticeMessage: TextView = view.findViewById(R.id.noticeMessage)
     }
 }
