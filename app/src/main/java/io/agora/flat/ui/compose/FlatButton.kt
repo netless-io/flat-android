@@ -13,7 +13,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
-import io.agora.flat.ui.activity.ui.theme.*
+import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.Shapes
 
 @Composable

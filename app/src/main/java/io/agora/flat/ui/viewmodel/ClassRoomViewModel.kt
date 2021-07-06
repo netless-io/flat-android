@@ -492,8 +492,7 @@ class ClassRoomViewModel @Inject constructor(
             return
         }
         // "正在插入课件……"
-        val ext = file.fileURL.substringAfterLast('.').toLowerCase()
-        when (ext) {
+        when (val ext = file.fileURL.substringAfterLast('.').toLowerCase()) {
             "jpg", "jpeg", "png", "webp" -> {
                 onEvent(ClassRoomEvent.InsertImage(file.fileURL))
             }

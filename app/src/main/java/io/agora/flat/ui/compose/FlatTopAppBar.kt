@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.agora.flat.ui.activity.ui.theme.FlatTitleTextStyle
+import io.agora.flat.ui.theme.FlatTitleTextStyle
 
 @Composable
 fun FlatTopAppBar(

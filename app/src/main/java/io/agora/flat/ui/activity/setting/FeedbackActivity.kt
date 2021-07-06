@@ -16,9 +16,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.agora.flat.R
-import io.agora.flat.ui.activity.ui.theme.*
+import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.viewmodel.FeedbackViewModel
 
 class FeedbackActivity : ComponentActivity() {

@@ -30,13 +30,10 @@ import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorDivider
-import io.agora.flat.ui.activity.ui.theme.FlatSmallTextStyle
-import io.agora.flat.ui.activity.ui.theme.FlatTitleTextStyle
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatRoomStatusText
 import io.agora.flat.ui.compose.FlatTopAppBar
+import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showDebugToast
 
@@ -107,7 +104,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
                 contentScale = ContentScale.Crop,
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(stringResource(id = tip), style = FlatSmallTextStyle)
+            Text(stringResource(tip), style = FlatSmallTextStyle)
         }
     }
 }
@@ -116,7 +113,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
 fun FlatHomeTopBar(userAvatar: String) {
     FlatTopAppBar(
         title = {
-            Text(stringResource(id = R.string.title_home), style = FlatTitleTextStyle)
+            Text(stringResource(R.string.title_home), style = FlatTitleTextStyle)
         },
         actions = {
             Box {
@@ -264,20 +261,33 @@ fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategor
             RoomCategory.History -> R.string.home_no_history_room_tip
         }
         EmptyView(imgRes, message, modifier)
-    }
-    LazyColumn(modifier) {
-        items(count = roomList.size, key = { index: Int ->
-            roomList[index].roomUUID
-        }) {
-            RoomListItem(
-                roomList[it],
-                Modifier.clickable {
-                    Navigator.launchRoomDetailActivity(
-                        context,
-                        roomList[it].roomUUID,
-                        roomList[it].periodicUUID
+    } else {
+        LazyColumn(modifier) {
+            items(count = roomList.size, key = { index: Int ->
+                roomList[index].roomUUID
+            }) {
+                RoomListItem(
+                    roomList[it],
+                    Modifier.clickable {
+                        Navigator.launchRoomDetailActivity(
+                            context,
+                            roomList[it].roomUUID,
+                            roomList[it].periodicUUID
+                        )
+                    })
+            }
+            item {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp), Alignment.TopCenter
+                ) {
+                    Text(
+                        text = stringResource(R.string.loaded_all),
+                        style = FlatSmallTipTextStyle
                     )
-                })
+                }
+            }
         }
     }
 }

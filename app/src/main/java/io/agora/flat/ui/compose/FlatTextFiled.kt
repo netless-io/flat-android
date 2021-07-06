@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.tooling.preview.Preview
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorBorder
-import io.agora.flat.ui.activity.ui.theme.FlatColorGray
-import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorBorder
+import io.agora.flat.ui.theme.FlatColorGray
+import io.agora.flat.ui.theme.FlatCommonTextStyle
 
 @Composable
 fun FlatPrimaryTextField(

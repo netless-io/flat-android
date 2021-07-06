@@ -11,9 +11,13 @@ import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.event.HomeRefreshEvent
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -21,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RoomDetailViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val userRepository: UserRepository,
     private val eventBus: EventBus,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -29,7 +34,9 @@ class RoomDetailViewModel @Inject constructor(
     private val loading = MutableStateFlow(true)
     private val loadingCount = AtomicInteger(0)
 
-    private val _state = MutableStateFlow(RoomDetailViewState())
+    private var userUUID: String = userRepository.getUserInfo()!!.uuid;
+
+    private val _state = MutableStateFlow(RoomDetailViewState(userUUID = userUUID))
     val state: StateFlow<RoomDetailViewState>
         get() = _state
 
@@ -37,27 +44,22 @@ class RoomDetailViewModel @Inject constructor(
     val cancelSuccess: StateFlow<Boolean>
         get() = _cancelSuccess
 
+
     init {
         viewModelScope.launch {
-            combine(
-                roomInfo,
-                periodicRoomInfo,
-                loading,
-            ) { roomInfo, periodicRoomInfo, loading ->
-                RoomDetailViewState(
+            combine(roomInfo, periodicRoomInfo, loading) { roomInfo, periodicRoomInfo, loading ->
+                _state.value.copy(
                     roomInfo = roomInfo,
                     periodicRoomInfo = periodicRoomInfo,
-                    loading = loading,
-                    errorMessage = null
+                    loading = loading
                 )
-            }.catch { throwable ->
-                throw throwable
             }.collect {
                 _state.value = it
             }
         }
 
         loadOrdinaryRoom()
+
         if (isPeriodicRoom()) {
             loadPeriodicRoomInfo()
         }
@@ -77,14 +79,12 @@ class RoomDetailViewModel @Inject constructor(
     private fun loadOrdinaryRoom() {
         viewModelScope.launch {
             incLoadingCount()
-            val resp =
-                roomRepository.getOrdinaryRoomInfo(intentValue(Constants.IntentKey.ROOM_UUID))
+            val resp = roomRepository.getOrdinaryRoomInfo(intentValue(Constants.IntentKey.ROOM_UUID))
             if (resp is Success) {
-                roomInfo.value =
-                    resp.data.roomInfo.map(
-                        intentValue(Constants.IntentKey.ROOM_UUID),
-                        intentValueNullable(Constants.IntentKey.PERIODIC_UUID)
-                    )
+                resp.data.roomInfo.map(
+                    intentValue(Constants.IntentKey.ROOM_UUID),
+                    intentValueNullable(Constants.IntentKey.PERIODIC_UUID)
+                ).also { roomInfo.value = it }
             }
             decLoadingCount()
         }
@@ -93,8 +93,7 @@ class RoomDetailViewModel @Inject constructor(
     private fun loadPeriodicRoomInfo() {
         viewModelScope.launch {
             incLoadingCount()
-            val resp =
-                roomRepository.getPeriodicRoomInfo(intentValue(Constants.IntentKey.PERIODIC_UUID))
+            val resp = roomRepository.getPeriodicRoomInfo(intentValue(Constants.IntentKey.PERIODIC_UUID))
             if (resp is Success) {
                 periodicRoomInfo.value = resp.data
             }
@@ -135,10 +134,13 @@ class RoomDetailViewModel @Inject constructor(
 
 data class RoomDetailViewState(
     val roomInfo: UIRoomInfo? = null,
+    val userUUID: String,
     val periodicRoomInfo: RoomDetailPeriodic? = null,
     val loading: Boolean = false,
-    val errorMessage: String? = null
-)
+) {
+    val isOwner: Boolean
+        get() = roomInfo?.ownerUUID == userUUID
+}
 
 data class UIRoomInfo(
     val roomUUID: String,

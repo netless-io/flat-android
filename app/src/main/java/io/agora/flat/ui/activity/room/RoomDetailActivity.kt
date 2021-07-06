@@ -36,9 +36,8 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.rememberAndroidClipboardController
 import io.agora.flat.data.model.*
-import io.agora.flat.ui.activity.ui.theme.*
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.ui.viewmodel.UserViewModel
@@ -82,7 +81,7 @@ class RoomDetailActivity : ComponentActivity() {
                     DetailUiAction.AllRoomBack -> {
                         visible = false
                     }
-                    DetailUiAction.CancelRoom -> {
+                    DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> {
                         viewModel.cancelRoom()
                     }
                     DetailUiAction.ModifyRoom -> {
@@ -115,12 +114,14 @@ class RoomDetailActivity : ComponentActivity() {
 private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
     FlatColumnPage {
         val viewModel: RoomDetailViewModel = viewModel()
-        val viewState = viewModel.state.collectAsState()
+        val viewState by viewModel.state.collectAsState()
 
         BackTopAppBar(
             stringResource(R.string.title_room_detail),
             onBackPressed = { actioner(DetailUiAction.Back) }) {
-            AppBarMoreButton(actioner)
+            viewState.roomInfo?.run {
+                AppBarMoreButton(viewState.isOwner, roomStatus, actioner)
+            }
         }
 
         Box(
@@ -128,16 +129,16 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
                 .fillMaxWidth()
                 .weight(1f), contentAlignment = Alignment.Center
         ) {
-            if (viewState.value.roomInfo != null) {
-                val roomInfo = viewState.value.roomInfo!!
+            if (viewState.roomInfo != null) {
+                val roomInfo = viewState.roomInfo!!
                 Column(Modifier.fillMaxSize()) {
                     TimeDisplay(
                         begin = roomInfo.beginTime,
                         end = roomInfo.endTime,
                         state = roomInfo.roomStatus
                     )
-                    if (viewModel.isPeriodicRoom() && viewState.value.periodicRoomInfo != null) {
-                        val periodicRoomInfo = viewState.value.periodicRoomInfo!!
+                    if (viewModel.isPeriodicRoom() && viewState.periodicRoomInfo != null) {
+                        val periodicRoomInfo = viewState.periodicRoomInfo!!
                         Column(
                             Modifier
                                 .fillMaxWidth()
@@ -169,7 +170,7 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
                     )
                 }
             }
-            if (viewState.value.loading) {
+            if (viewState.loading) {
                 FlatPageLoading()
             }
         }
@@ -180,15 +181,17 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
 @Composable
 private fun AllRoomDetail(actioner: (DetailUiAction) -> Unit) {
     val viewModel: RoomDetailViewModel = viewModel()
-    val viewState = viewModel.state.collectAsState()
+    val viewState by viewModel.state.collectAsState()
 
     FlatColumnPage {
         BackHandler(onBack = { actioner(DetailUiAction.AllRoomBack) })
         BackTopAppBar(stringResource(R.string.title_room_all),
             onBackPressed = { actioner(DetailUiAction.AllRoomBack) }) {
-            AppBarMoreButton(actioner)
+            viewState.roomInfo?.run {
+                AppBarMoreButton(viewState.isOwner, roomStatus, actioner)
+            }
         }
-        viewState.value.periodicRoomInfo?.run {
+        viewState.periodicRoomInfo?.run {
             LazyColumn {
                 item {
                     PeriodicInfoDisplay(periodic, rooms.size)
@@ -203,23 +206,47 @@ private fun AllRoomDetail(actioner: (DetailUiAction) -> Unit) {
 }
 
 @Composable
-private fun AppBarMoreButton(actioner: (DetailUiAction) -> Unit) {
+private fun AppBarMoreButton(isOwner: Boolean, roomStatus: RoomStatus, actioner: (DetailUiAction) -> Unit) {
     Box {
         var expanded by remember { mutableStateOf(false) }
 
         IconButton(onClick = { expanded = true }) {
             Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
         }
-        DropdownMenu(
-            modifier = Modifier.wrapContentSize(),
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
+
+        DetailDropdownMenu(isOwner, roomStatus, expanded, { expanded = false }, actioner)
+    }
+}
+
+@Composable
+private fun DetailDropdownMenu(
+    isOwner: Boolean,
+    roomStatus: RoomStatus,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    actioner: (DetailUiAction) -> Unit
+) {
+    DropdownMenu(
+        modifier = Modifier.wrapContentSize(),
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        if (isOwner && roomStatus == RoomStatus.Idle) {
             DropdownMenuItem(onClick = { actioner(DetailUiAction.ModifyRoom) }) {
-                Text("修改房间")
+                Text(stringResource(R.string.modify_room))
             }
             DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
-                Text("取消房间", color = FlatColorRed)
+                Text(stringResource(R.string.cancel_room), color = FlatColorRed)
+            }
+        }
+        if (!isOwner && roomStatus != RoomStatus.Stopped) {
+            DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
+                Text(stringResource(R.string.remove_room), color = FlatColorRed)
+            }
+        }
+        if (roomStatus == RoomStatus.Stopped) {
+            DropdownMenuItem(onClick = { actioner(DetailUiAction.DeleteRoom) }) {
+                Text(stringResource(R.string.delete_history), color = FlatColorRed)
             }
         }
     }
@@ -574,7 +601,7 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
 }
 
 @Composable
-fun RoomState(state: RoomStatus, modifier: Modifier) {
+private fun RoomState(state: RoomStatus, modifier: Modifier) {
     when (state) {
         RoomStatus.Idle ->
             Text(
@@ -678,6 +705,7 @@ internal sealed class DetailUiAction {
     object ShowAllRooms : DetailUiAction()
     object ModifyRoom : DetailUiAction()
     object CancelRoom : DetailUiAction()
+    object DeleteRoom : DetailUiAction()
 
     // AllRoom
     object AllRoomBack : DetailUiAction()

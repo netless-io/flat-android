@@ -20,10 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.agora.flat.R
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorGray
-import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.activity.ui.theme.FlatTitleTextStyle
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorGray
+import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatTitleTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.util.getAppVersion

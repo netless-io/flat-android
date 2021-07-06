@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.ui.activity.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.MaxWidthSpread

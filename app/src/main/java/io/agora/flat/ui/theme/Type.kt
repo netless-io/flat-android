@@ -1,4 +1,4 @@
-package io.agora.flat.ui.activity.ui.theme
+package io.agora.flat.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
@@ -49,5 +49,11 @@ val FlatSmallTextStyle = TextStyle(
 val FlatCommonTipTextStyle = TextStyle(
     fontFamily = FontFamily.Default,
     fontSize = 16.sp,
+    color = FlatColorTextSecondary,
+)
+
+val FlatSmallTipTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 12.sp,
     color = FlatColorTextSecondary,
 )

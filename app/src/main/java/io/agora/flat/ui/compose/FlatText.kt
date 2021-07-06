@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.ui.activity.ui.theme.FlatColorBlue
-import io.agora.flat.ui.activity.ui.theme.FlatColorRed
-import io.agora.flat.ui.activity.ui.theme.FlatColorTextSecondary
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorRed
+import io.agora.flat.ui.theme.FlatColorTextSecondary
 
 
 @Composable

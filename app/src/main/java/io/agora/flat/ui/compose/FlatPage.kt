@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
-import io.agora.flat.ui.activity.ui.theme.FlatAndroidTheme
-import io.agora.flat.ui.activity.ui.theme.FlatColorWhite
+import io.agora.flat.ui.theme.FlatAndroidTheme
+import io.agora.flat.ui.theme.FlatColorWhite
 
 @Composable
 fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -> Unit) {

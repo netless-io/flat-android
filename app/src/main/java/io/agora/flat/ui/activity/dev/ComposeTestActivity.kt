@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import io.agora.flat.R
-import io.agora.flat.ui.activity.ui.theme.FlatAndroidTheme
-import io.agora.flat.ui.activity.ui.theme.FlatColorWhite
+import io.agora.flat.ui.theme.FlatAndroidTheme
+import io.agora.flat.ui.theme.FlatColorWhite
 import io.agora.flat.ui.compose.BackTopAppBar
 
 class ComposeTestActivity : ComponentActivity() {

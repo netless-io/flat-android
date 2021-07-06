@@ -62,4 +62,10 @@
     <string name="room_class_start_class_success" translatable="false">开始房间成功</string>
     <string name="room_class_start_class_fail" translatable="false">开始房间失败</string>
     <string name="room_class_stop_class_fail" translatable="false">结束房间失败</string>
+
+    <string name="loaded_all" translatable="false">已加载全部</string>
+    <string name="modify_room" translatable="false">修改房间</string>
+    <string name="cancel_room" translatable="false">取消房间</string>
+    <string name="remove_room" translatable="false">移除房间</string>
+    <string name="delete_history" translatable="false">删除记录</string>
 </resources>

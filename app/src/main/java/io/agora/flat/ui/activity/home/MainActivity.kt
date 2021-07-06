@@ -30,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.activity.ui.theme.FlatColorWhite
+import io.agora.flat.ui.theme.FlatColorWhite
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPageLoading
 import kotlinx.coroutines.flow.collect
