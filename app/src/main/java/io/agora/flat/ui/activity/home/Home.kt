@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.home
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,7 @@ import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
+import io.agora.flat.ui.compose.CustomInteractionSource
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatRoomStatusText
 import io.agora.flat.ui.compose.FlatTopAppBar
@@ -268,7 +270,9 @@ fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategor
             }) {
                 RoomListItem(
                     roomList[it],
-                    Modifier.clickable {
+                    Modifier.clickable(
+                        indication = LocalIndication.current,
+                        interactionSource = remember { CustomInteractionSource() }) {
                         Navigator.launchRoomDetailActivity(
                             context,
                             roomList[it].roomUUID,
