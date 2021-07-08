@@ -69,6 +69,7 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.cloudStorageFiles.collect {
                 cloudStorageAdapter.setDataSet(it)
+                binding.layoutCloudStorage.listEmpty.isVisible = it.isEmpty()
             }
         }
 

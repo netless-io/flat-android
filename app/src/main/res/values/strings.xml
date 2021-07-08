@@ -74,4 +74,6 @@
     <string name="message_unmuted" translatable="false">已解除禁言</string>
     <string name="class_room_message_muted" translatable="false">全员禁言中</string>
     <string name="end" translatable="false">结束</string>
+    <string name="room_class_message_empty_hit" translatable="false">说点什么吧...</string>
+    <string name="room_class_cloudstorage_empty_hit" translatable="false">暂无文件</string>
 </resources>

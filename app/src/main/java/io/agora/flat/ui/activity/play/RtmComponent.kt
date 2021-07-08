@@ -118,6 +118,7 @@ class RtmComponent(
             viewModel.messageList.collect {
                 messageAdapter.setDataList(it)
                 binding.messageList.smoothScrollToPosition(it.size);
+                binding.listEmpty.isVisible = it.isEmpty()
             }
         }
 
