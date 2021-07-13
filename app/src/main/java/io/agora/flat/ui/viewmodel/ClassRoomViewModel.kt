@@ -44,7 +44,7 @@ class ClassRoomViewModel @Inject constructor(
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
     private val rtmApi: RtmEngineProvider,
     private val eventbus: EventBus,
-    val clipboard: ClipboardController
+    private val clipboard: ClipboardController
 ) : ViewModel() {
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
@@ -53,20 +53,18 @@ class ClassRoomViewModel @Inject constructor(
     val state: StateFlow<ClassRoomState>
         get() = _state
 
-    // 缓存用户信息，降低web服务压力
-    private var _usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf()
-    private var _usersMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val usersMap = _usersMap.asStateFlow()
+    private lateinit var userState: UserState
 
     private var _currentUser = MutableStateFlow<RtcUser?>(null)
     val currentUser = _currentUser.asStateFlow()
 
-    private var _videoUserMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val videoUserMap = _videoUserMap.asStateFlow()
+    private var _videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
+    val videoUsers = _videoUsers.asStateFlow()
 
-    private var _messageUserMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
-    val messageUserMap = _messageUserMap.asStateFlow()
+    private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
+    val messageUsers = _messageUsers.asStateFlow()
 
+    // 消息列表
     private var _messageList = MutableStateFlow<List<Message>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
@@ -87,55 +85,21 @@ class ClassRoomViewModel @Inject constructor(
     private var _roomConfig = MutableStateFlow(RoomConfig(""))
     val roomConfig = _roomConfig.asStateFlow()
 
-    var roomUUID: String
+    private var roomUUID: String
+    private var userUUID: String
+    private var userName: String
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
+        userUUID = appKVCenter.getUserInfo()!!.uuid
+        userName = appKVCenter.getUserInfo()!!.name
+
         _state = MutableStateFlow(
-            ClassRoomState(
-                roomUUID = roomUUID,
-                currentUserUUID = appKVCenter.getUserInfo()!!.uuid,
-                currentUserName = appKVCenter.getUserInfo()!!.name
-            )
+            ClassRoomState(roomUUID = roomUUID, userUUID = userUUID, userName = userName)
         )
 
         viewModelScope.launch {
-            usersMap.map { it[_state.value.currentUserUUID] }.filterNotNull().collect {
-                _currentUser.value = it
-                _state.value = _state.value.copy(isSpeak = it.isSpeak)
-            }
-        }
-
-        viewModelScope.launch {
-            usersMap.collect {
-                if (_state.value.ownerUUID == "") {
-                    return@collect
-                }
-
-                var map = if (_state.value.roomType == RoomType.BigClass) {
-                    it.filterValues { value -> (value.userUUID == _state.value.ownerUUID || value.isSpeak) }
-                        .toMutableMap()
-                } else {
-                    it.toMutableMap()
-                }
-
-                if (!map.containsKey(_state.value.ownerUUID)) {
-                    map[_state.value.ownerUUID] = RtcUser("", 0, "", userUUID = _state.value.ownerUUID)
-                }
-                _videoUserMap.value = map
-            }
-        }
-
-        viewModelScope.launch {
-            usersMap.collect {
-                // TODO
-                _messageUserMap.value = it
-            }
-        }
-
-        viewModelScope.launch {
-            when (val result =
-                roomRepository.joinRoom(roomUUID)) {
+            when (val result = roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
                     _roomPlayInfo.value = result.data
                 }
@@ -154,39 +118,64 @@ class ClassRoomViewModel @Inject constructor(
                         endTime = roomInfo.endTime,
                         roomStatus = roomInfo.roomStatus,
                     )
+                    userState = UserState(roomUUID = roomUUID, userUUID = userUUID, ownerUUID = roomInfo.ownerUUID)
+                    observerUserState()
                 }
+            }
+
+            viewModelScope.launch(Dispatchers.IO) {
+                _roomConfig.value = database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
+            }
+        }
+    }
+
+    private fun observerUserState() {
+        viewModelScope.launch {
+            userState.users
+                .map { it.find { user -> user.userUUID == _state.value.userUUID } }
+                .filterNotNull()
+                .collect {
+                    _currentUser.value = it
+                    _state.value = _state.value.copy(isSpeak = it.isSpeak)
+                }
+        }
+
+        viewModelScope.launch {
+            userState.users.collect {
+                if (_state.value.ownerUUID == "") {
+                    return@collect
+                }
+
+                val users = if (_state.value.roomType == RoomType.BigClass) {
+                    it.filter { value -> (value.userUUID == _state.value.ownerUUID || value.isSpeak) }.toMutableList()
+                } else {
+                    it.toMutableList()
+                }
+
+                if (users.firstOrNull { user -> _state.value.ownerUUID == user.userUUID } == null) {
+                    users.add(0, RtcUser("", 0, "", userUUID = _state.value.ownerUUID))
+                }
+                _videoUsers.value = users
             }
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            _roomConfig.value = database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
+        viewModelScope.launch {
+            userState.users.collect {
+                _messageUsers.value = it
+            }
         }
     }
 
-    private inline fun RtcUser?.priority(): Int {
-        if (this == null) {
-            return 0;
-        }
-        return when {
-            isNotJoin -> 5
-            userUUID != _state.value.ownerName && isSpeak -> 4
-            isRaiseHand -> 3
-            userUUID == _state.value.ownerName -> 2
-            else -> 0
-        }
-    }
-
-
-    fun enableVideo(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
+    fun enableVideo(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (uuid == _state.value.currentUserUUID) {
+            if (uuid == _state.value.userUUID) {
                 val config = _roomConfig.value.copy(enableVideo = enable)
                 database.roomConfigDao().insertOrUpdate(config)
                 _roomConfig.value = config
             }
 
-            _usersMap.value[uuid]?.run {
-                if (uuid == _state.value.currentUserUUID) {
+            userState.findUser(uuid)?.run {
+                if (uuid == _state.value.userUUID) {
                     sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
                 } else if (isRoomOwner() && !enable) {
                     sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
@@ -198,16 +187,16 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun enableAudio(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
+    fun enableAudio(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (uuid == _state.value.currentUserUUID) {
+            if (uuid == _state.value.userUUID) {
                 val config = _roomConfig.value.copy(enableAudio = enable)
                 database.roomConfigDao().insertOrUpdate(config)
                 _roomConfig.value = config
             }
 
-            _usersMap.value[uuid]?.run {
-                if (uuid == _state.value.currentUserUUID) {
+            userState.findUser(uuid)?.run {
+                if (uuid == _state.value.userUUID) {
                     sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
                 } else if (isRoomOwner() && !enable) {
                     sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
@@ -219,22 +208,21 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    suspend fun initRoomUsers(usersUUIDs: List<String>): Boolean = suspendCoroutine { cont ->
+    suspend fun initRoomUsers(uuids: List<String>): Boolean = suspendCoroutine { cont ->
         viewModelScope.launch {
-            when (val result = roomRepository.getRoomUsers(roomUUID, usersUUIDs)) {
+            when (val result = roomRepository.getRoomUsers(roomUUID, uuids)) {
                 is Success -> {
                     result.data.forEach { (uuid, user) ->
                         run {
                             user.userUUID = uuid
-                            if (user.userUUID == _state.value.currentUserUUID) {
+                            if (user.userUUID == _state.value.userUUID) {
                                 user.audioOpen = _roomConfig.value.enableAudio
                                 user.videoOpen = _roomConfig.value.enableVideo
                             }
                         }
                     }
-
-                    addToCache(result.data)
-                    addToCurrent(result.data)
+                    userState.addToCache(result.data)
+                    userState.addToCurrent(result.data.values.toList())
                     cont.resume(true)
                 }
                 is ErrorResult -> {
@@ -245,10 +233,9 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private suspend fun sendAndUpdateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
-        val event = RTMEvent.DeviceState(
-            DeviceStateValue(userUUID = userUUID, camera = enableVideo, mic = enableAudio)
-        )
+        val event = RTMEvent.DeviceState(DeviceStateValue(userUUID, enableVideo, enableAudio))
         rtmApi.sendChannelCommand(event)
+
         updateDeviceState(event.value)
     }
 
@@ -269,33 +256,22 @@ class ClassRoomViewModel @Inject constructor(
         onEvent(ClassRoomEvent.RtmChannelJoined)
     }
 
-    private fun addToCurrent(userMap: Map<String, RtcUser>) {
-        val map = _usersMap.value.toMutableMap()
-        userMap.forEach { (uuid, user) -> map[uuid] = user.copy() }
-        _usersMap.value = map
-    }
-
-    private fun addToCache(userMap: Map<String, RtcUser>) {
-        userMap.forEach { (uuid, user) -> _usersCacheMap[uuid] = user.copy() }
-    }
-
     fun removeRtmMember(userUUID: String) {
-        val map = _usersMap.value.toMutableMap()
-        map.remove(userUUID)
-        _usersMap.value = map
+        userState.removeUser(userUUID)
     }
 
     fun addRtmMember(userUUID: String) {
-        if (_usersCacheMap.containsKey(userUUID)) {
-            addToCurrent(mapOf(userUUID to _usersCacheMap[userUUID]!!))
+        if (userState.hasCache(userUUID)) {
+            userState.addToCurrent(userUUID)
             return
         }
+
         viewModelScope.launch {
             when (val result = roomRepository.getRoomUsers(roomUUID, listOf(userUUID))) {
                 is Success -> {
                     result.data.forEach { (uuid, user) -> user.userUUID = uuid }
-                    addToCache(result.data)
-                    addToCurrent(result.data)
+                    userState.addToCache(result.data)
+                    userState.addToCurrent(result.data.values.toList())
                 }
                 is ErrorResult -> {
                 }
@@ -317,51 +293,42 @@ class ClassRoomViewModel @Inject constructor(
 
     // RTCCommand Handle
     private fun updateDeviceState(value: DeviceStateValue) {
-        val user = _usersMap.value[value.userUUID]
-        if (user != null) {
-            val map = _usersMap.value.toMutableMap()
-            map[value.userUUID] = user.copy(audioOpen = value.mic, videoOpen = value.camera)
-            _usersMap.value = map
+        userState.findUser(value.userUUID)?.run {
+            userState.updateUser(copy(audioOpen = value.mic, videoOpen = value.camera))
         }
     }
 
     private fun updateUserState(userUUID: String, state: RTMUserState) {
-        val user = _usersMap.value[userUUID]
-        if (user != null) {
-            val map = _usersMap.value.toMutableMap()
-            map[userUUID] = user.copy(
-                audioOpen = state.mic,
-                videoOpen = state.camera,
-                name = state.name,
-                isSpeak = state.isSpeak
+        userState.findUser(userUUID)?.run {
+            userState.updateUser(
+                copy(
+                    audioOpen = state.mic,
+                    videoOpen = state.camera,
+                    name = state.name,
+                    isSpeak = state.isSpeak
+                )
             )
-            _usersMap.value = map
         }
     }
 
     private fun updateChannelState(status: ChannelStatusValue) {
-        val map = _usersMap.value.toMutableMap()
         status.uStates.forEach { (userId, s) ->
-            run {
-                usersMap.value[userId]?.copy(
-                    videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true),
-                    audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true),
-                    isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true),
-                    isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true),
-                )?.also { map[userId] = it }
+            userState.findUser(userId)?.copy(
+                videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true),
+                audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true),
+                isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true),
+                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true),
+            )?.also {
+                userState.updateUser(it)
             }
         }
-        _usersMap.value = map
         _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
     }
 
     fun requestChannelStatus() {
         viewModelScope.launch {
-            val user = _usersMap.value.values.firstOrNull { user ->
-                user.userUUID != _state.value.currentUserUUID
-            }
-            user?.run {
-                val roomUUID = roomUUID;
+            userState.findFirstOtherUser()?.run {
+                val roomUUID = roomUUID
                 val userInfo = appKVCenter.getUserInfo()!!
                 val state = RTMUserState(
                     userInfo.name,
@@ -380,7 +347,7 @@ class ClassRoomViewModel @Inject constructor(
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
             rtmApi.sendChannelMessage(message)
-            appendMessage(ChatMessage(name = _state.value.currentUserName, message = message, isSelf = true))
+            appendMessage(ChatMessage(name = _state.value.userName, message = message, isSelf = true))
         }
     }
 
@@ -389,11 +356,11 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun isRoomOwner(): Boolean {
-        return _state.value.ownerUUID == _state.value.currentUserUUID
+        return _state.value.ownerUUID == _state.value.userUUID
     }
 
     private fun isCurrentUser(userUUID: String): Boolean {
-        return userUUID == _state.value.currentUserUUID
+        return userUUID == _state.value.userUUID
     }
 
     fun onRTMEvent(event: RTMEvent, senderId: String) {
@@ -401,9 +368,9 @@ class ClassRoomViewModel @Inject constructor(
             is RTMEvent.ChannelMessage -> {
                 appendMessage(
                     ChatMessage(
-                        _usersMap.value[senderId]?.name ?: "",
+                        userState.findUser(senderId)?.name ?: "",
                         event.text,
-                        _state.value.currentUserUUID == senderId
+                        _state.value.userUUID == senderId
                     )
                 )
             }
@@ -412,7 +379,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.RequestChannelStatus -> {
                 updateUserState(event.value.roomUUID, event.value.user)
-                if (event.value.userUUIDs.contains(_state.value.currentUserUUID)) {
+                if (event.value.userUUIDs.contains(_state.value.userUUID)) {
                     sendChannelStatus(senderId)
                 }
             }
@@ -421,11 +388,8 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.AcceptRaiseHand -> {
                 if (senderId == _state.value.ownerUUID) {
-                    val user = _usersMap.value[event.value.userUUID]
-                    user?.run {
-                        val map = _usersMap.value.toMutableMap()
-                        map[event.value.userUUID] = copy(isSpeak = event.value.accept, isRaiseHand = false)
-                        _usersMap.value = map
+                    userState.findUser(event.value.userUUID)?.run {
+                        userState.updateUser(copy(isSpeak = event.value.accept, isRaiseHand = false))
                     }
                 }
             }
@@ -436,9 +400,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.CancelHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
-                    val map = _usersMap.value.toMutableMap()
-                    map.forEach { (uuid, u) -> map[uuid] = u.copy(isRaiseHand = false) }
-                    _usersMap.value = map
+                    userState.cancelHandRaising()
                 }
             }
             is RTMEvent.ClassMode -> {
@@ -467,33 +429,25 @@ class ClassRoomViewModel @Inject constructor(
                     updateSpeakStatus(it)
                 }
             }
-            else -> {
-
-            }
         }
     }
 
     private fun updateSpeakStatus(it: SpeakItem) {
-        _usersMap.value[it.userUUID]?.run {
-            val map = _usersMap.value.toMutableMap()
-            map[it.userUUID] = copy(isSpeak = it.speak)
-            _usersMap.value = map
+        userState.findUser(it.userUUID)?.run {
+            userState.updateUser(copy(isSpeak = it.speak))
         }
     }
 
     private fun updateRaiseHandStatus(userUUID: String, event: RTMEvent.RaiseHand) {
-        val user = _usersMap.value[userUUID]
-        user?.run {
-            val map = _usersMap.value.toMutableMap()
-            map[userUUID] = copy(isRaiseHand = event.v)
-            _usersMap.value = map
+        userState.findUser(userUUID)?.run {
+            userState.updateUser(copy(isRaiseHand = event.v))
         }
     }
 
     private fun sendChannelStatus(senderId: String) {
         viewModelScope.launch {
             val uStates = HashMap<String, String>()
-            usersMap.value.values.forEach {
+            userState.users.value.forEach {
                 uStates[it.userUUID] = StringBuilder().apply {
                     if (it.isSpeak) append(RTMUserProp.IsSpeak.flag)
                     if (it.isRaiseHand) append(RTMUserProp.IsRaiseHand.flag)
@@ -501,7 +455,7 @@ class ClassRoomViewModel @Inject constructor(
                     if (it.audioOpen) append(RTMUserProp.Mic.flag)
                 }.toString()
             }
-            var channelState = RTMEvent.ChannelStatus(
+            val channelState = RTMEvent.ChannelStatus(
                 ChannelStatusValue(
                     ban = _state.value.ban,
                     rStatus = _state.value.roomStatus,
@@ -515,14 +469,13 @@ class ClassRoomViewModel @Inject constructor(
 
     fun sendRaiseHand() {
         viewModelScope.launch {
-            val user = _usersMap.value[_state.value.currentUserUUID]
-            user?.run {
+            userState.findCurrentUser()?.run {
                 if (this.isSpeak) {
                     return@run
                 }
                 val event = RTMEvent.RaiseHand(!isRaiseHand)
                 rtmApi.sendChannelCommand(event)
-                updateRaiseHandStatus(_state.value.currentUserUUID, event)
+                updateRaiseHandStatus(_state.value.userUUID, event)
             }
         }
     }
@@ -600,7 +553,7 @@ class ClassRoomViewModel @Inject constructor(
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    val uuid = UUID.randomUUID().toString();
+                    val uuid = UUID.randomUUID().toString()
                     onEvent(ClassRoomEvent.InsertPpt("/${file.taskUUID}/${uuid}", ppt))
                 }
 
@@ -621,7 +574,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun isTeacher(userUUID: String): Boolean {
+    fun isCreator(userUUID: String): Boolean {
         return _state.value.ownerUUID == userUUID
     }
 }
@@ -636,9 +589,9 @@ data class ClassRoomState(
     // 房间所有者
     val ownerUUID: String = "",
     // 当前用户
-    val currentUserUUID: String = "",
+    val userUUID: String = "",
     // 当前用户名
-    val currentUserName: String = "",
+    val userName: String = "",
     // 房间所有者的名称
     val ownerName: String? = null,
     // 房间标题
@@ -656,11 +609,11 @@ data class ClassRoomState(
 ) {
     val isWritable: Boolean
         get() {
-            return ownerUUID == currentUserUUID || classMode == ClassModeType.Interaction || isSpeak
+            return ownerUUID == userUUID || classMode == ClassModeType.Interaction || isSpeak
         }
 
     val isOwner: Boolean
-        get() = ownerUUID == currentUserUUID
+        get() = ownerUUID == userUUID
 
     val showStartButton: Boolean
         get() {
@@ -669,6 +622,126 @@ data class ClassRoomState(
 
     val needOwnerExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
+}
+
+class UserState(
+    private val roomUUID: String,
+    private val userUUID: String,
+    private val ownerUUID: String,
+    // 缓存用户信息，降低web服务压力
+    private var usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf(),
+    private var creator: RtcUser? = null,
+    private var currentUser: RtcUser? = null,
+    private var speakingJoiners: MutableList<RtcUser> = mutableListOf(),
+    private var handRaisingJoiners: MutableList<RtcUser> = mutableListOf(),
+    private var otherJoiners: MutableList<RtcUser> = mutableListOf()
+) {
+    private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
+    val users = _users.asStateFlow()
+
+    fun addToCache(userMap: Map<String, RtcUser>) {
+        userMap.forEach { (uuid, user) -> usersCacheMap[uuid] = user.copy() }
+    }
+
+    fun addToCurrent(userUUID: String) {
+        usersCacheMap[userUUID]?.run {
+            addToCurrent(listOf(this))
+        }
+    }
+
+    fun addToCurrent(userList: List<RtcUser>) {
+        userList.forEach {
+            if (it.userUUID == userUUID) {
+                currentUser = it
+            }
+            when {
+                it.userUUID == ownerUUID -> {
+                    creator = it
+                }
+                it.isSpeak -> {
+                    val index = speakingJoiners.indexOfFirst { user -> user.userUUID == it.userUUID }
+                    if (index >= 0) {
+                        speakingJoiners.removeAt(index)
+                    }
+                    speakingJoiners.add(it)
+                }
+                it.isRaiseHand -> {
+                    val index = handRaisingJoiners.indexOfFirst { user -> user.userUUID == it.userUUID }
+                    if (index >= 0) {
+                        handRaisingJoiners.removeAt(index)
+                    }
+                    handRaisingJoiners.add(it)
+                }
+                else -> {
+                    val index = otherJoiners.indexOfFirst { user -> user.userUUID == it.userUUID }
+                    if (index >= 0) {
+                        otherJoiners.removeAt(index)
+                    }
+                    otherJoiners.add(it)
+                }
+            }
+        }
+
+        notifyUsers()
+    }
+
+    fun hasCache(userUUID: String): Boolean {
+        return usersCacheMap.containsKey(userUUID)
+    }
+
+    fun removeUser(userUUID: String, notify: Boolean = true) {
+        if (userUUID == ownerUUID) {
+            creator = null
+        }
+        speakingJoiners.removeAll { it.userUUID == userUUID }
+        handRaisingJoiners.removeAll { it.userUUID == userUUID }
+        otherJoiners.removeAll { it.userUUID == userUUID }
+
+        if (notify) {
+            notifyUsers()
+        }
+    }
+
+    fun updateUser(user: RtcUser, notify: Boolean = true) {
+        removeUser(user.userUUID, false)
+        addToCurrent(listOf(user))
+        if (notify) {
+            notifyUsers()
+        }
+    }
+
+    private fun notifyUsers() {
+        val ranked = mutableListOf<RtcUser>()
+        ranked += speakingJoiners
+        ranked += handRaisingJoiners
+        creator?.run {
+            ranked += this
+        }
+        ranked += otherJoiners
+
+        _users.value = ranked
+    }
+
+    fun findCurrentUser(): RtcUser? {
+        return users.value.find { it.userUUID == userUUID }
+    }
+
+    fun findFirstOtherUser(): RtcUser? {
+        return users.value.find { it.userUUID != userUUID }
+    }
+
+    fun findUser(uuid: String): RtcUser? {
+        return users.value.find { it.userUUID == uuid }
+    }
+
+    fun cancelHandRaising() {
+        val list = handRaisingJoiners.toMutableList()
+        handRaisingJoiners.clear()
+        list.forEach { it.isRaiseHand = false }
+        otherJoiners.addAll(list)
+
+        notifyUsers()
+    }
 }
 
 sealed class ClassRoomEvent {
@@ -690,7 +763,7 @@ sealed class ClassRoomEvent {
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
-    data class InsertPpt(val dirpath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
+    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
 
 sealed class Message

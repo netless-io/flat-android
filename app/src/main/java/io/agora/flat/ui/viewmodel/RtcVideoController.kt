@@ -43,8 +43,10 @@ class RtcVideoController @Inject constructor(
         if (uidTextureMap[uid] == null) {
             uidTextureMap[uid] = RtcEngine.CreateTextureView(videoContainer.context)
         } else {
-            val parent = uidTextureMap[uid]!!.parent as FrameLayout
-            parent.removeAllViews()
+            uidTextureMap[uid]!!.parent?.run {
+                this as FrameLayout
+                removeAllViews()
+            }
         }
         videoContainer.apply {
             if (childCount >= 1) {

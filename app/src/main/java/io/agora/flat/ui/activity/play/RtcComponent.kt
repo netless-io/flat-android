@@ -77,12 +77,13 @@ class RtcComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.videoUserMap.collect { it ->
-                Log.d(TAG, "currentUsersMap $it")
-                adapter.setDataSet(ArrayList(it.values))
+            viewModel.videoUsers.collect {
+                users ->
+                Log.d(TAG, "currentUsersMap $users")
+                adapter.setDataSet(users)
                 // 处理用户进出时的显示
                 val findUser = userCallOut?.run {
-                    it.values.find { it.userUUID == this.userUUID }
+                    users.find { it.userUUID == this.userUUID }
                 }
                 if (findUser == null) {
                     hideVideoListOptArea()

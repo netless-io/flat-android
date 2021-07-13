@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -56,8 +55,8 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageUserMap.collect {
-                userListAdapter.setDataSet(it.values.toList())
+            viewModel.messageUsers.collect {
+                userListAdapter.setDataSet(it)
             }
         }
 
@@ -269,7 +268,7 @@ class ToolComponent(
 
     private fun showInviteDialog() {
         val state = viewModel.state.value
-        val inviteTitle = "${state.currentUserName} 邀请你加入 Flat 房间"
+        val inviteTitle = "${state.userName} 邀请你加入 Flat 房间"
         val roomTime = "${FlatFormatter.date(state.beginTime)} ${
             FlatFormatter.timeDuring(
                 state.beginTime,

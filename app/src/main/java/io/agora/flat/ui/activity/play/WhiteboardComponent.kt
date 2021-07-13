@@ -303,7 +303,7 @@ class WhiteboardComponent(
                     is ClassRoomEvent.NoOptPermission -> activity.showDebugToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl)
                     is ClassRoomEvent.InsertPpt -> {
-                        insertPpt(it.dirpath, it.convertedFiles)
+                        insertPpt(it.dirPath, it.convertedFiles)
                         room?.scalePptToFit()
                     }
                     else -> {
