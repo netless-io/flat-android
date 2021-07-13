@@ -61,6 +61,12 @@ class ClassRoomViewModel @Inject constructor(
     private var _currentUser = MutableStateFlow<RtcUser?>(null)
     val currentUser = _currentUser.asStateFlow()
 
+    private var _videoUserMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
+    val videoUserMap = _videoUserMap.asStateFlow()
+
+    private var _messageUserMap = MutableStateFlow<Map<String, RtcUser>>(emptyMap())
+    val messageUserMap = _messageUserMap.asStateFlow()
+
     private var _messageList = MutableStateFlow<List<Message>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
@@ -101,6 +107,33 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            usersMap.collect {
+                if (_state.value.ownerUUID == "") {
+                    return@collect
+                }
+
+                var map = if (_state.value.roomType == RoomType.BigClass) {
+                    it.filterValues { value -> (value.userUUID == _state.value.ownerUUID || value.isSpeak) }
+                        .toMutableMap()
+                } else {
+                    it.toMutableMap()
+                }
+
+                if (!map.containsKey(_state.value.ownerUUID)) {
+                    map[_state.value.ownerUUID] = RtcUser("", 0, "", userUUID = _state.value.ownerUUID)
+                }
+                _videoUserMap.value = map
+            }
+        }
+
+        viewModelScope.launch {
+            usersMap.collect {
+                // TODO
+                _messageUserMap.value = it
+            }
+        }
+
+        viewModelScope.launch {
             when (val result =
                 roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
@@ -129,6 +162,20 @@ class ClassRoomViewModel @Inject constructor(
             _roomConfig.value = database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
         }
     }
+
+    private inline fun RtcUser?.priority(): Int {
+        if (this == null) {
+            return 0;
+        }
+        return when {
+            isNotJoin -> 5
+            userUUID != _state.value.ownerName && isSpeak -> 4
+            isRaiseHand -> 3
+            userUUID == _state.value.ownerName -> 2
+            else -> 0
+        }
+    }
+
 
     fun enableVideo(enable: Boolean, uuid: String = _state.value.currentUserUUID) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -380,7 +427,6 @@ class ClassRoomViewModel @Inject constructor(
                         map[event.value.userUUID] = copy(isSpeak = event.value.accept, isRaiseHand = false)
                         _usersMap.value = map
                     }
-
                 }
             }
             is RTMEvent.BanText -> {
@@ -471,6 +517,9 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             val user = _usersMap.value[_state.value.currentUserUUID]
             user?.run {
+                if (this.isSpeak) {
+                    return@run
+                }
                 val event = RTMEvent.RaiseHand(!isRaiseHand)
                 rtmApi.sendChannelCommand(event)
                 updateRaiseHandStatus(_state.value.currentUserUUID, event)
@@ -571,6 +620,10 @@ class ClassRoomViewModel @Inject constructor(
             }
         }
     }
+
+    fun isTeacher(userUUID: String): Boolean {
+        return _state.value.ownerUUID == userUUID
+    }
 }
 
 data class ClassRoomState(
@@ -628,6 +681,7 @@ sealed class ClassRoomEvent {
         const val AREA_ID_VIDEO_OP_CALL_OUT = 6
         const val AREA_ID_INVITE_DIALOG = 7
         const val AREA_ID_OWNER_EXIT_DIALOG = 8
+        const val AREA_ID_USER_LIST = 9
     }
 
     object RtmChannelJoined : ClassRoomEvent()

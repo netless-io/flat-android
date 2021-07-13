@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -35,6 +36,7 @@ class ToolComponent(
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
     private lateinit var cloudStorageAdapter: CloudStorageAdapter
+    private lateinit var userListAdapter: UserListAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -50,6 +52,12 @@ class ToolComponent(
                     is ClassRoomEvent.StartRoomResult -> {
                     }
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.messageUserMap.collect {
+                userListAdapter.setDataSet(it.values.toList())
             }
         }
 
@@ -88,6 +96,10 @@ class ToolComponent(
         if (areaId != ClassRoomEvent.AREA_ID_CLOUD_STORAGE) {
             hideCloudStorageLayout()
         }
+
+        if (areaId != ClassRoomEvent.AREA_ID_USER_LIST) {
+            hideUserListLayout()
+        }
     }
 
     private fun hideSettingLayout() {
@@ -110,6 +122,16 @@ class ToolComponent(
         binding.cloudservice.isSelected = true
     }
 
+    private fun hideUserListLayout() {
+        binding.layoutUserList.root.isVisible = false
+        binding.userlist.isSelected = false
+    }
+
+    private fun showUserListLayout() {
+        binding.layoutUserList.root.isVisible = true
+        binding.userlist.isSelected = true
+    }
+
     private fun initView() {
         binding = ComponentToolBinding.inflate(activity.layoutInflater, rootView, true)
 
@@ -126,6 +148,14 @@ class ToolComponent(
                     viewModel.requestCloudStorageFiles()
                 }
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLOUD_STORAGE)
+            },
+            binding.userlist to {
+                if (binding.layoutUserList.root.isVisible) {
+                    hideUserListLayout()
+                } else {
+                    showUserListLayout()
+                }
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_USER_LIST)
             },
             binding.invite to {
                 showInviteDialog()
@@ -190,6 +220,10 @@ class ToolComponent(
         }
         binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
         binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
+
+        userListAdapter = UserListAdapter(viewModel)
+        binding.layoutUserList.userList.adapter = userListAdapter
+        binding.layoutUserList.userList.layoutManager = LinearLayoutManager(activity)
     }
 
     private fun handleExit() {
@@ -271,7 +305,8 @@ class ToolComponent(
         dialog.show(activity.supportFragmentManager, "InviteDialog")
     }
 
-    private val expandHeight = activity.dp2px(128)
+    // TODO
+    private val expandHeight = activity.dp2px(160)
     private val collapseHeight = activity.dp2px(32)
 
     private fun onUpdateTool(value: Float) {

@@ -11,6 +11,9 @@ import io.agora.flat.ui.viewmodel.ChatMessage
 import io.agora.flat.ui.viewmodel.Message
 import io.agora.flat.ui.viewmodel.NoticeMessage
 
+/**
+ * 消息列表适配器
+ */
 class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
     private val dataSet: MutableList<Message> = mutableListOf()
 

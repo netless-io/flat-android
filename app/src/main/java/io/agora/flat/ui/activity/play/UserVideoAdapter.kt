@@ -15,6 +15,9 @@ import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.ui.viewmodel.RtcVideoController
 
+/**
+ * 用户视频区域
+ */
 class UserVideoAdapter(
     private val dataSet: MutableList<RtcUser>,
     private val rtcVideoController: RtcVideoController
@@ -52,15 +55,18 @@ class UserVideoAdapter(
             transformations(CircleCropTransformation())
         }
 
-        rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+        viewHolder.teacherLeaveLy.isVisible = itemData.isNotJoin
+        viewHolder.micClosed.isVisible = !itemData.audioOpen
+
+        if (itemData.rtcUID != 0) {
+            rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+        }
 
         viewHolder.itemView.setOnClickListener {
+            if (itemData.isNotJoin)
+                return@setOnClickListener
             rtcVideoController.enterFullScreen(itemData.rtcUID)
             listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
-        }
-        viewHolder.closeSpeak.isVisible = itemData.isSpeak
-        viewHolder.closeSpeak.setOnClickListener {
-            listener?.onCloseSpeak(position, itemData)
         }
         viewHolder.videoClosedLayout.isVisible = !itemData.videoOpen
     }
@@ -89,7 +95,8 @@ class UserVideoAdapter(
         val videoClosedLayout: FrameLayout = view.findViewById(R.id.videoClosedLayout)
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val username: TextView = view.findViewById(R.id.username)
-        val closeSpeak: View = view.findViewById(R.id.close_speak)
+        val micClosed: View = view.findViewById(R.id.mic_closed)
+        val teacherLeaveLy: ViewGroup = view.findViewById(R.id.teacher_leave_ly)
     }
 
     var listener: Listener? = null

@@ -9,4 +9,9 @@ data class RtcUser(
     var isSpeak: Boolean = false,
     var isRaiseHand: Boolean = false,
 ) {
+
+    val isNotJoin: Boolean
+        get() {
+            return rtcUID == 0
+        }
 }

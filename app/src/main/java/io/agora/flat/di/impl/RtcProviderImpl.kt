@@ -8,6 +8,7 @@ import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoEncoderConfiguration
+import io.agora.rtc.video.VideoEncoderConfiguration.VideoDimensions
 
 class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
     private lateinit var mRtcEngine: RtcEngine
@@ -36,7 +37,7 @@ class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
                 VideoEncoderConfiguration.VD_640x360,
                 VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
                 VideoEncoderConfiguration.STANDARD_BITRATE,
-                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT
+                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_LANDSCAPE
             )
         )
     }
