@@ -301,12 +301,7 @@ class ClassRoomViewModel @Inject constructor(
     private fun updateUserState(userUUID: String, state: RTMUserState) {
         userState.findUser(userUUID)?.run {
             userState.updateUser(
-                copy(
-                    audioOpen = state.mic,
-                    videoOpen = state.camera,
-                    name = state.name,
-                    isSpeak = state.isSpeak
-                )
+                copy(audioOpen = state.mic, videoOpen = state.camera, name = state.name, isSpeak = state.isSpeak)
             )
         }
     }
@@ -328,16 +323,13 @@ class ClassRoomViewModel @Inject constructor(
     fun requestChannelStatus() {
         viewModelScope.launch {
             userState.findFirstOtherUser()?.run {
-                val roomUUID = roomUUID
-                val userInfo = appKVCenter.getUserInfo()!!
                 val state = RTMUserState(
-                    userInfo.name,
+                    name = userName,
                     camera = _roomConfig.value.enableVideo,
                     mic = _roomConfig.value.enableAudio,
                     isSpeak = isRoomOwner(),
                 )
-                val value = RequestChannelStatusValue(roomUUID, listOf(userUUID), state)
-                val event = RTMEvent.RequestChannelStatus(value)
+                val event = RTMEvent.RequestChannelStatus(RequestChannelStatusValue(roomUUID, listOf(userUUID), state))
 
                 rtmApi.sendChannelCommand(event)
             }
@@ -361,6 +353,10 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun isCurrentUser(userUUID: String): Boolean {
         return userUUID == _state.value.userUUID
+    }
+
+    fun isCreator(userUUID: String): Boolean {
+        return userUUID == _state.value.ownerUUID
     }
 
     fun onRTMEvent(event: RTMEvent, senderId: String) {
@@ -395,7 +391,6 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.BanText -> {
                 _state.value = _state.value.copy(ban = event.v)
-
                 appendMessage(NoticeMessage(ban = event.v))
             }
             is RTMEvent.CancelHandRaising -> {
@@ -574,8 +569,15 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun isCreator(userUUID: String): Boolean {
-        return _state.value.ownerUUID == userUUID
+    fun acceptSpeak(userUUID: String) {
+        viewModelScope.launch {
+            if (isRoomOwner()) {
+                rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, true))))
+                userState.findUser(userUUID)?.run {
+                    userState.updateUser(copy(isSpeak = true, isRaiseHand = false))
+                }
+            }
+        }
     }
 }
 
@@ -618,6 +620,11 @@ data class ClassRoomState(
     val showStartButton: Boolean
         get() {
             return isOwner && RoomStatus.Idle == roomStatus
+        }
+
+    val showRaiseHand: Boolean
+        get() {
+            return !isOwner
         }
 
     val needOwnerExitDialog: Boolean
@@ -710,7 +717,7 @@ class UserState(
         }
     }
 
-    private fun notifyUsers() {
+    fun notifyUsers() {
         val ranked = mutableListOf<RtcUser>()
         ranked += speakingJoiners
         ranked += handRaisingJoiners

@@ -74,7 +74,7 @@ class UserListAdapter(
                         isVisible = true
                         setImageResource(R.drawable.ic_room_userlist_handup_agree)
                         setOnClickListener {
-                            viewModel
+                            viewModel.acceptSpeak(itemData.userUUID)
                         }
                     }
                     else -> isVisible = false

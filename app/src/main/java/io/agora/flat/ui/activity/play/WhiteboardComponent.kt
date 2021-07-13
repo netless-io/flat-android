@@ -188,28 +188,29 @@ class WhiteboardComponent(
 
     private fun onSelectAppliance(appliance: String) {
         binding.toolsLayout.isVisible = false
-        updateApplicance(appliance)
+        updateAppliance(appliance)
         room?.memberState = MemberState().apply {
             currentApplianceName = appliance
         }
     }
 
-    private fun updateApplicance(appliance: String) {
+    // TODO
+    private fun updateAppliance(appliance: String) {
         binding.tools.setImageResource(applianceResource(appliance))
 
         when (appliance) {
             Appliance.SELECTOR -> {
-                binding.toolsSub.visibility = View.VISIBLE
-                binding.toolsSubDelete.visibility = View.VISIBLE
-                binding.toolsSubPaint.visibility = View.GONE
+                binding.toolsSub.isVisible = viewModel.state.value.isWritable
+                binding.toolsSubDelete.isVisible = true
+                binding.toolsSubPaint.isVisible = false
             }
             Appliance.LASER_POINTER, Appliance.ERASER, Appliance.HAND, Appliance.CLICKER -> {
-                binding.toolsSub.visibility = View.INVISIBLE
+                binding.toolsSub.isVisible = false
             }
             else -> {
-                binding.toolsSub.visibility = View.VISIBLE
-                binding.toolsSubDelete.visibility = View.GONE
-                binding.toolsSubPaint.visibility = View.VISIBLE
+                binding.toolsSub.isVisible = viewModel.state.value.isWritable
+                binding.toolsSubDelete.isVisible = false
+                binding.toolsSubPaint.isVisible = true
             }
         }
     }
@@ -315,6 +316,7 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.state.collect {
                 setRoomWritable(it.isWritable)
+                binding.handup.isVisible = it.showRaiseHand
             }
         }
 
@@ -357,6 +359,12 @@ class WhiteboardComponent(
             override fun catchEx(error: SDKError) {
             }
         })
+
+        binding.tools.isVisible = writable
+        binding.toolsSub.isVisible = writable
+        binding.showScenes.isVisible = writable
+        binding.pageIndicateLy.isVisible = writable
+        binding.undoRedoLayout.isVisible = writable
     }
 
     private fun handleAreaShown(areaId: Int) {
@@ -504,7 +512,7 @@ class WhiteboardComponent(
     }
 
     private fun onMemberStateChanged(memberState: MemberState) {
-        updateApplicance(memberState.currentApplianceName)
+        updateAppliance(memberState.currentApplianceName)
         memberState.apply {
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
             var item = ColorItem.colors.find {
