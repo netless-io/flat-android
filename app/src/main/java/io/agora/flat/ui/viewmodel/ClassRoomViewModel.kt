@@ -55,16 +55,12 @@ class ClassRoomViewModel @Inject constructor(
 
     private lateinit var userState: UserState
 
-    private var _currentUser = MutableStateFlow<RtcUser?>(null)
-    val currentUser = _currentUser.asStateFlow()
-
     private var _videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val videoUsers = _videoUsers.asStateFlow()
 
     private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val messageUsers = _messageUsers.asStateFlow()
 
-    // 消息列表
     private var _messageList = MutableStateFlow<List<Message>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
@@ -87,20 +83,25 @@ class ClassRoomViewModel @Inject constructor(
 
     private var roomUUID: String
     private var userUUID: String
-    private var userName: String
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
         userUUID = appKVCenter.getUserInfo()!!.uuid
-        userName = appKVCenter.getUserInfo()!!.name
+        val userName = appKVCenter.getUserInfo()!!.name
 
         _state = MutableStateFlow(
-            ClassRoomState(roomUUID = roomUUID, userUUID = userUUID, userName = userName)
+            ClassRoomState(
+                roomUUID = roomUUID,
+                userUUID = userUUID,
+                currentUser = RtcUser(name = userName, userUUID = userUUID)
+            )
         )
 
         viewModelScope.launch {
             when (val result = roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
+                    userState = UserState(roomUUID = roomUUID, userUUID = userUUID, ownerUUID = result.data.ownerUUID)
+                    observerUserState()
                     _roomPlayInfo.value = result.data
                 }
             }
@@ -118,8 +119,6 @@ class ClassRoomViewModel @Inject constructor(
                         endTime = roomInfo.endTime,
                         roomStatus = roomInfo.roomStatus,
                     )
-                    userState = UserState(roomUUID = roomUUID, userUUID = userUUID, ownerUUID = roomInfo.ownerUUID)
-                    observerUserState()
                 }
             }
 
@@ -131,30 +130,24 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun observerUserState() {
         viewModelScope.launch {
-            userState.users
-                .map { it.find { user -> user.userUUID == _state.value.userUUID } }
-                .filterNotNull()
-                .collect {
-                    _currentUser.value = it
-                    _state.value = _state.value.copy(isSpeak = it.isSpeak)
-                }
+            userState.currentUser.filterNotNull().collect {
+                _state.value = _state.value.copy(isSpeak = it.isSpeak, currentUser = it.copy())
+            }
         }
 
         viewModelScope.launch {
             userState.users.collect {
-                if (_state.value.ownerUUID == "") {
-                    return@collect
+                val users = it.filter { value ->
+                    when (_state.value.roomType) {
+                        RoomType.BigClass -> (value.userUUID == _state.value.ownerUUID || value.isSpeak)
+                        else -> true
+                    }
+                }.toMutableList()
+
+                if (users.isNotEmpty() && !users.containOwner()) {
+                    users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = _state.value.ownerUUID))
                 }
 
-                val users = if (_state.value.roomType == RoomType.BigClass) {
-                    it.filter { value -> (value.userUUID == _state.value.ownerUUID || value.isSpeak) }.toMutableList()
-                } else {
-                    it.toMutableList()
-                }
-
-                if (users.firstOrNull { user -> _state.value.ownerUUID == user.userUUID } == null) {
-                    users.add(0, RtcUser("", 0, "", userUUID = _state.value.ownerUUID))
-                }
                 _videoUsers.value = users
             }
         }
@@ -166,16 +159,20 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    private fun List<RtcUser>.containOwner(): Boolean {
+        return this.find { _state.value.ownerUUID == it.userUUID } != null
+    }
+
     fun enableVideo(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (uuid == _state.value.userUUID) {
+            if (isCurrentUser(uuid)) {
                 val config = _roomConfig.value.copy(enableVideo = enable)
                 database.roomConfigDao().insertOrUpdate(config)
                 _roomConfig.value = config
             }
 
             userState.findUser(uuid)?.run {
-                if (uuid == _state.value.userUUID) {
+                if (isCurrentUser(uuid)) {
                     sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
                 } else if (isRoomOwner() && !enable) {
                     sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
@@ -189,14 +186,14 @@ class ClassRoomViewModel @Inject constructor(
 
     fun enableAudio(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (uuid == _state.value.userUUID) {
+            if (isCurrentUser(uuid)) {
                 val config = _roomConfig.value.copy(enableAudio = enable)
                 database.roomConfigDao().insertOrUpdate(config)
                 _roomConfig.value = config
             }
 
             userState.findUser(uuid)?.run {
-                if (uuid == _state.value.userUUID) {
+                if (isCurrentUser(uuid)) {
                     sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
                 } else if (isRoomOwner() && !enable) {
                     sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
@@ -324,7 +321,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userState.findFirstOtherUser()?.run {
                 val state = RTMUserState(
-                    name = userName,
+                    name = _state.value.currentUser.name,
                     camera = _roomConfig.value.enableVideo,
                     mic = _roomConfig.value.enableAudio,
                     isSpeak = isRoomOwner(),
@@ -339,7 +336,7 @@ class ClassRoomViewModel @Inject constructor(
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
             rtmApi.sendChannelMessage(message)
-            appendMessage(ChatMessage(name = _state.value.userName, message = message, isSelf = true))
+            appendMessage(ChatMessage(name = _state.value.currentUser.name, message = message, isSelf = true))
         }
     }
 
@@ -592,8 +589,8 @@ data class ClassRoomState(
     val ownerUUID: String = "",
     // 当前用户
     val userUUID: String = "",
-    // 当前用户名
-    val userName: String = "",
+    // 当前用户
+    val currentUser: RtcUser,
     // 房间所有者的名称
     val ownerName: String? = null,
     // 房间标题
@@ -603,7 +600,7 @@ data class ClassRoomState(
     // 结束时间
     val endTime: Long = 0L,
     // 禁用
-    val ban: Boolean = true,
+    val ban: Boolean = false,
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
 
@@ -611,7 +608,15 @@ data class ClassRoomState(
 ) {
     val isWritable: Boolean
         get() {
-            return ownerUUID == userUUID || classMode == ClassModeType.Interaction || isSpeak
+            return when (roomType) {
+                RoomType.BigClass -> {
+                    ownerUUID == userUUID || isSpeak
+                }
+                RoomType.SmallClass -> {
+                    classMode == ClassModeType.Interaction
+                }
+                else -> true
+            }
         }
 
     val isOwner: Boolean
@@ -638,13 +643,15 @@ class UserState(
     // 缓存用户信息，降低web服务压力
     private var usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf(),
     private var creator: RtcUser? = null,
-    private var currentUser: RtcUser? = null,
     private var speakingJoiners: MutableList<RtcUser> = mutableListOf(),
     private var handRaisingJoiners: MutableList<RtcUser> = mutableListOf(),
     private var otherJoiners: MutableList<RtcUser> = mutableListOf()
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()
+
+    private var _currentUser = MutableStateFlow<RtcUser?>(null)
+    val currentUser = _currentUser.asStateFlow()
 
     fun addToCache(userMap: Map<String, RtcUser>) {
         userMap.forEach { (uuid, user) -> usersCacheMap[uuid] = user.copy() }
@@ -659,7 +666,7 @@ class UserState(
     fun addToCurrent(userList: List<RtcUser>) {
         userList.forEach {
             if (it.userUUID == userUUID) {
-                currentUser = it
+                _currentUser.value = it
             }
             when {
                 it.userUUID == ownerUUID -> {
@@ -717,7 +724,7 @@ class UserState(
         }
     }
 
-    fun notifyUsers() {
+    private fun notifyUsers() {
         val ranked = mutableListOf<RtcUser>()
         ranked += speakingJoiners
         ranked += handRaisingJoiners

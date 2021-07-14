@@ -268,7 +268,7 @@ class ToolComponent(
 
     private fun showInviteDialog() {
         val state = viewModel.state.value
-        val inviteTitle = "${state.userName} 邀请你加入 Flat 房间"
+        val inviteTitle = "${state.currentUser.name} 邀请你加入 Flat 房间"
         val roomTime = "${FlatFormatter.date(state.beginTime)} ${
             FlatFormatter.timeDuring(
                 state.beginTime,

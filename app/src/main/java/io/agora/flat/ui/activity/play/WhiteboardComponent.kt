@@ -317,15 +317,7 @@ class WhiteboardComponent(
             viewModel.state.collect {
                 setRoomWritable(it.isWritable)
                 binding.handup.isVisible = it.showRaiseHand
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.currentUser.collect {
-                Log.d(RtcComponent.TAG, "currentUser $it")
-                it?.run {
-                    binding.handup.isSelected = isRaiseHand
-                }
+                it.currentUser.run { binding.handup.isSelected = isRaiseHand }
             }
         }
     }
