@@ -16,7 +16,27 @@
         android:paddingVertical="4dp"
         android:paddingStart="4dp"
         android:paddingEnd="12dp"
-        android:text="开始上课"
+        android:text="@string/start_room"
+        android:textColor="#444E60"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
+
+    <TextView
+        android:id="@+id/startRecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/shape_gray_border_round_16_bg"
+        android:drawableStart="@drawable/ic_record_stop"
+        android:gravity="center"
+        android:paddingVertical="4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="12dp"
+        android:text="@string/start_record"
         android:textColor="#444E60"
         android:textSize="14sp"
         android:visibility="gone"
@@ -24,6 +44,85 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/record_displaying_ly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/red_dot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_red_dot" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="REC"
+            android:textColor="#fff45454"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/record_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:text="00:00"
+            android:textColor="#ff444e60"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_record_arrow_down" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/record_stop_ly"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/shape_gray_border_round_4_bg"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingVertical="12dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/record_displaying_ly"
+        tools:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/room_recording_hit"
+            android:textColor="#FF7A7B7C"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/stop_record"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/shape_red_border_round_4_bg"
+            android:drawableStart="@drawable/ic_record_stop"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:text="@string/stop_record"
+            android:textColor="#F45454"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="32dp"
@@ -115,7 +214,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="设置"
+            android:text="@string/setting"
             android:textColor="#ff444e60"
             android:textSize="12sp" />
 
@@ -128,7 +227,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="摄像头"
+                android:text="@string/camera"
                 android:textColor="#ff7a7b7c"
                 android:textSize="12sp" />
 
@@ -158,7 +257,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="麦克风"
+                android:text="@string/microphone"
                 android:textColor="#ff7a7b7c"
                 android:textSize="12sp" />
 
@@ -216,7 +315,7 @@
             android:drawablePadding="0dp"
             android:gravity="center"
             android:paddingHorizontal="14dp"
-            android:text="退出教室"
+            android:text="@string/exit_room"
             android:textColor="#f45454"
             android:textSize="14sp" />
     </LinearLayout>
@@ -245,5 +344,5 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

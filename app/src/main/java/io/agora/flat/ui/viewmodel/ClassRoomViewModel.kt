@@ -18,6 +18,7 @@ import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
+import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.AppModule
@@ -39,6 +40,7 @@ import kotlin.coroutines.suspendCoroutine
 class ClassRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val cloudStorageRepository: CloudStorageRepository,
+    private val cloudRecordRepository: CloudRecordRepository,
     private val savedStateHandle: SavedStateHandle,
     private val database: AppDatabase,
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
@@ -472,18 +474,51 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    suspend fun startRoomClass(): Boolean {
-        return when (roomRepository.startRoomClass(roomUUID)) {
-            is Success -> {
-                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
-                _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
-                true
+    fun startClass() {
+        viewModelScope.launch {
+            when (roomRepository.startRoomClass(roomUUID)) {
+                is Success -> {
+                    rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
+                    _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
+                    startRecord()
+                }
             }
-            else -> false
         }
     }
 
-    suspend fun pauseRoomClass(): Boolean {
+    fun startRecord() {
+        viewModelScope.launch {
+            val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
+            if (acquireResp is Success) {
+                val startResp = cloudRecordRepository.startRecordWithAgora(roomUUID, acquireResp.data.resourceId)
+                if (startResp is Success) {
+                    _state.value = _state.value.copy(
+                        recordState = RecordState(
+                            resourceId = startResp.data.resourceId,
+                            sid = startResp.data.sid
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun stopRecord() {
+        viewModelScope.launch {
+            state.value.recordState?.run {
+                val resp = cloudRecordRepository.stopRecordWithAgora(
+                    roomUUID,
+                    resourceId,
+                    sid,
+                )
+                if (resp is Success) {
+                    _state.value = _state.value.copy(recordState = null)
+                }
+            }
+        }
+    }
+
+    suspend fun pauseClass(): Boolean {
         return when (roomRepository.pauseRoomClass(roomUUID)) {
             is Success -> {
                 rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Paused))
@@ -493,10 +528,11 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    suspend fun stopRoomClass(): Boolean {
+    suspend fun stopClass(): Boolean {
         return when (roomRepository.stopRoomClass(roomUUID)) {
             is Success -> {
                 rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Stopped))
+                stopRecord()
                 true
             }
             else -> false
@@ -605,6 +641,8 @@ data class ClassRoomState(
     val classMode: ClassModeType = ClassModeType.Interaction,
 
     val isSpeak: Boolean = false,
+
+    val recordState: RecordState? = null
 ) {
     val isWritable: Boolean
         get() {
@@ -635,6 +673,11 @@ data class ClassRoomState(
     val needOwnerExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
 }
+
+class RecordState constructor(
+    val resourceId: String,
+    val sid: String
+)
 
 class UserState(
     private val roomUUID: String,

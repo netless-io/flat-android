@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.agora.flat.R
+import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.InviteDialog
@@ -70,6 +71,15 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.state.collect {
                 binding.roomStart.isVisible = it.showStartButton
+                if (it.roomStatus == RoomStatus.Started && it.isOwner) {
+                    binding.recordDisplayingLy.isVisible = it.recordState != null;
+                    binding.startRecord.isVisible = it.recordState == null
+                    binding.recordStopLy.isVisible = false
+                } else {
+                    binding.recordDisplayingLy.isVisible = false
+                    binding.startRecord.isVisible = false
+                    binding.recordStopLy.isVisible = false
+                }
             }
         }
 
@@ -173,14 +183,16 @@ class ToolComponent(
             binding.expand to { toolAnimator.show() },
             binding.exit to { handleExit() },
             binding.roomStart to {
-                lifecycleScope.launch {
-                    if (viewModel.startRoomClass()) {
-                        activity.showToast(R.string.room_class_start_class_success)
-                        binding.roomStart.isVisible = false
-                    } else {
-                        activity.showToast(R.string.room_class_start_class_fail)
-                    }
-                }
+                viewModel.startClass()
+            },
+            binding.startRecord to {
+                viewModel.startRecord()
+            },
+            binding.recordDisplayingLy to {
+                binding.recordStopLy.isVisible = !binding.recordStopLy.isVisible
+            },
+            binding.stopRecord to {
+                viewModel.stopRecord()
             }
         )
 
@@ -249,7 +261,7 @@ class ToolComponent(
             // 结束房间
             override fun onRightButtonClick() {
                 lifecycleScope.launch {
-                    if (viewModel.stopRoomClass()) {
+                    if (viewModel.stopClass()) {
                         activity.finish()
                     } else {
                         activity.showToast(R.string.room_class_stop_class_fail)
@@ -312,9 +324,5 @@ class ToolComponent(
         val layoutParams = binding.extTools.layoutParams
         layoutParams.height = collapseHeight + (value * (expandHeight - collapseHeight)).toInt()
         binding.extTools.layoutParams = layoutParams
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        super.onDestroy(owner)
     }
 }

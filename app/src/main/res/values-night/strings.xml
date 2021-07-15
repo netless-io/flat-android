@@ -1,9 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Flat</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_home">首页</string>
-    <string name="title_activity_compose_test">ComposeTestActivity</string>
-    <string name="title_setting">我的资料</string>
     <string name="room_recording_hit">课程录制中...</string>
     <string name="stop_record">停止录制</string>
     <string name="setting">设置</string>
