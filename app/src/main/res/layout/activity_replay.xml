@@ -5,13 +5,12 @@
     android:id="@+id/roomPlayRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity">
+    tools:context="io.agora.flat.ui.activity.playback.ReplayActivity">
 
     <FrameLayout
         android:id="@+id/videoListContainer"
         android:layout_width="120dp"
         android:layout_height="match_parent"
-        android:background="#603381FF"
         app:layout_constraintRight_toRightOf="parent" />
 
     <FrameLayout
