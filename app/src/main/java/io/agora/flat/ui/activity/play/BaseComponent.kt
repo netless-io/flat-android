@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.widget.FrameLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -13,7 +14,7 @@ import io.agora.flat.di.AppModule
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
 
-abstract class BaseComponent(val activity: ClassRoomActivity, val rootView: FrameLayout) :
+abstract class BaseComponent(val activity: AppCompatActivity, val rootView: FrameLayout) :
     LifecycleOwner, DefaultLifecycleObserver {
 
     @EntryPoint

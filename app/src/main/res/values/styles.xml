@@ -6,4 +6,13 @@
         <item name="colorSwitchThumbNormal">@color/flat_white</item>
         <item name="android:colorForeground">@color/flat_gray</item>
     </style>
+
+    <style name="PlaybackSeekbarStyle">
+        <item name="android:maxHeight">8dp</item>
+        <!--        <item name="android:indeterminateOnly">false</item>-->
+        <!--        <item name="android:indeterminateDrawable">@color/colorAccent</item>-->
+        <item name="android:progressDrawable">@drawable/playback_seek_bar_drawable</item>
+        <item name="android:minHeight">8dp</item>
+        <item name="android:thumb">@drawable/playback_thumb_shape</item>
+    </style>
 </resources>

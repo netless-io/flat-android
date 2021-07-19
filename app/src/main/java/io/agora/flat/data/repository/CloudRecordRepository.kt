@@ -94,4 +94,10 @@ class CloudRecordRepository @Inject constructor(
             ).executeOnce().toResult()
         }
     }
+
+    suspend fun getRecordInfo(roomUUID: String): Result<RecordInfo> {
+        return withContext(Dispatchers.IO) {
+            cloudRecordService.getRecordInfo(PureRoomReq(roomUUID)).executeOnce().toResult()
+        }
+    }
 }

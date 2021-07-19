@@ -88,7 +88,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/record_stop_ly"
+        android:id="@+id/stop_record_ly"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

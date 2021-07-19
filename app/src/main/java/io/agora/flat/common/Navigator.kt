@@ -7,16 +7,12 @@ import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
-import io.agora.flat.ui.activity.playback.PlaybackActivity
+import io.agora.flat.ui.activity.playback.ReplayActivity
 import io.agora.flat.ui.activity.room.CreateRoomActivity
 import io.agora.flat.ui.activity.room.JoinRoomActivity
 import io.agora.flat.ui.activity.room.RoomDetailActivity
 import io.agora.flat.ui.activity.room.SubscribeRoomActivity
-import io.agora.flat.ui.activity.setting.AboutUsActivity
-import io.agora.flat.ui.activity.setting.FeedbackActivity
-import io.agora.flat.ui.activity.setting.SettingActivity
-import io.agora.flat.ui.activity.setting.UserInfoActivity
-import io.agora.flat.ui.activity.setting.MyProfileActivity
+import io.agora.flat.ui.activity.setting.*
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
@@ -40,7 +36,9 @@ object Navigator {
     }
 
     fun launchPlaybackActivity(context: Context, roomUUID: String) {
-        val intent = Intent(context, PlaybackActivity::class.java)
+        val intent = Intent(context, ReplayActivity::class.java).apply {
+            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
+        }
         context.startActivity(intent)
     }
 

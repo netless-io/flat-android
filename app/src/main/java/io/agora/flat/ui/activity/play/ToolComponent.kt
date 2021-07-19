@@ -72,13 +72,17 @@ class ToolComponent(
             viewModel.state.collect {
                 binding.roomStart.isVisible = it.showStartButton
                 if (it.roomStatus == RoomStatus.Started && it.isOwner) {
-                    binding.recordDisplayingLy.isVisible = it.recordState != null;
-                    binding.startRecord.isVisible = it.recordState == null
-                    binding.recordStopLy.isVisible = false
+                    binding.recordDisplayingLy.isVisible = it.isRecording
+                    binding.startRecord.isVisible = !it.isRecording
+                    if (it.recordState != null) {
+                        binding.recordTime.text = "${it.recordState.recordTime / 60}:${it.recordState.recordTime % 60}"
+                    } else {
+                        binding.stopRecordLy.isVisible = false
+                    }
                 } else {
                     binding.recordDisplayingLy.isVisible = false
                     binding.startRecord.isVisible = false
-                    binding.recordStopLy.isVisible = false
+                    binding.stopRecordLy.isVisible = false
                 }
             }
         }
@@ -189,7 +193,7 @@ class ToolComponent(
                 viewModel.startRecord()
             },
             binding.recordDisplayingLy to {
-                binding.recordStopLy.isVisible = !binding.recordStopLy.isVisible
+                binding.stopRecordLy.isVisible = !binding.stopRecordLy.isVisible
             },
             binding.stopRecord to {
                 viewModel.stopRecord()

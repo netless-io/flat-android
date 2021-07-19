@@ -26,8 +26,11 @@ import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.event.HomeRefreshEvent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -48,6 +51,8 @@ class ClassRoomViewModel @Inject constructor(
     private val eventbus: EventBus,
     private val clipboard: ClipboardController
 ) : ViewModel() {
+    private var timer: Job? = null
+
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
 
@@ -85,6 +90,14 @@ class ClassRoomViewModel @Inject constructor(
 
     private var roomUUID: String
     private var userUUID: String
+
+    fun tickerFlow(period: Long, initialDelay: Long = 0) = flow {
+        delay(initialDelay)
+        while (true) {
+            emit(Unit)
+            delay(period)
+        }
+    }
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
@@ -146,7 +159,7 @@ class ClassRoomViewModel @Inject constructor(
                     }
                 }.toMutableList()
 
-                if (users.isNotEmpty() && !users.containOwner()) {
+                if (it.isNotEmpty() && !users.containOwner()) {
                     users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = _state.value.ownerUUID))
                 }
 
@@ -498,9 +511,23 @@ class ClassRoomViewModel @Inject constructor(
                             sid = startResp.data.sid
                         )
                     )
+                    startTimer()
                 }
             }
         }
+    }
+
+    private fun startTimer() {
+        timer = viewModelScope.launch {
+            tickerFlow(1000, 1000).collect {
+                val recordState = _state.value.recordState
+                _state.value = _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        timer?.cancel()
     }
 
     fun stopRecord() {
@@ -514,6 +541,7 @@ class ClassRoomViewModel @Inject constructor(
                 if (resp is Success) {
                     _state.value = _state.value.copy(recordState = null)
                 }
+                stopTimer()
             }
         }
     }
@@ -642,7 +670,7 @@ data class ClassRoomState(
 
     val isSpeak: Boolean = false,
 
-    val recordState: RecordState? = null
+    val recordState: RecordState? = null,
 ) {
     val isWritable: Boolean
         get() {
@@ -665,6 +693,9 @@ data class ClassRoomState(
             return isOwner && RoomStatus.Idle == roomStatus
         }
 
+    val isRecording: Boolean
+        get() = recordState != null
+
     val showRaiseHand: Boolean
         get() {
             return !isOwner
@@ -674,9 +705,10 @@ data class ClassRoomState(
         get() = isOwner && RoomStatus.Idle != roomStatus
 }
 
-class RecordState constructor(
+data class RecordState constructor(
     val resourceId: String,
-    val sid: String
+    val sid: String,
+    val recordTime: Long = 0
 )
 
 class UserState(

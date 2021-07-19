@@ -36,7 +36,12 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
-        <activity android:name=".ui.activity.playback.PlaybackActivity" />
+
+        <activity
+            android:name=".ui.activity.playback.ReplayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.FlatAndroid.Fullscreen" />
         <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
