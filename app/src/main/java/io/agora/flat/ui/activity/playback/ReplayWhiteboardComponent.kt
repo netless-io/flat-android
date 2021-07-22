@@ -10,8 +10,9 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.herewhite.demo.player.RtcVideoExoPlayer
+import com.herewhite.demo.player.VideoItem
 import com.herewhite.sdk.*
-import com.herewhite.sdk.combinePlayer.PlayerSyncManager
 import com.herewhite.sdk.domain.*
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
@@ -20,11 +21,12 @@ import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
 import io.agora.flat.ui.activity.play.WhiteboardComponent
+import io.agora.flat.ui.activity.playback.syncplayer.ClusterPlayer
+import io.agora.flat.ui.activity.playback.syncplayer.WhiteboardPlayer
 import io.agora.flat.ui.viewmodel.ReplayViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 
 class ReplayWhiteboardComponent(
@@ -42,24 +44,28 @@ class ReplayWhiteboardComponent(
 
     private val viewModel: ReplayViewModel by activity.viewModels()
     private var player: Player? = null
-    private var videoplayer: RtcVideoExoPlayer? = null
-    private var playerSyncManager: PlayerSyncManager? = null
+
+    private var whiteboardPlayer: WhiteboardPlayer? = null
+    private var videoPlayer: RtcVideoExoPlayer? = null
+
+    private var clusterPlayer: ClusterPlayer? = null
+    // private var playerSyncManager: PlayerSyncManager? = null
 
     private var mSeekBarUpdateHandler: Handler = Handler(Looper.getMainLooper())
     private var mUpdateSeekBar: Runnable = object : Runnable {
         override fun run() {
-            val progress: Float = player?.playerTimeInfo?.progress() ?: 0f
-            whiteBinding.playbackSeekBar.progress = (progress * 10).toInt()
+            val progress: Float = progress()
+            whiteBinding.playbackSeekBar.progress = (progress() * 10).toInt()
             Log.v(TAG, "progress: $progress")
             mSeekBarUpdateHandler.postDelayed(this, 500)
         }
     }
 
-    private fun PlayerTimeInfo.progress(): Float {
-        if (timeDuration == 0L) {
+    private fun progress(): Float {
+        if (viewModel.state.value.duration == 0L) {
             return 0f
         }
-        return scheduleTime * 100f / timeDuration
+        return (clusterPlayer?.currentTime() ?: 0L) * 100f / viewModel.state.value.duration
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -84,9 +90,8 @@ class ReplayWhiteboardComponent(
         whiteBinding.playbackSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    val timeDuration = player?.playerTimeInfo?.timeDuration ?: 0
-                    playerSyncManager?.seek((progress * timeDuration * 1f / 1000).toLong(), TimeUnit.MILLISECONDS)
                     whiteBinding.playbackSeekBar.progress = progress
+                    clusterPlayer?.seek((progress * viewModel.state.value.duration * 1f / 1000).toLong())
                 }
             }
 
@@ -101,13 +106,13 @@ class ReplayWhiteboardComponent(
         whiteBinding.playbackSeekBar.max = 1000
 
         whiteBinding.playbackStart.setOnClickListener {
-            playerSyncManager?.play()
+            clusterPlayer?.play()
 
             whiteBinding.playbackStart.isVisible = false
             whiteBinding.playbackPause.isVisible = true
         }
         whiteBinding.playbackPause.setOnClickListener {
-            playerSyncManager?.pause()
+            clusterPlayer?.pause()
 
             whiteBinding.playbackStart.isVisible = true
             whiteBinding.playbackPause.isVisible = false
@@ -154,17 +159,19 @@ class ReplayWhiteboardComponent(
                 if (it.recordInfo != null && it.roomInfo != null) {
                     createVideoPlayer(it.roomInfo.beginTime, it.recordInfo.recordInfo)
                     createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
+
+                    whiteBinding.playbackTime.text = "${it.duration / 60_000}:${(it.duration / 1000) % 60}"
                 }
             }
         }
     }
 
     private fun createVideoPlayer(startTime: Long, recordInfo: List<RecordItem>) {
-        val records = recordInfo.map {
-            it.copy(beginTime = it.beginTime - startTime, endTime = it.endTime - startTime)
+        val videos = recordInfo.map {
+            VideoItem(beginTime = it.beginTime - startTime, endTime = it.endTime - startTime, videoURL = it.videoURL)
         }
-        videoplayer = RtcVideoExoPlayer(activity, records)
-        videoplayer?.setPlayerView(videoBinding.videoView)
+        videoPlayer = RtcVideoExoPlayer(activity, videos)
+        videoPlayer?.setPlayerView(videoBinding.videoView)
     }
 
     private fun createWhitePlayer(roomUUID: String, roomToken: String) {
@@ -172,7 +179,7 @@ class ReplayWhiteboardComponent(
         val playerListener = object : PlayerListener {
             override fun onPhaseChanged(phase: PlayerPhase) {
                 Log.d(TAG, "play phase $phase")
-                playerSyncManager?.updateWhitePlayerPhase(phase);
+                whiteboardPlayer?.updateWhitePlayerPhase(phase)
             }
 
             override fun onLoadFirstFrame() {
@@ -192,7 +199,8 @@ class ReplayWhiteboardComponent(
             }
 
             override fun onScheduleTimeChanged(time: Long) {
-                // Log.d(TAG, "onScheduleTimeChanged called $time")
+                whiteBinding.playbackTime.text = "${time / 60_000}:${(time / 1000) % 60}"
+                clusterPlayer?.syncTime(time)
             }
 
             override fun onCatchErrorWhenAppendFrame(error: SDKError) {
@@ -207,26 +215,8 @@ class ReplayWhiteboardComponent(
             override fun then(player: Player) {
                 this@ReplayWhiteboardComponent.player = player
 
-                playerSyncManager = PlayerSyncManager(player, videoplayer, object : PlayerSyncManager.Callbacks {
-                    override fun startBuffering() {
-                        Log.d(TAG, "startBuffering: ")
-                    }
-
-                    override fun endBuffering() {
-                        Log.d(TAG, "endBuffering: ")
-                    }
-                })
-                videoplayer!!.bindPlayerSyncManager(playerSyncManager)
-                player.getPlayerTimeInfo(object : Promise<PlayerTimeInfo> {
-                    override fun then(info: PlayerTimeInfo) {
-                        whiteBinding.playbackTime.text =
-                            "${info.timeDuration / 60_000}:${(info.timeDuration / 1000) % 60}"
-                    }
-
-                    override fun catchEx(t: SDKError?) {
-
-                    }
-                })
+                whiteboardPlayer = WhiteboardPlayer(player)
+                clusterPlayer = ClusterPlayer(videoPlayer!!, whiteboardPlayer!!)
             }
 
             override fun catchEx(error: SDKError) {

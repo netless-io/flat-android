@@ -3,14 +3,23 @@ package io.agora.flat.di.impl
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import io.agora.flat.Constants
 import io.agora.flat.common.RTMListener
 import io.agora.flat.common.toFlatException
+import io.agora.flat.data.Success
 import io.agora.flat.data.model.RTMEvent
+import io.agora.flat.data.model.RtmQueryMessage
+import io.agora.flat.data.repository.MessageRepository
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.flat.ui.activity.play.RtmComponent
 import io.agora.rtm.*
+import kotlinx.coroutines.delay
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -21,7 +30,16 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         val TAG = RtmProviderImpl::class.simpleName
     }
 
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface RtmEntryPointInterface {
+        fun miscRepository(): MiscRepository
+        fun messageRepository(): MessageRepository
+    }
+
     private lateinit var rtmClient: RtmClient
+    private lateinit var miscRepository: MiscRepository
+    private lateinit var messageRepository: MessageRepository
 
     override fun onCreate(context: Context) {
         try {
@@ -66,6 +84,14 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
             Log.w(TAG, "RTM SDK init fatal error!")
             throw RuntimeException("You need to check the RTM init process.")
         }
+
+        val entryPoint = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            RtmEntryPointInterface::class.java
+        )
+
+        miscRepository = entryPoint.miscRepository()
+        messageRepository = entryPoint.messageRepository()
     }
 
     private var messageListener = object : RtmChannelListenerAdapter {
@@ -96,11 +122,11 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         return rtmClient
     }
 
-    override suspend fun initChannel(token: String, channelId: String, userId: String): Boolean {
+    override suspend fun initChannel(rtmToken: String, channelId: String, userUUID: String): Boolean {
         channelMessageID = channelId
         channelCommandID = channelId + "commands"
 
-        login(token, userId)
+        login(rtmToken, userUUID)
         channelMessage = joinChannel(channelMessageID, messageListener)
         channelCommand = joinChannel(channelCommandID, commandListener)
 
@@ -156,12 +182,16 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         }) ?: cont.resume(listOf())
     }
 
+    private var sendMessageOptions = SendMessageOptions().apply {
+        enableHistoricalMessaging = true
+    }
+
     override suspend fun sendChannelMessage(msg: String): Boolean = suspendCoroutine { cont ->
         run {
             val message = rtmClient.createMessage()
             message.text = msg
 
-            channelMessage?.sendMessage(message, object : ResultCallback<Void?> {
+            channelMessage?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
                 override fun onSuccess(v: Void?) {
                     cont.resume(true)
                 }
@@ -178,7 +208,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
             val message = rtmClient.createMessage()
             message.text = Gson().toJson(event)
 
-            channelCommand?.sendMessage(message, object : ResultCallback<Void?> {
+            channelCommand?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
                 override fun onSuccess(v: Void?) {
                     cont.resume(true)
                 }
@@ -213,6 +243,25 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         }
     }
 
+    override suspend fun getTextHistory(
+        channelId: String,
+        startTime: Long,
+        endTime: Long,
+        limit: Int,
+    ): List<RtmQueryMessage> {
+        val result = messageRepository.queryHistoryHandle(channelId, startTime, endTime)
+        if (result is Success) {
+            repeat(3) {
+                delay(1000)
+                val messageResult = messageRepository.getMessageList(handle = result.data)
+                if (messageResult is Success) {
+                    return messageResult.data
+                }
+            }
+        }
+        return listOf()
+    }
+
     private var flatRTMListeners = mutableListOf<RTMListener>()
 
     override fun addFlatRTMListener(listener: RTMListener) {
@@ -223,7 +272,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         flatRTMListeners.remove(listener)
     }
 
-    open interface RtmChannelListenerAdapter : RtmChannelListener {
+    interface RtmChannelListenerAdapter : RtmChannelListener {
         override fun onMemberCountUpdated(count: Int) {
             Log.d(RtmComponent.TAG, "onMemberCountUpdated")
         }

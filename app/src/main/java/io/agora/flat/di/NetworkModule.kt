@@ -4,12 +4,18 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.agora.flat.data.AppEnv
+import io.agora.flat.data.api.MessageService
+import io.agora.flat.data.api.MiscService
 import io.agora.flat.http.HeaderProvider
+import io.agora.flat.http.interceptor.AgoraMessageInterceptor
 import io.agora.flat.http.interceptor.HeaderInterceptor
-import io.agora.flat.http.interceptor.OtherInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,12 +26,11 @@ object NetworkModule {
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
-    annotation class OtherInterceptorOkHttpClient
+    annotation class AgoraMessageOkHttpClient
 
     @NormalOkHttpClient
     @Provides
     fun provideOkHttpClient(headerProviders: Set<@JvmSuppressWildcards HeaderProvider>): OkHttpClient {
-        // TODO workaround inject headerProviders
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
         return OkHttpClient.Builder()
@@ -34,13 +39,39 @@ object NetworkModule {
             .build()
     }
 
-    @OtherInterceptorOkHttpClient
+    @AgoraMessageOkHttpClient
     @Provides
-    fun provideOtherInterceptorOkHttpClient(
-        otherInterceptor: OtherInterceptor
-    ): OkHttpClient {
+    fun provideAgoraMessageOkHttpClient(): OkHttpClient {
+        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+
         return OkHttpClient.Builder()
-            .addInterceptor(otherInterceptor)
+            .addInterceptor(logger)
+            .addInterceptor(AgoraMessageInterceptor())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMiscService(@NetworkModule.NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): MiscService {
+        return Retrofit.Builder()
+            .baseUrl(appEnv.flatServiceUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MiscService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMessageService(
+        @NetworkModule.AgoraMessageOkHttpClient client: OkHttpClient,
+        appEnv: AppEnv,
+    ): MessageService {
+        return Retrofit.Builder()
+            .baseUrl("https://api.agora.io/dev/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MessageService::class.java)
     }
 }

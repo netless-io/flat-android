@@ -2,6 +2,7 @@ package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.RTMListener
 import io.agora.flat.data.model.RTMEvent
+import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
 import io.agora.rtm.RtmClient
 
@@ -17,6 +18,13 @@ interface RtmEngineProvider {
     suspend fun sendChannelCommand(event: RTMEvent): Boolean
 
     suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean
+
+    suspend fun getTextHistory(
+        channelId: String,
+        startTime: Long,
+        endTime: Long,
+        limit: Int = 100,
+    ): List<RtmQueryMessage>
 
     fun addFlatRTMListener(listener: RTMListener)
 
