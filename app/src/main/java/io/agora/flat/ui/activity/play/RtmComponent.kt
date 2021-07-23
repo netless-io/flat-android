@@ -1,17 +1,12 @@
 package io.agora.flat.ui.activity.play
 
-import android.content.Context
 import android.util.Log
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.EntryPointAccessors
-import io.agora.flat.R
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.RTMListener
 import io.agora.flat.data.AppKVCenter
@@ -39,9 +34,7 @@ class RtmComponent(
 
     private lateinit var rtmApi: RtmEngineProvider
     private lateinit var kvCenter: AppKVCenter
-
     private lateinit var binding: ComponentMessageBinding
-    private lateinit var messageAdapter: MessageAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -61,34 +54,8 @@ class RtmComponent(
     private fun initView() {
         binding = ComponentMessageBinding.inflate(activity.layoutInflater, rootView, true)
 
-        messageAdapter = MessageAdapter()
-        binding.messageList.adapter = messageAdapter
-        binding.messageList.layoutManager = LinearLayoutManager(activity)
-
-        binding.messageEdit.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                hideKeyboard()
-            }
-            true
-        }
-
-        binding.send.setOnClickListener {
-            onSendMessage()
-        }
-    }
-
-    private fun onSendMessage() {
-        if (binding.messageEdit.text.isNotEmpty()) {
-            viewModel.sendChatMessage(binding.messageEdit.text.toString())
-            binding.messageEdit.setText("")
-            binding.messageEdit.clearFocus()
-        }
-    }
-
-    private fun hideKeyboard() {
-        activity.currentFocus?.let { view ->
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            imm?.hideSoftInputFromWindow(view.windowToken, 0)
+        binding.messageLv.setListener {
+            viewModel.sendChatMessage(it)
         }
     }
 
@@ -107,18 +74,13 @@ class RtmComponent(
                     activity.delayAndFinish(message = "房间结束，退出中...")
                 }
 
-                binding.messageEdit.isEnabled = !it.ban
-                binding.send.isEnabled = !it.ban
-                binding.messageEdit.hint =
-                    activity.getString(if (it.ban) R.string.class_room_message_muted else R.string.say_something)
+                binding.messageLv.setBan(it.ban)
             }
         }
 
         lifecycleScope.launch {
             viewModel.messageList.collect {
-                messageAdapter.setDataList(it)
-                binding.messageList.smoothScrollToPosition(it.size);
-                binding.listEmpty.isVisible = it.isEmpty()
+                binding.messageLv.setMessages(it)
             }
         }
 

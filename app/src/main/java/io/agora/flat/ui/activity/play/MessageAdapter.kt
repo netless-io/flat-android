@@ -8,14 +8,14 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.ui.viewmodel.ChatMessage
-import io.agora.flat.ui.viewmodel.Message
+import io.agora.flat.ui.viewmodel.RTMMessage
 import io.agora.flat.ui.viewmodel.NoticeMessage
 
 /**
  * 消息列表适配器
  */
 class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
-    private val dataSet: MutableList<Message> = mutableListOf()
+    private val dataSet: MutableList<RTMMessage> = mutableListOf()
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(viewGroup.context)
@@ -66,7 +66,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataList(it: List<Message>) {
+    fun setDataList(it: List<RTMMessage>) {
         dataSet.clear()
         dataSet.addAll(it)
         notifyDataSetChanged()

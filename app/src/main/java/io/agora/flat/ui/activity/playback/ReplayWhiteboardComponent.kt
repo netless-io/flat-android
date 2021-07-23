@@ -21,9 +21,9 @@ import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
 import io.agora.flat.ui.activity.play.WhiteboardComponent
-import io.agora.flat.ui.activity.playback.syncplayer.ClusterPlayer
-import io.agora.flat.ui.activity.playback.syncplayer.WhiteboardPlayer
+import io.agora.flat.ui.activity.playback.syncplayer.*
 import io.agora.flat.ui.viewmodel.ReplayViewModel
+import io.agora.flat.util.FlatFormatter
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -43,13 +43,10 @@ class ReplayWhiteboardComponent(
     private lateinit var whiteSdk: WhiteSdk
 
     private val viewModel: ReplayViewModel by activity.viewModels()
-    private var player: Player? = null
 
     private var whiteboardPlayer: WhiteboardPlayer? = null
     private var videoPlayer: RtcVideoExoPlayer? = null
-
     private var clusterPlayer: ClusterPlayer? = null
-    // private var playerSyncManager: PlayerSyncManager? = null
 
     private var mSeekBarUpdateHandler: Handler = Handler(Looper.getMainLooper())
     private var mUpdateSeekBar: Runnable = object : Runnable {
@@ -80,6 +77,7 @@ class ReplayWhiteboardComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
+
         mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar)
     }
 
@@ -157,10 +155,12 @@ class ReplayWhiteboardComponent(
         lifecycleScope.launch {
             viewModel.state.collect {
                 if (it.recordInfo != null && it.roomInfo != null) {
-                    createVideoPlayer(it.roomInfo.beginTime, it.recordInfo.recordInfo)
-                    createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
+                    if (clusterPlayer == null) {
+                        createVideoPlayer(it.roomInfo.beginTime, it.recordInfo.recordInfo)
+                        createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
 
-                    whiteBinding.playbackTime.text = "${it.duration / 60_000}:${(it.duration / 1000) % 60}"
+                        whiteBinding.playbackTime.text = FlatFormatter.timeMS(it.duration)
+                    }
                 }
             }
         }
@@ -199,8 +199,10 @@ class ReplayWhiteboardComponent(
             }
 
             override fun onScheduleTimeChanged(time: Long) {
-                whiteBinding.playbackTime.text = "${time / 60_000}:${(time / 1000) % 60}"
+                whiteBinding.playbackTime.text = FlatFormatter.timeMS(time)
                 clusterPlayer?.syncTime(time)
+
+                viewModel.updateTime(time)
             }
 
             override fun onCatchErrorWhenAppendFrame(error: SDKError) {
@@ -213,10 +215,13 @@ class ReplayWhiteboardComponent(
         }
         whiteSdk.createPlayer(conf, playerListener, object : Promise<Player> {
             override fun then(player: Player) {
-                this@ReplayWhiteboardComponent.player = player
-
                 whiteboardPlayer = WhiteboardPlayer(player)
                 clusterPlayer = ClusterPlayer(videoPlayer!!, whiteboardPlayer!!)
+                clusterPlayer?.atomPlayerListener = object : AtomPlayerListener {
+                    override fun onPlayerPhaseChange(atomPlayer: AtomPlayer, phaseChange: AtomPlayerPhase) {
+
+                    }
+                }
             }
 
             override fun catchEx(error: SDKError) {

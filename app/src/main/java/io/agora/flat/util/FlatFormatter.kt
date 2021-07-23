@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 
 object FlatFormatter {
     private val timeFormatter = SimpleDateFormat("HH:mm")
+    private val timeMsFormatter = SimpleDateFormat("mm:ss")
     private val dateFormat = SimpleDateFormat("MM/dd")
     private val dateDashFormat = SimpleDateFormat("MM-dd")
     private val dateMiscFormat = SimpleDateFormat("MM月dd日")
@@ -14,6 +15,10 @@ object FlatFormatter {
 
     fun time(utcMs: Long): String {
         return timeFormatter.format(utcMs)
+    }
+
+    fun timeMS(utcMs: Long): String {
+        return timeMsFormatter.format(utcMs)
     }
 
     fun date(utcMs: Long): String {

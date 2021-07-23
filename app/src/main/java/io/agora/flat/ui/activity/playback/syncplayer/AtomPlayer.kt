@@ -57,9 +57,9 @@ abstract class AtomPlayer {
 }
 
 interface AtomPlayerListener {
-    fun onPlayerPhaseChange(atomPlayer: AtomPlayer, phaseChange: AtomPlayerPhase)
+    fun onPlayerPhaseChange(atomPlayer: AtomPlayer, phaseChange: AtomPlayerPhase) {}
 
-    fun onSeekTo(atomPlayer: AtomPlayer, timeMs: Long)
+    fun onSeekTo(atomPlayer: AtomPlayer, timeMs: Long) {}
 }
 
 enum class AtomPlayerPhase {

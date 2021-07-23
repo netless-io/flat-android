@@ -30,7 +30,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -68,7 +67,7 @@ class ClassRoomViewModel @Inject constructor(
     private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val messageUsers = _messageUsers.asStateFlow()
 
-    private var _messageList = MutableStateFlow<List<Message>>(emptyList())
+    private var _messageList = MutableStateFlow<List<RTMMessage>>(emptyList())
     val messageList = _messageList.asStateFlow()
 
     private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
@@ -355,7 +354,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun appendMessage(message: Message) {
+    private fun appendMessage(message: RTMMessage) {
         _messageList.value = _messageList.value + message
     }
 
@@ -855,6 +854,6 @@ sealed class ClassRoomEvent {
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
 
-sealed class Message
-data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false) : Message()
-data class NoticeMessage(val ban: Boolean) : Message()
+sealed class RTMMessage()
+data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false) : RTMMessage()
+data class NoticeMessage(val ban: Boolean) : RTMMessage()

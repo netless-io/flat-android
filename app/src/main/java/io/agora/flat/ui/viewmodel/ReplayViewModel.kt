@@ -1,6 +1,5 @@
 package io.agora.flat.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +14,7 @@ import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.AppModule
+import io.agora.flat.di.interfaces.MessageQuery
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +35,7 @@ class ReplayViewModel @Inject constructor(
         get() = _state
 
     val roomUUID: String
+    var query: MessageQuery? = null
 
     init {
         roomUUID = intentValue(Constants.IntentKey.ROOM_UUID)
@@ -52,7 +53,10 @@ class ReplayViewModel @Inject constructor(
                 if (recordResp is Success) {
                     _state.value = _state.value.copy(roomInfo = roomResp.data.roomInfo, recordInfo = recordResp.data)
 
-                    requestMessages()
+                    query = MessageQuery(_state.value.roomUUID,
+                        _state.value.roomInfo!!.beginTime,
+                        _state.value.roomInfo!!.endTime,
+                        rtmEngineProvider)
                 }
             }
         }
@@ -64,14 +68,12 @@ class ReplayViewModel @Inject constructor(
         }
     }
 
-    private fun requestMessages() {
+    fun updateTime(time: Long) {
         viewModelScope.launch {
-            val messages = rtmEngineProvider.getTextHistory(
-                roomUUID,
-                _state.value.roomInfo!!.beginTime,
-                _state.value.roomInfo!!.endTime,
-            )
-            Log.e("Aderan", messages.toString())
+            val rtmMessages = query?.query(time)?.map {
+                ChatMessage("HH", it.payload, false)
+            } ?: listOf()
+            _state.value = _state.value.copy(messages = rtmMessages)
         }
     }
 
@@ -84,6 +86,9 @@ data class ReplayState(
     val roomUUID: String,
     val roomInfo: RoomInfo? = null,
     val recordInfo: RecordInfo? = null,
+    val messages: List<RTMMessage> = listOf(),
+
+    val isPlayer: Boolean = false,
 ) {
     val duration: Long
         get() = (roomInfo?.run { endTime - beginTime }) ?: 0L
