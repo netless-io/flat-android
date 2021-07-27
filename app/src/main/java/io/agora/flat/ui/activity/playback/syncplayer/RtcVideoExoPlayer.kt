@@ -41,7 +41,8 @@ class RtcVideoExoPlayer(
         exoPlayer.addListener(this)
         exoPlayer.setAudioAttributes(AudioAttributes.DEFAULT, false)
         exoPlayer.playWhenReady = false
-        dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.getString(R.string.app_name)))
+        dataSourceFactory =
+            DefaultDataSourceFactory(context, Util.getUserAgent(context, context.getString(R.string.app_name)))
         observeLifecycle()
     }
 
@@ -247,7 +248,7 @@ class RtcVideoExoPlayer(
 }
 
 data class VideoItem constructor(
-        val beginTime: Long,
-        val endTime: Long,
-        val videoURL: String,
+    val beginTime: Long,
+    val endTime: Long,
+    val videoURL: String,
 )

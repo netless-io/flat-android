@@ -17,8 +17,8 @@ import com.google.android.exoplayer2.util.Util
 import io.agora.flat.R
 
 class SimpleVideoPlayer(
-        context: Context,
-        videoPath: String,
+    context: Context,
+    videoPath: String,
 ) : AtomPlayer(), Player.EventListener {
     private var exoPlayer: SimpleExoPlayer = SimpleExoPlayer.Builder(context.applicationContext).build()
     private var mediaSource: MediaSource? = null
@@ -32,7 +32,8 @@ class SimpleVideoPlayer(
         exoPlayer.addListener(this)
         exoPlayer.setAudioAttributes(AudioAttributes.DEFAULT, false)
         exoPlayer.playWhenReady = false
-        dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.getString(R.string.app_name)))
+        dataSourceFactory =
+            DefaultDataSourceFactory(context, Util.getUserAgent(context, context.getString(R.string.app_name)))
 
         setVideoPath(videoPath)
     }

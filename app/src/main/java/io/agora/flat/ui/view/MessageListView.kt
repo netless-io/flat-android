@@ -13,6 +13,7 @@ import io.agora.flat.R
 import io.agora.flat.databinding.LayoutMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
 import io.agora.flat.ui.viewmodel.RTMMessage
+import okhttp3.internal.notify
 
 class MessageListView @JvmOverloads constructor(
     context: Context,

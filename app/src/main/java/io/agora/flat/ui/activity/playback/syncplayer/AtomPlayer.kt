@@ -21,6 +21,11 @@ abstract class AtomPlayer {
 
     abstract fun pause()
 
+    open fun stop() {
+        pause()
+        seek(0)
+    }
+
     abstract fun release()
 
     abstract fun seek(timeMs: Long)

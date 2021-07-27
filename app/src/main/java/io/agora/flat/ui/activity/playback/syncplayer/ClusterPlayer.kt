@@ -118,7 +118,7 @@ class ClusterPlayer constructor(private val one: AtomPlayer, private val two: At
 
         override fun onSeekTo(atomPlayer: AtomPlayer, timeMs: Long) {
             seeking--
-            if (seeking != 0) {
+            if (seeking == 0) {
                 atomPlayerListener?.onSeekTo(this@ClusterPlayer, timeMs = timeMs)
             }
         }

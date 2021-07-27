@@ -5,16 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.data.AppDatabase
-import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RecordInfo
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.di.AppModule
-import io.agora.flat.di.interfaces.MessageQuery
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,11 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ReplayViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val userRepository: UserRepository,
     private val cloudRecordRepository: CloudRecordRepository,
-    private val rtmEngineProvider: RtmEngineProvider,
+    private val rtmApi: RtmEngineProvider,
     private val savedStateHandle: SavedStateHandle,
-    private val database: AppDatabase,
-    @AppModule.GlobalData private val appKVCenter: AppKVCenter,
 ) : ViewModel() {
     private var _state: MutableStateFlow<ReplayState>
     val state: StateFlow<ReplayState>
@@ -56,7 +52,9 @@ class ReplayViewModel @Inject constructor(
                     query = MessageQuery(_state.value.roomUUID,
                         _state.value.roomInfo!!.beginTime,
                         _state.value.roomInfo!!.endTime,
-                        rtmEngineProvider)
+                        rtmApi,
+                        UserQuery(roomUUID, userRepository, roomRepository)
+                    )
                 }
             }
         }
@@ -70,10 +68,8 @@ class ReplayViewModel @Inject constructor(
 
     fun updateTime(time: Long) {
         viewModelScope.launch {
-            val rtmMessages = query?.query(time)?.map {
-                ChatMessage("HH", it.payload, false)
-            } ?: listOf()
-            _state.value = _state.value.copy(messages = rtmMessages)
+            val rtmMessages = query?.query(time) ?: emptyList()
+            _state.value = _state.value.copy(messages = rtmMessages.toList())
         }
     }
 

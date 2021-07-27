@@ -48,7 +48,7 @@ class ClassRoomViewModel @Inject constructor(
     @AppModule.GlobalData private val appKVCenter: AppKVCenter,
     private val rtmApi: RtmEngineProvider,
     private val eventbus: EventBus,
-    private val clipboard: ClipboardController
+    private val clipboard: ClipboardController,
 ) : ViewModel() {
     private var timer: Job? = null
 
@@ -520,7 +520,8 @@ class ClassRoomViewModel @Inject constructor(
         timer = viewModelScope.launch {
             tickerFlow(1000, 1000).collect {
                 val recordState = _state.value.recordState
-                _state.value = _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
+                _state.value =
+                    _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
             }
         }
     }
@@ -707,7 +708,7 @@ data class ClassRoomState(
 data class RecordState constructor(
     val resourceId: String,
     val sid: String,
-    val recordTime: Long = 0
+    val recordTime: Long = 0,
 )
 
 class UserState(
@@ -719,7 +720,7 @@ class UserState(
     private var creator: RtcUser? = null,
     private var speakingJoiners: MutableList<RtcUser> = mutableListOf(),
     private var handRaisingJoiners: MutableList<RtcUser> = mutableListOf(),
-    private var otherJoiners: MutableList<RtcUser> = mutableListOf()
+    private var otherJoiners: MutableList<RtcUser> = mutableListOf(),
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()
@@ -854,6 +855,9 @@ sealed class ClassRoomEvent {
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
 }
 
-sealed class RTMMessage()
-data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false) : RTMMessage()
-data class NoticeMessage(val ban: Boolean) : RTMMessage()
+sealed class RTMMessage {
+    // timestamp, ms
+    abstract val ts:Long
+}
+data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false, override val ts:Long = 0) : RTMMessage()
+data class NoticeMessage(val ban: Boolean, override val ts:Long = 0) : RTMMessage()

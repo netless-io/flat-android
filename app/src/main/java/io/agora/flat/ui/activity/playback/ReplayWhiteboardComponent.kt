@@ -106,15 +106,18 @@ class ReplayWhiteboardComponent(
         whiteBinding.playbackStart.setOnClickListener {
             clusterPlayer?.play()
 
-            whiteBinding.playbackStart.isVisible = false
-            whiteBinding.playbackPause.isVisible = true
+            setPlaying(true)
         }
         whiteBinding.playbackPause.setOnClickListener {
             clusterPlayer?.pause()
 
-            whiteBinding.playbackStart.isVisible = true
-            whiteBinding.playbackPause.isVisible = false
+            setPlaying(false)
         }
+    }
+
+    private fun setPlaying(isPlaying: Boolean) {
+        whiteBinding.playbackStart.isVisible = !isPlaying
+        whiteBinding.playbackPause.isVisible = isPlaying
     }
 
     private fun initWhiteboard() {
@@ -203,6 +206,11 @@ class ReplayWhiteboardComponent(
                 clusterPlayer?.syncTime(time)
 
                 viewModel.updateTime(time)
+                if (time > viewModel.state.value.duration) {
+                    clusterPlayer?.stop()
+
+                    setPlaying(false)
+                }
             }
 
             override fun onCatchErrorWhenAppendFrame(error: SDKError) {
