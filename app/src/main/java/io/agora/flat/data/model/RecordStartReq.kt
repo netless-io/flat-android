@@ -7,7 +7,7 @@ data class RecordStartReq constructor(
 )
 
 data class AgoraRecordStartedData constructor(
-    val clientRequest: ClientRequest
+    val clientRequest: ClientRequest,
 )
 
 data class ClientRequest constructor(
@@ -27,7 +27,7 @@ data class RecordingConfig constructor(
     // val unSubscribeVideoUids: List<String>?,
     // val subscribeAudioUids: List<String>?,
     // val unSubscribeAudioUids: List<String>?,
-    val subscribeUidGroup: Int?
+    val subscribeUidGroup: Int?,
 )
 
 data class TranscodingConfig constructor(
@@ -39,7 +39,7 @@ data class TranscodingConfig constructor(
     val bitrate: Int,
     val maxResolutionUid: String? = null,
     val mixedVideoLayout: Int? = null,
-    val backgroundColor: String? = null,
+    val backgroundColor: String = "#FFFFFF",
     val defaultUserBackgroundImage: String? = null,
     val layoutConfig: List<LayoutConfig>? = null,
     val backgroundConfig: List<BackgroundConfig>? = null,
@@ -64,5 +64,5 @@ data class LayoutConfig constructor(
 data class BackgroundConfig constructor(
     val uid: String,
     val image_url: String,
-    val render_mode: Int,
+    val render_mode: Int = 0,
 )

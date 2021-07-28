@@ -75,7 +75,7 @@ class ToolComponent(
                     binding.recordDisplayingLy.isVisible = it.isRecording
                     binding.startRecord.isVisible = !it.isRecording
                     if (it.recordState != null) {
-                        binding.recordTime.text = "${it.recordState.recordTime / 60}:${it.recordState.recordTime % 60}"
+                        binding.recordTime.text = FlatFormatter.timeMS(it.recordState.recordTime * 1000)
                     } else {
                         binding.stopRecordLy.isVisible = false
                     }

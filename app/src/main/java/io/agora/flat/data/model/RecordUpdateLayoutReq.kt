@@ -7,12 +7,13 @@ data class RecordUpdateLayoutReq constructor(
 )
 
 data class AgoraRecordUpdateLayoutData constructor(
-    val clientRequest: UpdateLayoutClientRequest
+    val clientRequest: UpdateLayoutClientRequest,
 )
 
 data class UpdateLayoutClientRequest constructor(
     val maxResolutionUid: String? = null,
     val mixedVideoLayout: Int = 3,
     val backgroundColor: String = "#FFFFFF",
-    val layoutConfig: List<LayoutConfig>,
+    val layoutConfig: List<LayoutConfig>? = null,
+    val backgroundConfig: List<BackgroundConfig>? = null,
 )

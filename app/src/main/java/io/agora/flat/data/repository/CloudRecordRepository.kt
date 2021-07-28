@@ -28,8 +28,8 @@ class CloudRecordRepository @Inject constructor(
     suspend fun startRecordWithAgora(
         roomUUID: String,
         resourceId: String,
+        transcodingConfig: TranscodingConfig = TranscodingConfig(width = 640, height = 360, fps = 15, bitrate = 500),
         mode: AgoraRecordMode = AgoraRecordMode.Mix,
-        transcodingConfig: TranscodingConfig = TranscodingConfig(width = 640, height = 360, fps = 15, bitrate = 500)
     ): Result<RecordStartRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.startRecordWithAgora(
@@ -65,8 +65,9 @@ class CloudRecordRepository @Inject constructor(
 
     suspend fun updateRecordLayoutWithAgora(
         roomUUID: String,
-        resourceId: String, mode: AgoraRecordMode = AgoraRecordMode.Mix,
-        clientRequest: UpdateLayoutClientRequest
+        resourceId: String,
+        clientRequest: UpdateLayoutClientRequest,
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.updateRecordLayoutWithAgora(

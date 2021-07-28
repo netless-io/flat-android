@@ -19,6 +19,9 @@ interface RtmEngineProvider {
 
     suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean
 
+    /**
+     * 获取历史聊天消息
+     */
     suspend fun getTextHistory(
         channelId: String,
         startTime: Long,

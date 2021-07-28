@@ -498,11 +498,27 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    val width = 120 * 3
+    val height = 360 * 3
+
     fun startRecord() {
         viewModelScope.launch {
             val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
             if (acquireResp is Success) {
-                val startResp = cloudRecordRepository.startRecordWithAgora(roomUUID, acquireResp.data.resourceId)
+                val transcodingConfig = TranscodingConfig(
+                    width,
+                    height,
+                    15,
+                    500,
+                    mixedVideoLayout = 3,
+                    layoutConfig = getLayoutConfig(),
+                    backgroundConfig = getBackgroundConfig()
+                )
+                val startResp = cloudRecordRepository.startRecordWithAgora(
+                    roomUUID,
+                    acquireResp.data.resourceId,
+                    transcodingConfig
+                )
                 if (startResp is Success) {
                     _state.value = _state.value.copy(
                         recordState = RecordState(
@@ -516,12 +532,41 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    private fun updateRecordLayout() {
+        viewModelScope.launch {
+            val config = UpdateLayoutClientRequest(
+                layoutConfig = getLayoutConfig(),
+                backgroundConfig = getBackgroundConfig(),
+            )
+            cloudRecordRepository.updateRecordLayoutWithAgora(roomUUID, _state.value.recordState!!.resourceId, config)
+        }
+    }
+
+    private fun getBackgroundConfig(): List<BackgroundConfig> {
+        return _videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
+            BackgroundConfig(uid = user.rtcUID.toString(), image_url = user.avatarURL)
+        }
+    }
+
+    private fun getLayoutConfig(): List<LayoutConfig> {
+        return _videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
+            LayoutConfig(
+                uid = user.rtcUID.toString(),
+                x_axis = 12f  / 120,
+                y_axis = (8f + index * 80) / 360,
+                width = 96f  / 120,
+                height = 72f / 360,
+            )
+        }
+    }
+
     private fun startTimer() {
         timer = viewModelScope.launch {
             tickerFlow(1000, 1000).collect {
                 val recordState = _state.value.recordState
                 _state.value =
                     _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
+                updateRecordLayout()
             }
         }
     }
@@ -593,6 +638,9 @@ class ClassRoomViewModel @Inject constructor(
             }
             "doc", "docx", "ppt", "pptx", "pdf" -> {
                 insertDocs(file, ext)
+            }
+            else -> {
+                // Not Support Mobile
             }
         }
     }
@@ -857,7 +905,14 @@ sealed class ClassRoomEvent {
 
 sealed class RTMMessage {
     // timestamp, ms
-    abstract val ts:Long
+    abstract val ts: Long
 }
-data class ChatMessage(val name: String = "", val message: String = "", val isSelf: Boolean = false, override val ts:Long = 0) : RTMMessage()
-data class NoticeMessage(val ban: Boolean, override val ts:Long = 0) : RTMMessage()
+
+data class ChatMessage(
+    val name: String = "",
+    val message: String = "",
+    val isSelf: Boolean = false,
+    override val ts: Long = 0,
+) : RTMMessage()
+
+data class NoticeMessage(val ban: Boolean, override val ts: Long = 0) : RTMMessage()

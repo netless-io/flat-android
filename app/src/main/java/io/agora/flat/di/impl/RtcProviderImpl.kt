@@ -4,14 +4,10 @@ import android.content.Context
 import io.agora.flat.Constants
 import io.agora.flat.common.RTCEventHandler
 import io.agora.flat.common.RTCEventListener
-import io.agora.flat.data.api.MiscService
-import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoEncoderConfiguration
-import io.agora.rtc.video.VideoEncoderConfiguration.VideoDimensions
-import javax.inject.Inject
 
 class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
     private lateinit var mRtcEngine: RtcEngine
@@ -26,8 +22,6 @@ class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
         }
 
         setupVideoConfig()
-
-
     }
 
     override fun onTerminate() {
