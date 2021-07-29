@@ -892,6 +892,9 @@ sealed class ClassRoomEvent {
         const val AREA_ID_INVITE_DIALOG = 7
         const val AREA_ID_OWNER_EXIT_DIALOG = 8
         const val AREA_ID_USER_LIST = 9
+
+        const val DOT_ID_MESSAGE = 1
+        const val DOT_ID_USERLIST = 2
     }
 
     object RtmChannelJoined : ClassRoomEvent()
@@ -901,6 +904,7 @@ sealed class ClassRoomEvent {
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
+    data class ShowDot(val id:Int) :ClassRoomEvent()
 }
 
 sealed class RTMMessage {

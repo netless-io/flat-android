@@ -140,12 +140,25 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/message"
+            <FrameLayout
                 android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_message_selector" />
+                android:layout_height="32dp">
+
+                <ImageView
+                    android:id="@+id/message"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_toolbox_ext_message_selector" />
+
+                <ImageView
+                    android:id="@+id/messageDot"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_float_red_dot"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
             <ImageView
                 android:id="@+id/cloudservice"
@@ -154,12 +167,25 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_toolbox_ext_cloudservice_selector" />
 
-            <ImageView
-                android:id="@+id/userlist"
+            <FrameLayout
                 android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_userlist_selector" />
+                android:layout_height="32dp">
+
+                <ImageView
+                    android:id="@+id/userlist"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_toolbox_ext_userlist_selector" />
+
+                <ImageView
+                    android:id="@+id/userlistDot"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_float_red_dot"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
             <ImageView
                 android:id="@+id/invite"

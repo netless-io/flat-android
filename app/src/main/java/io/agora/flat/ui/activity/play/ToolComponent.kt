@@ -58,6 +58,13 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.messageUsers.collect {
                 userListAdapter.setDataSet(it)
+                binding.userlistDot.isVisible = it.find { user -> user.isRaiseHand } != null
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.messageList.collect {
+                binding.messageDot.isVisible = it.isNotEmpty() && !viewModel.messageAreaShown.value
             }
         }
 
@@ -150,6 +157,7 @@ class ToolComponent(
 
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.message to {
+                binding.messageDot.isVisible = false
                 val shown = !viewModel.messageAreaShown.value
                 viewModel.setMessageAreaShown(shown)
             },

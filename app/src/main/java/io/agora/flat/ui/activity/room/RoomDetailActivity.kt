@@ -210,7 +210,7 @@ private fun AppBarMoreButton(isOwner: Boolean, roomStatus: RoomStatus, actioner:
     Box {
         var expanded by remember { mutableStateOf(false) }
 
-        IconButton(onClick = { expanded = true }) {
+        IconButton(onClick = { expanded = true }, enabled = !(isOwner && roomStatus == RoomStatus.Started)) {
             Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
         }
 
@@ -224,7 +224,7 @@ private fun DetailDropdownMenu(
     roomStatus: RoomStatus,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    actioner: (DetailUiAction) -> Unit
+    actioner: (DetailUiAction) -> Unit,
 ) {
     DropdownMenu(
         modifier = Modifier.wrapContentSize(),
@@ -302,7 +302,7 @@ private fun PeriodicSubRoomItem(
     dayText: String,
     dayOfWeekText: String,
     timeDuring: String,
-    roomStatus: RoomStatus
+    roomStatus: RoomStatus,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -407,7 +407,7 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
 private fun Operations(
     roomInfo: UIRoomInfo,
     modifier: Modifier,
-    actioner: (DetailUiAction) -> Unit
+    actioner: (DetailUiAction) -> Unit,
 ) = when (roomInfo.roomStatus) {
     RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
         Column(modifier) {
