@@ -13,12 +13,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class JoinRoomViewModel @Inject constructor(
-    val appDatabase: AppDatabase,
-    val clipboard: ClipboardController
+    private val appDatabase: AppDatabase,
+    private val clipboard: ClipboardController,
 ) : ViewModel() {
     companion object {
-        const val ROOM_UUID_PATTERN =
-            """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
+        const val ROOM_UUID_PATTERN = """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
     }
 
     val roomUUID = MutableStateFlow("")
@@ -36,7 +35,7 @@ class JoinRoomViewModel @Inject constructor(
         }
     }
 
-    fun currentClipboardText(): String {
+    private fun currentClipboardText(): String {
         if (clipboard.getText().isNotBlank()) {
             val regex = ROOM_UUID_PATTERN.toRegex()
             val entire = regex.find(clipboard.getText())
@@ -50,7 +49,5 @@ class JoinRoomViewModel @Inject constructor(
 
 internal sealed class JoinRoomAction {
     object Close : JoinRoomAction()
-    object CheckClipboardText : JoinRoomAction()
-    data class JoinRoom(val roomUUID: String, val openVideo: Boolean, val openAudio: Boolean) :
-        JoinRoomAction()
+    data class JoinRoom(val roomUUID: String, val openVideo: Boolean, val openAudio: Boolean) : JoinRoomAction()
 }
