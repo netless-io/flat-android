@@ -90,7 +90,7 @@ class ClassRoomViewModel @Inject constructor(
     private var roomUUID: String
     private var userUUID: String
 
-    fun tickerFlow(period: Long, initialDelay: Long = 0) = flow {
+    private fun tickerFlow(period: Long, initialDelay: Long = 0) = flow {
         delay(initialDelay)
         while (true) {
             emit(Unit)

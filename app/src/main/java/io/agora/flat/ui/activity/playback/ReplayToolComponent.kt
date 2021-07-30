@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.databinding.ComponentReplayToolBinding
 import io.agora.flat.ui.activity.play.BaseComponent
+import io.agora.flat.ui.view.ReplayExitDialog
 import io.agora.flat.ui.viewmodel.ReplayViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -33,7 +34,27 @@ class ReplayToolComponent(
             toolBinding.messageLv.isVisible = toolBinding.message.isSelected
         }
 
+        toolBinding.exit.setOnClickListener {
+            showExitDialog()
+        }
         toolBinding.messageLv.setEditable(false)
+    }
+
+    private fun showExitDialog() {
+        val dialog = ReplayExitDialog().apply {
+            setListener(object : ReplayExitDialog.Listener {
+                override fun onClose() {
+                }
+
+                override fun onLeftButtonClick() {
+                }
+
+                override fun onRightButtonClick() {
+                    activity?.finish()
+                }
+            })
+        }
+        dialog.show(activity.supportFragmentManager, "ReplayExitDialog")
     }
 
     private fun observeData() {
