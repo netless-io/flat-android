@@ -5,6 +5,7 @@
     <string name="commit" translatable="false">提交</string>
     <string name="username" translatable="false">用户名</string>
     <string name="toast_in_development" translatable="false">Not Supported Yet</string>
+    <string name="delete" translatable="false">删除</string>
 
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
@@ -91,4 +92,10 @@
     <string name="exit_room">退出教室</string>
     <string name="start_record">开始录制</string>
     <string name="chat">聊天</string>
+
+    <string name="cloud_storage_usage_format" translatable="false">已使用 %1$s</string>
+    <string name="cloud_storage_upload_image" translatable="false">上传照片</string>
+    <string name="cloud_storage_upload_video" translatable="false">上传视频</string>
+    <string name="cloud_storage_upload_music" translatable="false">上传音频</string>
+    <string name="cloud_storage_upload_doc" translatable="false">上传文件</string>
 </resources>

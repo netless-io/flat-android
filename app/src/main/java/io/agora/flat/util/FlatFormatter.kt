@@ -62,4 +62,12 @@ object FlatFormatter {
         }
         return "${TimeUnit.MILLISECONDS.toDays(diff)}天"
     }
+
+    fun size(size: Long): String {
+        return if (size < 1024 * 1024) {
+            String.format("%.1f K", (size / 1024.0))
+        } else {
+            String.format("%.1f M", (size / 1024.0 / 1024.0))
+        }
+    }
 }

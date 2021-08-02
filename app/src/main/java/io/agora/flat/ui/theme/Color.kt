@@ -13,6 +13,7 @@ val FlatColorTextSecondary = Color(0xFF7A7B7C)
 
 val FlatColorDivider = Color(0xFFDBE1EA)
 val FlatColorBorder = Color(0xFFDBE1EA)
+val FlatColorBackground = Color(0xFFF3F6F9)
 
 val FlatColorWhite = Color(0xFFFFFFFF)
 val FlatColorBlack = Color(0xFF000000)
