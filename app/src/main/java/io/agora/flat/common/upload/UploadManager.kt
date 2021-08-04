@@ -23,16 +23,17 @@ object UploadManager {
         .writeTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
+    private val callMap = mutableMapOf<String, Call>()
+    private val taskMap = mutableMapOf<String, UploadTask>()
 
     fun init(application: Application) {
         UploadManager.application = application
         contentResolver = application.contentResolver
     }
 
-    fun upload(uploadRequest: UploadRequest, listener: OnUploadEventListener) {
+    fun upload(uploadRequest: UploadRequest, uploadEventListener: UploadEventListener) {
         val fileInfo = application.contentFileInfo(uri = uploadRequest.uri) ?: return
         val (fileName, size, mediaType) = fileInfo
-
         val fileBody = InputStreamRequestBody(
             mediaType.toMediaType(),
             contentResolver.openInputStream(uploadRequest.uri),
@@ -40,9 +41,9 @@ object UploadManager {
             object : OnProgressListener {
                 private var nextUpdate = System.currentTimeMillis()
                 override fun onProgress(currentSize: Long, totalSize: Long) {
-                    if (System.currentTimeMillis() > nextUpdate) {
+                    if (System.currentTimeMillis() > nextUpdate || currentSize == totalSize) {
                         nextUpdate += 1000
-                        listener.onEvent(UploadEvent.UploadProgressEvent(uploadRequest.fileUUID,
+                        uploadEventListener.onEvent(UploadEvent.UploadProgressEvent(uploadRequest.fileUUID,
                             currentSize,
                             totalSize))
                     }
@@ -70,22 +71,44 @@ object UploadManager {
             .post(requestBody)
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
+        val fileUUID = uploadRequest.fileUUID
+        taskMap[fileUUID] = UploadTask(uploadRequest, uploadEventListener)
+
+        val call = client.newCall(request)
+        call.enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
-                    listener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID, UploadState.Success))
+                    uploadEventListener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID,
+                        UploadState.Success))
+                    taskMap.remove(fileUUID)
                 } else {
-                    listener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID, UploadState.Failure))
+                    uploadEventListener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID,
+                        UploadState.Failure))
                 }
+                callMap.remove(fileUUID)
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                listener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID, UploadState.Failure))
+                uploadEventListener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID, UploadState.Failure))
+                callMap.remove(fileUUID)
             }
         })
+        uploadEventListener.onEvent(UploadEvent.UploadStateEvent(uploadRequest.fileUUID, UploadState.Uploading))
+        callMap[fileUUID] = call
+    }
+
+    fun cancel(fileUUID: String) {
+        callMap[fileUUID]?.cancel()
+        callMap.remove(fileUUID)
+    }
+
+    fun retry(fileUUID: String) {
+        cancel(fileUUID)
+        taskMap[fileUUID]?.run {
+            upload(uploadRequest, uploadEventListener)
+        }
     }
 }
-
 
 data class UploadRequest constructor(
     val fileUUID: String,
@@ -95,6 +118,10 @@ data class UploadRequest constructor(
     val signature: String,
     val uri: Uri,
 )
+
+private class UploadTask constructor(val uploadRequest: UploadRequest, val uploadEventListener: UploadEventListener) {
+
+}
 
 internal class InputStreamRequestBody(
     private val contentType: MediaType,
@@ -122,6 +149,7 @@ internal class InputStreamRequestBody(
                 sink.flush();
                 onProgressListener.onProgress(currentSize, totalSize)
             }
+            onProgressListener.onProgress(totalSize, totalSize)
         }
     }
 }
@@ -130,7 +158,7 @@ internal interface OnProgressListener {
     fun onProgress(currentSize: Long, totalSize: Long)
 }
 
-interface OnUploadEventListener {
+interface UploadEventListener {
     fun onEvent(event: UploadEvent)
 }
 

@@ -30,9 +30,8 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.agora.flat.R
-import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
-import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
@@ -56,24 +55,29 @@ fun CloudStorage() {
 
 @Composable
 internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(viewState.refreshing),
-        onRefresh = { actioner(CloudStorageUIAction.Reload) },
-        indicator = { state, trigger ->
-            SwipeRefreshIndicator(
-                state = state,
-                refreshTriggerDistance = trigger,
-                contentColor = MaterialTheme.colors.primary,
-            )
-        }) {
-        FlatColumnPage {
+    FlatPage {
+        Column {
             FlatCloudStorageTopBar()
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
+            SwipeRefresh(
+                state = rememberSwipeRefreshState(viewState.refreshing),
+                onRefresh = { actioner(CloudStorageUIAction.Reload) },
+                indicator = { state, trigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshTriggerDistance = trigger,
+                        contentColor = MaterialTheme.colors.primary,
+                    )
+                }) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
 
-                CloudStorageAddFile(actioner)
+                    CloudStorageAddFile(actioner)
+                }
             }
+        }
+        if (viewState.uploadFiles.isNotEmpty()) {
+            UploadList()
         }
     }
 }

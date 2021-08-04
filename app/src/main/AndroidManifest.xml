@@ -62,7 +62,7 @@
         <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity
             android:name=".ui.activity.dev.ComposeTestActivity"
-
+            android:exported="true"
             android:label="@string/title_activity_compose_test" />
         <activity
             android:name=".ui.activity.home.MainActivity"
