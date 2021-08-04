@@ -13,9 +13,7 @@ data class CloudStorageFile constructor(
     val convertStep: FileConvertStep,
     val taskUUID: String,
     val taskToken: String,
-    val createAt: String,
-    // local
-    val checked: Boolean = false,
+    val createAt: Long,
 )
 
 enum class FileConvertStep {

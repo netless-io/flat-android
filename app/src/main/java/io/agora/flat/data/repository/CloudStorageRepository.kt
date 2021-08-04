@@ -20,7 +20,7 @@ class CloudStorageRepository @Inject constructor(
         }
     }
 
-    suspend fun updateStart(fileName: String, fileSize: Int, region: String): Result<CloudStorageUploadStartResp> {
+    suspend fun updateStart(fileName: String, fileSize: Long, region: String = "cn-hz"): Result<CloudStorageUploadStartResp> {
         return withContext(Dispatchers.IO) {
             cloudStorageService.updateStart(CloudStorageUploadStartReq(fileName, fileSize, region))
                 .executeOnce().toResult()
@@ -38,6 +38,12 @@ class CloudStorageRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             cloudStorageService.remove(CloudStorageRemoveReq(fileUUIDs))
                 .executeOnce().toResult()
+        }
+    }
+
+    suspend fun cancel(fileUUIDs: List<String> = listOf()): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.cancel().executeOnce().toResult()
         }
     }
 

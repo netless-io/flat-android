@@ -33,6 +33,11 @@ interface CloudStorageService {
         @Body req: CloudStorageRenameReq,
     ): Call<BaseResp<RespNoData>>
 
+    @POST("v1/cloud-storage/upload/cancel")
+    fun cancel(
+        @Body empty: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<RespNoData>>
+
     @POST("v1/cloud-storage/alibaba-cloud/convert/start")
     fun convertStart(
         @Body req: CloudStorageFileReq,

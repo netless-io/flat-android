@@ -1,5 +1,7 @@
 package io.agora.flat.ui.activity.home
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
@@ -17,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,6 +36,7 @@ import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.contentFileInfo
 
 @Composable
 fun CloudStorage() {
@@ -43,6 +48,7 @@ fun CloudStorage() {
             is CloudStorageUIAction.CheckItem -> viewModel.checkItem(action)
             is CloudStorageUIAction.Delete -> viewModel.deleteChecked()
             is CloudStorageUIAction.Reload -> viewModel.reloadFileList()
+            is CloudStorageUIAction.UploadFile -> viewModel.uploadFile(action)
             else -> ""
         }
     }
@@ -66,14 +72,14 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
             Box(modifier = Modifier.fillMaxSize()) {
                 CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
 
-                CloudStorageAddFile()
+                CloudStorageAddFile(actioner)
             }
         }
     }
 }
 
 @Composable
-fun BoxScope.CloudStorageAddFile() {
+fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Unit) {
     var showPick by remember { mutableStateOf(false) }
 
     FloatingActionButton(
@@ -87,14 +93,25 @@ fun BoxScope.CloudStorageAddFile() {
 
     val aniValue: Float by animateFloatAsState(if (showPick) 1f else 0f)
     if (aniValue > 0) {
-        UpdatePickLayout(aniValue) {
+        UpdatePickLayout(aniValue, actioner = {
+            actioner(it)
+            showPick = false
+        }) {
             showPick = false
         }
     }
 }
 
 @Composable
-private fun UpdatePickLayout(aniValue: Float, onCoverClick: () -> Unit) {
+private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -> Unit, onCoverClick: () -> Unit) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        it?.run {
+            val info = context.contentFileInfo(this) ?: return@run
+            actioner(CloudStorageUIAction.UploadFile(filename = info.filename, size = info.size, uri = this))
+        }
+    }
+
     Column {
         Box(Modifier
             .weight(1f)
@@ -121,16 +138,16 @@ private fun UpdatePickLayout(aniValue: Float, onCoverClick: () -> Unit) {
             }
             Row(Modifier.align(Alignment.Center)) {
                 UpdatePickItem(R.drawable.ic_cloud_storage_image, R.string.cloud_storage_upload_image) {
-
+                    launcher.launch("image/*")
                 }
                 UpdatePickItem(R.drawable.ic_cloud_storage_video, R.string.cloud_storage_upload_video) {
-
+                    launcher.launch("video/*")
                 }
                 UpdatePickItem(R.drawable.ic_cloud_storage_music, R.string.cloud_storage_upload_music) {
-
+                    launcher.launch("audio/*")
                 }
                 UpdatePickItem(R.drawable.ic_cloud_storage_doc, R.string.cloud_storage_upload_doc) {
-
+                    launcher.launch("*/*")
                 }
             }
         }
@@ -153,7 +170,7 @@ private fun RowScope.UpdatePickItem(@DrawableRes id: Int, @StringRes text: Int, 
 @Composable
 internal fun CloudStorageContent(
     totalUsage: Long,
-    files: List<CloudStorageFile>,
+    files: List<CloudStorageUIFile>,
     actioner: (CloudStorageUIAction) -> Unit,
 ) {
     Column {
@@ -180,7 +197,7 @@ internal fun CloudStorageContent(
 }
 
 @Composable
-private fun CloudStorageItem(file: CloudStorageFile, onCheckedChange: ((Boolean) -> Unit)) {
+private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolean) -> Unit)) {
     // "jpg", "jpeg", "png", "webp","doc", "docx", "ppt", "pptx", "pdf"
     val imageId = when (file.fileURL.substringAfterLast('.').toLowerCase()) {
         "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_storage_image
@@ -200,16 +217,15 @@ private fun CloudStorageItem(file: CloudStorageFile, onCheckedChange: ((Boolean)
                 contentDescription = ""
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(text = file.fileName)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    Text(text = file.createAt)
+                    Text(text = FlatFormatter.dateDash(file.createAt))
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(text = FlatFormatter.size(file.fileSize.toLong()))
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
             Checkbox(checked = file.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
             Spacer(modifier = Modifier.width(12.dp))
         }
@@ -225,27 +241,27 @@ private fun FlatCloudStorageTopBar() {
 @Composable
 @Preview
 private fun CloudStoragePreview() {
-    val files = listOf<CloudStorageFile>(
-        CloudStorageFile("1",
-            "1.jpg",
+    val files = listOf<CloudStorageUIFile>(
+        CloudStorageUIFile("1",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg",
             1111024,
-            createAt = "17:26:03",
+            createAt = 1627898586449,
             fileURL = "",
             convertStep = FileConvertStep.Done,
             taskUUID = "",
             taskToken = ""),
-        CloudStorageFile("2",
+        CloudStorageUIFile("2",
             "2.doc",
             111024,
-            createAt = "17:26:03",
+            createAt = 1627818586449,
             fileURL = "",
             convertStep = FileConvertStep.Done,
             taskUUID = "",
             taskToken = ""),
-        CloudStorageFile("3",
+        CloudStorageUIFile("3",
             "3.mp4",
             111111024,
-            createAt = "17:26:03",
+            createAt = 1617898586449,
             fileURL = "",
             convertStep = FileConvertStep.Done,
             taskUUID = "",
@@ -262,7 +278,7 @@ private fun CloudStoragePreview() {
 @Composable
 @Preview
 private fun UpdatePickDialogPreview() {
-    UpdatePickLayout(1f) {
+    UpdatePickLayout(1f, {}) {
 
     }
 }

@@ -3,6 +3,8 @@ package io.agora.flat.util
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Resources
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
@@ -68,3 +70,23 @@ fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = ""
         finish()
     }
 }
+
+fun Context.contentFileInfo(uri: Uri): ContentFileInfo? {
+    val mediaType = contentResolver.getType(uri) ?: "text/plain"
+    return contentResolver.query(
+        uri,
+        arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+        null,
+        null,
+        null
+    )?.use { cursor ->
+        cursor.moveToFirst()
+        val filename = cursor.getString(0)
+        val size = cursor.getLong(1)
+        cursor.close()
+
+        return ContentFileInfo(filename, size, mediaType)
+    }
+}
+
+data class ContentFileInfo(val filename: String, val size: Long, val mediaType: String)
