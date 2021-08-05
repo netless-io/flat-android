@@ -43,7 +43,7 @@ fun UploadList() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun UploadList(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
-    var showList by remember { mutableStateOf(true) }
+    var showList by remember { mutableStateOf(false) }
 
     val progress = (viewState.uploadFiles.sumOf {
         it.progress.toDouble()

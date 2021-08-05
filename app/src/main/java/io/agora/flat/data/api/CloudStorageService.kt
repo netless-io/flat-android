@@ -38,12 +38,12 @@ interface CloudStorageService {
         @Body empty: BaseReq = BaseReq.EMPTY,
     ): Call<BaseResp<RespNoData>>
 
-    @POST("v1/cloud-storage/alibaba-cloud/convert/start")
+    @POST("v1/cloud-storage/convert/start")
     fun convertStart(
         @Body req: CloudStorageFileReq,
     ): Call<BaseResp<CloudStorageFileConvertResp>>
 
-    @POST("v1/cloud-storage/alibaba-cloud/convert/finish")
+    @POST("v1/cloud-storage/convert/finish")
     fun convertFinish(
         @Body req: CloudStorageFileReq,
     ): Call<BaseResp<RespNoData>>

@@ -4,7 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -216,10 +217,20 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
             .fillMaxWidth()
             .weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(12.dp))
-            Image(
-                painterResource(imageId),
-                contentDescription = ""
-            )
+            Box {
+                Image(
+                    painterResource(imageId),
+                    contentDescription = ""
+                )
+                if (file.convertStep == FileConvertStep.Converting) {
+                    ConvertingImage(Modifier.align(Alignment.BottomEnd))
+                } else if (file.convertStep == FileConvertStep.Failed) {
+                    Icon(painter = painterResource(R.drawable.ic_cloud_storage_convert_failure),
+                        contentDescription = "",
+                        Modifier.align(Alignment.BottomEnd),
+                        tint = Color.Unspecified)
+                }
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -235,6 +246,24 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
         }
         Divider(modifier = Modifier.padding(start = 52.dp, end = 12.dp), thickness = 1.dp, color = FlatColorDivider)
     }
+}
+
+@Composable
+fun ConvertingImage(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val angle: Float by infiniteTransition.animateFloat(
+        initialValue = 0F,
+        targetValue = 360F,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+        )
+    )
+
+    Icon(painter = painterResource(R.drawable.ic_cloud_storage_converting),
+        contentDescription = "",
+        modifier.rotate(angle),
+        tint = Color.Unspecified)
 }
 
 @Composable

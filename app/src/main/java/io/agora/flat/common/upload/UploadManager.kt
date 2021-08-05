@@ -119,9 +119,7 @@ data class UploadRequest constructor(
     val uri: Uri,
 )
 
-private class UploadTask constructor(val uploadRequest: UploadRequest, val uploadEventListener: UploadEventListener) {
-
-}
+private class UploadTask constructor(val uploadRequest: UploadRequest, val uploadEventListener: UploadEventListener)
 
 internal class InputStreamRequestBody(
     private val contentType: MediaType,

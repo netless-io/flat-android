@@ -1,8 +1,15 @@
 package io.agora.flat.ui.activity.home
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.herewhite.sdk.ConverterCallbacks
+import com.herewhite.sdk.converter.ConvertType
+import com.herewhite.sdk.converter.ConverterV5
+import com.herewhite.sdk.domain.ConversionInfo
+import com.herewhite.sdk.domain.ConvertException
+import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.upload.*
 import io.agora.flat.data.AppKVCenter
@@ -180,7 +187,53 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             val resp = cloudStorageRepository.updateFinish(fileUUID)
             if (resp is Success) {
-                // delayRemoveSuccess(fileUUID)
+                delayRemoveSuccess(fileUUID)
+                startConvert(fileUUID)
+            }
+        }
+    }
+
+    private fun startConvert(fileUUID: String) {
+        viewModelScope.launch {
+            val resp = cloudStorageRepository.convertStart(fileUUID)
+            if (resp is Success) {
+                var converterV5 = ConverterV5.Builder().apply {
+                    // TODO
+                    setResource("")
+                    setType(ConvertType.Dynamic)
+                    setTaskToken(resp.data.taskToken)
+                    setTaskUuid(resp.data.taskUUID)
+                    setCallback(object : ConverterCallbacks {
+                        override fun onProgress(progress: Double?, convertInfo: ConversionInfo?) {
+                            Log.d("Aderan", "onProgress $progress")
+                        }
+
+                        override fun onFinish(ppt: ConvertedFiles?, convertInfo: ConversionInfo?) {
+                            Log.d("Aderan", "onFinish")
+                            finishConvert(fileUUID, true)
+                        }
+
+                        override fun onFailure(e: ConvertException?) {
+                            Log.w("Aderan", "onFailure $e")
+                            finishConvert(fileUUID, false)
+                        }
+                    })
+                }.build()
+                converterV5.startConvertTask()
+            }
+        }
+    }
+
+    private fun finishConvert(fileUUID: String, success: Boolean) {
+        viewModelScope.launch {
+            val resp = cloudStorageRepository.convertFinish(fileUUID)
+            if (resp is Success) {
+                files.value.indexOfFirst { fileUUID == it.fileUUID }.let { index ->
+                    if (index < 0) return@launch
+                    val convertStep = if (success) FileConvertStep.Done else FileConvertStep.Failed
+                    val changed = files.value[index].copy(convertStep = convertStep)
+                    files.value = files.value.toMutableList().apply { set(index, changed) }
+                }
             }
         }
     }
