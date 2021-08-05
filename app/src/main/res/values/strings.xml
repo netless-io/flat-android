@@ -98,4 +98,8 @@
     <string name="cloud_storage_upload_video" translatable="false">上传视频</string>
     <string name="cloud_storage_upload_music" translatable="false">上传音频</string>
     <string name="cloud_storage_upload_doc" translatable="false">上传文件</string>
+    <string name="cloud_storage_upload_list_title">传输列表</string>
+
+    <string name="upload_success" translatable="false">上传成功</string>
+    <string name="upload_failure" translatable="false">上传失败</string>
 </resources>

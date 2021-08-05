@@ -198,12 +198,6 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
-    fun cancelUpload(fileUUID: String) {
-        viewModelScope.launch {
-            UploadManager.cancel(fileUUID)
-        }
-    }
-
     fun deleteUpload(fileUUID: String) {
         viewModelScope.launch {
             uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
@@ -249,6 +243,5 @@ sealed class CloudStorageUIAction {
     data class UploadFile(val filename: String, val size: Long, val uri: Uri) : CloudStorageUIAction()
 
     data class UploadRetry(val fileUUID: String) : CloudStorageUIAction()
-    data class UploadCancel(val fileUUID: String) : CloudStorageUIAction()
     data class UploadDelete(val fileUUID: String) : CloudStorageUIAction()
 }
