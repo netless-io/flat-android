@@ -70,7 +70,7 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
                         contentColor = MaterialTheme.colors.primary,
                     )
                 }) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize()) {
                     CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
 
                     CloudStorageAddFile(actioner)
@@ -84,7 +84,7 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
 }
 
 @Composable
-fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Unit) {
+private fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Unit) {
     var showPick by remember { mutableStateOf(false) }
 
     FloatingActionButton(
@@ -119,8 +119,8 @@ private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -
 
     Column {
         Box(Modifier
-            .weight(1f)
             .fillMaxWidth()
+            .weight(1f)
             .graphicsLayer(alpha = aniValue)
             .background(Color(0x52000000))
             .clickable(
@@ -213,10 +213,8 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
         else -> R.drawable.ic_cloud_storage_doc
     }
     Column(Modifier.height(68.dp)) {
-        Row(Modifier
-            .fillMaxWidth()
-            .weight(1f), verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(12.dp))
+        Row(MaxWidthSpread, verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(12.dp))
             Box {
                 Image(
                     painterResource(imageId),
@@ -231,8 +229,8 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
                         tint = Color.Unspecified)
                 }
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            Spacer(Modifier.width(8.dp))
+            Column(Modifier.weight(1f)) {
                 Text(text = file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
                 Row {
@@ -274,7 +272,7 @@ private fun FlatCloudStorageTopBar() {
 @Composable
 @Preview
 private fun CloudStoragePreview() {
-    val files = listOf<CloudStorageUIFile>(
+    val files = listOf(
         CloudStorageUIFile("1",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg",
             1111024,

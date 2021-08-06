@@ -11,10 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import io.agora.flat.ui.theme.FlatAndroidTheme
-import io.agora.flat.ui.theme.FlatColorWhite
 
 @Composable
-fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -> Unit) {
+fun FlatPage(
+    statusBarColor: Color = MaterialTheme.colors.background,
+    content: @Composable() () -> Unit,
+) {
     val controller = rememberAndroidSystemUiController()
     controller.setStatusBarColor(statusBarColor)
 
@@ -29,8 +31,8 @@ fun FlatPage(statusBarColor: Color = FlatColorWhite, content: @Composable() () -
 
 @Composable
 fun FlatColumnPage(
-    statusBarColor: Color = FlatColorWhite,
-    content: @Composable() ColumnScope.() -> Unit
+    statusBarColor: Color = MaterialTheme.colors.background,
+    content: @Composable() ColumnScope.() -> Unit,
 ) {
     val controller = rememberAndroidSystemUiController()
     controller.setStatusBarColor(statusBarColor)

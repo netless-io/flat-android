@@ -25,11 +25,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatHighlightTextButton
+import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
@@ -129,7 +129,7 @@ fun UserSettingActivityPreview() {
         BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { })
         Box(Modifier.weight(1f)) {
             SettingItemList()
-            BottomOptArea({})
+            BottomOptArea {}
         }
     }
 }

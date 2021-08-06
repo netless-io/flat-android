@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,10 +29,6 @@ class HomeViewModel @Inject constructor(
     private val appKVCenter: AppKVCenter,
     private val cloudStorageRepository: CloudStorageRepository,
 ) : ViewModel() {
-    companion object {
-        val TAG = HomeViewModel.javaClass.simpleName;
-    }
-
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
     private val selectedCategory = MutableStateFlow(RoomCategory.Current)
     private val roomList = MutableStateFlow(listOf<RoomInfo>())
@@ -41,12 +36,11 @@ class HomeViewModel @Inject constructor(
     private val refreshing = ObservableLoadingCounter()
 
     private val _state = MutableStateFlow(HomeViewState())
-
     val state: StateFlow<HomeViewState>
         get() = _state
 
-    private var page: Int = 1;
-    private var historyPage: Int = 1;
+    private var page: Int = 1
+    private var historyPage: Int = 1
 
     init {
         viewModelScope.launch {
@@ -58,7 +52,7 @@ class HomeViewModel @Inject constructor(
                 userInfo,
             ) { selectedCategory, roomLists, roomHistoryList, refreshing, userInfo ->
                 HomeViewState(
-                    selectedHomeCategory = selectedCategory,
+                    category = selectedCategory,
                     roomList = roomLists,
                     roomHistoryList = roomHistoryList,
                     refreshing = refreshing,
@@ -84,7 +78,6 @@ class HomeViewModel @Inject constructor(
     }
 
     fun reloadRoomList() {
-        Log.d(TAG, "reload room list start")
         viewModelScope.launch {
             refreshing.addLoader()
             reloadRooms()
@@ -152,7 +145,7 @@ class HomeViewModel @Inject constructor(
                 roomInfo.showDayHead = false
             }
         }
-        return list;
+        return list
     }
 }
 
@@ -166,7 +159,7 @@ enum class RoomCategory {
 
 data class HomeViewState(
     val refreshing: Boolean = false,
-    val selectedHomeCategory: RoomCategory = RoomCategory.Current,
+    val category: RoomCategory = RoomCategory.Current,
     val roomList: List<RoomInfo> = listOf(),
     val roomHistoryList: List<RoomInfo> = listOf(),
     val userInfo: UserInfo = UserInfo("", "", ""),

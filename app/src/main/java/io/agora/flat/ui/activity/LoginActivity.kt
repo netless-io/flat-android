@@ -31,8 +31,8 @@ import io.agora.flat.Constants.Login.AUTH_ERROR
 import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay

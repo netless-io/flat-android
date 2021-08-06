@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.viewmodel.UserViewModel
 
 @AndroidEntryPoint
@@ -35,7 +35,7 @@ class UserInfoActivity : ComponentActivity() {
                 val viewModel = viewModel(UserViewModel::class.java)
                 val userInfo = viewModel.userInfo.collectAsState()
 
-                BackTopAppBar(title = stringResource(R.string.title_user_info), onBackPressed = { finish() })
+                BackTopAppBar(stringResource(R.string.title_user_info), { finish() })
                 userInfo.value?.apply {
                     SettingList(name)
                 }
@@ -59,7 +59,7 @@ private fun SettingList(name: String) {
 private fun Item(
     tip: String,
     desc: String = "",
-    onClickOrNull: (() -> Unit)? = null
+    onClickOrNull: (() -> Unit)? = null,
 ) {
     val modifier = Modifier
         .fillMaxWidth()

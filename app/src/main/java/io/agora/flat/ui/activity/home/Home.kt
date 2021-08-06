@@ -73,7 +73,7 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                selectedHomeCategory = viewState.selectedHomeCategory,
+                selectedHomeCategory = viewState.category,
                 onCategorySelected = { actioner(HomeViewAction.SelectCategory(it)) },
                 roomList = viewState.roomList,
                 roomHistory = viewState.roomHistoryList
@@ -378,7 +378,7 @@ fun RoomListItemPreview() {
     RoomListItem(roomInfo, Modifier)
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = 0x30)
 @Composable
 fun HomePreview() {
     val viewState = HomeViewState(

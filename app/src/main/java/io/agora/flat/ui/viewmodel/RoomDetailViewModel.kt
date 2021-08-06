@@ -44,7 +44,6 @@ class RoomDetailViewModel @Inject constructor(
     val cancelSuccess: StateFlow<Boolean>
         get() = _cancelSuccess
 
-
     init {
         viewModelScope.launch {
             combine(roomInfo, periodicRoomInfo, loading) { roomInfo, periodicRoomInfo, loading ->

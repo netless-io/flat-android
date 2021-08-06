@@ -20,12 +20,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.agora.flat.R
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatColorGray
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatTitleTextStyle
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.theme.*
 import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.showDebugToast
 
@@ -47,38 +44,26 @@ class AboutUsActivity : ComponentActivity() {
 
 @Composable
 private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
-    var context = LocalContext.current
-    var version = context.getAppVersion()
+    val context = LocalContext.current
+    val version = context.getAppVersion()
 
     FlatColumnPage {
         BackTopAppBar(stringResource(R.string.title_about_us), { actioner(AboutUiAction.Back) });
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(), contentAlignment = Alignment.Center
-        ) {
+        Box(MaxWidthSpread, contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_flat_logo),
-                    contentDescription = null
-                )
+                Image(painterResource(R.drawable.ic_flat_logo), null)
                 Spacer(Modifier.height(16.dp))
-                Text(text = "Flat", style = FlatTitleTextStyle)
+                Text("Flat", style = FlatTitleTextStyle)
                 Spacer(Modifier.height(8.dp))
-                Text(text = "Version $version", style = FlatCommonTextStyle)
+                Text("Version $version", style = FlatCommonTextStyle)
             }
         }
-        Box(
-            modifier = Modifier
-                .padding(vertical = 32.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(MaxWidth.padding(vertical = 32.dp), Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     onClick = { actioner(AboutUiAction.OpenServiceProtocol) }) {
-                    Text(text = "服务协议", style = ProtocolTextStyle)
+                    Text(stringResource(id = R.string.service_agreement), style = ProtocolTextStyle)
                 }
                 Spacer(
                     Modifier
@@ -87,9 +72,9 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
                         .background(FlatColorGray)
                 )
                 TextButton(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onClick = { actioner(AboutUiAction.OpenPrivacyProtocol) }) {
-                    Text(text = "隐私协议", style = ProtocolTextStyle)
+                    onClick = { actioner(AboutUiAction.OpenPrivacyProtocol) },
+                    modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(stringResource(R.string.privacy_agreement), style = ProtocolTextStyle)
                 }
             }
         }

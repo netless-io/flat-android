@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Range
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,7 +31,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.theme.FlatColorWhite
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPageLoading
 import kotlinx.coroutines.flow.collect
@@ -120,7 +119,7 @@ fun MainPage() {
 @Composable
 private fun FlatHomeBottomBar(
     selectedTab: MainTab,
-    onTabSelected: (MainTab) -> Unit
+    onTabSelected: (MainTab) -> Unit,
 ) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
@@ -132,7 +131,7 @@ private fun FlatHomeBottomBar(
     }
 
     Divider()
-    BottomAppBar(elevation = 0.dp, backgroundColor = FlatColorWhite) {
+    BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.background) {
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { onTabSelected(MainTab.Home) }) {
                 Image(painterResource(homeResId), null)

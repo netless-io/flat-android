@@ -7,10 +7,18 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
+@SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
+    primary = FlatColorBlue,
+    primaryVariant = FlatColorBlue,
+    secondary = FlatColorBlue,
+    secondaryVariant = FlatColorBlue,
 
+    // behind scrollable content
+    background = FlatColorBlack,
+    // cards, sheets, and menus
+    surface = FlatColorBlack,
 )
-
 
 /**
  * See <a href="https://material.io/design/material-theming/implementing-your-theme.html">Material Theming</a>
@@ -32,7 +40,7 @@ private val LightColorPalette = lightColors(
     onSecondary = FlatColorTextSecondary,
     onBackground = FlatColorBlack,
     onSurface = FlatColorBlack,
-    onError = FlatColorRed
+    onError = FlatColorWhite
 )
 
 @Composable

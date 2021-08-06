@@ -124,14 +124,10 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
             }
         }
 
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f), contentAlignment = Alignment.Center
-        ) {
+        Box(MaxWidthSpread, Alignment.Center) {
             if (viewState.roomInfo != null) {
                 val roomInfo = viewState.roomInfo!!
-                Column(Modifier.fillMaxSize()) {
+                Column(MaxWidth) {
                     TimeDisplay(
                         begin = roomInfo.beginTime,
                         end = roomInfo.endTime,
@@ -139,12 +135,7 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
                     )
                     if (viewModel.isPeriodicRoom() && viewState.periodicRoomInfo != null) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
-                        Column(
-                            Modifier
-                                .fillMaxWidth()
-                                .animateContentSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        Column(MaxWidth.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 "查看全部${periodicRoomInfo.rooms.size}个房间",
                                 Modifier

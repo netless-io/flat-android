@@ -7,6 +7,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
+// TODO 排版信息中不包含颜色配置，将具体颜色配置定义在业务自定义组件中
+
 val Typography = Typography(
     h6 = TextStyle(
         fontFamily = FontFamily.Default,
