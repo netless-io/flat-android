@@ -170,5 +170,10 @@ data class HomeViewState(
     val roomList: List<RoomInfo> = listOf(),
     val roomHistoryList: List<RoomInfo> = listOf(),
     val userInfo: UserInfo = UserInfo("", "", ""),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
+
+sealed class HomeViewAction {
+    object Reload : HomeViewAction()
+    data class SelectCategory(val category: RoomCategory) : HomeViewAction()
+}

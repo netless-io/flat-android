@@ -437,7 +437,8 @@ private fun Operations(
     RoomStatus.Stopped ->
         Column(modifier) {
             FlatPrimaryTextButton(
-                text = "回放",
+                text = stringResource(id = R.string.replay),
+                enabled = roomInfo.hasRecord,
                 onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) })
         }
 }

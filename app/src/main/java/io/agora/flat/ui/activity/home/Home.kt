@@ -37,35 +37,44 @@ import io.agora.flat.ui.compose.FlatRoomStatusText
 import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.showDebugToast
 
 @Composable
 fun Home() {
     val viewModel = viewModel(HomeViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(viewState.refreshing),
-        onRefresh = { viewModel.reloadRoomList() },
-        indicator = { state, trigger ->
-            SwipeRefreshIndicator(
-                state = state,
-                refreshTriggerDistance = trigger,
-                contentColor = MaterialTheme.colors.primary,
-            )
-        }) {
-        FlatColumnPage {
-            // 顶部栏
-            FlatHomeTopBar(userAvatar = viewState.userInfo.avatar)
-            // 操作区
-            TopOperations()
-            // 房间列表区
+    Home(viewState) { action ->
+        when (action) {
+            HomeViewAction.Reload -> viewModel.reloadRoomList()
+            is HomeViewAction.SelectCategory -> viewModel.onRoomCategorySelected(action.category)
+        }
+    }
+}
+
+@Composable
+private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
+    FlatColumnPage {
+        // 顶部栏
+        FlatHomeTopBar(userAvatar = viewState.userInfo.avatar)
+        // 操作区
+        TopOperations()
+        // 房间列表区
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(viewState.refreshing),
+            onRefresh = { actioner(HomeViewAction.Reload) },
+            indicator = { state, trigger ->
+                SwipeRefreshIndicator(
+                    state = state,
+                    refreshTriggerDistance = trigger,
+                    contentColor = MaterialTheme.colors.primary,
+                )
+            }) {
             HomeRoomLists(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 selectedHomeCategory = viewState.selectedHomeCategory,
-                onCategorySelected = viewModel::onRoomCategorySelected,
+                onCategorySelected = { actioner(HomeViewAction.SelectCategory(it)) },
                 roomList = viewState.roomList,
                 roomHistory = viewState.roomHistoryList
             )
@@ -84,10 +93,11 @@ private fun TopOperations() {
         OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {
             Navigator.launchJoinRoomActivity(context)
         }
-        OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
-            // Navigator.launchSubscribeRoomActivity(context)
-            context.showDebugToast(R.string.toast_in_development)
-        }
+        // Perhaps, the future will support
+        // OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
+        //     // Navigator.launchSubscribeRoomActivity(context)
+        //     context.showDebugToast(R.string.toast_in_development)
+        // }
     }
 }
 
@@ -199,7 +209,7 @@ private fun HomeRoomTabs(
     categories: List<RoomCategory>,
     selectedCategory: RoomCategory,
     onCategorySelected: (RoomCategory) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val selectedIndex = categories.indexOfFirst { it == selectedCategory }
     val indicator = @Composable { tabPositions: List<TabPosition> ->
@@ -237,7 +247,7 @@ private fun HomeRoomTabs(
 @Composable
 fun HomeTabIndicator(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onSurface
+    color: Color = MaterialTheme.colors.onSurface,
 ) {
     Spacer(
         modifier
@@ -370,6 +380,11 @@ fun RoomListItemPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    FlatHomeTopBar("")
+fun HomePreview() {
+    val viewState = HomeViewState(
+
+    )
+    Home(viewState) {
+
+    }
 }

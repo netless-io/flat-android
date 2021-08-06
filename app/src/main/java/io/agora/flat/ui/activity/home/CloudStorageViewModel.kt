@@ -294,7 +294,6 @@ sealed class CloudStorageUIAction {
     data class ClickItem(val index: Int) : CloudStorageUIAction()
 
     data class UploadFile(val filename: String, val size: Long, val uri: Uri) : CloudStorageUIAction()
-
     data class UploadRetry(val fileUUID: String) : CloudStorageUIAction()
     data class UploadDelete(val fileUUID: String) : CloudStorageUIAction()
 }

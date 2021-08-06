@@ -102,4 +102,5 @@
 
     <string name="upload_success" translatable="false">上传成功</string>
     <string name="upload_failure" translatable="false">上传失败</string>
+    <string name="replay">回放</string>
 </resources>

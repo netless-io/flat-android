@@ -9,4 +9,5 @@
     <string name="start_record">开始录制</string>
     <string name="chat">聊天</string>
     <string name="cloud_storage_upload_list_title">传输列表</string>
+    <string name="replay">回放</string>
 </resources>

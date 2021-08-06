@@ -151,7 +151,8 @@ data class UIRoomInfo(
     val endTime: Long = 0,
     val roomType: RoomType,
     val roomStatus: RoomStatus = RoomStatus.Idle,
-    val isPeriodic: Boolean = false
+    val isPeriodic: Boolean = false,
+    val hasRecord: Boolean,
 )
 
 private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?): UIRoomInfo {
@@ -163,6 +164,7 @@ private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?): UIRoomInf
         beginTime = beginTime,
         endTime = endTime,
         roomType = roomType,
-        roomStatus = roomStatus
+        roomStatus = roomStatus,
+        hasRecord = hasRecord,
     )
 }
