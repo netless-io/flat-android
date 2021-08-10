@@ -36,7 +36,7 @@ class RtcProviderImpl : RtcEngineProvider, StartupInitializer {
                 VideoEncoderConfiguration.VD_640x360,
                 VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
                 VideoEncoderConfiguration.STANDARD_BITRATE,
-                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_LANDSCAPE
+                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
             )
         )
     }

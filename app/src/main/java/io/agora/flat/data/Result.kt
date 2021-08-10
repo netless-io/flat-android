@@ -31,12 +31,11 @@ data class Success<T>(val data: T) : Result<T>() {
 
 data class ErrorResult<T>(
     val throwable: Throwable,
-    val error: Error = Error.unknownServerError
+    val error: Error = Error.Unkown,
 ) : Result<T>()
 
-data class Error(val status: Int, val code: Int, val message: String = "") {
+data class Error(val status: Int, val code: Int) {
     companion object {
-        var unknownServerError: Error =
-            Error(-1, -1)
+        var Unkown: Error = Error(-1, -1)
     }
 }

@@ -20,7 +20,7 @@ class UserRepository @Inject constructor(
 ) {
     suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
-            userService.loginCheck().executeOnce().toResult()
+            userService.loginCheck().toResult()
         }
         return when (result) {
             is Success -> {
@@ -47,15 +47,13 @@ class UserRepository @Inject constructor(
 
     suspend fun loginSetAuthUUID(authUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.loginSetAuthUUID(AuthUUIDReq(authUUID))
-                .executeOnce().toResult()
+            userService.loginSetAuthUUID(AuthUUIDReq(authUUID)).toResult()
         }
     }
 
     suspend fun loginWeChatCallback(state: String, code: String): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
-            userService.loginWeChatCallback(state, code)
-                .executeOnce().toResult()
+            userService.loginWeChatCallback(state, code).toResult()
         }
         return when (result) {
             is Success -> {
@@ -73,7 +71,7 @@ class UserRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             repeat(times) {
                 val result =
-                    userService.loginProcess(AuthUUIDReq(authUUID)).executeOnce().toResult()
+                    userService.loginProcess(AuthUUIDReq(authUUID)).toResult()
                 if (result is Success && result.data.token.isNotBlank()) {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.mapToUserInfo())

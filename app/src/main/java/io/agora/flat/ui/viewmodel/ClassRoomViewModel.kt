@@ -237,7 +237,7 @@ class ClassRoomViewModel @Inject constructor(
                     cont.resume(true)
                 }
                 is ErrorResult -> {
-                    cont.resumeWithException(FlatException(result.error.code, result.error.message))
+                    cont.resumeWithException(FlatException(result.error.code, ""))
                 }
             }
         }

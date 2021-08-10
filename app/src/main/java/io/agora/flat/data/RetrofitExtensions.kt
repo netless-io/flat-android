@@ -18,8 +18,8 @@
 
 package io.agora.flat.data
 
-import kotlinx.coroutines.delay
 import io.agora.flat.data.model.BaseResp
+import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.HttpException
 import retrofit2.Response
@@ -32,6 +32,26 @@ inline fun <T> Response<T>.bodyOrThrow(): T {
 
 inline fun <T> Response<T>.toException() = HttpException(this)
 
+suspend inline fun <T> Call<BaseResp<T>>.toResult(): Result<T> = try {
+    executeWithRetry(maxAttempts = 1).toResult()
+} catch (e: Exception) {
+    ErrorResult(e)
+}
+
+suspend inline fun <T> Call<BaseResp<T>>.toResultWithRetry(
+    defaultDelay: Long = 100,
+    maxAttempts: Int = 3,
+    shouldRetry: (Exception) -> Boolean = ::defaultShouldRetry,
+): Result<T> = try {
+    executeWithRetry(
+        defaultDelay = defaultDelay,
+        maxAttempts = maxAttempts,
+        shouldRetry = shouldRetry,
+    ).toResult()
+} catch (e: Exception) {
+    ErrorResult(e)
+}
+
 suspend inline fun <T> Call<T>.executeOnce(): Response<T> {
     return executeWithRetry(maxAttempts = 1)
 }
@@ -39,7 +59,7 @@ suspend inline fun <T> Call<T>.executeOnce(): Response<T> {
 suspend inline fun <T> Call<T>.executeWithRetry(
     defaultDelay: Long = 100,
     maxAttempts: Int = 3,
-    shouldRetry: (Exception) -> Boolean = ::defaultShouldRetry
+    shouldRetry: (Exception) -> Boolean = ::defaultShouldRetry,
 ): Response<T> {
     repeat(maxAttempts) { attempt ->
         var nextDelay = attempt * attempt * defaultDelay
@@ -84,13 +104,11 @@ inline fun defaultShouldRetry(exception: Exception) = when (exception) {
 
 inline fun <T> Response<BaseResp<T>>.toResult(): Result<T> = try {
     if (isSuccessful) {
-        if (bodyOrThrow().status == 0) {
-            Success(data = bodyOrThrow().data)
+        val resp = bodyOrThrow()
+        if (resp.status == 0) {
+            Success(resp.data)
         } else {
-            ErrorResult(
-                toException(),
-                Error(bodyOrThrow().status, bodyOrThrow().code ?: -1)
-            )
+            ErrorResult(toException(), Error(resp.status, resp.code ?: -1))
         }
     } else {
         ErrorResult(toException())

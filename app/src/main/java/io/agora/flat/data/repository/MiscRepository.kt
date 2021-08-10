@@ -18,13 +18,13 @@ class MiscRepository @Inject constructor(
 ) {
     suspend fun generateRtcToken(roomUUID: String): Result<PureToken> {
         return withContext(Dispatchers.IO) {
-            miscService.generateRtcToken(PureRoomReq(roomUUID)).executeOnce().toResult()
+            miscService.generateRtcToken(PureRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun generateRtmToken(page: Int): Result<PureToken> {
         return withContext(Dispatchers.IO) {
-            miscService.generateRtmToken().executeOnce().toResult()
+            miscService.generateRtmToken().toResult()
         }
     }
 }

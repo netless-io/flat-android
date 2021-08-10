@@ -2,6 +2,7 @@ package io.agora.flat.common
 
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import io.agora.flat.Constants
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
@@ -93,5 +94,10 @@ object Navigator {
     fun launchSubscribeRoomActivity(context: Context) {
         val intent = Intent(context, SubscribeRoomActivity::class.java)
         context.startActivity(intent)
+    }
+
+    // system
+    fun gotoNetworkSetting(context: Context) {
+        context.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
     }
 }

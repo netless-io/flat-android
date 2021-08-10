@@ -16,4 +16,5 @@
     <string name="replay">回放</string>
     <string name="service_agreement">服务协议</string>
     <string name="privacy_agreement">隐私协议</string>
+    <string name="network_error">网络异常，请检查网络设置</string>
 </resources>

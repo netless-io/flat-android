@@ -11,6 +11,7 @@ import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.HomeRefreshEvent
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.ObservableLoadingCounter
@@ -28,12 +29,14 @@ class HomeViewModel @Inject constructor(
     private val eventBus: EventBus,
     private val appKVCenter: AppKVCenter,
     private val cloudStorageRepository: CloudStorageRepository,
+    private val networkObserver: NetworkObserver,
 ) : ViewModel() {
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
-    private val selectedCategory = MutableStateFlow(RoomCategory.Current)
+    private val roomCategory = MutableStateFlow(RoomCategory.Current)
     private val roomList = MutableStateFlow(listOf<RoomInfo>())
-    private val roomHistoryList = MutableStateFlow(listOf<RoomInfo>())
+    private val historyList = MutableStateFlow(listOf<RoomInfo>())
     private val refreshing = ObservableLoadingCounter()
+    private val networkActive = networkObserver.observeNetworkActive()
 
     private val _state = MutableStateFlow(HomeViewState())
     val state: StateFlow<HomeViewState>
@@ -45,22 +48,29 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                selectedCategory,
+                roomCategory,
                 roomList,
-                roomHistoryList,
+                historyList,
                 refreshing.observable,
                 userInfo,
             ) { selectedCategory, roomLists, roomHistoryList, refreshing, userInfo ->
                 HomeViewState(
                     category = selectedCategory,
                     roomList = roomLists,
-                    roomHistoryList = roomHistoryList,
+                    historyList = roomHistoryList,
                     refreshing = refreshing,
                     userInfo = userInfo,
+                    networkActive = _state.value.networkActive,
                     errorMessage = null,
                 )
             }.collect {
                 _state.value = it
+            }
+        }
+
+        viewModelScope.launch {
+            networkActive.collect {
+                _state.value = _state.value.copy(networkActive = it)
             }
         }
 
@@ -74,7 +84,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onRoomCategorySelected(category: RoomCategory) {
-        selectedCategory.value = category
+        roomCategory.value = category
     }
 
     fun reloadRoomList() {
@@ -120,7 +130,7 @@ class HomeViewModel @Inject constructor(
             when (val response = roomRepository.getRoomListHistory(historyPage)) {
                 is Success -> {
                     val list = ArrayList(response.data)
-                    roomHistoryList.value = addShowDayHeadFlag(list)
+                    historyList.value = addShowDayHeadFlag(list)
                 }
                 is ErrorResult -> {
                     when (response.error.status) {
@@ -161,12 +171,14 @@ data class HomeViewState(
     val refreshing: Boolean = false,
     val category: RoomCategory = RoomCategory.Current,
     val roomList: List<RoomInfo> = listOf(),
-    val roomHistoryList: List<RoomInfo> = listOf(),
+    val historyList: List<RoomInfo> = listOf(),
     val userInfo: UserInfo = UserInfo("", "", ""),
+    val networkActive: Boolean = true,
     val errorMessage: String? = null,
 )
 
 sealed class HomeViewAction {
     object Reload : HomeViewAction()
     data class SelectCategory(val category: RoomCategory) : HomeViewAction()
+    object SetNetwork : HomeViewAction()
 }

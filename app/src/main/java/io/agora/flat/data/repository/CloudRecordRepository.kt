@@ -2,7 +2,6 @@ package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
 import io.agora.flat.data.api.CloudRecordService
-import io.agora.flat.data.executeOnce
 import io.agora.flat.data.model.*
 import io.agora.flat.data.toResult
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +20,7 @@ class CloudRecordRepository @Inject constructor(
                     roomUUID,
                     RecordAcquireReqData(RecordAcquireReqDataClientRequest(expiredHour, 0))
                 )
-            ).executeOnce().toResult()
+            ).toResult()
         }
     }
 
@@ -45,13 +44,13 @@ class CloudRecordRepository @Inject constructor(
                         )
                     )
                 )
-            ).executeOnce().toResult()
+            ).toResult()
         }
     }
 
     suspend fun queryRecordWithAgora(
         roomUUID: String,
-        resourceId: String, mode: AgoraRecordMode = AgoraRecordMode.Mix
+        resourceId: String, mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.queryRecordWithAgora(
@@ -59,7 +58,7 @@ class CloudRecordRepository @Inject constructor(
                     roomUUID,
                     AgoraRecordParams(resourceId, mode),
                 )
-            ).executeOnce().toResult()
+            ).toResult()
         }
     }
 
@@ -76,7 +75,7 @@ class CloudRecordRepository @Inject constructor(
                     AgoraRecordParams(resourceId, mode),
                     AgoraRecordUpdateLayoutData(clientRequest)
                 )
-            ).executeOnce().toResult()
+            ).toResult()
         }
     }
 
@@ -84,7 +83,7 @@ class CloudRecordRepository @Inject constructor(
         roomUUID: String,
         resourceId: String,
         sid: String,
-        mode: AgoraRecordMode = AgoraRecordMode.Mix
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordStopRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.stopRecordWithAgora(
@@ -92,13 +91,13 @@ class CloudRecordRepository @Inject constructor(
                     roomUUID,
                     AgoraRecordParams(resourceId, mode, sid),
                 )
-            ).executeOnce().toResult()
+            ).toResult()
         }
     }
 
     suspend fun getRecordInfo(roomUUID: String): Result<RecordInfo> {
         return withContext(Dispatchers.IO) {
-            cloudRecordService.getRecordInfo(PureRoomReq(roomUUID)).executeOnce().toResult()
+            cloudRecordService.getRecordInfo(PureRoomReq(roomUUID)).toResult()
         }
     }
 }

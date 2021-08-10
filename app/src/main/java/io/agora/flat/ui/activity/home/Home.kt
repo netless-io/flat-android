@@ -2,10 +2,7 @@ package io.agora.flat.ui.activity.home
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +37,7 @@ import io.agora.flat.util.FlatFormatter
 
 @Composable
 fun Home() {
+    val context = LocalContext.current
     val viewModel = viewModel(HomeViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 
@@ -47,6 +45,7 @@ fun Home() {
         when (action) {
             HomeViewAction.Reload -> viewModel.reloadRoomList()
             is HomeViewAction.SelectCategory -> viewModel.onRoomCategorySelected(action.category)
+            HomeViewAction.SetNetwork -> Navigator.gotoNetworkSetting(context)
         }
     }
 }
@@ -56,6 +55,9 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
     FlatColumnPage {
         // 顶部栏
         FlatHomeTopBar(userAvatar = viewState.userInfo.avatar)
+        if (!viewState.networkActive) FlatNetworkError {
+            actioner(HomeViewAction.SetNetwork)
+        }
         // 操作区
         TopOperations()
         // 房间列表区
@@ -69,16 +71,38 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
                     contentColor = MaterialTheme.colors.primary,
                 )
             }) {
-            HomeRoomLists(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+            HomeRoomContent(
+                modifier = MaxWidthSpread,
                 selectedHomeCategory = viewState.category,
                 onCategorySelected = { actioner(HomeViewAction.SelectCategory(it)) },
                 roomList = viewState.roomList,
-                roomHistory = viewState.roomHistoryList
+                roomHistory = viewState.historyList
             )
         }
+    }
+}
+
+@Composable
+fun FlatNetworkError(onClick: () -> Unit) {
+    Box(Modifier
+        .fillMaxWidth()
+        .height(40.dp)
+        .clickable {
+            onClick()
+        }
+        .background(FlatColorRedLight)
+        .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            stringResource(R.string.network_error),
+            Modifier.align(Alignment.CenterStart),
+            FlatColorRed
+        )
+        Image(
+            painterResource(R.drawable.ic_arrow_right_red),
+            "",
+            Modifier.align(Alignment.CenterEnd),
+        )
     }
 }
 
@@ -132,8 +156,7 @@ fun FlatHomeTopBar(userAvatar: String) {
                 val context = LocalContext.current
                 var expanded by remember { mutableStateOf(false) }
 
-                IconButton(
-                    onClick = { expanded = true }) {
+                IconButton(onClick = { expanded = true }) {
                     Image(
                         modifier = Modifier
                             .size(24.dp, 24.dp)
@@ -171,7 +194,7 @@ fun FlatHomeTopBar(userAvatar: String) {
 }
 
 @Composable
-fun HomeRoomLists(
+private fun HomeRoomContent(
     modifier: Modifier,
     selectedHomeCategory: RoomCategory,
     onCategorySelected: (RoomCategory) -> Unit,
@@ -182,25 +205,18 @@ fun HomeRoomLists(
         HomeRoomTabs(
             listOf(RoomCategory.Current, RoomCategory.History),
             selectedHomeCategory,
-            onCategorySelected = onCategorySelected,
+            onCategorySelected,
             Modifier.fillMaxWidth()
         )
 
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            when (selectedHomeCategory) {
-                RoomCategory.Current -> {
-                    RoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current)
-                }
-                RoomCategory.History -> {
-                    RoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History)
-                }
+        when (selectedHomeCategory) {
+            RoomCategory.Current -> {
+                HomeRoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current)
+            }
+            RoomCategory.History -> {
+                HomeRoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History)
             }
         }
-
     }
 }
 
@@ -213,31 +229,25 @@ private fun HomeRoomTabs(
 ) {
     val selectedIndex = categories.indexOfFirst { it == selectedCategory }
     val indicator = @Composable { tabPositions: List<TabPosition> ->
-        HomeTabIndicator(
-            Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-            FlatColorBlue
-        )
+        HomeTabIndicator(Modifier.tabIndicatorOffset(tabPositions[selectedIndex]), FlatColorBlue)
     }
 
     TabRow(
         selectedTabIndex = selectedIndex,
+        modifier = modifier,
         indicator = indicator,
-        backgroundColor = MaterialTheme.colors.surface,
-        divider = {},
-        modifier = modifier
-    ) {
+        backgroundColor = MaterialTheme.colors.surface) {
         categories.forEachIndexed { index, category ->
+            val text = when (category) {
+                RoomCategory.Current -> stringResource(R.string.home_room_list)
+                RoomCategory.History -> stringResource(R.string.home_history_record)
+            }
+
             Tab(
                 selected = index == selectedIndex,
                 onClick = { onCategorySelected(category) },
                 text = {
-                    Text(
-                        text = when (category) {
-                            RoomCategory.Current -> stringResource(R.string.home_room_list)
-                            RoomCategory.History -> stringResource(R.string.home_history_record)
-                        },
-                        style = MaterialTheme.typography.body2
-                    )
+                    Text(text = text, style = MaterialTheme.typography.body2)
                 }
             )
         }
@@ -245,7 +255,7 @@ private fun HomeRoomTabs(
 }
 
 @Composable
-fun HomeTabIndicator(
+private fun HomeTabIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onSurface,
 ) {
@@ -260,7 +270,7 @@ fun HomeTabIndicator(
 }
 
 @Composable
-fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategory) {
+private fun HomeRoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategory) {
     val context = LocalContext.current
 
     if (roomList.isEmpty()) {
@@ -272,7 +282,7 @@ fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategor
             RoomCategory.Current -> R.string.home_no_room_tip
             RoomCategory.History -> R.string.home_no_history_room_tip
         }
-        EmptyView(imgRes, message, modifier)
+        EmptyView(imgRes, message, modifier.verticalScroll(rememberScrollState()))
     } else {
         LazyColumn(modifier) {
             items(count = roomList.size, key = { index: Int ->
@@ -307,7 +317,7 @@ fun RoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategor
 }
 
 @Composable
-fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
+private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
 
     Column(modifier) {
@@ -334,8 +344,8 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 .padding(16.dp, 12.dp)
         ) {
             Text(
-                modifier = Modifier.align(Alignment.TopStart),
                 text = roomInfo.title,
+                modifier = Modifier.align(Alignment.TopStart),
                 style = typography.body1
             )
             Text(
@@ -349,7 +359,7 @@ fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
             )
         }
         Spacer(
-            modifier = Modifier
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .height(0.5.dp)
@@ -382,7 +392,7 @@ fun RoomListItemPreview() {
 @Composable
 fun HomePreview() {
     val viewState = HomeViewState(
-
+        networkActive = false
     )
     Home(viewState) {
 

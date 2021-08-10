@@ -16,87 +16,87 @@ class RoomRepository @Inject constructor(
 ) {
     suspend fun getRoomListAll(page: Int): Result<List<RoomInfo>> {
         return withContext(Dispatchers.IO) {
-            roomService.getRoomAll(page).executeOnce().toResult()
+            roomService.getRoomAll(page).toResult()
         }
     }
 
     suspend fun getRoomListHistory(page: Int): Result<List<RoomInfo>> {
         return withContext(Dispatchers.IO) {
-            roomService.getRoomHistory(page).executeOnce().toResult()
+            roomService.getRoomHistory(page).toResult()
         }
     }
 
     suspend fun getOrdinaryRoomInfo(roomUUID: String): Result<RoomDetailOrdinary> {
         return withContext(Dispatchers.IO) {
             roomService.getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun getPeriodicRoomInfo(periodicUUID: String): Result<RoomDetailPeriodic> {
         return withContext(Dispatchers.IO) {
             roomService.getPeriodicRoomInfo(RoomDetailPeriodicReq(periodicUUID = periodicUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun cancelOrdinary(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             roomService.cancelOrdinary(CancelRoomReq(roomUUID = roomUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun cancelPeriodic(periodicUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             roomService.cancelPeriodic(CancelRoomReq(periodicUUID = periodicUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun cancelPeriodicSubRoom(roomUUID: String, periodicUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             roomService.cancelPeriodicSubRoom(CancelRoomReq(roomUUID, periodicUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun joinRoom(uuid: String): Result<RoomPlayInfo> {
         return withContext(Dispatchers.IO) {
             roomService.joinRoom(JoinRoomReq(uuid))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>): Result<Map<String, RtcUser>> {
         return withContext(Dispatchers.IO) {
             roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun createOrdinary(title: String, type: RoomType): Result<RoomCreateRespData> {
         return withContext(Dispatchers.IO) {
             roomService.createOrdinary(RoomCreateReq(title, type, System.currentTimeMillis()))
-                .executeOnce().toResult()
+                .toResult()
         }
     }
 
     suspend fun startRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.startRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
+            roomService.startRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun pauseRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.pauseRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
+            roomService.pauseRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun stopRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.stopRoomClass(PureRoomReq(roomUUID)).executeOnce().toResult()
+            roomService.stopRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 }

@@ -15,10 +15,7 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.RtcProviderImpl
 import io.agora.flat.di.impl.RtmProviderImpl
-import io.agora.flat.di.interfaces.EventBus
-import io.agora.flat.di.interfaces.RtcEngineProvider
-import io.agora.flat.di.interfaces.RtmEngineProvider
-import io.agora.flat.di.interfaces.StartupInitializer
+import io.agora.flat.di.interfaces.*
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -73,6 +70,12 @@ class AppModule {
         return EventBus()
     }
 
+    @Singleton
+    @Provides
+    fun providerNetworkObserver(): NetworkObserver {
+        return FlatNetworkObserver()
+    }
+
     /**
      * StartupInitializer Set
      */
@@ -86,6 +89,12 @@ class AppModule {
     @IntoSet
     fun provideRtmInitializer(rtmEngineProvider: RtmEngineProvider): StartupInitializer {
         return rtmEngineProvider as StartupInitializer
+    }
+
+    @Provides
+    @IntoSet
+    fun providerNetworkObserverInitializer(networkObserver: NetworkObserver): StartupInitializer {
+        return networkObserver as StartupInitializer
     }
 
     @Singleton
