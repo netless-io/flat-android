@@ -72,14 +72,10 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
     }
 
     FlatColumnPage {
-        CloseTopAppBar(
-            title = stringResource(R.string.title_join_room),
-            onClose = { actioner(JoinRoomAction.Close) })
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp)
-        ) {
+        CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
+        Column(Modifier
+            .weight(1f)
+            .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
             Text(stringResource(R.string.room_number))
             FlatSmallVerticalSpacer()

@@ -106,4 +106,11 @@
     <string name="service_agreement">服务协议</string>
     <string name="privacy_agreement">隐私协议</string>
     <string name="network_error">网络异常，请检查网络设置</string>
+    <string name="copy_success">复制成功</string>
+
+    <string name="invite_title_format" translatable="false">%1$s 邀请你加入 Flat 房间</string>
+    <string name="invite_room_name_format" translatable="false">房间主题：%1$s</string>
+    <string name="invite_room_number_format" translatable="false">房间号：%1$s</string>
+    <string name="invite_begin_time_format" translatable="false">开始时间：%1$s</string>
+    <string name="invite_join_link_format" translatable="false">加入链接：%1$s</string>
 </resources>

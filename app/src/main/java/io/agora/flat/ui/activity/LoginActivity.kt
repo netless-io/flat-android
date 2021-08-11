@@ -54,17 +54,15 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            FlatPage {
-                LoginContent { action ->
-                    when (action) {
-                        LoginUIAction.WeChatLogin -> {
-                            currentLogin = LOGIN_WECHAT
-                            loginAfterSetAuthUUID(::callWeChatLogin)
-                        }
-                        LoginUIAction.GithubLogin -> {
-                            currentLogin = LOGIN_GITHUB
-                            loginAfterSetAuthUUID(::callGithubLogin)
-                        }
+            LoginContent { action ->
+                when (action) {
+                    LoginUIAction.WeChatLogin -> {
+                        currentLogin = LOGIN_WECHAT
+                        loginAfterSetAuthUUID(::callWeChatLogin)
+                    }
+                    LoginUIAction.GithubLogin -> {
+                        currentLogin = LOGIN_GITHUB
+                        loginAfterSetAuthUUID(::callGithubLogin)
                     }
                 }
             }
@@ -96,7 +94,7 @@ class LoginActivity : ComponentActivity() {
                     return
                 }
                 lifecycleScope.launch {
-                    val code = intent.getStringExtra(Constants.Login.KEY_LOGIN_RESP) ?: "";
+                    val code = intent.getStringExtra(Constants.Login.KEY_LOGIN_RESP) ?: ""
                     if (viewModel.loginWeChatCallback(code)) {
                         loginSuccess()
                     } else {
@@ -123,7 +121,7 @@ class LoginActivity : ComponentActivity() {
     private fun loginSuccess() {
         lifecycleScope.launch {
             showToast(R.string.login_success_and_jump)
-            delay(2000);
+            delay(2000)
             Navigator.launchHomeActivity(this@LoginActivity)
         }
     }
@@ -163,27 +161,26 @@ class LoginActivity : ComponentActivity() {
 private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
     val typography = MaterialTheme.typography
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(120.dp))
-        Image(painterResource(R.drawable.img_login_logo), null)
-        Text("Flat", Modifier.offset(y = (-16).dp), style = typography.h5)
-        Text(text = stringResource(id = R.string.login_page_label_1), style = FlatCommonTextStyle)
-        Spacer(modifier = Modifier.weight(1f))
-        Row {
-            LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
-                Image(painterResource(R.drawable.ic_wechat_login), contentDescription = null)
+    FlatPage {
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.height(120.dp))
+            Image(painterResource(R.drawable.img_login_logo), null)
+            Text("Flat", Modifier.offset(y = (-16).dp), style = typography.h5)
+            Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+            Spacer(Modifier.weight(1f))
+            Row {
+                LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
+                    Image(painterResource(R.drawable.ic_wechat_login), "")
+                }
+                Spacer(Modifier.width(48.dp))
+                LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
+                    Image(painterResource(R.drawable.ic_github_login), "")
+                }
             }
-            Spacer(modifier = Modifier.width(48.dp))
-            LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
-                Image(painterResource(R.drawable.ic_github_login), contentDescription = null)
+            Spacer(modifier = Modifier.height(100.dp))
+            Box(Modifier.padding(vertical = 24.dp)) {
+                Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
             }
-        }
-        Spacer(modifier = Modifier.height(100.dp))
-        Box(modifier = Modifier.padding(vertical = 24.dp)) {
-            Text(text = stringResource(id = R.string.login_page_label_2), style = FlatCommonTextStyle)
         }
     }
 }
@@ -193,16 +190,13 @@ private fun LoginImageButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = rememberRipple(bounded = false, radius = 48.dp),
-            onClick = onClick,
-        ),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier.clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = rememberRipple(bounded = false, radius = 48.dp),
+        onClick = onClick,
+    ), Alignment.Center) {
         val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
         CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
     }

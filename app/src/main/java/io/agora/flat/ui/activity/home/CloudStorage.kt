@@ -37,6 +37,8 @@ import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.contentFileInfo
+import io.agora.flat.util.fileSuffix
+import java.util.*
 
 @Composable
 fun CloudStorage() {
@@ -49,7 +51,7 @@ fun CloudStorage() {
             is CloudStorageUIAction.Delete -> viewModel.deleteChecked()
             is CloudStorageUIAction.Reload -> viewModel.reloadFileList()
             is CloudStorageUIAction.UploadFile -> viewModel.uploadFile(action)
-            else -> ""
+            else -> {; }
         }
     }
 }
@@ -88,10 +90,10 @@ private fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Uni
     var showPick by remember { mutableStateOf(false) }
 
     FloatingActionButton(
+        onClick = { showPick = true },
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .padding(16.dp),
-        onClick = { showPick = true },
+            .padding(16.dp)
     ) {
         Icon(Icons.Outlined.Add, contentDescription = null, tint = FlatColorWhite)
     }
@@ -128,16 +130,15 @@ private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -
                 indication = null
             ) { onCoverClick() }) {
         }
-        Box(Modifier
+        Box(MaxWidth
             .height(160.dp * aniValue)
-            .fillMaxWidth()
             .background(FlatColorWhite)) {
             Box(Modifier
                 .align(Alignment.TopCenter)
                 .clickable { onCoverClick() }) {
                 Image(
-                    painter = painterResource(R.drawable.ic_record_arrow_down),
-                    contentDescription = "",
+                    painterResource(R.drawable.ic_record_arrow_down),
+                    "",
                     Modifier.padding(4.dp)
                 )
             }
@@ -182,12 +183,14 @@ internal fun CloudStorageContent(
         Row(Modifier
             .fillMaxWidth()
             .background(FlatColorBackground), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
-                color = FlatColorTextSecondary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp))
+            Text(
+                stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
+                Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                FlatColorTextSecondary,
+            )
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = { actioner(CloudStorageUIAction.Delete) }) {
-                Text(text = stringResource(id = R.string.delete), color = Color.Red)
+                Text(stringResource(R.string.delete), color = Color.Red)
             }
         }
         LazyColumn(Modifier.weight(1f)) {
@@ -204,7 +207,7 @@ internal fun CloudStorageContent(
 @Composable
 private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolean) -> Unit)) {
     // "jpg", "jpeg", "png", "webp","doc", "docx", "ppt", "pptx", "pdf"
-    val imageId = when (file.fileURL.substringAfterLast('.').toLowerCase()) {
+    val imageId = when (file.fileURL.fileSuffix()) {
         "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_storage_image
         "ppt", "pptx" -> R.drawable.ic_cloud_storage_ppt
         "pdf" -> R.drawable.ic_cloud_storage_pdf
@@ -216,31 +219,30 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
         Row(MaxWidthSpread, verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(12.dp))
             Box {
-                Image(
-                    painterResource(imageId),
-                    contentDescription = ""
-                )
-                if (file.convertStep == FileConvertStep.Converting) {
-                    ConvertingImage(Modifier.align(Alignment.BottomEnd))
-                } else if (file.convertStep == FileConvertStep.Failed) {
-                    Icon(painter = painterResource(R.drawable.ic_cloud_storage_convert_failure),
-                        contentDescription = "",
+                Image(painterResource(imageId), contentDescription = "")
+                when (file.convertStep) {
+                    FileConvertStep.Converting -> ConvertingImage(Modifier.align(Alignment.BottomEnd))
+                    FileConvertStep.Failed -> Icon(
+                        painterResource(R.drawable.ic_cloud_storage_convert_failure),
+                        "",
                         Modifier.align(Alignment.BottomEnd),
-                        tint = Color.Unspecified)
+                        Color.Unspecified,
+                    )
+                    else -> {; }
                 }
             }
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
-                Text(text = file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(modifier = Modifier.height(4.dp))
+                Text(file.filename, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(4.dp))
                 Row {
-                    Text(text = FlatFormatter.dateDash(file.createAt))
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(text = FlatFormatter.size(file.fileSize.toLong()))
+                    Text(FlatFormatter.dateDash(file.createAt))
+                    Spacer(Modifier.width(16.dp))
+                    Text(FlatFormatter.size(file.fileSize.toLong()))
                 }
             }
             Checkbox(checked = file.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(Modifier.width(12.dp))
         }
         Divider(modifier = Modifier.padding(start = 52.dp, end = 12.dp), thickness = 1.dp, color = FlatColorDivider)
     }

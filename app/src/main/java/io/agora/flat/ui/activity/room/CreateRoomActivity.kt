@@ -40,7 +40,7 @@ class CreateRoomActivity : ComponentActivity() {
             val viewModel: CreateRoomViewModel = viewModel()
             val viewState by viewModel.state.collectAsState()
 
-            CreateRoomPage(viewState) { action ->
+            CreateRoomContent(viewState) { action ->
                 when (action) {
                     CreateRoomAction.Close -> finish()
                     is CreateRoomAction.JoinRoom -> {
@@ -59,8 +59,8 @@ class CreateRoomActivity : ComponentActivity() {
 }
 
 @Composable
-private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
-    var context = LocalContext.current
+private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
+    val context = LocalContext.current
     var title by remember {
         mutableStateOf(
             context.getString(
@@ -111,7 +111,6 @@ private fun CreateRoomPage(viewState: ViewState, actioner: (CreateRoomAction) ->
                 Text(stringResource(id = R.string.open_video))
             }
             Spacer(Modifier.height(32.dp))
-            // TODO Loading
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -193,7 +192,7 @@ private fun TypeItem(
 @Composable
 @Preview
 private fun CreateRoomPagePreview() {
-    CreateRoomPage(ViewState()) {}
+    CreateRoomContent(ViewState()) {}
 }
 
 internal sealed class CreateRoomAction {

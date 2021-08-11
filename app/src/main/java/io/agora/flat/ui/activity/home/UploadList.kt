@@ -36,6 +36,7 @@ fun UploadList() {
         when (action) {
             is CloudStorageUIAction.UploadRetry -> viewModel.retryUpload(action.fileUUID)
             is CloudStorageUIAction.UploadDelete -> viewModel.deleteUpload(action.fileUUID)
+            else -> {; }
         }
     }
 }

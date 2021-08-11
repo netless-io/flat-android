@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
@@ -292,33 +293,30 @@ class ToolComponent(
 
     private fun showInviteDialog() {
         val state = viewModel.state.value
-        val inviteTitle = "${state.currentUser.name} 邀请你加入 Flat 房间"
-        val roomTime = "${FlatFormatter.date(state.beginTime)} ${
-            FlatFormatter.timeDuring(
-                state.beginTime,
-                state.endTime
-            )
-        }"
+        val inviteTitle = activity.getString(R.string.invite_title_format, state.currentUser.name)
+        val roomTime = "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
+        val inviteLink = Constants.BASE_INVITE_URL + "/join/" + state.roomUUID
 
         val copyText = """
-                            |$inviteTitle
-                            |房间主题：${state.title}
-                            |开始时间：${roomTime}
-                            |房间号：${state.roomUUID}
-                            |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
-                        """.trimMargin()
+            |${activity.getString(R.string.invite_title_format, state.currentUser.name)}
+            |${activity.getString(R.string.invite_room_name_format, state.title)}
+            |${activity.getString(R.string.invite_begin_time_format, roomTime)}
+            |${activity.getString(R.string.invite_room_number_format, state.roomUUID)}
+            |${activity.getString(R.string.invite_join_link_format, inviteLink)}
+            """.trimMargin()
 
-        val dialog = InviteDialog()
-        dialog.arguments = Bundle().apply {
-            putString(InviteDialog.INVITE_TITLE, inviteTitle)
-            putString(InviteDialog.ROOM_TITLE, state.title)
-            putString(InviteDialog.ROOM_NUMBER, state.roomUUID.substringAfterLast("-"))
-            putString(InviteDialog.ROOM_TIME, roomTime)
+        val dialog = InviteDialog().apply {
+            arguments = Bundle().apply {
+                putString(InviteDialog.INVITE_TITLE, inviteTitle)
+                putString(InviteDialog.ROOM_TITLE, state.title)
+                putString(InviteDialog.ROOM_NUMBER, state.roomUUID.substringAfterLast("-"))
+                putString(InviteDialog.ROOM_TIME, roomTime)
+            }
         }
         dialog.setListener(object : InviteDialog.Listener {
             override fun onCopy() {
                 viewModel.onCopyText(copyText)
-                activity.showToast("复制成功")
+                activity.showToast(R.string.copy_success)
             }
 
             override fun onHide() {

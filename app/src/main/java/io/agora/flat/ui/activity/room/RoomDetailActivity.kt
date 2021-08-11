@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.rememberAndroidClipboardController
@@ -435,9 +436,20 @@ private fun Operations(
 }
 
 @Composable
-private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo, onCopy: (String) -> Unit) {
+private fun InviteDialog(openDialog: MutableState<Boolean>, room: UIRoomInfo, onCopy: (String) -> Unit) {
     val viewModel: UserViewModel = viewModel()
     val username = viewModel.userInfo.value!!.name
+    val timeDuring = "${FlatFormatter.date(room.beginTime)} ${FlatFormatter.timeDuring(room.beginTime, room.endTime)}"
+    val inviteLink = Constants.BASE_INVITE_URL + "/join/" + room.roomUUID
+
+    val context = LocalContext.current
+    val copyText = """
+        |${context.getString(R.string.invite_title_format, username)}
+        |${context.getString(R.string.invite_room_name_format, room.title)}
+        |${context.getString(R.string.invite_begin_time_format, timeDuring)}
+        |${context.getString(R.string.invite_room_number_format, room.roomUUID)}
+        |${context.getString(R.string.invite_join_link_format, inviteLink)}
+        """.trimMargin()
 
     Dialog(onDismissRequest = { openDialog.value = false }) {
         Surface(
@@ -445,31 +457,18 @@ private fun InviteDialog(openDialog: MutableState<Boolean>, roomInfo: UIRoomInfo
             color = MaterialTheme.colors.surface,
             contentColor = contentColorFor(MaterialTheme.colors.surface)
         ) {
-            val timeDuring = "${FlatFormatter.date(roomInfo.beginTime)} ${
-                FlatFormatter.timeDuring(
-                    roomInfo.beginTime,
-                    roomInfo.endTime
-                )
-            }"
-            val copyText = """
-                            |$username 邀请你加入 Flat 房间
-                            |房间主题：${roomInfo.title}
-                            |开始时间：${timeDuring}
-                            |房间号：${roomInfo.roomUUID}
-                            |打开（没有安装的话请先下载并安装）并登录 Flat，点击加入房间，输入房间号即可加入和预约
-                        """.trimMargin()
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
                 Text("$username 邀请您参加 Flat 房间")
                 FlatLargeVerticalSpacer()
                 Box(Modifier.fillMaxWidth()) {
                     Text("房间主题", Modifier.align(Alignment.TopStart))
-                    Text(roomInfo.title, Modifier.align(Alignment.TopEnd))
+                    Text(room.title, Modifier.align(Alignment.TopEnd))
                 }
                 FlatNormalVerticalSpacer()
                 Box(Modifier.fillMaxWidth()) {
                     Text("房间号", Modifier.align(Alignment.TopStart))
                     Text(
-                        roomInfo.roomUUID.substringAfterLast("-"),
+                        room.roomUUID.substringAfterLast("-"),
                         Modifier.align(Alignment.TopEnd)
                     )
                 }

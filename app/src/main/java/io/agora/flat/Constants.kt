@@ -9,6 +9,8 @@ class Constants {
         const val AGORA_APP_ID = "931b86d6781e49a2a255db4ce6e8e804"
 
         const val OSS_ACCESS_KEY_ID = "LTAI5t9Gb6tzQzzLmB6cTVf7"
+
+        const val BASE_INVITE_URL = "https://flat-web.whiteboard.agora.io"
     }
 
     object IntentKey {

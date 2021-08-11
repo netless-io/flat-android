@@ -9,4 +9,6 @@ data class RoomCreateReq constructor(
     val beginTime: Long,
     // 如果不传，则默认是 beginTime 后的一个小时)
     val endTime: Long? = beginTime + 3600_000,
+    // 区域标记
+    val region: String = "cn-hz",
 )

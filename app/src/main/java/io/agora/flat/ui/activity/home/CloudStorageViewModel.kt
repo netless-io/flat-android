@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.home
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.herewhite.sdk.ConverterCallbacks
@@ -11,15 +10,15 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.common.FlatException
 import io.agora.flat.common.upload.*
-import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.CloudStorageUploadStartResp
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.repository.CloudStorageRepository
-import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.util.ObservableLoadingCounter
+import io.agora.flat.util.fileSuffix
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,8 +33,6 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CloudStorageViewModel @Inject constructor(
-    private val roomRepository: RoomRepository,
-    private val appKVCenter: AppKVCenter,
     private val cloudStorageRepository: CloudStorageRepository,
 ) : ViewModel() {
     companion object {
@@ -85,7 +82,7 @@ class CloudStorageViewModel @Inject constructor(
                     files.value = resp.data.files.reversed().map {
                         CloudStorageUIFile(
                             fileUUID = it.fileUUID,
-                            fileName = it.fileName,
+                            filename = it.fileName,
                             fileSize = it.fileSize,
                             fileURL = it.fileURL,
                             convertStep = it.convertStep,
@@ -130,7 +127,7 @@ class CloudStorageViewModel @Inject constructor(
             if (resp is Success) {
                 result = resp.data
             } else if (resp is ErrorResult) {
-                if (resp.error.code == 700000) {
+                if (resp.error.code == FlatException.Web_UploadConcurrentLimit) {
                     cloudStorageRepository.cancel()
                     val resp2 = cloudStorageRepository.updateStart(action.filename, action.size)
                     if (resp2 is Success) {
@@ -155,7 +152,7 @@ class CloudStorageViewModel @Inject constructor(
                 override fun onEvent(event: UploadEvent) {
                     updateUploadFiles(event)
                     if (event is UploadEvent.UploadStateEvent && event.uploadState == UploadState.Success) {
-                        handleUploadSuccess(request.fileUUID)
+                        handleUploadSuccess(request.fileUUID, action.filename, action.size)
                     }
                 }
             })
@@ -183,43 +180,56 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
-    private fun handleUploadSuccess(fileUUID: String) {
+    private fun handleUploadSuccess(fileUUID: String, filename: String, size: Long) {
         viewModelScope.launch {
             val resp = cloudStorageRepository.updateFinish(fileUUID)
             if (resp is Success) {
                 delayRemoveSuccess(fileUUID)
-                startConvert(fileUUID)
+                when (filename.fileSuffix()) {
+                    "ppt", "pptx" -> startConvert(fileUUID, true)
+                    "pdf" -> startConvert(fileUUID, false)
+                    else -> {; }
+                }
+
+                files.value = files.value.toMutableList().apply {
+                    add(0, CloudStorageUIFile(
+                        fileUUID = fileUUID,
+                        filename = filename,
+                        fileSize = size,
+                        fileURL = filename,
+                        createAt = System.currentTimeMillis()
+                    ))
+                }
+                totalUsage.value = totalUsage.value + size
             }
         }
     }
 
-    private fun startConvert(fileUUID: String) {
+    private fun startConvert(fileUUID: String, dynamic: Boolean) {
         viewModelScope.launch {
             val resp = cloudStorageRepository.convertStart(fileUUID)
             if (resp is Success) {
-                var converterV5 = ConverterV5.Builder().apply {
-                    // TODO
+                val converterV5 = ConverterV5.Builder().apply {
                     setResource("")
-                    setType(ConvertType.Dynamic)
+                    setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
                     setTaskToken(resp.data.taskToken)
                     setTaskUuid(resp.data.taskUUID)
                     setCallback(object : ConverterCallbacks {
-                        override fun onProgress(progress: Double?, convertInfo: ConversionInfo?) {
-                            Log.d("Aderan", "onProgress $progress")
+                        override fun onProgress(progress: Double, convertInfo: ConversionInfo) {
                         }
 
-                        override fun onFinish(ppt: ConvertedFiles?, convertInfo: ConversionInfo?) {
-                            Log.d("Aderan", "onFinish")
+                        override fun onFinish(ppt: ConvertedFiles?, convertInfo: ConversionInfo) {
                             finishConvert(fileUUID, true)
                         }
 
-                        override fun onFailure(e: ConvertException?) {
-                            Log.w("Aderan", "onFailure $e")
+                        override fun onFailure(e: ConvertException) {
                             finishConvert(fileUUID, false)
                         }
                     })
                 }.build()
                 converterV5.startConvertTask()
+
+                updateConvertStep(fileUUID, FileConvertStep.Converting)
             }
         }
     }
@@ -228,13 +238,18 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             val resp = cloudStorageRepository.convertFinish(fileUUID)
             if (resp is Success) {
-                files.value.indexOfFirst { fileUUID == it.fileUUID }.let { index ->
-                    if (index < 0) return@launch
-                    val convertStep = if (success) FileConvertStep.Done else FileConvertStep.Failed
-                    val changed = files.value[index].copy(convertStep = convertStep)
-                    files.value = files.value.toMutableList().apply { set(index, changed) }
-                }
+                updateConvertStep(fileUUID, if (success) FileConvertStep.Done else FileConvertStep.Failed)
+            } else {
+                updateConvertStep(fileUUID, FileConvertStep.Failed)
             }
+        }
+    }
+
+    private fun updateConvertStep(fileUUID: String, convertStep: FileConvertStep) {
+        files.value.indexOfFirst { fileUUID == it.fileUUID }.let { index ->
+            if (index < 0) return
+            val changed = files.value[index].copy(convertStep = convertStep)
+            files.value = files.value.toMutableList().apply { set(index, changed) }
         }
     }
 
@@ -261,8 +276,8 @@ class CloudStorageViewModel @Inject constructor(
 
 data class CloudStorageUIFile(
     val fileUUID: String,
-    val fileName: String,
-    val fileSize: Int = 0,
+    val filename: String,
+    val fileSize: Long = 0,
     val fileURL: String = "",
     val convertStep: FileConvertStep = FileConvertStep.None,
     val taskUUID: String? = null,

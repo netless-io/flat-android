@@ -8,7 +8,7 @@ data class CloudStorageFileListResp constructor(
 data class CloudStorageFile constructor(
     val fileUUID: String,
     val fileName: String,
-    val fileSize: Int,
+    val fileSize: Long,
     val fileURL: String,
     val convertStep: FileConvertStep,
     val taskUUID: String,

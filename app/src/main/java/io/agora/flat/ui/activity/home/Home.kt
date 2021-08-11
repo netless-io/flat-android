@@ -3,11 +3,13 @@ package io.agora.flat.ui.activity.home
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -127,19 +129,18 @@ private fun TopOperations() {
 
 @Composable
 private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, onClick: () -> Unit) {
-    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
-        Column(
-            modifier = Modifier
-                .padding(top = 16.dp, bottom = 24.dp)
-                .clickable(onClick = onClick),
+    Box(Modifier.weight(1f), Alignment.TopCenter) {
+        Column(Modifier
+            .padding(top = 16.dp, bottom = 24.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 48.dp),
+                onClick = onClick,
+            ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Image(painterResource(id), null)
+            Spacer(Modifier.height(8.dp))
             Text(stringResource(tip), style = FlatSmallTextStyle)
         }
     }
@@ -158,12 +159,12 @@ fun FlatHomeTopBar(userAvatar: String) {
 
                 IconButton(onClick = { expanded = true }) {
                     Image(
+                        painter = rememberCoilPainter(userAvatar),
+                        contentDescription = null,
                         modifier = Modifier
                             .size(24.dp, 24.dp)
                             .clip(shape = RoundedCornerShape(12.dp)),
-                        painter = rememberCoilPainter(userAvatar),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null
+                        contentScale = ContentScale.Crop
                     )
                 }
                 DropdownMenu(
@@ -177,7 +178,7 @@ fun FlatHomeTopBar(userAvatar: String) {
                     }) {
                         Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("我的资料", Modifier.width(100.dp))
+                        Text(stringResource(R.string.title_my_profile), Modifier.width(100.dp))
                     }
                     DropdownMenuItem(onClick = {
                         Navigator.launchMyProfileActivity(context)
@@ -185,7 +186,7 @@ fun FlatHomeTopBar(userAvatar: String) {
                     }) {
                         Image(painterResource(R.drawable.ic_user_profile_aboutus), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("个人信息", Modifier.width(100.dp))
+                        Text(stringResource(R.string.title_user_info), Modifier.width(100.dp))
                     }
                 }
             }
@@ -259,14 +260,9 @@ private fun HomeTabIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onSurface,
 ) {
-    Spacer(
-        modifier
-            .height(2.dp)
-            .background(
-                color,
-                RoundedCornerShape(topStartPercent = 100, topEndPercent = 100),
-            )
-    )
+    Spacer(modifier
+        .height(2.dp)
+        .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100)))
 }
 
 @Composable
@@ -301,15 +297,10 @@ private fun HomeRoomList(modifier: Modifier, roomList: List<RoomInfo>, category:
                     })
             }
             item {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp), Alignment.TopCenter
-                ) {
-                    Text(
-                        text = stringResource(R.string.loaded_all),
-                        style = FlatSmallTipTextStyle
-                    )
+                Box(Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp), Alignment.TopCenter) {
+                    Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
                 }
             }
         }
@@ -322,10 +313,8 @@ private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
 
     Column(modifier) {
         if (roomInfo.showDayHead) {
-            Row(
-                Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_home_calendar),
                     contentDescription = null
@@ -337,20 +326,18 @@ private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                 )
             }
         }
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(72.dp)
-                .padding(16.dp, 12.dp)
+        Box(MaxWidth
+            .height(72.dp)
+            .padding(16.dp, 12.dp)
         ) {
             Text(
-                text = roomInfo.title,
-                modifier = Modifier.align(Alignment.TopStart),
+                roomInfo.title,
+                Modifier.align(Alignment.TopStart),
                 style = typography.body1
             )
             Text(
-                modifier = Modifier.align(Alignment.BottomStart),
-                text = "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
+                "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
+                Modifier.align(Alignment.BottomStart),
                 style = typography.body2
             )
             FlatRoomStatusText(
