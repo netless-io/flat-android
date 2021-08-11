@@ -5,5 +5,5 @@ package io.agora.flat.data.model
  */
 data class RoomDetailPeriodic constructor(
     val periodic: RoomPeriodic,
-    val rooms: ArrayList<RoomInfo>
+    val rooms: ArrayList<RoomInfo>,
 )

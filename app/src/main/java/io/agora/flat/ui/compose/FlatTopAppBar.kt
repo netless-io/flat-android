@@ -52,7 +52,7 @@ fun FlatTopAppBar(
 fun BackTopAppBar(
     title: String,
     onBackPressed: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
         title = {
@@ -71,7 +71,7 @@ fun BackTopAppBar(
 fun CloseTopAppBar(
     title: String,
     onClose: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
         title = {

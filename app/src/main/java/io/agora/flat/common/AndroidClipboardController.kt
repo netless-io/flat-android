@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun rememberAndroidClipboardController(
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
 ): AndroidClipboardController = remember(context) {
     AndroidClipboardController(context)
 }

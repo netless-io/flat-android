@@ -34,7 +34,7 @@ import java.util.*
 class WhiteboardComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    private val scenePreview: FrameLayout
+    private val scenePreview: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName

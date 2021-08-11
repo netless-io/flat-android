@@ -16,10 +16,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.agora.flat.R
-import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.FeedbackViewModel
 
 class FeedbackActivity : ComponentActivity() {
@@ -55,7 +54,9 @@ class FeedbackActivity : ComponentActivity() {
                     colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
                     shape = MaterialTheme.shapes.small,
                     onClick = { viewModel.uploadFeedback(text) }) {
-                    Text(text = stringResource(id = R.string.commit), style = FlatCommonTextStyle, color = FlatColorWhite)
+                    Text(text = stringResource(id = R.string.commit),
+                        style = FlatCommonTextStyle,
+                        color = FlatColorWhite)
                 }
             }
         }

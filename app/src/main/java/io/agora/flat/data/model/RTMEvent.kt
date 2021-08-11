@@ -82,7 +82,7 @@ data class RTMUserState(
 
 data class AcceptRaiseHandValue(
     val userUUID: String,
-    val accept: Boolean
+    val accept: Boolean,
 )
 
 data class SpeakItem(
@@ -93,7 +93,7 @@ data class SpeakItem(
 data class DeviceStateValue(
     val userUUID: String,
     val camera: Boolean,
-    val mic: Boolean
+    val mic: Boolean,
 )
 
 data class RequestChannelStatusValue(
@@ -101,7 +101,7 @@ data class RequestChannelStatusValue(
     /** these users should response */
     val userUUIDs: List<String>,
     /** also inform others about current user states */
-    val user: RTMUserState
+    val user: RTMUserState,
 )
 
 data class ChannelStatusValue(

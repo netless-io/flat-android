@@ -8,7 +8,7 @@ class PaddingItemDecoration(
     private val left: Int = 0,
     private val top: Int = 0,
     private val right: Int = 0,
-    private val bottom: Int = 0
+    private val bottom: Int = 0,
 ) : RecyclerView.ItemDecoration() {
 
     constructor(horizontal: Int = 0, vertical: Int = 0) : this(

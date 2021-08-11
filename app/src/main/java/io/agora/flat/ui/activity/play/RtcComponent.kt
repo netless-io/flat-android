@@ -77,8 +77,7 @@ class RtcComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.videoUsers.collect {
-                users ->
+            viewModel.videoUsers.collect { users ->
                 Log.d(TAG, "currentUsersMap $users")
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示

@@ -10,7 +10,7 @@ import android.view.View
 class StrokeSeeker @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
     private var onStrokeChangedListener: OnStrokeChangedListener? = null
 

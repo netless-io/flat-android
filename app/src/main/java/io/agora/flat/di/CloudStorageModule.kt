@@ -19,7 +19,7 @@ object CloudStorageModule {
     @Singleton
     fun provideCloudStorageService(
         @NetworkModule.NormalOkHttpClient client: OkHttpClient,
-        appEnv: AppEnv
+        appEnv: AppEnv,
     ): CloudStorageService {
         return Retrofit.Builder()
             .baseUrl(appEnv.flatServiceUrl)

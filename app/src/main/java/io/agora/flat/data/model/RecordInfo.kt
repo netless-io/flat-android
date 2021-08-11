@@ -7,7 +7,7 @@ data class RecordInfo constructor(
     val whiteboardRoomToken: String,
     val whiteboardRoomUUID: String,
     val rtmToken: String,
-    val recordInfo: List<RecordItem>
+    val recordInfo: List<RecordItem>,
 )
 
 data class RecordItem constructor(

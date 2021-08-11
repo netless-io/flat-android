@@ -20,7 +20,7 @@ fun FlatPrimaryTextField(
     onValueChange: (String) -> Unit,
     placeholderValue: String = "",
     onFocusChanged: (FocusState) -> Unit = {},
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     OutlinedTextField(
         value = value,

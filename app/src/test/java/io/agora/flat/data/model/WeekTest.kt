@@ -1,7 +1,6 @@
 package io.agora.flat.data.model
 
 import com.google.gson.Gson
-import io.agora.flat.data.model.Week
 import junit.framework.TestCase
 import org.junit.Assert.assertArrayEquals
 

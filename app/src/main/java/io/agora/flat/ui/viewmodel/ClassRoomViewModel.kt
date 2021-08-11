@@ -552,9 +552,9 @@ class ClassRoomViewModel @Inject constructor(
         return _videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
             LayoutConfig(
                 uid = user.rtcUID.toString(),
-                x_axis = 12f  / 120,
+                x_axis = 12f / 120,
                 y_axis = (8f + index * 80) / 360,
-                width = 96f  / 120,
+                width = 96f / 120,
                 height = 72f / 360,
             )
         }
@@ -904,7 +904,7 @@ sealed class ClassRoomEvent {
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
-    data class ShowDot(val id:Int) :ClassRoomEvent()
+    data class ShowDot(val id: Int) : ClassRoomEvent()
 }
 
 sealed class RTMMessage {

@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName
 data class AgoraRecordParams constructor(
     val resourceid: String,
     val mode: AgoraRecordMode,
-    val sid: String? = null
+    val sid: String? = null,
 )
 
 enum class AgoraRecordMode {

@@ -3,13 +3,11 @@ package io.agora.flat.util
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Resources
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
-import androidx.core.content.getSystemService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

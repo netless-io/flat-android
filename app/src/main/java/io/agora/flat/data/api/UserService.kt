@@ -11,12 +11,12 @@ interface UserService {
 
     @POST("v1/login")
     fun loginCheck(
-        @Body req: LoginCheckReq = LoginCheckReq()
+        @Body req: LoginCheckReq = LoginCheckReq(),
     ): Call<BaseResp<UserInfo>>
 
     @POST("v1/login/set-auth-uuid")
     fun loginSetAuthUUID(
-        @Body req: AuthUUIDReq
+        @Body req: AuthUUIDReq,
     ): Call<BaseResp<RespNoData>>
 
     @GET("v1/login/weChat/mobile/callback")
@@ -27,6 +27,6 @@ interface UserService {
 
     @POST("v1/login/process")
     fun loginProcess(
-        @Body req: AuthUUIDReq
+        @Body req: AuthUUIDReq,
     ): Call<BaseResp<UserInfoWithToken>>
 }

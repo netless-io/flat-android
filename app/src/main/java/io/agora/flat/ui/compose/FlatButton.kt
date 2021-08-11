@@ -14,8 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.ui.theme.*
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.Shapes
 
 @Composable
 fun FlatPrimaryTextButton(

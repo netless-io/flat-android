@@ -20,7 +20,7 @@ import io.agora.flat.ui.viewmodel.RtcVideoController
  */
 class UserVideoAdapter(
     private val dataSet: MutableList<RtcUser>,
-    private val rtcVideoController: RtcVideoController
+    private val rtcVideoController: RtcVideoController,
 ) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
     init {

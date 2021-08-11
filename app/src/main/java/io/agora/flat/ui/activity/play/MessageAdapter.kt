@@ -8,8 +8,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.ui.viewmodel.ChatMessage
-import io.agora.flat.ui.viewmodel.RTMMessage
 import io.agora.flat.ui.viewmodel.NoticeMessage
+import io.agora.flat.ui.viewmodel.RTMMessage
 
 /**
  * 消息列表适配器

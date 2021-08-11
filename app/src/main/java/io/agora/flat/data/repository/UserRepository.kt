@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService,
-    @AppModule.GlobalData private val appKVCenter: AppKVCenter
+    @AppModule.GlobalData private val appKVCenter: AppKVCenter,
 ) {
     suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {

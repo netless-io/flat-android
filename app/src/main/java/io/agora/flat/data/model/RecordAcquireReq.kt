@@ -6,7 +6,7 @@ data class RecordAcquireReq constructor(
 )
 
 data class RecordAcquireReqData constructor(
-    val clientRequest: RecordAcquireReqDataClientRequest
+    val clientRequest: RecordAcquireReqDataClientRequest,
 )
 
 data class RecordAcquireReqDataClientRequest(

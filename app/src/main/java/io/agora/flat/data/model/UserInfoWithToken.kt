@@ -6,5 +6,5 @@ data class UserInfoWithToken(
     val name: String,
     val avatar: String,
     @SerializedName("userUUID") val uuid: String,
-    val token: String
+    val token: String,
 )

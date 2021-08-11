@@ -19,7 +19,7 @@ object CloudRecordModule {
     @Singleton
     fun provideCloudRecordService(
         @NetworkModule.NormalOkHttpClient client: OkHttpClient,
-        appEnv: AppEnv
+        appEnv: AppEnv,
     ): CloudRecordService {
         return Retrofit.Builder()
             .baseUrl(appEnv.flatServiceUrl)

@@ -2,5 +2,5 @@ package io.agora.flat.data.model
 
 data class RoomDetailOrdinary constructor(
     val roomInfo: RoomInfo,
-    val docs: ArrayList<RoomDocs>
+    val docs: ArrayList<RoomDocs>,
 )

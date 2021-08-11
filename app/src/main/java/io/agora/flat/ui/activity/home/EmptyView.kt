@@ -11,8 +11,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
-import io.agora.flat.ui.theme.FlatTitleTextStyle
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.theme.FlatTitleTextStyle
 
 @Composable
 internal fun EmptyView(imgRes: Int, message: Int, modifier: Modifier = Modifier.fillMaxSize()) {

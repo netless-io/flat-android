@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class ReplayVideoComponent(
     activity: ReplayActivity,
-    rootView: FrameLayout
+    rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     private lateinit var binding: ComponentReplayVideoBinding
     private val viewModel: ReplayViewModel by activity.viewModels()
