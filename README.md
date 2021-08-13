@@ -1,33 +1,41 @@
 <div align="center">
-    <img width="200" height="200" style="display: block;" src="./assets/flat-logo.png">
+    <img width="200" height="200" style="display: block;" src="art/flat-logo.png">
 </div>
 
+<!-- 
 <div align="center">
     <img alt="GitHub" src="https://img.shields.io/github/license/netless-io/flat?color=9cf&style=flat-square">
-</div>
+</div> 
+-->
 
 <div align="center">
     <h1>Agora Flat Android</h1>
-    <p>Project flat is the Web, Windows and macOS client of <a href="https://flat.whiteboard.agora.io/en/">Agora Flat</a> open source classroom.</p>
+    <p>Project Flat Android is the Android client of <a href="https://flat.whiteboard.agora.io/en/">Agora Flat</a> open source classroom.</p>
+    <img src="art/flat-showcase.png">
     <p><a href="./README-zh.md">中文</a></p>
 </div>
 
 
-## Try it now
+# Try it now
 
 -   [Download artifact][flat-homepage]
+-   [Start using Flat Web][flat-web]
 
-## Features
-
+# Features
+-   Open sourced front-end and back-end
+    -   [x] [Flat Web][flat-web]
+    -   [x] Flat Desktop ([Windows][flat-homepage] and [macOS][flat-homepage])
+    -   [x] [Flat Android][flat-android]
+    -   [x] [Flat Server][flat-server]
 -   Optimized teaching experience
-    -   [ ] Big class
-    -   [ ] Small class
-    -   [ ] One on one
+    -   [x] Big class
+    -   [x] Small class
+    -   [x] One on one
 -   Real-time interaction
-    -   [ ] Multifunctional interactive whiteboard
-    -   [ ] Real-time video/audio chat(RTC)
+    -   [x] Multifunctional interactive whiteboard
+    -   [x] Real-time video/audio chat(RTC)
     -   [x] Real-time messaging(RTM)
-    -   [ ] Participant hand raising
+    -   [x] Participant hand raising
 -   Login via
     -   [x] Wechat
     -   [x] GitHub
@@ -38,21 +46,26 @@
     -   [x] View room history
     -   [ ] schedule classrooms
 -   Classroom recording and replaying
-    -   [ ] Whiteboard replaying
-    -   [ ] Cloud recording for video and audio
-    -   [ ] Messaging replaying
--   [ ] Cloud Storage for multi-media courseware
+    -   [x] Whiteboard replaying
+    -   [x] Cloud recording for video and audio
+    -   [x] Messaging replaying
+-   [x] Cloud Storage for multi-media courseware
 -   [ ] Device self-check
 -   [ ] Auto Updater
 
-## Development
+# Development
 
-### Prerequisites
+## Android Code
+Flat is an app that attempts to use the latest cutting edge libraries and tools. As a summary:
 
-* JDK 1.8
-* Android SDK
-  - Android Studio 4.2.0+
+* Entirely written in Kotlin.
+* UI Mostly written in Jetpack Compose (see below).
+* Uses Kotlin Coroutines throughout.
+* Uses many of the Architecture Components, including: Room, Lifecycle, ViewMedel.
+* Uses Hilt for dependency injection
 
+## Development Tool
+Flat require the latest Android Studio Arctic Fox release to be able to build the app. This is because the project is written in Jetpack Compose (more on that below).
 
 
 ## Environment Variables Reference
@@ -65,8 +78,10 @@
 | FLAT_SERVER_DOMAIN                   | Flat Server deployed address                             | e.g. `flat-api.whiteboard.agora.io`                                                 |
 |                                                                                     |
 
-[flat-homepage]: https://flat.whiteboard.agora.io/
+[flat-homepage]: https://flat.whiteboard.agora.io/#download
+[flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
+[flat-android]: https://github.com/netless-io/flat-android
 [flat-storybook]: https://netless-io.github.io/flat/storybook/
 [open-wechat]: https://open.weixin.qq.com/
 [netless-auth]: https://docs.agora.io/en/whiteboard/generate_whiteboard_token_at_app_server?platform=RESTful

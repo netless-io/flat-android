@@ -1,31 +1,38 @@
 <div align="center">
-    <img width="200" height="200" style="display: block;" src="./assets/flat-logo.png">
+    <img width="200" height="200" style="display: block;" src="art/flat-logo.png">
 </div>
+
+<!-- 
+<div align="center">
+    <img alt="GitHub" src="https://img.shields.io/github/license/netless-io/flat-android?color=9cf&style=flat-square">
+</div> 
+-->
 
 <div align="center">
-    <img alt="GitHub" src="https://img.shields.io/github/license/netless-io/flat?color=9cf&style=flat-square">
+    <h1>Agora Flat Android App</h1>
+    <p>Flat Android 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Android 端客户端</p>
+    <img src="art/flat-showcase-zh.jpg">
 </div>
 
-<div align="center">
-    <h1>Agora Flat</h1>
-    <p>项目 flat 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Web 端、Android 端、Windows 客户端与 macOS 客户端。</p>
-</div>
+# 产品体验
+-   [APP 下载地址][flat-homepage]
+-   [快速体验 Flat Web][flat-web]
 
-## 产品体验
-
--   [下载地址][flat-homepage]
-
-## 特性
-
+# 特性
+-   前后端完全开源
+    -   [x] [Flat Web][flat-web]
+    -   [x] Flat 桌面端 ([Windows][flat-homepage] and [macOS][flat-homepage])
+    -   [x] [Flat Android][flat-android]
+    -   [x] [Flat Server 服务器][flat-server]
 -   多场景课堂
-    -   [ ] 大班课
-    -   [ ] 小班课
-    -   [ ] 一对一
+    -   [x] 大班课
+    -   [x] 小班课
+    -   [x] 一对一
 -   实时交互
-    -   [ ] 多功能互动白板
-    -   [ ] 实时音视频（RTC）通讯
-    -   [ ] 即时消息（RTM）聊天
-    -   [ ] 举手上麦发言
+    -   [x] 多功能互动白板
+    -   [x] 实时音视频（RTC）通讯
+    -   [x] 即时消息（RTM）聊天
+    -   [x] 举手上麦发言
 -   帐户系统
     -   [x] 微信登陆
     -   [x] GitHub 登陆
@@ -36,23 +43,27 @@
     -   [x] 支持周期性房间
     -   [x] 查看历史房间
 -   课堂录制回放
-    -   [ ] 白板信令回放
-    -   [ ] 音视频云录制回放
-    -   [ ] 群聊信令回放
--   [ ] 多媒体课件云盘
+    -   [x] 白板信令回放
+    -   [x] 音视频云录制回放
+    -   [x] 群聊信令回放
+-   [x] 多媒体课件云盘
 -   [ ] 设备检测
 -   [ ] 自动检查更新
 
-## 本地开发
+# 开发环境
+## 开发结构
+Flat 试图使用最新 Android 开发库和工具开发应用程序。主要使用一下技术项
+* 完全用 Kotlin 编写。
+* UI 大部分是用 Jetpack Compose 编写的。
+* 始终使用 Kotlin Coroutines 及 Kotlin Flow。
+* 使用了许多 Jetpack 架构组件。包括：Room, Lifecycle, ViewMedel
+* 使用Hilt进行依赖性注入
 
-### 开发环境
-
-* JDK 1.8
-* Android SDK
-  - Android Studio 4.2.0+
+## 开发工具
+你需要最新的Android Studio Arctic Fox版本，以便能够构建该应用程序。这是因为该项目是用Jetpack Compose编写的。
 
 
-## 环境变量值参考
+## 环境配置
 
 | 变量名                               | 描述                                               | 备注                                                             |
 | ------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------- |
@@ -63,11 +74,11 @@
 |                                                                  |
 
 [flat-homepage]: https://flat.whiteboard.agora.io/
+[flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
-[flat-storybook]: https://netless-io.github.io/flat/storybook/
+[flat-android]: https://github.com/netless-io/flat-android
 [open-wechat]: https://open.weixin.qq.com/
 [netless-auth]: https://docs.agora.io/cn/whiteboard/generate_whiteboard_token_at_app_server?platform=RESTful
 [agora-app-id-auth]: https://docs.agora.io/cn/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
 [cloud-recording]: https://docs.agora.io/cn/cloud-recording/cloud_recording_api_rest?platform=RESTful#storageConfig
 [cloud-recording-background]: https://docs.agora.io/cn/cloud-recording/cloud_recording_layout?platform=RESTful#background
-[electron-updater]: https://github.com/electron-userland/electron-builder/tree/master/packages/electron-updater
