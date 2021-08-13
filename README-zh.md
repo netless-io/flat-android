@@ -9,8 +9,8 @@
 -->
 
 <div align="center">
-    <h1>Agora Flat Android App</h1>
-    <p>Flat Android 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Android 端客户端</p>
+    <h1>Agora Flat Android</h1>
+    <p>Flat Android 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Android 客户端</p>
     <img src="art/flat-showcase-zh.jpg">
 </div>
 

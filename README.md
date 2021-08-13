@@ -78,7 +78,7 @@ Flat require the latest Android Studio Arctic Fox release to be able to build th
 | FLAT_SERVER_DOMAIN                   | Flat Server deployed address                             | e.g. `flat-api.whiteboard.agora.io`                                                 |
 |                                                                                     |
 
-[flat-homepage]: https://flat.whiteboard.agora.io/#download
+[flat-homepage]: https://flat.whiteboard.agora.io/en/#download
 [flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
 [flat-android]: https://github.com/netless-io/flat-android
