@@ -14,20 +14,18 @@ import io.agora.flat.ui.viewmodel.RTMMessage
 /**
  * 消息列表适配器
  */
-class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
-    private val dataSet: MutableList<RTMMessage> = mutableListOf()
+class MessageAdapter constructor(
+    private val dataSet: MutableList<RTMMessage?> = mutableListOf(),
+) : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(viewGroup.context)
         val view = inflater.inflate(R.layout.item_room_message, viewGroup, false)
-
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val item = dataSet[position]
-
-        when (item) {
+        when (val item = dataSet[position]) {
             is ChatMessage -> {
                 if (item.isSelf) {
                     viewHolder.rightMessageLayout.isVisible = true
@@ -50,26 +48,32 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
                 viewHolder.noticeMessageLayout.isVisible = true
 
                 viewHolder.noticeMessage.run {
-                    text = if (item.ban)
+                    text = if (item.ban) {
                         context.getString(R.string.message_muted)
-                    else
+                    } else {
                         context.getString(R.string.message_unmuted)
+                    }
                 }
             }
         }
-
-    }
-
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
     }
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataList(it: List<RTMMessage>) {
+    fun setMessages(it: List<RTMMessage>) {
         dataSet.clear()
         dataSet.addAll(it)
         notifyDataSetChanged()
+    }
+
+    fun addMessagesAtHead(msgs: List<RTMMessage>) {
+        dataSet.addAll(0, msgs)
+        notifyItemRangeInserted(0, msgs.size)
+    }
+
+    fun addMessagesAtTail(msgs: List<RTMMessage>) {
+        dataSet.addAll(msgs)
+        notifyItemRangeInserted(dataSet.size - msgs.size, msgs.size);
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

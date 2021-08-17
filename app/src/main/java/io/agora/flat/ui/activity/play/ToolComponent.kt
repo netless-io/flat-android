@@ -64,8 +64,8 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageList.collect {
-                binding.messageDot.isVisible = it.isNotEmpty() && !viewModel.messageAreaShown.value
+            viewModel.messageUpdate.collect {
+                binding.messageDot.isVisible = it.messages.isNotEmpty() && !viewModel.messageAreaShown.value
             }
         }
 

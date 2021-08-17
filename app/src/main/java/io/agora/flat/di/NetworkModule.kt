@@ -65,7 +65,6 @@ object NetworkModule {
     @Singleton
     fun provideMessageService(
         @NetworkModule.AgoraMessageOkHttpClient client: OkHttpClient,
-        appEnv: AppEnv,
     ): MessageService {
         return Retrofit.Builder()
             .baseUrl("https://api.agora.io/dev/")

@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:layout_marginVertical="4dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/name"

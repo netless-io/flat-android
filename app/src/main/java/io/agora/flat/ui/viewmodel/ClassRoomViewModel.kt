@@ -21,6 +21,7 @@ import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.AppModule
 import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
@@ -41,6 +42,7 @@ import kotlin.coroutines.suspendCoroutine
 @HiltViewModel
 class ClassRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val userRepository: UserRepository,
     private val cloudStorageRepository: CloudStorageRepository,
     private val cloudRecordRepository: CloudRecordRepository,
     private val savedStateHandle: SavedStateHandle,
@@ -67,8 +69,9 @@ class ClassRoomViewModel @Inject constructor(
     private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val messageUsers = _messageUsers.asStateFlow()
 
-    private var _messageList = MutableStateFlow<List<RTMMessage>>(emptyList())
-    val messageList = _messageList.asStateFlow()
+    private var messageList = mutableListOf<RTMMessage>()
+    private val _messageUpdate = MutableStateFlow(MessagesUpdate())
+    val messageUpdate = _messageUpdate.asStateFlow()
 
     private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
     val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
@@ -115,8 +118,10 @@ class ClassRoomViewModel @Inject constructor(
             when (val result = roomRepository.joinRoom(roomUUID)) {
                 is Success -> {
                     userState = UserState(roomUUID = roomUUID, userUUID = userUUID, ownerUUID = result.data.ownerUUID)
-                    observerUserState()
                     _roomPlayInfo.value = result.data
+
+                    observerUserState()
+                    loadHistoryMessage()
                 }
             }
         }
@@ -139,6 +144,39 @@ class ClassRoomViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 _roomConfig.value = database.roomConfigDao().getConfigById(roomUUID) ?: RoomConfig(roomUUID)
             }
+        }
+    }
+
+    private var _messageLoading = MutableStateFlow(false)
+    val messageLoading = _messageLoading.asStateFlow()
+
+    private lateinit var messageQuery: MessageQuery
+
+    fun loadHistoryMessage() {
+        ensureMessageQuery()
+        if (messageLoading.value || !messageQuery.hasMoreMessage()) {
+            return
+        }
+        viewModelScope.launch {
+            // show loading
+            _messageLoading.value = true
+            if (messageList.isEmpty()) {
+                val msgs = messageQuery.loadMore().asReversed()
+                appendMessages(msgs)
+            } else {
+                val msgs = messageQuery.loadMore().asReversed()
+                prependMessages(msgs)
+            }
+            _messageLoading.value = false
+        }
+    }
+
+    private fun ensureMessageQuery() {
+        if (!this::messageQuery.isInitialized) {
+            val endTime = System.currentTimeMillis()
+            val startTime = endTime - 3600_000 * 24
+            val userQuery = UserQuery(roomUUID, userRepository, roomRepository)
+            messageQuery = MessageQuery(roomUUID, startTime, endTime, rtmApi, userQuery, false)
         }
     }
 
@@ -355,7 +393,25 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun appendMessage(message: RTMMessage) {
-        _messageList.value = _messageList.value + message
+        appendMessages(listOf(message))
+    }
+
+    private fun appendMessages(msgs: List<RTMMessage>) {
+        messageList.addAll(msgs)
+
+        _messageUpdate.value = _messageUpdate.value.copy(
+            updateOp = MessagesUpdate.APPEND,
+            messages = msgs,
+        )
+    }
+
+    private fun prependMessages(msgs: List<RTMMessage>) {
+        messageList.addAll(0, msgs)
+
+        _messageUpdate.value = _messageUpdate.value.copy(
+            updateOp = MessagesUpdate.PREPEND,
+            messages = msgs
+        )
     }
 
     private fun isRoomOwner(): Boolean {
@@ -920,3 +976,14 @@ data class ChatMessage(
 ) : RTMMessage()
 
 data class NoticeMessage(val ban: Boolean, override val ts: Long = 0) : RTMMessage()
+
+data class MessagesUpdate(
+    val updateOp: Int = IDLE,
+    val messages: List<RTMMessage> = listOf(),
+) {
+    companion object {
+        const val IDLE = 0
+        const val APPEND = 1
+        const val PREPEND = 2
+    }
+}

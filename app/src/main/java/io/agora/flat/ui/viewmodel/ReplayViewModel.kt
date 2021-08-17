@@ -1,5 +1,6 @@
 package io.agora.flat.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,9 +11,11 @@ import io.agora.flat.data.model.RecordInfo
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.CloudRecordRepository
+import io.agora.flat.data.repository.MessageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.RtmEngineProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,6 +26,7 @@ class ReplayViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
     private val cloudRecordRepository: CloudRecordRepository,
+    private val messageRepository: MessageRepository,
     private val rtmApi: RtmEngineProvider,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -55,6 +59,22 @@ class ReplayViewModel @Inject constructor(
                         rtmApi,
                         UserQuery(roomUUID, userRepository, roomRepository)
                     )
+
+                    try {
+                        repeat(3) {
+                            delay(2000)
+                            val result = messageRepository.getMessageCount(
+                                _state.value.roomUUID,
+                                _state.value.roomInfo!!.beginTime,
+                                _state.value.roomInfo!!.endTime,
+                            )
+                            if (result is Success) {
+                                Log.e("Aderan", "message count is ${result.data}")
+                            }
+                        }
+                    } catch (e: Exception) {
+
+                    }
                 }
             }
         }
@@ -68,8 +88,8 @@ class ReplayViewModel @Inject constructor(
 
     fun updateTime(time: Long) {
         viewModelScope.launch {
-            val rtmMessages = query?.query(time) ?: emptyList()
-            _state.value = _state.value.copy(messages = rtmMessages.toList())
+            val msgs = query?.query(time) ?: emptyList()
+            _state.value = _state.value.copy(messages = msgs.toList())
         }
     }
 

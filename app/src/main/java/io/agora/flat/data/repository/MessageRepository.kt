@@ -34,7 +34,14 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun queryHistoryHandle(channel: String, startTime: Long, endTime: Long): Result<String> {
+    suspend fun queryHistoryHandle(
+        channel: String,
+        startTime: Long,
+        endTime: Long,
+        limit: Int,
+        offset: Int,
+        order: String,
+    ): Result<String> {
         val start: String = dateFormat.get().format(startTime)
         val end: String = dateFormat.get().format(endTime)
         return withContext(Dispatchers.IO) {
@@ -49,10 +56,12 @@ class MessageRepository @Inject constructor(
                 }
             }
 
-            val result = messageService.queryHistory(
-                Constants.AGORA_APP_ID,
+            val result = messageService.queryHistory(Constants.AGORA_APP_ID,
                 MessageQueryHistoryReq(
-                    MessageQueryFilter(destination = channel, start_time = start, end_time = end)
+                    filter = MessageQueryFilter(destination = channel, start_time = start, end_time = end),
+                    limit = limit,
+                    offset = offset,
+                    order = order,
                 ),
                 userRepository.getUserInfo()!!.uuid,
                 rtmToken!!
@@ -85,6 +94,45 @@ class MessageRepository @Inject constructor(
                 val code = result.bodyOrThrow().code;
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
+                } else {
+                    ErrorResult(FlatException(0, ""))
+                }
+            } catch (e: Exception) {
+                ErrorResult(e)
+            }
+        }
+    }
+
+    suspend fun getMessageCount(channel: String, startTime: Long, endTime: Long): Result<Int> {
+        val start: String = dateFormat.get().format(startTime)
+        val end: String = dateFormat.get().format(endTime)
+
+        return withContext(Dispatchers.IO) {
+            if (rtmToken == null) {
+                try {
+                    val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
+                    if (tokenResult is Success) {
+                        rtmToken = tokenResult.data.token
+                    }
+                } catch (e: Exception) {
+                    return@withContext ErrorResult(e)
+                }
+            }
+
+            val result = messageService.getMessageCount(
+                Constants.AGORA_APP_ID,
+                source = null,
+                destination = channel,
+                startTime = start,
+                endTime = end,
+                userRepository.getUserInfo()!!.uuid,
+                rtmToken!!
+            ).executeOnce()
+
+            try {
+                val code = result.bodyOrThrow().code;
+                if (code == "ok") {
+                    return@withContext Success(data = result.bodyOrThrow().count)
                 } else {
                     ErrorResult(FlatException(0, ""))
                 }

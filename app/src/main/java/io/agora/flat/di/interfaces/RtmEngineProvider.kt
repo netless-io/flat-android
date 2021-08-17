@@ -1,6 +1,7 @@
 package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.RTMListener
+import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
@@ -27,7 +28,15 @@ interface RtmEngineProvider {
         startTime: Long,
         endTime: Long,
         limit: Int = 100,
+        offset: Int = 0,
+        order: String = ORDER_ASC,
     ): List<RtmQueryMessage>
+
+    suspend fun getTextHistoryCount(
+        channelId: String,
+        startTime: Long,
+        endTime: Long,
+    ): Int
 
     fun addFlatRTMListener(listener: RTMListener)
 

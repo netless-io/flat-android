@@ -248,11 +248,13 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
         startTime: Long,
         endTime: Long,
         limit: Int,
+        offset: Int,
+        order: String,
     ): List<RtmQueryMessage> {
-        val result = messageRepository.queryHistoryHandle(channelId, startTime, endTime)
+        val result = messageRepository.queryHistoryHandle(channelId, startTime, endTime, limit, offset, order)
         if (result is Success) {
             repeat(3) {
-                delay(1000)
+                delay(2000)
                 val messageResult = messageRepository.getMessageList(handle = result.data)
                 if (messageResult is Success) {
                     return messageResult.data
@@ -260,6 +262,17 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
             }
         }
         return listOf()
+    }
+
+    override suspend fun getTextHistoryCount(channelId: String, startTime: Long, endTime: Long): Int {
+        repeat(3) {
+            delay(2000)
+            val result = messageRepository.getMessageCount(channelId, startTime, endTime)
+            if (result is Success) {
+                return result.data
+            }
+        }
+        return -1
     }
 
     private var flatRTMListeners = mutableListOf<RTMListener>()

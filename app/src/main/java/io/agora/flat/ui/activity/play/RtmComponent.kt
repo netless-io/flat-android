@@ -14,8 +14,10 @@ import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.delayAndFinish
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.ResultCallback
@@ -54,9 +56,15 @@ class RtmComponent(
     private fun initView() {
         binding = ComponentMessageBinding.inflate(activity.layoutInflater, rootView, true)
 
-        binding.messageLv.setListener {
-            viewModel.sendChatMessage(it)
-        }
+        binding.messageLv.setListener(object : MessageListView.Listener {
+            override fun onSendMessage(msg: String) {
+                viewModel.sendChatMessage(msg)
+            }
+
+            override fun onLoadMore() {
+                viewModel.loadHistoryMessage()
+            }
+        })
     }
 
     private fun loadData() {
@@ -79,8 +87,17 @@ class RtmComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageList.collect {
-                binding.messageLv.setMessages(it)
+            viewModel.messageLoading.collect {
+                binding.messageLv.showLoading(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.messageUpdate.collect {
+                when (it.updateOp) {
+                    MessagesUpdate.APPEND -> binding.messageLv.addMessagesAtTail(it.messages)
+                    MessagesUpdate.PREPEND -> binding.messageLv.addMessagesAtHead(it.messages)
+                }
             }
         }
 
