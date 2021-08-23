@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Agora RTM-->
+    <!-- Agora RTM -->
     <!--<uses-permission android:name="android.permission.INTERNET" />-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
@@ -31,6 +31,7 @@
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.FlatAndroid">
+
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -42,6 +43,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
+
         <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
@@ -66,7 +68,6 @@
             android:label="@string/title_activity_compose_test" />
         <activity
             android:name=".ui.activity.home.MainActivity"
-
             android:theme="@style/Theme.FlatAndroid.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

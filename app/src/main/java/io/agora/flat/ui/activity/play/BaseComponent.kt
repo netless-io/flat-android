@@ -14,8 +14,10 @@ import io.agora.flat.di.AppModule
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
 
-abstract class BaseComponent(val activity: AppCompatActivity, val rootView: FrameLayout) :
-    LifecycleOwner, DefaultLifecycleObserver {
+abstract class BaseComponent(
+    val activity: AppCompatActivity,
+    val rootView: FrameLayout,
+) : LifecycleOwner, DefaultLifecycleObserver {
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)

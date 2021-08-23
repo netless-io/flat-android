@@ -33,3 +33,5 @@
 
 # Agora RTC
 -keep class io.agora.**{*;}
+# Agora Whiteboard
+-keep class com.herewhite.** { *; }

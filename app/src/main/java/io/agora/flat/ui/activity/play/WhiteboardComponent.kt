@@ -541,5 +541,6 @@ class WhiteboardComponent(
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         whiteSdk.releaseRoom()
+        room?.disconnect()
     }
 }

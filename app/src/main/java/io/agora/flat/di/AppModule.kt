@@ -48,6 +48,10 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun provideRoomConfigDao(db: AppDatabase) = db.roomConfigDao()
+
+    @Singleton
+    @Provides
     fun providerAppEnv(@ApplicationContext context: Context): AppEnv {
         return AppEnv(context)
     }

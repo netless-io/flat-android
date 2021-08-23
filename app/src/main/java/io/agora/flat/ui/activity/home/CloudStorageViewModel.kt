@@ -93,7 +93,7 @@ class CloudStorageViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    // TODO
+                    // do nothing
                 }
             }
             refreshing.removeLoader()

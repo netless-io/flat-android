@@ -45,6 +45,14 @@ class UserRepository @Inject constructor(
         return appKVCenter.getUserInfo()
     }
 
+    fun getUsername(): String {
+        return getUserInfo()!!.name
+    }
+
+    fun getUserUUID(): String {
+        return getUserInfo()!!.uuid
+    }
+
     suspend fun loginSetAuthUUID(authUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             userService.loginSetAuthUUID(AuthUUIDReq(authUUID)).toResult()

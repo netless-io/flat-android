@@ -223,7 +223,6 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
     override suspend fun sendPeerCommand(event: RTMEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
         run {
             val message = rtmClient.createMessage()
-            // TODO
             event.r = channelCommandID
             message.text = Gson().toJson(event)
 

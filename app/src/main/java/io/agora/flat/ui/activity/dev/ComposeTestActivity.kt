@@ -90,12 +90,12 @@ fun GreetingCompose() {
             Row() {
                 TextButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { /*TODO*/ }) {
+                    onClick = {  }) {
                     Text(text = "Hello", color = Color.White)
                 }
                 TextButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { /*TODO*/ }) {
+                    onClick = {  }) {
                     Text(text = "World", color = Color.White)
                 }
             }

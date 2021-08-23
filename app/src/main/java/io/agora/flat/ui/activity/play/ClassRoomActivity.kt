@@ -15,13 +15,12 @@ class ClassRoomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRoomPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         initSystemUI()
 
         componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer, binding.scenePreviewContainer))
         componentSet.add(RtcComponent(this, binding.videoListContainer, binding.fullVideoContainer))
         componentSet.add(RtmComponent(this, binding.messageContainer))
-        componentSet.add(ToolComponent(this, binding.extToolContainer))
+        componentSet.add(ToolComponent(this, binding.toolContainer))
 
         componentSet.forEach { lifecycle.addObserver(it) }
     }

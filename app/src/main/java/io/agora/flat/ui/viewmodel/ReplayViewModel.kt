@@ -23,12 +23,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReplayViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val cloudRecordRepository: CloudRecordRepository,
     private val messageRepository: MessageRepository,
+    private val cloudRecordRepository: CloudRecordRepository,
     private val rtmApi: RtmEngineProvider,
-    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private var _state: MutableStateFlow<ReplayState>
     val state: StateFlow<ReplayState>
@@ -53,7 +53,8 @@ class ReplayViewModel @Inject constructor(
                 if (recordResp is Success) {
                     _state.value = _state.value.copy(roomInfo = roomResp.data.roomInfo, recordInfo = recordResp.data)
 
-                    query = MessageQuery(_state.value.roomUUID,
+                    query = MessageQuery(
+                        _state.value.roomUUID,
                         _state.value.roomInfo!!.beginTime,
                         _state.value.roomInfo!!.endTime,
                         rtmApi,

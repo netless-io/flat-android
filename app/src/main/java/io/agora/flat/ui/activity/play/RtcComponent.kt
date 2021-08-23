@@ -113,13 +113,6 @@ class RtcComponent(
                 }
             }
         }
-
-        lifecycleScope.launch {
-            viewModel.roomConfig.collect {
-                rtcApi.rtcEngine().muteLocalAudioStream(!it.enableAudio)
-                rtcApi.rtcEngine().muteLocalVideoStream(!it.enableVideo)
-            }
-        }
     }
 
     private val expandWidth = activity.dp2px(120)

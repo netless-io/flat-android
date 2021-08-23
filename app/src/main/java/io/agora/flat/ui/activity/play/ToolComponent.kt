@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -64,12 +65,6 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageUpdate.collect {
-                binding.messageDot.isVisible = it.messages.isNotEmpty() && !viewModel.messageAreaShown.value
-            }
-        }
-
-        lifecycleScope.launch {
             viewModel.roomConfig.collect {
                 binding.switchVideo.isChecked = it.enableVideo
                 binding.switchAudio.isChecked = it.enableAudio
@@ -105,6 +100,12 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.messageAreaShown.collect {
                 binding.message.isSelected = it
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.messageCount.collect {
+                binding.messageDot.isVisible = it > 0 && !viewModel.messageAreaShown.value
             }
         }
     }
@@ -225,7 +226,7 @@ class ToolComponent(
 
         binding.switchVideoArea.isChecked = viewModel.videoAreaShown.value
         binding.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setVideoShown(isChecked)
+            viewModel.setVideoAreaShown(isChecked)
             hideSettingLayout()
         }
 
@@ -294,7 +295,8 @@ class ToolComponent(
     private fun showInviteDialog() {
         val state = viewModel.state.value
         val inviteTitle = activity.getString(R.string.invite_title_format, state.currentUser.name)
-        val roomTime = "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
+        val roomTime =
+            "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
         val inviteLink = Constants.BASE_INVITE_URL + "/join/" + state.roomUUID
 
         val copyText = """

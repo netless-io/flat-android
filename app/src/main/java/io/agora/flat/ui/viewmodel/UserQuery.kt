@@ -9,7 +9,7 @@ class UserQuery(val roomUUID: String, val userRepository: UserRepository, val ro
     private var userMap = mutableMapOf<String, RtcUser>()
 
     fun isSelf(uuid: String): Boolean {
-        return userRepository.getUserInfo()!!.uuid == uuid
+        return userRepository.getUserUUID() == uuid
     }
 
     suspend fun getUsers(uuids: List<String>): Map<String, RtcUser> {

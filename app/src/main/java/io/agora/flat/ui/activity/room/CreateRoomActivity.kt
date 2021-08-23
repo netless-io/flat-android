@@ -163,7 +163,6 @@ private fun TypeItem(
     modifier: Modifier,
 ) {
     val border = BorderStroke(1.dp, if (checked) FlatColorBlue else FlatColorGray)
-    // TODO fix icon usage
     val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
