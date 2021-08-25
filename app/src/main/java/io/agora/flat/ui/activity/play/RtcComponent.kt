@@ -16,10 +16,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.transform.CircleCropTransformation
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.common.RTCEventListener
-import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RtcUser
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.RtcEngineProvider
@@ -49,11 +52,18 @@ class RtcComponent(
         )
     }
 
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface RtcComponentEntryPoint {
+        fun userRepository(): UserRepository
+        fun rtcApi(): RtcEngineProvider
+    }
+
     private lateinit var fullScreenBinding: ComponentFullscreenBinding
     private lateinit var videoListBinding: ComponentVideoListBinding
 
+    private lateinit var userRepository: UserRepository
     private lateinit var rtcApi: RtcEngineProvider
-    private lateinit var appDatabase: AppDatabase
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val rtcVideoController: RtcVideoController by activity.viewModels()
 
@@ -63,12 +73,9 @@ class RtcComponent(
     private lateinit var fullScreenAnimator: SimpleAnimator
 
     override fun onCreate(owner: LifecycleOwner) {
-        val entryPoint = EntryPointAccessors.fromApplication(
-            activity.applicationContext,
-            ComponentEntryPoint::class.java
-        )
+        val entryPoint = EntryPointAccessors.fromActivity(activity, RtcComponentEntryPoint::class.java)
+        userRepository = entryPoint.userRepository()
         rtcApi = entryPoint.rtcApi()
-        appDatabase = entryPoint.database()
 
         initView()
         initListener()

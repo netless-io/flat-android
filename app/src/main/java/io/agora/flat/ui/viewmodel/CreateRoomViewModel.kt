@@ -52,7 +52,7 @@ class CreateRoomViewModel @Inject constructor(
             when (val result = runAtLeast { roomRepository.createOrdinary(title, type) }) {
                 is Success -> {
                     roomUUID.value = result.get().roomUUID
-                    eventBus.produceEvent(HomeRefreshEvent())
+                    eventBus.produceEvent(HomeRefreshEvent)
                 }
             }
             loadingCounter.removeLoader()

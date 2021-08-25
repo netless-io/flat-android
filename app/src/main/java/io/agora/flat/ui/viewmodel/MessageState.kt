@@ -1,6 +1,7 @@
 package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import io.agora.flat.common.message.Message
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -10,21 +11,21 @@ import javax.inject.Inject
  */
 @ActivityRetainedScoped
 class MessageState @Inject constructor() {
-    private var _messages = MutableStateFlow<List<RTMMessage>>(emptyList())
+    private var _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages = _messages.asStateFlow()
 
     fun isEmpty(): Boolean {
         return _messages.value.isEmpty()
     }
 
-    fun appendMessages(msgs: List<RTMMessage>) {
+    fun appendMessages(msgs: List<Message>) {
         val list = _messages.value.toMutableList().apply {
             addAll(msgs)
         }
         _messages.value = list;
     }
 
-    fun prependMessages(msgs: List<RTMMessage>) {
+    fun prependMessages(msgs: List<Message>) {
         val list = _messages.value.toMutableList().apply {
             addAll(0, msgs)
         }

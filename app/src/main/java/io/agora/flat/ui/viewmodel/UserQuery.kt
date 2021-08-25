@@ -1,28 +1,49 @@
 package io.agora.flat.ui.viewmodel
 
+import android.util.Log
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.data.repository.UserRepository
+import javax.inject.Inject
 
-class UserQuery(val roomUUID: String, val userRepository: UserRepository, val roomRepository: RoomRepository) {
+@ActivityRetainedScoped
+class UserQuery @Inject constructor(
+    val roomRepository: RoomRepository,
+) {
+    private lateinit var roomUUID: String
     private var userMap = mutableMapOf<String, RtcUser>()
 
-    fun isSelf(uuid: String): Boolean {
-        return userRepository.getUserUUID() == uuid
+    fun update(roomUUID: String) {
+        this.roomUUID = roomUUID
     }
 
-    suspend fun getUsers(uuids: List<String>): Map<String, RtcUser> {
+    suspend fun loadUsers(uuids: List<String>): Map<String, RtcUser> {
         val filter = uuids.filter { !userMap.containsKey(it) }
         if (filter.isNotEmpty()) {
+            Log.d("UserQuery", "loadUsers more $filter")
             val result = roomRepository.getRoomUsers(roomUUID, filter)
             if (result is Success) {
                 result.data.forEach {
                     it.value.userUUID = it.key
                 }
                 userMap.putAll(result.data)
+            } else {
+                return emptyMap() // TODO: return empty for failure
             }
         }
         return userMap.filter { uuids.contains(it.key) }
+    }
+
+    fun queryUser(uuid: String): RtcUser? {
+        val user = userMap[uuid]
+        if (user == null) {
+            Log.e("UserQuery", "should not hint here")
+        }
+        return user
+    }
+
+    fun hasCache(userUUID: String): Boolean {
+        return userMap.containsKey(userUUID)
     }
 }

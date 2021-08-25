@@ -122,7 +122,7 @@ class RoomDetailViewModel @Inject constructor(
             }
             if (resp is Success) {
                 _cancelSuccess.value = true
-                eventBus.produceEvent(HomeRefreshEvent())
+                eventBus.produceEvent(HomeRefreshEvent)
             } else {
                 // show cancel error
             }

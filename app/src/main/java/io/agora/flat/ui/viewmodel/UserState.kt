@@ -1,13 +1,9 @@
 package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import io.agora.flat.common.FlatException
-import io.agora.flat.data.ErrorResult
-import io.agora.flat.data.Success
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomConfigRepository
-import io.agora.flat.data.repository.RoomRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,13 +12,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
 class UserState @Inject constructor(
-    private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
+    private val userQuery: UserQuery,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()
@@ -30,8 +25,6 @@ class UserState @Inject constructor(
     private var _currentUser = MutableStateFlow<RtcUser?>(null)
     val currentUser = _currentUser.asStateFlow()
 
-    // 缓存用户信息，降低web服务压力
-    private var usersCacheMap: MutableMap<String, RtcUser> = mutableMapOf()
     private var creator: RtcUser? = null
     private var speakingJoiners: MutableList<RtcUser> = mutableListOf()
     private var handRaisingJoiners: MutableList<RtcUser> = mutableListOf()
@@ -55,38 +48,26 @@ class UserState @Inject constructor(
         notifyUsers()
     }
 
-    suspend fun initRoomUsers(uuids: List<String>): Boolean = suspendCoroutine { cont ->
+    suspend fun init(uuids: List<String>): Boolean = suspendCoroutine { cont ->
         scope.launch {
-            when (val result = roomRepository.getRoomUsers(roomUUID, uuids)) {
-                is Success -> {
-                    result.data.forEach { (uuid, user) ->
-                        run {
-                            user.userUUID = uuid
-                            if (user.userUUID == userUUID) {
-                                val config = roomConfigRepository.getRoomConfig(roomUUID)
-                                user.audioOpen = config?.enableAudio ?: false
-                                user.videoOpen = config?.enableVideo ?: false
-                            }
-                        }
-                    }
-                    addToCache(result.data)
-                    addToCurrent(result.data.values.toList())
-                    cont.resume(true)
-                }
-                is ErrorResult -> {
-                    cont.resumeWithException(FlatException(result.error.code, ""))
+            val userMap = userQuery.loadUsers(uuids)
+            if (userMap.isNotEmpty()) {
+                userMap[userUUID]?.run {
+                    val config = roomConfigRepository.getRoomConfig(roomUUID)
+                    this.audioOpen = config?.enableAudio ?: false
+                    this.videoOpen = config?.enableVideo ?: false
                 }
             }
+            addToCurrent(userMap.values.toList())
+            cont.resume(true)
         }
     }
 
-    private fun addToCache(userMap: Map<String, RtcUser>) {
-        userMap.forEach { (uuid, user) -> usersCacheMap[uuid] = user.copy() }
-    }
-
     private fun addToCurrent(userUUID: String) {
-        usersCacheMap[userUUID]?.run {
-            addToCurrent(listOf(this))
+        scope.launch {
+            userQuery.loadUsers(listOf(userUUID)).run {
+                addToCurrent(this.values.toList())
+            }
         }
     }
 
@@ -127,7 +108,7 @@ class UserState @Inject constructor(
     }
 
     private fun hasCache(userUUID: String): Boolean {
-        return usersCacheMap.containsKey(userUUID)
+        return userQuery.hasCache(userUUID)
     }
 
     fun removeUser(userUUID: String, notify: Boolean = true) {
@@ -150,15 +131,8 @@ class UserState @Inject constructor(
         }
 
         scope.launch {
-            when (val result = roomRepository.getRoomUsers(roomUUID, listOf(userUUID))) {
-                is Success -> {
-                    result.data.forEach { (uuid, user) -> user.userUUID = uuid }
-                    addToCache(result.data)
-                    addToCurrent(result.data.values.toList())
-                }
-                is ErrorResult -> {
-                }
-            }
+            val userMap = userQuery.loadUsers(listOf(userUUID))
+            addToCurrent(userMap.values.toList())
         }
     }
 

@@ -1,25 +1,43 @@
 package io.agora.flat.ui.viewmodel
 
+import dagger.hilt.android.scopes.ActivityRetainedScoped
+import io.agora.flat.common.message.Message
+import io.agora.flat.common.message.MessageFactory
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.ORDER_DESC
 import io.agora.flat.di.interfaces.RtmEngineProvider
+import javax.inject.Inject
 
-class MessageQuery constructor(
-    private val roomUUID: String,
-    private val startTime: Long,
-    private val endTime: Long,
+@ActivityRetainedScoped
+class MessageQuery @Inject constructor(
     private val rtmApi: RtmEngineProvider,
     private val userQuery: UserQuery,
-    private val orderAsc: Boolean = true,
 ) {
-    private val messageCache = mutableListOf<RTMMessage>()
-    private val messages = mutableListOf<RTMMessage>()
-    private var hasMore = true
+    companion object {
+        const val PAGE_LIMIT = 20
+    }
+
+    private val messageCache = mutableListOf<Message>()
+    private val messages = mutableListOf<Message>()
+
+    private lateinit var roomUUID: String
+    private var startTime: Long = 0
+    private var endTime: Long = 0
+    private var orderAsc: Boolean = true
     private var offset = 0
     private var querying = false
-    private val PAGE_LIMIT = 20
 
-    suspend fun query(timeOffset: Long): List<RTMMessage> {
+    var hasMore = true
+
+    fun update(roomUUID: String, startTime: Long, endTime: Long, orderAsc: Boolean = true) {
+        this.roomUUID = roomUUID
+        this.startTime = startTime
+        this.endTime = endTime
+        this.orderAsc = orderAsc
+        userQuery.update(roomUUID)
+    }
+
+    suspend fun query(timeOffset: Long): List<Message> {
         val targetTime = startTime + timeOffset;
         if (querying) {
             return messages
@@ -32,14 +50,9 @@ class MessageQuery constructor(
             } else {
                 offset += msgs.size
             }
-            val users = userQuery.getUsers(msgs.map { it.src }.distinct())
+            userQuery.loadUsers(msgs.map { it.src }.distinct())
             val chatMessages = msgs.map {
-                ChatMessage(
-                    name = users[it.src]?.name ?: "",
-                    message = it.payload,
-                    isSelf = userQuery.isSelf(it.src),
-                    ts = it.ms
-                )
+                MessageFactory.createText(it.src, it.payload, it.ms)
             }
             messageCache.addAll(chatMessages)
         }
@@ -61,11 +74,11 @@ class MessageQuery constructor(
         return messages
     }
 
-    suspend fun loadMore(): List<RTMMessage> {
+    suspend fun loadMore(): List<Message> {
         if (querying) {
             return emptyList()
         }
-        var result = emptyList<RTMMessage>()
+        var result = emptyList<Message>()
         if (hasMore) {
             querying = true
             val msgs = rtmApi.getTextHistory(
@@ -74,27 +87,18 @@ class MessageQuery constructor(
                 endTime,
                 PAGE_LIMIT,
                 offset,
-                order = if (orderAsc) ORDER_ASC else ORDER_DESC)
+                if (orderAsc) ORDER_ASC else ORDER_DESC)
             if (msgs.size < PAGE_LIMIT) {
                 hasMore = false
             } else {
                 offset += msgs.size
             }
-            val users = userQuery.getUsers(msgs.map { it.src }.distinct())
+            userQuery.loadUsers(msgs.map { it.src }.distinct())
             result = msgs.map {
-                ChatMessage(
-                    name = users[it.src]?.name ?: "",
-                    message = it.payload,
-                    isSelf = userQuery.isSelf(it.src),
-                    ts = it.ms
-                )
+                MessageFactory.createText(it.src, it.payload, it.ms)
             }
             querying = false
         }
         return result;
-    }
-
-    fun hasMoreMessage(): Boolean {
-        return hasMore
     }
 }

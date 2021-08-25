@@ -11,9 +11,9 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
+import io.agora.flat.common.message.Message
 import io.agora.flat.databinding.LayoutMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
-import io.agora.flat.ui.viewmodel.RTMMessage
 
 class MessageListView @JvmOverloads constructor(
     context: Context,
@@ -25,6 +25,7 @@ class MessageListView @JvmOverloads constructor(
         this,
         true,
     )
+
     private var messageAdapter: MessageAdapter = MessageAdapter()
     private var listener: Listener? = null
 
@@ -90,17 +91,17 @@ class MessageListView @JvmOverloads constructor(
 
     private fun isLoading() = binding.loading.isVisible
 
-    fun setMessages(messages: List<RTMMessage>) {
+    fun setMessages(messages: List<Message>) {
         messageAdapter.setMessages(messages)
         binding.listEmpty.isVisible = messages.isEmpty()
         postDelayed({ binding.messageList.scrollToPosition(messageAdapter.itemCount - 1) }, 100)
     }
 
-    fun addMessagesAtHead(messages: List<RTMMessage>) {
+    fun addMessagesAtHead(messages: List<Message>) {
         messageAdapter.addMessagesAtHead(messages)
     }
 
-    fun addMessagesAtTail(messages: List<RTMMessage>) {
+    fun addMessagesAtTail(messages: List<Message>) {
         messageAdapter.addMessagesAtTail(messages)
         postDelayed({ binding.messageList.scrollToPosition(messageAdapter.itemCount - 1) }, 100)
     }

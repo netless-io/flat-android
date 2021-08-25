@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.common.message.Message
+import io.agora.flat.common.message.MessageFactory
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
@@ -20,9 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MessageViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
     private val messageState: MessageState,
+    private val messageQuery: MessageQuery,
     private val rtmApi: RtmEngineProvider,
     private val eventbus: EventBus,
 ) : ViewModel() {
@@ -34,10 +35,9 @@ class MessageViewModel @Inject constructor(
     private var _messageLoading = MutableStateFlow(false)
     val messageLoading = _messageLoading.asStateFlow()
 
-    private lateinit var messageQuery: MessageQuery
-
     init {
         viewModelScope.launch {
+            initMessageQuery()
             loadHistoryMessage()
         }
 
@@ -48,9 +48,14 @@ class MessageViewModel @Inject constructor(
         }
     }
 
+    private fun initMessageQuery() {
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - 3600_000 * 24
+        messageQuery.update(roomUUID, startTime, endTime, false)
+    }
+
     fun loadHistoryMessage() {
-        ensureMessageQuery()
-        if (messageLoading.value || !messageQuery.hasMoreMessage()) {
+        if (messageLoading.value || !messageQuery.hasMore) {
             return
         }
         viewModelScope.launch {
@@ -66,16 +71,7 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    private fun ensureMessageQuery() {
-        if (!this::messageQuery.isInitialized) {
-            val endTime = System.currentTimeMillis()
-            val startTime = endTime - 3600_000 * 24
-            val userQuery = UserQuery(roomUUID, userRepository, roomRepository)
-            messageQuery = MessageQuery(roomUUID, startTime, endTime, rtmApi, userQuery, false)
-        }
-    }
-
-    private fun appendMessages(msgs: List<RTMMessage>) {
+    private fun appendMessages(msgs: List<Message>) {
         messageState.appendMessages(msgs)
 
         _messageUpdate.value = _messageUpdate.value.copy(
@@ -84,8 +80,8 @@ class MessageViewModel @Inject constructor(
         )
     }
 
-    private fun prependMessages(msgs: List<RTMMessage>) {
-        messageState.prependMessages( msgs)
+    private fun prependMessages(msgs: List<Message>) {
+        messageState.prependMessages(msgs)
 
         _messageUpdate.value = _messageUpdate.value.copy(
             updateOp = MessagesUpdate.PREPEND,
@@ -95,15 +91,14 @@ class MessageViewModel @Inject constructor(
 
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
-            rtmApi.sendChannelMessage(message)
-            appendMessages(listOf(ChatMessage(name = userRepository.getUserUUID(), message = message, isSelf = true)))
+            appendMessages(listOf(MessageFactory.createText(userRepository.getUserUUID(), message)))
         }
     }
 }
 
 data class MessagesUpdate(
     val updateOp: Int = IDLE,
-    val messages: List<RTMMessage> = listOf(),
+    val messages: List<Message> = listOf(),
 ) {
     companion object {
         const val IDLE = 0

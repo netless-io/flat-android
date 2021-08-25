@@ -6,12 +6,15 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.RTMListener
-import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.view.MessageListView
@@ -33,22 +36,25 @@ class RtmComponent(
         val TAG = RtmComponent::class.simpleName
     }
 
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface RtmComponentEntryPoint {
+        fun userRepository(): UserRepository
+        fun rtmApi(): RtmEngineProvider
+    }
+
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val messageViewModel: MessageViewModel by activity.viewModels()
 
+    private lateinit var userRepository: UserRepository
     private lateinit var rtmApi: RtmEngineProvider
-    private lateinit var kvCenter: AppKVCenter
     private lateinit var binding: ComponentMessageBinding
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-
-        val entryPoint = EntryPointAccessors.fromApplication(
-            activity.applicationContext,
-            ComponentEntryPoint::class.java
-        )
+        val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
+        userRepository = entryPoint.userRepository()
         rtmApi = entryPoint.rtmApi()
-        kvCenter = entryPoint.kvCenter()
         rtmApi.addFlatRTMListener(flatRTMListener)
 
         initView()
@@ -142,14 +148,10 @@ class RtmComponent(
         }
     }
 
-    private fun currentUUID(): String {
-        return kvCenter.getUserInfo()!!.uuid;
-    }
-
     private fun enterChannel(rtmToken: String, channelId: String) {
         lifecycleScope.launch {
             try {
-                rtmApi.initChannel(rtmToken, channelId, currentUUID())
+                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
                 viewModel.initRoomUsers(rtmApi.getMembers().map { it.userId })
                 viewModel.requestChannelStatus()
                 Log.d(TAG, "notify rtm joined success")

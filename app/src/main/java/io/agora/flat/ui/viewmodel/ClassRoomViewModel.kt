@@ -12,6 +12,8 @@ import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.ClipboardController
+import io.agora.flat.common.message.Message
+import io.agora.flat.common.message.MessageFactory
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
@@ -78,6 +80,9 @@ class ClassRoomViewModel @Inject constructor(
     private val userUUID = userRepository.getUserUUID()
     private var _roomConfig = MutableStateFlow(RoomConfig(roomUUID))
     val roomConfig = _roomConfig.asStateFlow()
+
+    private var _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage = _errorMessage.asStateFlow().filterNotNull()
 
     private fun tickerFlow(period: Long, initialDelay: Long = 0) = flow {
         delay(initialDelay)
@@ -239,7 +244,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     suspend fun initRoomUsers(uuids: List<String>): Boolean {
-        return userState.initRoomUsers(uuids = uuids)
+        return userState.init(uuids = uuids)
     }
 
     fun removeRtmMember(userUUID: String) {
@@ -295,7 +300,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun appendMessage(message: RTMMessage) {
+    private fun appendMessage(message: Message) {
         viewModelScope.launch {
             eventbus.produceEvent(RTMMessageEvent(listOf(message)))
         }
@@ -316,13 +321,7 @@ class ClassRoomViewModel @Inject constructor(
     fun onRTMEvent(event: RTMEvent, senderId: String) {
         when (event) {
             is RTMEvent.ChannelMessage -> {
-                appendMessage(
-                    ChatMessage(
-                        userState.username(senderId),
-                        event.text,
-                        _state.value.userUUID == senderId
-                    )
-                )
+                appendMessage(MessageFactory.createText(sender = senderId, event.text))
             }
             is RTMEvent.ChannelStatus -> {
                 updateChannelState(event.value)
@@ -347,7 +346,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.BanText -> {
                 _state.value = _state.value.copy(ban = event.v)
-                appendMessage(NoticeMessage(ban = event.v))
+                appendMessage(MessageFactory.createNotice(ban = event.v))
             }
             is RTMEvent.CancelHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
@@ -370,7 +369,7 @@ class ClassRoomViewModel @Inject constructor(
                     _state.value = _state.value.copy(roomStatus = event.roomStatus)
                     if (_state.value.roomStatus == RoomStatus.Stopped) {
                         viewModelScope.launch {
-                            eventbus.produceEvent(HomeRefreshEvent())
+                            eventbus.produceEvent(HomeRefreshEvent)
                         }
                     }
                 }
@@ -709,9 +708,6 @@ sealed class ClassRoomEvent {
         const val AREA_ID_INVITE_DIALOG = 7
         const val AREA_ID_OWNER_EXIT_DIALOG = 8
         const val AREA_ID_USER_LIST = 9
-
-        const val DOT_ID_MESSAGE = 1
-        const val DOT_ID_USERLIST = 2
     }
 
     object RtmChannelJoined : ClassRoomEvent()
@@ -723,17 +719,3 @@ sealed class ClassRoomEvent {
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
     data class ShowDot(val id: Int) : ClassRoomEvent()
 }
-
-sealed class RTMMessage {
-    // timestamp, ms
-    abstract val ts: Long
-}
-
-data class ChatMessage(
-    val name: String = "",
-    val message: String = "",
-    val isSelf: Boolean = false,
-    override val ts: Long = 0,
-) : RTMMessage()
-
-data class NoticeMessage(val ban: Boolean, override val ts: Long = 0) : RTMMessage()
