@@ -36,7 +36,7 @@ class CloudStorageViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
 ) : ViewModel() {
     companion object {
-        val TAG = CloudStorageViewModel.javaClass.simpleName;
+        const val TAG = "CloudStorageViewModel"
     }
 
     private val refreshing = ObservableLoadingCounter()
@@ -123,15 +123,17 @@ class CloudStorageViewModel @Inject constructor(
     fun uploadFile(action: CloudStorageUIAction.UploadFile) {
         viewModelScope.launch {
             var result: CloudStorageUploadStartResp? = null
-            val resp = cloudStorageRepository.updateStart(action.filename, action.size)
-            if (resp is Success) {
-                result = resp.data
-            } else if (resp is ErrorResult) {
-                if (resp.error.code == FlatException.Web_UploadConcurrentLimit) {
-                    cloudStorageRepository.cancel()
-                    val resp2 = cloudStorageRepository.updateStart(action.filename, action.size)
-                    if (resp2 is Success) {
-                        result = resp2.data
+            var resp = cloudStorageRepository.updateStart(action.filename, action.size)
+            when (resp) {
+                is Success -> result = resp.data
+                is ErrorResult -> {
+                    if (resp.error.code == FlatException.Web_UploadConcurrentLimit) {
+                        cloudStorageRepository.cancel()
+                        // retry
+                        resp = cloudStorageRepository.updateStart(action.filename, action.size)
+                        if (resp is Success) {
+                            result = resp.data
+                        }
                     }
                 }
             }
@@ -148,14 +150,12 @@ class CloudStorageViewModel @Inject constructor(
                 signature = result.signature,
                 uri = action.uri
             )
-            UploadManager.upload(request, object : UploadEventListener {
-                override fun onEvent(event: UploadEvent) {
-                    updateUploadFiles(event)
-                    if (event is UploadEvent.UploadStateEvent && event.uploadState == UploadState.Success) {
-                        handleUploadSuccess(request.fileUUID, action.filename, action.size)
-                    }
+            UploadManager.upload(request) {
+                updateUploadFiles(it)
+                if (it is UploadStateEvent && it.uploadState == UploadState.Success) {
+                    handleUploadSuccess(request.fileUUID, action.filename, action.size)
                 }
-            })
+            }
 
             uploadFiles.value = uploadFiles.value.toMutableList().apply {
                 add(0, UploadFile(fileUUID = result.fileUUID, fileName = action.filename))
@@ -164,14 +164,14 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun updateUploadFiles(event: UploadEvent) = when (event) {
-        is UploadEvent.UploadProgressEvent -> {
+        is UploadProgressEvent -> {
             uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
                 if (index < 0) return
                 val changed = uploadFiles.value[index].copy(progress = event.currentSize * 1f / event.totalSize)
                 uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
             }
         }
-        is UploadEvent.UploadStateEvent -> {
+        is UploadStateEvent -> {
             uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
                 if (index < 0) return
                 val changed = uploadFiles.value[index].copy(uploadState = event.uploadState)
@@ -268,8 +268,8 @@ class CloudStorageViewModel @Inject constructor(
 
     fun deleteUpload(fileUUID: String) {
         viewModelScope.launch {
-            uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
             UploadManager.cancel(fileUUID)
+            uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
         }
     }
 }
