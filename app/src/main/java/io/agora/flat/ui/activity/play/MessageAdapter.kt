@@ -12,9 +12,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
-import io.agora.flat.common.message.Message
-import io.agora.flat.common.message.NoticeMessageBody
-import io.agora.flat.common.message.TextMessageBody
+import io.agora.flat.common.rtm.Message
+import io.agora.flat.common.rtm.NoticeMessageBody
+import io.agora.flat.common.rtm.TextMessageBody
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.viewmodel.UserQuery
 

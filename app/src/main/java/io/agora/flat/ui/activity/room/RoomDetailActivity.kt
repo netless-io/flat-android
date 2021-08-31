@@ -35,7 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.common.rememberAndroidClipboardController
+import io.agora.flat.common.android.rememberAndroidClipboardController
 import io.agora.flat.data.model.*
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*

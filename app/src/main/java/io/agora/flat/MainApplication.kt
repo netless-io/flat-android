@@ -14,7 +14,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initializerSet.forEach {
-            it.onCreate(this)
+            it.init(this)
         }
         UploadManager.init(this)
     }

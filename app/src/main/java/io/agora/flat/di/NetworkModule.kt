@@ -5,9 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.agora.flat.data.AppEnv
-import io.agora.flat.data.api.MessageService
-import io.agora.flat.data.api.MiscService
 import io.agora.flat.http.HeaderProvider
+import io.agora.flat.http.api.*
 import io.agora.flat.http.interceptor.AgoraMessageInterceptor
 import io.agora.flat.http.interceptor.HeaderInterceptor
 import okhttp3.OkHttpClient
@@ -48,6 +47,45 @@ object NetworkModule {
             .addInterceptor(logger)
             .addInterceptor(AgoraMessageInterceptor())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRoomService(@NetworkModule.NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): RoomService {
+        return Retrofit.Builder()
+            .baseUrl(appEnv.flatServiceUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RoomService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudStorageService(
+        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        appEnv: AppEnv,
+    ): CloudStorageService {
+        return Retrofit.Builder()
+            .baseUrl(appEnv.flatServiceUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(CloudStorageService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudRecordService(
+        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        appEnv: AppEnv,
+    ): CloudRecordService {
+        return Retrofit.Builder()
+            .baseUrl(appEnv.flatServiceUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(CloudRecordService::class.java)
     }
 
     @Provides

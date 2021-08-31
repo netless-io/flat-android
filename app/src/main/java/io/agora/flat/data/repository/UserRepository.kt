@@ -1,12 +1,12 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.*
-import io.agora.flat.data.api.UserService
 import io.agora.flat.data.model.AuthUUIDReq
 import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import io.agora.flat.di.AppModule
+import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -78,8 +78,7 @@ class UserRepository @Inject constructor(
     suspend fun loginProcess(authUUID: String, times: Int = 20): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             repeat(times) {
-                val result =
-                    userService.loginProcess(AuthUUIDReq(authUUID)).toResult()
+                val result = userService.loginProcess(AuthUUIDReq(authUUID)).toResult()
                 if (result is Success && result.data.token.isNotBlank()) {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.mapToUserInfo())

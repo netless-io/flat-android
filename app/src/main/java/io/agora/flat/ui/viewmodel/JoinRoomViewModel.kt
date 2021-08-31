@@ -3,7 +3,7 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.ClipboardController
+import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.model.RoomConfig
 import kotlinx.coroutines.Dispatchers

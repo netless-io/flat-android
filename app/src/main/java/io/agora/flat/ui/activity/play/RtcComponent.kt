@@ -20,7 +20,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
-import io.agora.flat.common.RTCEventListener
+import io.agora.flat.common.rtc.RTCEventListener
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentFullscreenBinding
@@ -105,8 +105,8 @@ class RtcComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
-                    // is ClassRoomEvent.ChangeVideoDisplay -> videoAreaAnimator.switch()
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
+                    else -> {; }
                 }
             }
         }

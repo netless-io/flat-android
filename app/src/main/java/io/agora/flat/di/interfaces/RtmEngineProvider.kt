@@ -1,6 +1,6 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.RTMListener
+import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
@@ -38,7 +38,9 @@ interface RtmEngineProvider {
         endTime: Long,
     ): Int
 
-    fun addFlatRTMListener(listener: RTMListener)
+    fun addRtmListener(listener: RTMListener)
 
-    fun removeFlatRTMListener(listener: RTMListener)
+    fun removeRtmListener(listener: RTMListener)
 }
+
+

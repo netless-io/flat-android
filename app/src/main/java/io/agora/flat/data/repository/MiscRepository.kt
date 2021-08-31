@@ -1,10 +1,10 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
-import io.agora.flat.data.api.MiscService
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
 import io.agora.flat.data.toResult
+import io.agora.flat.http.api.MiscService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

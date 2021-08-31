@@ -12,8 +12,8 @@ import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.interfaces.EventBus
-import io.agora.flat.event.HomeRefreshEvent
+import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.RoomsUpdated
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -122,7 +122,7 @@ class RoomDetailViewModel @Inject constructor(
             }
             if (resp is Success) {
                 _cancelSuccess.value = true
-                eventBus.produceEvent(HomeRefreshEvent)
+                eventBus.produceEvent(RoomsUpdated)
             } else {
                 // show cancel error
             }

@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.common.message.Message
-import io.agora.flat.common.message.MessageFactory
+import io.agora.flat.common.rtm.Message
+import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmEngineProvider
-import io.agora.flat.event.RTMMessageEvent
+import io.agora.flat.event.MessagesAppended
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -42,7 +42,7 @@ class MessageViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            eventbus.events.filterIsInstance<RTMMessageEvent>().collect {
+            eventbus.events.filterIsInstance<MessagesAppended>().collect {
                 appendMessages(it.messages)
             }
         }

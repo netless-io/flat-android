@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.common.message.Message
+import io.agora.flat.common.rtm.Message
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RecordInfo
 import io.agora.flat.data.model.RoomInfo

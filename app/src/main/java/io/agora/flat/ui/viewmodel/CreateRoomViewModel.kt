@@ -9,8 +9,8 @@ import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.interfaces.EventBus
-import io.agora.flat.event.HomeRefreshEvent
+import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.ObservableLoadingCounter
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class CreateRoomViewModel @Inject constructor(
             when (val result = runAtLeast { roomRepository.createOrdinary(title, type) }) {
                 is Success -> {
                     roomUUID.value = result.get().roomUUID
-                    eventBus.produceEvent(HomeRefreshEvent)
+                    eventBus.produceEvent(RoomsUpdated)
                 }
             }
             loadingCounter.removeLoader()

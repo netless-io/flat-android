@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels

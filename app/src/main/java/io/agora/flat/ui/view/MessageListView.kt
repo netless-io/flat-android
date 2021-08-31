@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
-import io.agora.flat.common.message.Message
+import io.agora.flat.common.rtm.Message
 import io.agora.flat.databinding.LayoutMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
 

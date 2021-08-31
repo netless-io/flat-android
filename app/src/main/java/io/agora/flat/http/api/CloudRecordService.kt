@@ -1,4 +1,4 @@
-package io.agora.flat.data.api
+package io.agora.flat.http.api
 
 import io.agora.flat.data.model.*
 import retrofit2.Call

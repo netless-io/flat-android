@@ -10,9 +10,9 @@ import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.NetworkObserver
-import io.agora.flat.event.HomeRefreshEvent
+import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.ObservableLoadingCounter
 import kotlinx.coroutines.delay
@@ -75,7 +75,7 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            eventBus.events.filter { it is HomeRefreshEvent }.collect {
+            eventBus.events.filter { it is RoomsUpdated }.collect {
                 reloadRoomList()
             }
         }

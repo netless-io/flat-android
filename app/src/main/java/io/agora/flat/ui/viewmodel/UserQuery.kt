@@ -9,8 +9,9 @@ import javax.inject.Inject
 
 @ActivityRetainedScoped
 class UserQuery @Inject constructor(
-    val roomRepository: RoomRepository,
+    private val roomRepository: RoomRepository,
 ) {
+    private val TAG = "MyActivity"
     private lateinit var roomUUID: String
     private var userMap = mutableMapOf<String, RtcUser>()
 

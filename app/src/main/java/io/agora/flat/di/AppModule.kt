@@ -7,15 +7,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
-import io.agora.flat.common.AndroidClipboardController
-import io.agora.flat.common.ClipboardController
+import io.agora.flat.common.android.AndroidClipboardController
+import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.di.impl.RtcProviderImpl
-import io.agora.flat.di.impl.RtmProviderImpl
-import io.agora.flat.di.interfaces.*
+import io.agora.flat.di.impl.EventBus
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -58,47 +55,8 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun providerRtcProvider(): RtcEngineProvider {
-        return RtcProviderImpl()
-    }
-
-    @Singleton
-    @Provides
-    fun providerRtmProvider(): RtmEngineProvider {
-        return RtmProviderImpl()
-    }
-
-    @Singleton
-    @Provides
     fun providerEventBus(): EventBus {
         return EventBus()
-    }
-
-    @Singleton
-    @Provides
-    fun providerNetworkObserver(): NetworkObserver {
-        return FlatNetworkObserver()
-    }
-
-    /**
-     * StartupInitializer Set
-     */
-    @Provides
-    @IntoSet
-    fun provideRtcInitializer(rtcEngineProvider: RtcEngineProvider): StartupInitializer {
-        return rtcEngineProvider as StartupInitializer
-    }
-
-    @Provides
-    @IntoSet
-    fun provideRtmInitializer(rtmEngineProvider: RtmEngineProvider): StartupInitializer {
-        return rtmEngineProvider as StartupInitializer
-    }
-
-    @Provides
-    @IntoSet
-    fun providerNetworkObserverInitializer(networkObserver: NetworkObserver): StartupInitializer {
-        return networkObserver as StartupInitializer
     }
 
     @Singleton

@@ -7,8 +7,8 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.data.api.UserService
 import io.agora.flat.http.HeaderProvider
+import io.agora.flat.http.api.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -6,10 +6,16 @@ class FlatException constructor(errorCode: Int, message: String, exception: Exce
     @JvmOverloads RuntimeException(message, exception) {
 
     companion object {
+        /**
+         * RTM
+         */
         const val RTM_LOGIN_ERROR_START = 0x11000
         const val RTM_LOGOUT_ERROR_START = 0x12000
 
-        // https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
+        /**
+         * Flat Web 服务
+         * https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
+         */
         const val Web_ParamsCheckFailed = 100000 // parameter verification failed
         const val Web_ServerFail = 100001 // server fail (retry)
         const val Web_CurrentProcessFailed = 100002 // current processing failed

@@ -8,7 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import io.agora.flat.Constants
-import io.agora.flat.common.RTMListener
+import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.common.toFlatException
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RTMEvent
@@ -20,11 +20,14 @@ import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.flat.ui.activity.play.RtmComponent
 import io.agora.rtm.*
 import kotlinx.coroutines.delay
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
+@Singleton
+class RtmProviderImpl @Inject constructor() : RtmEngineProvider, StartupInitializer {
 
     companion object {
         val TAG = RtmProviderImpl::class.simpleName
@@ -41,7 +44,7 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
     private lateinit var miscRepository: MiscRepository
     private lateinit var messageRepository: MessageRepository
 
-    override fun onCreate(context: Context) {
+    override fun init(context: Context) {
         try {
             rtmClient = RtmClient.createInstance(context, Constants.AGORA_APP_ID, object : RtmClientListener {
                 override fun onConnectionStateChanged(state: Int, reason: Int) {
@@ -276,11 +279,11 @@ class RtmProviderImpl : RtmEngineProvider, StartupInitializer {
 
     private var flatRTMListeners = mutableListOf<RTMListener>()
 
-    override fun addFlatRTMListener(listener: RTMListener) {
+    override fun addRtmListener(listener: RTMListener) {
         flatRTMListeners.add(listener)
     }
 
-    override fun removeFlatRTMListener(listener: RTMListener) {
+    override fun removeRtmListener(listener: RTMListener) {
         flatRTMListeners.remove(listener)
     }
 

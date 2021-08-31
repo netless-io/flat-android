@@ -1,9 +1,9 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
-import io.agora.flat.data.api.RoomService
 import io.agora.flat.data.model.*
 import io.agora.flat.data.toResult
+import io.agora.flat.http.api.RoomService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package io.agora.flat.common.message
+package io.agora.flat.common.rtm
 
 data class Message constructor(
     // 消息类型

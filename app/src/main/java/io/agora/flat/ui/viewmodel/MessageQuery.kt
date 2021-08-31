@@ -1,8 +1,8 @@
 package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import io.agora.flat.common.message.Message
-import io.agora.flat.common.message.MessageFactory
+import io.agora.flat.common.rtm.Message
+import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.ORDER_DESC
 import io.agora.flat.di.interfaces.RtmEngineProvider

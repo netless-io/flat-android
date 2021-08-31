@@ -1,4 +1,4 @@
-package io.agora.flat.common
+package io.agora.flat.common.rtc
 
 import io.agora.rtc.IRtcEngineEventHandler.*
 

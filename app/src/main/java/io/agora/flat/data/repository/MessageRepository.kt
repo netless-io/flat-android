@@ -3,11 +3,11 @@ package io.agora.flat.data.repository
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
 import io.agora.flat.data.*
-import io.agora.flat.data.api.MessageService
-import io.agora.flat.data.api.MiscService
 import io.agora.flat.data.model.MessageQueryFilter
 import io.agora.flat.data.model.MessageQueryHistoryReq
 import io.agora.flat.data.model.RtmQueryMessage
+import io.agora.flat.http.api.MessageService
+import io.agora.flat.http.api.MiscService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat

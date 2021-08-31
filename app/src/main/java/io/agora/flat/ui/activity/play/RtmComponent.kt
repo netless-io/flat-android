@@ -11,7 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.common.FlatException
-import io.agora.flat.common.RTMListener
+import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.UserRepository
@@ -55,7 +55,7 @@ class RtmComponent(
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
         rtmApi = entryPoint.rtmApi()
-        rtmApi.addFlatRTMListener(flatRTMListener)
+        rtmApi.addRtmListener(flatRTMListener)
 
         initView()
         loadData()
@@ -121,7 +121,7 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        rtmApi.removeFlatRTMListener(flatRTMListener)
+        rtmApi.removeRtmListener(flatRTMListener)
         rtmApi.rtmEngine().logout(object : ResultCallback<Void> {
             override fun onSuccess(p0: Void?) {
 

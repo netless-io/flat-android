@@ -1,4 +1,4 @@
-package io.agora.flat.common
+package io.agora.flat.common.android
 
 import android.content.ClipData
 import android.content.ClipboardManager

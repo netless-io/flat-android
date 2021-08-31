@@ -10,8 +10,11 @@ import androidx.core.content.getSystemService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FlatNetworkObserver : StartupInitializer, NetworkObserver {
+@Singleton
+class FlatNetworkObserver @Inject constructor() : StartupInitializer, NetworkObserver {
     companion object {
         const val TAG = "FlatNetworkObserver"
     }
@@ -19,7 +22,7 @@ class FlatNetworkObserver : StartupInitializer, NetworkObserver {
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var state: MutableStateFlow<Boolean>
 
-    override fun onCreate(context: Context) {
+    override fun init(context: Context) {
         connectivityManager = context.getSystemService()!!
         state = MutableStateFlow(connectivityManager.allNetworks.any { it.isOnline() })
 
@@ -27,10 +30,6 @@ class FlatNetworkObserver : StartupInitializer, NetworkObserver {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         connectivityManager.registerNetworkCallback(request, networkCallback)
-    }
-
-    override fun onTerminate() {
-        connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
     override fun observeNetworkActive(): Flow<Boolean> = state.asStateFlow()

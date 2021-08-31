@@ -171,7 +171,7 @@ dependencies {
     // agora
     implementation 'com.github.netless-io:whiteboard-android:2.13.16'
     // implementation project(':sdk')
-    implementation 'io.agora.rtc:full-sdk:3.3.0'
+    implementation 'io.agora.rtc:full-sdk:3.5.0.2'
     implementation 'io.agora.rtm:rtm-sdk:1.4.1'
 
     // exoplayer

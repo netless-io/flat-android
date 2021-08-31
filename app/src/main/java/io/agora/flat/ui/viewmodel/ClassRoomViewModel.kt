@@ -11,17 +11,17 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.common.ClipboardController
-import io.agora.flat.common.message.Message
-import io.agora.flat.common.message.MessageFactory
+import io.agora.flat.common.android.ClipboardController
+import io.agora.flat.common.rtm.Message
+import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
-import io.agora.flat.di.interfaces.EventBus
+import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
-import io.agora.flat.event.HomeRefreshEvent
-import io.agora.flat.event.RTMMessageEvent
+import io.agora.flat.event.MessagesAppended
+import io.agora.flat.event.RoomsUpdated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -302,7 +302,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun appendMessage(message: Message) {
         viewModelScope.launch {
-            eventbus.produceEvent(RTMMessageEvent(listOf(message)))
+            eventbus.produceEvent(MessagesAppended(listOf(message)))
         }
     }
 
@@ -369,7 +369,7 @@ class ClassRoomViewModel @Inject constructor(
                     _state.value = _state.value.copy(roomStatus = event.roomStatus)
                     if (_state.value.roomStatus == RoomStatus.Stopped) {
                         viewModelScope.launch {
-                            eventbus.produceEvent(HomeRefreshEvent)
+                            eventbus.produceEvent(RoomsUpdated)
                         }
                     }
                 }
@@ -560,7 +560,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             when (val res = cloudStorageRepository.getFileList(1)) {
                 is Success -> {
-                    _cloudStorageFiles.value = res.data.files
+                    _cloudStorageFiles.value = res.data.files.asReversed()
                 }
             }
         }

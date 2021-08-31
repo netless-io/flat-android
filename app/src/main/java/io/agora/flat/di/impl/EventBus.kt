@@ -1,4 +1,4 @@
-package io.agora.flat.di.interfaces
+package io.agora.flat.di.impl
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
