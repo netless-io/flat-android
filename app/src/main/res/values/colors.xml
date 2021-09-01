@@ -26,4 +26,6 @@
     <color name="flat_pencil_color_gray">#6D7278</color>
     <color name="flat_pencil_color_black">#000</color>
     <color name="flat_pencil_color_white">#FFF</color>
+
+    <color name="ic_launcher_background">@color/flat_white</color>
 </resources>
