@@ -16,6 +16,8 @@ class Constants {
     object IntentKey {
         const val ROOM_UUID = "room_uuid"
         const val PERIODIC_UUID = "periodic_uuid"
+        const val ROOM_INFO = "room_info"
+        const val ROOM_PLAY_INFO = "room_play_info"
     }
 
     object Login {

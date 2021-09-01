@@ -33,8 +33,8 @@ object NetworkModule {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
         return OkHttpClient.Builder()
-            .addInterceptor(logger)
             .addInterceptor(HeaderInterceptor(headerProviders))
+            .addInterceptor(logger)
             .build()
     }
 
@@ -44,8 +44,8 @@ object NetworkModule {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
         return OkHttpClient.Builder()
-            .addInterceptor(logger)
             .addInterceptor(AgoraMessageInterceptor())
+            .addInterceptor(logger)
             .build()
     }
 

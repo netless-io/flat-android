@@ -23,10 +23,14 @@ import io.agora.flat.databinding.LayoutScenePreviewBinding
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
+import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showDebugToast
+import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.*
@@ -290,10 +294,8 @@ class WhiteboardComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.roomPlayInfo.collect {
-                it?.apply {
-                    join(whiteboardRoomUUID, whiteboardRoomToken)
-                }
+            viewModel.roomPlayInfo.filterNotNull().collect {
+                join(it.whiteboardRoomUUID, it.whiteboardRoomToken)
             }
         }
 
@@ -301,23 +303,19 @@ class WhiteboardComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
-                    is ClassRoomEvent.NoOptPermission -> activity.showDebugToast(R.string.class_room_no_operate_permission)
+                    is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl)
-                    is ClassRoomEvent.InsertPpt -> {
-                        insertPpt(it.dirPath, it.convertedFiles)
-                        room?.scalePptToFit()
-                    }
-                    else -> {
-                    }
+                    is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles)
+                    else -> {; }
                 }
             }
         }
 
         lifecycleScope.launch {
-            viewModel.state.collect {
+            viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 setRoomWritable(it.isWritable)
                 binding.handup.isVisible = it.showRaiseHand
-                it.currentUser.run { binding.handup.isSelected = isRaiseHand }
+                binding.handup.isSelected = it.isRaiseHand
             }
         }
     }
@@ -338,6 +336,7 @@ class WhiteboardComponent(
     private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles) {
         room?.putScenes(dirpath, convertedFiles.scenes, 0)
         room?.setScenePath("$dirpath/${convertedFiles.scenes[0].name}")
+        room?.scalePptToFit(AnimationMode.Immediately)
     }
 
     private fun setRoomWritable(writable: Boolean) {
@@ -471,7 +470,6 @@ class WhiteboardComponent(
                 override fun catchEx(t: SDKError?) {
                 }
             })
-
             setRoomWritable(viewModel.state.value.isWritable)
         }
 

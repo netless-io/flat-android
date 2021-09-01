@@ -1,8 +1,12 @@
 package io.agora.flat.data.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * 房间列表信息项
  */
+@Parcelize
 data class RoomInfo(
     // 房间的 uuid
     val roomUUID: String,
@@ -24,7 +28,7 @@ data class RoomInfo(
     val roomStatus: RoomStatus,
     // 是否存在录制(只有历史记录才会有)
     val hasRecord: Boolean,
-) {
+) : Parcelable {
     // local for listHead
     var showDayHead: Boolean = false
 }

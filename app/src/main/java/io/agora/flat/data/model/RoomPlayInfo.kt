@@ -1,8 +1,12 @@
 package io.agora.flat.data.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * 加入房间后获取的信息
  */
+@Parcelize
 data class RoomPlayInfo(
     // 房间类型
     val roomType: RoomType,
@@ -20,4 +24,4 @@ data class RoomPlayInfo(
     val rtcToken: String,
     // rtm token
     val rtmToken: String,
-)
+) : Parcelable

@@ -18,14 +18,12 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.view.MessageListView
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
-import io.agora.flat.ui.viewmodel.MessageViewModel
-import io.agora.flat.ui.viewmodel.MessagesUpdate
+import io.agora.flat.ui.viewmodel.*
 import io.agora.flat.util.delayAndFinish
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.ResultCallback
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 class RtmComponent(
@@ -85,7 +83,7 @@ class RtmComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.state.collect {
+            viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 if (it.roomStatus == RoomStatus.Stopped) {
                     activity.delayAndFinish(message = "房间结束，退出中...")
                 }

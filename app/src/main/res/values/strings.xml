@@ -7,6 +7,7 @@
     <string name="toast_in_development" translatable="false">Not Supported Yet</string>
     <string name="delete" translatable="false">删除</string>
 
+    <!-- title -->
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_home">Home</string>
     <string name="title_cloud_storage" translatable="false">云盘</string>
@@ -16,7 +17,8 @@
     <string name="title_room_detail" translatable="false">房间详情</string>
     <string name="title_room_all" translatable="false">全部房间</string>
     <string name="title_join_room" translatable="false">加入房间</string>
-    <string name="title_activity_compose_test">ComposeTestActivity</string>
+    <string name="title_activity_compose_test">ComposeTest</string>
+
     <string name="create_room" translatable="false">创建房间</string>
     <string name="create_room_topic" translatable="false">主题</string>
     <string name="create_room_type" translatable="false">类型</string>
@@ -41,7 +43,6 @@
     <string name="home_room_state_idle" translatable="false">待开始</string>
     <string name="home_room_state_started" translatable="false">进行中</string>
     <string name="home_room_state_end" translatable="false">已结束</string>
-
     <string name="home_no_room_tip" translatable="false">暂无房间</string>
     <string name="home_no_history_room_tip" translatable="false">暂无记录</string>
 

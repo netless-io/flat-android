@@ -14,6 +14,7 @@ import io.agora.flat.Constants
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
+import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
@@ -22,6 +23,7 @@ import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
+import io.agora.flat.util.fileSuffix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -52,9 +54,8 @@ class ClassRoomViewModel @Inject constructor(
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
 
-    private var _state: MutableStateFlow<ClassRoomState>
-    val state: StateFlow<ClassRoomState>
-        get() = _state
+    private var _state = MutableStateFlow(ClassRoomState.Init)
+    val state = _state.asStateFlow()
 
     private var _videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val videoUsers = _videoUsers.asStateFlow()
@@ -77,7 +78,10 @@ class ClassRoomViewModel @Inject constructor(
     private val eventId = AtomicInteger(0)
 
     private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
+    private val playInfo = savedStateHandle.get<RoomPlayInfo?>(Constants.IntentKey.ROOM_PLAY_INFO)
     private val userUUID = userRepository.getUserUUID()
+    private val userName = userRepository.getUsername()
+
     private var _roomConfig = MutableStateFlow(RoomConfig(roomUUID))
     val roomConfig = _roomConfig.asStateFlow()
 
@@ -93,47 +97,52 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     init {
-        _state = MutableStateFlow(
-            ClassRoomState(
-                roomUUID = roomUUID,
-                userUUID = userUUID,
-                currentUser = RtcUser(name = userRepository.getUsername(), userUUID = userUUID)
-            )
-        )
-
-        viewModelScope.launch {
-            when (val result = roomRepository.joinRoom(roomUUID)) {
-                is Success -> {
-                    userState.reset(
-                        roomUUID = roomUUID,
-                        userUUID = userUUID,
-                        ownerUUID = result.data.ownerUUID,
-                        scope = viewModelScope,
-                    )
-                    observerUserState()
-
-                    _roomPlayInfo.value = result.data
-                }
-            }
-        }
-
         viewModelScope.launch {
             when (val result = roomRepository.getOrdinaryRoomInfo(roomUUID)) {
                 is Success -> result.data.run {
-                    _state.value = _state.value.copy(
-                        roomType = roomInfo.roomType,
-                        ownerUUID = roomInfo.ownerUUID,
-                        ownerName = roomInfo.ownerName,
-                        title = roomInfo.title,
-                        beginTime = roomInfo.beginTime,
-                        endTime = roomInfo.endTime,
-                        roomStatus = roomInfo.roomStatus,
-                    )
+                    initRoomInfo(result.data.roomInfo)
                 }
             }
+        }
 
+        viewModelScope.launch {
+            if (playInfo != null) {
+                _roomPlayInfo.value = playInfo
+            } else {
+                when (val result = roomRepository.joinRoom(roomUUID)) {
+                    is Success -> {
+                        _roomPlayInfo.value = result.data
+                    }
+                    is ErrorResult -> _errorMessage.value = "join room error"
+                }
+            }
+        }
+
+        viewModelScope.launch {
             updateRoomConfig(roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID))
         }
+    }
+
+    private fun initRoomInfo(roomInfo: RoomInfo) {
+        _state.value = ClassRoomState(
+            roomUUID = roomUUID,
+            userUUID = userUUID,
+            userName = userName,
+            roomType = roomInfo.roomType,
+            ownerUUID = roomInfo.ownerUUID,
+            ownerName = roomInfo.ownerName,
+            title = roomInfo.title,
+            beginTime = roomInfo.beginTime,
+            endTime = roomInfo.endTime,
+            roomStatus = roomInfo.roomStatus,
+        )
+        userState.reset(
+            roomUUID = roomUUID,
+            userUUID = userUUID,
+            ownerUUID = roomInfo.ownerUUID,
+            scope = viewModelScope,
+        )
+        observerUserState()
     }
 
     private suspend fun updateRoomConfig(config: RoomConfig) {
@@ -147,7 +156,7 @@ class ClassRoomViewModel @Inject constructor(
     private fun observerUserState() {
         viewModelScope.launch {
             userState.currentUser.filterNotNull().collect {
-                _state.value = _state.value.copy(isSpeak = it.isSpeak, currentUser = it.copy())
+                _state.value = _state.value.copy(isSpeak = it.isSpeak, isRaiseHand = it.isRaiseHand)
             }
         }
 
@@ -288,7 +297,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userState.findFirstOtherUser()?.run {
                 val state = RTMUserState(
-                    name = _state.value.currentUser.name,
+                    name = userRepository.getUsername(),
                     camera = roomConfig.value.enableVideo,
                     mic = roomConfig.value.enableAudio,
                     isSpeak = isRoomOwner(),
@@ -355,7 +364,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.ClassMode -> {
                 if (senderId == _state.value.ownerUUID) {
-                    _state.value = state.value.copy(classMode = event.classModeType)
+                    _state.value = _state.value.copy(classMode = event.classModeType)
                 }
             }
             is RTMEvent.Notice -> {
@@ -517,7 +526,7 @@ class ClassRoomViewModel @Inject constructor(
 
     fun stopRecord() {
         viewModelScope.launch {
-            state.value.recordState?.run {
+            _state.value.recordState?.run {
                 val resp = cloudRecordRepository.stopRecordWithAgora(
                     roomUUID,
                     resourceId,
@@ -572,7 +581,7 @@ class ClassRoomViewModel @Inject constructor(
             return
         }
         // "正在插入课件……"
-        when (val ext = file.fileURL.substringAfterLast('.').toLowerCase()) {
+        when (val ext = file.fileURL.fileSuffix()) {
             "jpg", "jpeg", "png", "webp" -> {
                 onEvent(ClassRoomEvent.InsertImage(file.fileURL))
             }
@@ -637,14 +646,11 @@ data class ClassRoomState(
     val roomStatus: RoomStatus = RoomStatus.Idle,
     // 房间所有者
     val ownerUUID: String = "",
-    // 当前用户
-    val userUUID: String = "",
-    // 当前用户
-    val currentUser: RtcUser,
+
     // 房间所有者的名称
     val ownerName: String? = null,
     // 房间标题
-    val title: String = "",
+    val title: String? = null,
     // 房间开始时间
     val beginTime: Long = 0L,
     // 结束时间
@@ -654,21 +660,23 @@ data class ClassRoomState(
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
 
+    // 当前用户
+    val userUUID: String = "",
+    val userName: String = "",
     val isSpeak: Boolean = false,
+    val isRaiseHand: Boolean = false,
 
     val recordState: RecordState? = null,
 ) {
     val isWritable: Boolean
-        get() {
-            return when (roomType) {
-                RoomType.BigClass -> {
-                    ownerUUID == userUUID || isSpeak
-                }
-                RoomType.SmallClass -> {
-                    classMode == ClassModeType.Interaction
-                }
-                else -> true
+        get() = when (roomType) {
+            RoomType.BigClass -> {
+                ownerUUID == userUUID || isSpeak
             }
+            RoomType.SmallClass -> {
+                classMode == ClassModeType.Interaction
+            }
+            else -> true
         }
 
     val isOwner: Boolean
@@ -689,6 +697,10 @@ data class ClassRoomState(
 
     val needOwnerExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
+
+    companion object {
+        val Init = ClassRoomState()
+    }
 }
 
 data class RecordState constructor(

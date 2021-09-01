@@ -10,7 +10,7 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.FlatException
+import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.upload.*
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
@@ -127,7 +127,7 @@ class CloudStorageViewModel @Inject constructor(
             when (resp) {
                 is Success -> result = resp.data
                 is ErrorResult -> {
-                    if (resp.error.code == FlatException.Web_UploadConcurrentLimit) {
+                    if (resp.error.code == FlatErrorCode.Web_UploadConcurrentLimit) {
                         cloudStorageRepository.cancel()
                         // retry
                         resp = cloudStorageRepository.updateStart(action.filename, action.size)

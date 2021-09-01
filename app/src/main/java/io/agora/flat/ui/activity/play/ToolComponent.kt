@@ -16,11 +16,13 @@ import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
+import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 class ToolComponent(
@@ -71,7 +73,7 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.state.collect {
+            viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 binding.roomStart.isVisible = it.showStartButton
                 if (it.roomStatus == RoomStatus.Started && it.isOwner) {
                     binding.recordDisplayingLy.isVisible = it.isRecording
@@ -293,13 +295,13 @@ class ToolComponent(
 
     private fun showInviteDialog() {
         val state = viewModel.state.value
-        val inviteTitle = activity.getString(R.string.invite_title_format, state.currentUser.name)
+        val inviteTitle = activity.getString(R.string.invite_title_format, state.userName)
         val roomTime =
             "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
         val inviteLink = Constants.BASE_INVITE_URL + "/join/" + state.roomUUID
 
         val copyText = """
-            |${activity.getString(R.string.invite_title_format, state.currentUser.name)}
+            |${activity.getString(R.string.invite_title_format, state.userName)}
             |${activity.getString(R.string.invite_room_name_format, state.title)}
             |${activity.getString(R.string.invite_begin_time_format, roomTime)}
             |${activity.getString(R.string.invite_room_number_format, state.roomUUID)}

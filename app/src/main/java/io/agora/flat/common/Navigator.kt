@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import io.agora.flat.Constants
+import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
@@ -47,6 +48,14 @@ object Navigator {
         val intent = Intent(context, ClassRoomActivity::class.java).apply {
             putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
             putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
+        }
+        context.startActivity(intent)
+    }
+
+    fun launchRoomPlayActivity(context: Context, roomPlayInfo: RoomPlayInfo) {
+        val intent = Intent(context, ClassRoomActivity::class.java).apply {
+            putExtra(Constants.IntentKey.ROOM_UUID, roomPlayInfo.roomUUID)
+            putExtra(Constants.IntentKey.ROOM_PLAY_INFO, roomPlayInfo)
         }
         context.startActivity(intent)
     }

@@ -3,17 +3,22 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.ClipboardController
-import io.agora.flat.data.AppDatabase
+import io.agora.flat.data.ErrorResult
+import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
-import kotlinx.coroutines.Dispatchers
+import io.agora.flat.data.model.RoomPlayInfo
+import io.agora.flat.data.repository.RoomConfigRepository
+import io.agora.flat.data.repository.RoomRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class JoinRoomViewModel @Inject constructor(
-    private val appDatabase: AppDatabase,
+    private val roomConfigRepository: RoomConfigRepository,
+    private val roomRepository: RoomRepository,
     private val clipboard: ClipboardController,
 ) : ViewModel() {
     companion object {
@@ -21,10 +26,25 @@ class JoinRoomViewModel @Inject constructor(
     }
 
     val roomUUID = MutableStateFlow("")
+    val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
+    val errorMessage = MutableStateFlow<String?>(null)
 
-    fun updateRoomConfig(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            appDatabase.roomConfigDao().insertOrUpdate(RoomConfig(roomUUID, openVideo, openAudio))
+    fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
+        viewModelScope.launch {
+            roomConfigRepository.updateRoomConfig(RoomConfig(roomUUID, openVideo, openAudio))
+
+            when (val result = roomRepository.joinRoom(roomUUID)) {
+                is Success -> {
+                    roomPlayInfo.value = result.data
+                }
+                is ErrorResult -> {
+                    when (result.error.code) {
+                        FlatErrorCode.Web_RoomNotFound -> errorMessage.value = "room not found"
+                        FlatErrorCode.Web_RoomIsEnded -> errorMessage.value = " room has been ended"
+                        else -> errorMessage.value = "join room error ${result.error.code}"
+                    }
+                }
+            }
         }
     }
 

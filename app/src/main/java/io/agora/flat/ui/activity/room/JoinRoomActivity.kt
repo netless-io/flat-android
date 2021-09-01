@@ -32,18 +32,31 @@ class JoinRoomActivity : ComponentActivity() {
         setContent {
             val viewModel = viewModel<JoinRoomViewModel>()
             val clipboardText by viewModel.roomUUID.collectAsState()
+            val errorMessage by viewModel.errorMessage.collectAsState()
+            val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
 
             WindowFocusObserver { isWindowFocused ->
                 if (isWindowFocused) viewModel.checkClipboardText()
             }
+
+            LaunchedEffect(errorMessage) {
+                errorMessage?.let { showToast(it) }
+            }
+
+            LaunchedEffect(roomPlayInfo) {
+                if (roomPlayInfo != null) {
+                    Navigator.launchRoomPlayActivity(this@JoinRoomActivity, roomPlayInfo!!)
+                    finish()
+                }
+            }
+
             JoinRoomPage(clipboardText) { action ->
                 when (action) {
                     JoinRoomAction.Close -> finish()
                     is JoinRoomAction.JoinRoom -> {
-                        viewModel.updateRoomConfig(action.roomUUID, action.openVideo, action.openAudio)
-
-                        Navigator.launchRoomPlayActivity(this, roomUUID = action.roomUUID)
-                        finish()
+                        viewModel.joinRoom(action.roomUUID,
+                            action.openVideo,
+                            action.openAudio)
                     }
                 }
             }
