@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="房间类型"
+            android:text="@string/room_type"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
 
@@ -48,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="房间号"
+            android:text="@string/room_id"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
 
@@ -71,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="开始时间"
+            android:text="@string/time_start"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
 
@@ -91,6 +91,6 @@
         android:layout_height="36dp"
         android:layout_marginTop="24dp"
         android:background="@drawable/shape_blue_solid_round_4_bg"
-        android:text="复制邀请链接"
+        android:text="@string/copy_link_to_invite"
         android:textColor="#FFFFFF" />
 </LinearLayout>

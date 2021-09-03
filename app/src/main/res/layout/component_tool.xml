@@ -240,7 +240,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/setting"
+            android:text="@string/settings"
             android:textColor="#ff444e60"
             android:textSize="12sp" />
 
@@ -313,7 +313,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="视频区域"
+                android:text="@string/video_area"
                 android:textColor="#ff7a7b7c"
                 android:textSize="12sp" />
 

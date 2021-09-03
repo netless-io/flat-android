@@ -88,12 +88,12 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
                 .padding(horizontal = 16.dp)
         ) {
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.create_room_topic))
+            Text(stringResource(R.string.room_theme))
             FlatSmallVerticalSpacer()
             FlatPrimaryTextField(
                 value = title,
                 onValueChange = { title = it },
-                placeholderValue = stringResource(R.string.create_room_input_topic_hint)
+                placeholderValue = stringResource(R.string.create_room_input_theme)
             )
             FlatNormalVerticalSpacer()
             Text(stringResource(R.string.create_room_type))
@@ -108,7 +108,7 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
                     onCheckedChange = { openVideo = it }
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(id = R.string.open_video))
+                Text(stringResource(id = R.string.turn_on_camera))
             }
             Spacer(Modifier.height(32.dp))
             Box(

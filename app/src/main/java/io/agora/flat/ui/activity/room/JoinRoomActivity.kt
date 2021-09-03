@@ -90,12 +90,12 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
             .weight(1f)
             .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.room_number))
+            Text(stringResource(R.string.room_id))
             FlatSmallVerticalSpacer()
             FlatPrimaryTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
-                placeholderValue = stringResource(R.string.input_room_number_hint)
+                placeholderValue = stringResource(R.string.input_room_id_hint)
             )
             FlatNormalVerticalSpacer()
             Text(stringResource(R.string.join_option))
@@ -106,21 +106,21 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
                     onCheckedChange = { openAudio = it }
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.open_audio))
+                Text(stringResource(R.string.turn_on_mic))
                 Spacer(modifier = Modifier.width(40.dp))
                 Checkbox(
                     checked = openVideo,
                     onCheckedChange = { openVideo = it }
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.open_video))
+                Text(stringResource(R.string.turn_on_camera))
             }
             Spacer(modifier = Modifier.height(32.dp))
-            FlatPrimaryTextButton(stringResource(R.string.join_room_join)) {
+            FlatPrimaryTextButton(stringResource(R.string.join)) {
                 if (uuid.isNotBlank()) {
                     actioner(JoinRoomAction.JoinRoom(uuid, openVideo, openAudio))
                 } else {
-                    context.showToast("room uuid should not be empty")
+                    context.showToast(R.string.join_room_toast_empty)
                 }
             }
         }

@@ -1,5 +1,7 @@
 package io.agora.flat.util
 
+import android.content.Context
+import io.agora.flat.R
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -47,20 +49,18 @@ object FlatFormatter {
     }
 
     // TODO 国际化支持
-    fun diffTime(begin: Long, end: Long): String {
+    fun diffTime(context: Context, begin: Long, end: Long): String {
         val diff = end - begin
         if (diff < 0) {
-            // throw RuntimeException("end need large than begin")
-            return "0分"
+            return context.getString(R.string.relative_time_mm, 0)
         }
-        // 显示分钟
         if (diff < 3600_000) {
-            return "${TimeUnit.MILLISECONDS.toMinutes(diff)}分"
+            return context.getString(R.string.relative_time_mm, TimeUnit.MILLISECONDS.toMinutes(diff))
         }
         if (diff < 86400_000) {
-            return "${TimeUnit.MILLISECONDS.toHours(diff)}小时"
+            return context.getString(R.string.relative_time_hh, TimeUnit.MILLISECONDS.toHours(diff))
         }
-        return "${TimeUnit.MILLISECONDS.toDays(diff)}天"
+        return context.getString(R.string.relative_time_dd, TimeUnit.MILLISECONDS.toDays(diff))
     }
 
     fun size(size: Long): String {

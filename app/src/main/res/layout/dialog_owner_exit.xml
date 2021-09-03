@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="课堂正在继续，你是暂时退出挂起房间还是结束上课？"
+            android:text="@string/hangup_room_exit_tip"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
     </FrameLayout>
@@ -60,7 +60,7 @@
             android:layout_weight="1"
             android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
-            android:text="挂起房间"
+            android:text="@string/hangup_room"
             android:textColor="#444E60" />
 
         <View
@@ -74,7 +74,7 @@
             android:layout_weight="1"
             android:background="@drawable/shape_red_border_round_4_bg"
             android:gravity="center"
-            android:text="结束上课"
+            android:text="@string/end_room"
             android:textColor="#F45454" />
     </LinearLayout>
 </LinearLayout>

@@ -241,7 +241,7 @@ private fun HomeRoomTabs(
         categories.forEachIndexed { index, category ->
             val text = when (category) {
                 RoomCategory.Current -> stringResource(R.string.home_room_list)
-                RoomCategory.History -> stringResource(R.string.home_history_record)
+                RoomCategory.History -> stringResource(R.string.home_room_history)
             }
 
             Tab(
@@ -316,7 +316,7 @@ private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_home_calendar),
+                    painterResource(R.drawable.ic_home_calendar),
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.size(4.dp))

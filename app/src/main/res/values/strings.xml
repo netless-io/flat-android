@@ -1,117 +1,121 @@
 <resources>
     <string name="app_name">Flat</string>
-
-    <!-- common -->
-    <string name="commit" translatable="false">提交</string>
-    <string name="username" translatable="false">用户名</string>
-    <string name="toast_in_development" translatable="false">Not Supported Yet</string>
-    <string name="delete" translatable="false">删除</string>
-
-    <!-- title -->
-    <string name="title_activity_home">HomeActivity</string>
+    <string name="toast_in_development">Not Supported Yet</string>
+    <string name="commit">Commit</string>
+    <string name="username">Username</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="end">End</string>
+    <string name="relative_time_mm">%d m</string>
+    <string name="relative_time_hh">%d h</string>
+    <string name="relative_time_dd">%d d</string>
     <string name="title_home">Home</string>
-    <string name="title_cloud_storage" translatable="false">云盘</string>
-    <string name="title_user_info" translatable="false">个人信息</string>
-    <string name="title_setting" translatable="false">个人设置</string>
-    <string name="title_my_profile" translatable="false">我的资料</string>
-    <string name="title_room_detail" translatable="false">房间详情</string>
-    <string name="title_room_all" translatable="false">全部房间</string>
-    <string name="title_join_room" translatable="false">加入房间</string>
+    <string name="title_cloud_storage">Cloud Storage</string>
+    <string name="title_user_info">Personal</string>
+    <string name="title_setting">Settings</string>
+    <string name="title_my_profile">My Profile</string>
+    <string name="title_room_detail">Room Detail</string>
+    <string name="title_room_all">All Room</string>
+    <string name="title_join_room">Join Room</string>
+    <string name="title_feedback">Feedback</string>
+    <string name="title_about_us">About Us</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+    <string name="create_room">Create Room</string>
+    <string name="room_theme">Theme</string>
+    <string name="create_room_type">Type</string>
+    <string name="create_room_input_theme">Please enter the room theme.</string>
+    <string name="class_room_no_operate_permission">No permission</string>
+    <string name="schedule_room">Subscribe Room</string>
+    <string name="join_room">Join Room</string>
+    <string name="enter_room">Enter Room</string>
+    <string name="join_room_toast_empty">room uuid should not be empty</string>
+    <string name="room_id">Room ID</string>
+    <string name="input_room_id_hint">Please enter the room number</string>
+    <string name="room_type">Room Type</string>
+    <string name="nickname">Nickname</string>
+    <string name="input_nickname_hint">Please enter anonymous</string>
+    <string name="join">Join In</string>
+    <string name="join_option">Join Option</string>
+    <string name="turn_on_camera">Turn on the camera</string>
+    <string name="turn_on_mic">Turn on the microphone</string>
+    <string name="join_room_default_time_format">Room created by %1$s</string>
+    <string name="home_room_list">Room List</string>
+    <string name="home_room_history">History Record</string>
 
-    <string name="create_room" translatable="false">创建房间</string>
-    <string name="create_room_topic" translatable="false">主题</string>
-    <string name="create_room_type" translatable="false">类型</string>
-    <string name="create_room_input_topic_hint" translatable="false">请输入房间主题</string>
-    <string name="join_room" translatable="false">加入房间</string>
-    <string name="subscribe_room" translatable="false">预约房间</string>
-
-    <string name="room_number" translatable="false">房间号</string>
-    <string name="input_room_number_hint" translatable="false">请输入房间号</string>
-    <string name="room_type" translatable="false">房间类型</string>
-    <string name="nickname" translatable="false">匿名</string>
-    <string name="input_nickname_hint" translatable="false">请输入匿名</string>
-    <string name="join_room_join" translatable="false">加入</string>
-    <string name="join_option" translatable="false">加入选项</string>
-    <string name="open_video" translatable="false">开启摄像头</string>
-    <string name="open_audio" translatable="false">开启麦克风</string>
-
-    <string name="class_room_no_operate_permission" translatable="false">无法操作</string>
-
-    <string name="home_room_list" translatable="false">房间列表</string>
-    <string name="home_history_record" translatable="false">历史记录</string>
-    <string name="home_room_state_idle" translatable="false">待开始</string>
-    <string name="home_room_state_started" translatable="false">进行中</string>
-    <string name="home_room_state_end" translatable="false">已结束</string>
-    <string name="home_no_room_tip" translatable="false">暂无房间</string>
-    <string name="home_no_history_room_tip" translatable="false">暂无记录</string>
-
-    <string name="title_activity_create_room" translatable="false">CreateRoomActivity</string>
-    <string name="title_feedback" translatable="false">吐个槽</string>
-    <string name="title_about_us" translatable="false">关于我们</string>
-    <string name="setting_check_update" translatable="false">检查更新</string>
-
-    <string name="login_github_no_browser" translatable="false">链接错误或无浏览器</string>
-    <string name="login_github_browser_choose_title" translatable="false">Choose Browser</string>
-    <string name="login_set_auth_uuid_error" translatable="false">set auth uuid error</string>
-    <string name="login_page_label_1" translatable="false">在线互动，让想法同步</string>
-    <string name="login_page_label_2" translatable="false">powered by Agora</string>
-    <string name="login_success_and_jump" translatable="false">登录成功，跳转...</string>
-    <string name="login_fail" translatable="false">登录失败</string>
-
-    <string name="join_room_default_time_format" translatable="false">%1$s创建的房间</string>
-
-    <string name="room_class_start_class_success" translatable="false">开始房间成功</string>
-    <string name="room_class_start_class_fail" translatable="false">开始房间失败</string>
-    <string name="room_class_stop_class_fail" translatable="false">结束房间失败</string>
-
-    <string name="loaded_all" translatable="false">已加载全部</string>
-    <string name="modify_room" translatable="false">修改房间</string>
-    <string name="cancel_room" translatable="false">取消房间</string>
-    <string name="remove_room" translatable="false">移除房间</string>
-    <string name="delete_history" translatable="false">删除记录</string>
-
-    <string name="say_something" translatable="false">说点什么…</string>
-    <string name="message_muted" translatable="false">已禁言</string>
-    <string name="message_unmuted" translatable="false">已解除禁言</string>
-    <string name="class_room_message_muted" translatable="false">全员禁言中</string>
-    <string name="end" translatable="false">结束</string>
-    <string name="room_class_message_empty_hit" translatable="false">说点什么吧...</string>
-    <string name="room_class_cloudstorage_empty_hit" translatable="false">暂无文件</string>
-    <string name="room_class_teacher_leave" translatable="false">老师暂时离开</string>
-
-    <string name="user_list" translatable="false">用户列表</string>
-    <string name="room_class_userlist_state_speaking" translatable="false">（连麦中）</string>
-    <string name="room_class_userlist_state_handup" translatable="false">（已举手）</string>
-    <string name="room_class_userlist_state_teacher" translatable="false">（老师）</string>
-    <string name="start_room" translatable="false">开始上课</string>
-    <string name="room_recording_hit">课程录制中...</string>
-    <string name="stop_record">停止录制</string>
-    <string name="setting">设置</string>
-    <string name="camera">摄像头</string>
-    <string name="microphone">麦克风</string>
-    <string name="exit_room">退出教室</string>
-    <string name="start_record">开始录制</string>
-    <string name="chat">聊天</string>
-
-    <string name="cloud_storage_usage_format" translatable="false">已使用 %1$s</string>
-    <string name="cloud_storage_upload_image" translatable="false">上传照片</string>
-    <string name="cloud_storage_upload_video" translatable="false">上传视频</string>
-    <string name="cloud_storage_upload_music" translatable="false">上传音频</string>
-    <string name="cloud_storage_upload_doc" translatable="false">上传文件</string>
-    <string name="cloud_storage_upload_list_title">传输列表</string>
-
-    <string name="upload_success" translatable="false">上传成功</string>
-    <string name="upload_failure" translatable="false">上传失败</string>
-    <string name="replay">回放</string>
-    <string name="service_agreement">服务协议</string>
-    <string name="privacy_agreement">隐私协议</string>
-    <string name="network_error">网络异常，请检查网络设置</string>
-    <string name="copy_success">复制成功</string>
-
-    <string name="invite_title_format" translatable="false">%1$s 邀请你加入 Flat 房间</string>
-    <string name="invite_room_name_format" translatable="false">房间主题：%1$s</string>
-    <string name="invite_room_number_format" translatable="false">房间号：%1$s</string>
-    <string name="invite_begin_time_format" translatable="false">开始时间：%1$s</string>
-    <string name="invite_join_link_format" translatable="false">加入链接：%1$s</string>
+    <string name="home_room_state_idle">Upcoming</string>
+    <string name="home_room_state_started">Running</string>
+    <string name="home_room_state_paused">Paused</string>
+    <string name="home_room_state_end">Ended</string>
+    <string name="home_no_room_tip">No rooms available</string>
+    <string name="home_no_history_room_tip">No records</string>
+    <string name="setting_check_update">Check for updates</string>
+    <string name="login_github_no_browser">Link error or no browser</string>
+    <string name="login_github_browser_choose_title">Choose Browser</string>
+    <string name="login_set_auth_uuid_error">Set auth uuid error</string>
+    <string name="login_page_label_1">Interact online to keep ideas in sync</string>
+    <string name="login_page_label_2">Powered by Agora</string>
+    <string name="login_success_and_jump">Successful login, jump…</string>
+    <string name="login_fail">Login failed</string>
+    <string name="room_class_start_class_success">Start the room successfully</string>
+    <string name="room_class_start_class_fail">Failed to start the room</string>
+    <string name="room_class_stop_class_fail">Failed to end the room</string>
+    <string name="loaded_all">All loaded</string>
+    <string name="modify_room">Modify room</string>
+    <string name="cancel_room">Cancel room</string>
+    <string name="remove_room">Remove room</string>
+    <string name="delete_history">Delete Record</string>
+    <string name="say_something">Say something…</string>
+    <string name="message_muted">Muted</string>
+    <string name="message_unmuted">Unmuted</string>
+    <string name="class_room_message_muted">All members are mute</string>
+    <string name="room_class_message_empty_hit">Say something…</string>
+    <string name="room_class_cloudstorage_empty_hit">No files</string>
+    <string name="room_class_teacher_leave">The teacher leaves temporarily</string>
+    <string name="user_list">User List</string>
+    <string name="room_class_userlist_state_speaking">(Speaking)</string>
+    <string name="room_class_userlist_state_handup">(Hands raised)</string>
+    <string name="room_class_userlist_state_teacher">(Teacher)</string>
+    <string name="room_recording_hit">Course recording…</string>
+    <string name="start_room">Classes begin</string>
+    <string name="stop_record">Stop recording</string>
+    <string name="end_room">End of class</string>
+    <string name="settings">Settings</string>
+    <string name="camera">Camera</string>
+    <string name="microphone">Microphone</string>
+    <string name="exit_room">Exit</string>
+    <string name="start_record">Start Record</string>
+    <string name="chat">Chat</string>
+    <string name="cloud_storage">Cloud Storage</string>
+    <string name="cloud_storage_usage_format">%1$s used</string>
+    <string name="cloud_storage_upload_image">Photos</string>
+    <string name="cloud_storage_upload_video">Videos</string>
+    <string name="cloud_storage_upload_music">Audios</string>
+    <string name="cloud_storage_upload_doc">Files</string>
+    <string name="cloud_storage_upload_list_title">Upload List</string>
+    <string name="upload_success">Upload successfully</string>
+    <string name="upload_failure">Upload failed</string>
+    <string name="service_agreement">Service Agreement</string>
+    <string name="privacy_agreement">Privacy Agreement</string>
+    <string name="network_error">The network is abnormal, please check the network settings.</string>
+    <string name="copy_success">Copy successfully</string>
+    <string name="invite_title_format">%1$s invites you to join the Flat room</string>
+    <string name="invite_room_name_format">Room Theme: %1$s</string>
+    <string name="invite_room_number_format">Room ID: %1$s</string>
+    <string name="invite_begin_time_format">Start Time: %1$s</string>
+    <string name="invite_join_link_format">Join Link: %1$s</string>
+    <string name="replay">Replay</string>
+    <string name="exit_replay">Exit playback</string>
+    <string name="exit_replay_tip">Are you sure to exit playback?</string>
+    <string name="camera_has_closed">Camera is off</string>
+    <string name="video_area">Video area</string>
+    <string name="time_start">Start Time</string>
+    <string name="copy_link_to_invite">Copy Invite</string>
+    <string name="hangup_room">Hangup the room</string>
+    <string name="hangup_room_exit_tip">The class is continuing. Do you leave the suspended room temporarily or end the class?</string>
+    <string name="feedback_input_hint">Enter the content</string>
+    <string name="login_exit">Login Exit</string>
+    <string name="view_all_room_format">View all %1$d rooms</string>
+    <string name="copy_invite">Invite</string>
+    <string name="invite">Invite</string>
 </resources>

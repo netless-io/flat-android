@@ -1,21 +1,140 @@
 <resources>
     <string name="app_name">Flat</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_home">首页</string>
-    <string name="title_activity_compose_test">ComposeTestActivity</string>
-    <string name="title_setting">我的资料</string>
-    <string name="room_recording_hit">课程录制中...</string>
+    <string name="toast_in_development">Not Supported Yet</string>
+
+    <!-- common -->
+    <string name="commit">提交</string>
+    <string name="username">用户名</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="end">结束</string>
+
+    <!-- time -->
+    <string name="relative_time_mm">%d分</string>
+    <string name="relative_time_hh">%d小时</string>
+    <string name="relative_time_dd">%d天</string>
+
+    <!-- title -->
+    <string name="title_home">Home</string>
+    <string name="title_cloud_storage">云盘</string>
+    <string name="title_user_info">个人信息</string>
+    <string name="title_setting">个人设置</string>
+    <string name="title_my_profile">我的资料</string>
+    <string name="title_room_detail">房间详情</string>
+    <string name="title_room_all">全部房间</string>
+    <string name="title_join_room">加入房间</string>
+    <string name="title_feedback">吐个槽</string>
+    <string name="title_about_us">关于我们</string>
+    <string name="title_activity_compose_test">ComposeTest</string>
+
+    <string name="create_room">创建房间</string>
+    <string name="room_theme">主题</string>
+    <string name="create_room_type">类型</string>
+    <string name="create_room_input_theme">请输入房间主题</string>
+    <string name="class_room_no_operate_permission">无法操作</string>
+
+    <string name="schedule_room">预约房间</string>
+
+    <string name="join_room">加入房间</string>
+    <string name="enter_room">进入房间</string>
+    <string name="room_id">房间号</string>
+    <string name="input_room_id_hint">请输入房间号</string>
+    <string name="room_type">房间类型</string>
+    <string name="nickname">匿名</string>
+    <string name="input_nickname_hint">请输入匿名</string>
+    <string name="join">加入</string>
+    <string name="join_option">加入选项</string>
+    <string name="turn_on_camera">开启摄像头</string>
+    <string name="turn_on_mic">开启麦克风</string>
+    <string name="join_room_default_time_format">%1$s创建的房间</string>
+    <string name="join_room_toast_empty">房间号不能为空</string>
+
+    <string name="home_room_list">房间列表</string>
+    <string name="home_room_history">历史记录</string>
+    <string name="home_room_state_idle">待开始</string>
+    <string name="home_room_state_started">进行中</string>
+    <string name="home_room_state_paused">已暂停</string>
+    <string name="home_room_state_end">已结束</string>
+    <string name="home_no_room_tip">暂无房间</string>
+    <string name="home_no_history_room_tip">暂无记录</string>
+
+    <string name="setting_check_update">检查更新</string>
+
+    <string name="login_github_no_browser">链接错误或无浏览器</string>
+    <string name="login_github_browser_choose_title">Choose Browser</string>
+    <string name="login_set_auth_uuid_error">set auth uuid error</string>
+    <string name="login_page_label_1">在线互动，让想法同步</string>
+    <string name="login_page_label_2">powered by Agora</string>
+    <string name="login_success_and_jump">登录成功，跳转…</string>
+    <string name="login_fail">登录失败</string>
+    <string name="login_exit">退出登录</string>
+
+    <string name="room_class_start_class_success">开始房间成功</string>
+    <string name="room_class_start_class_fail">开始房间失败</string>
+    <string name="room_class_stop_class_fail">结束房间失败</string>
+
+    <string name="loaded_all">已加载全部</string>
+    <string name="modify_room">修改房间</string>
+    <string name="cancel_room">取消房间</string>
+    <string name="remove_room">移除房间</string>
+    <string name="delete_history">删除记录</string>
+
+    <string name="say_something">说点什么…</string>
+    <string name="message_muted">已禁言</string>
+    <string name="message_unmuted">已解除禁言</string>
+    <string name="class_room_message_muted">全员禁言中</string>
+    <string name="room_class_message_empty_hit">说点什么吧…</string>
+    <string name="room_class_cloudstorage_empty_hit">暂无文件</string>
+    <string name="room_class_teacher_leave">老师暂时离开</string>
+
+    <string name="user_list">用户列表</string>
+    <string name="room_class_userlist_state_speaking">(发言中)</string>
+    <string name="room_class_userlist_state_handup">(已举手)</string>
+    <string name="room_class_userlist_state_teacher">(老师)</string>
+    <string name="room_recording_hit">课程录制中…</string>
+    <string name="start_room">开始上课</string>
     <string name="stop_record">停止录制</string>
-    <string name="setting">设置</string>
+    <string name="end_room">结束上课</string>
+    <string name="settings">设置</string>
     <string name="camera">摄像头</string>
     <string name="microphone">麦克风</string>
     <string name="exit_room">退出教室</string>
     <string name="start_record">开始录制</string>
     <string name="chat">聊天</string>
+
+    <string name="cloud_storage">云盘</string>
+    <string name="cloud_storage_usage_format">已使用 %1$s</string>
+    <string name="cloud_storage_upload_image">上传照片</string>
+    <string name="cloud_storage_upload_video">上传视频</string>
+    <string name="cloud_storage_upload_music">上传音频</string>
+    <string name="cloud_storage_upload_doc">上传文件</string>
     <string name="cloud_storage_upload_list_title">传输列表</string>
-    <string name="replay">回放</string>
+
+    <string name="upload_success">上传成功</string>
+    <string name="upload_failure">上传失败</string>
     <string name="service_agreement">服务协议</string>
     <string name="privacy_agreement">隐私协议</string>
     <string name="network_error">网络异常，请检查网络设置</string>
     <string name="copy_success">复制成功</string>
+
+    <string name="invite_title_format">%1$s 邀请你加入 Flat 房间</string>
+    <string name="invite_room_name_format">房间主题：%1$s</string>
+    <string name="invite_room_number_format">房间号：%1$s</string>
+    <string name="invite_begin_time_format">开始时间：%1$s</string>
+    <string name="invite_join_link_format">加入链接：%1$s</string>
+
+    <string name="replay">回放</string>
+    <string name="exit_replay">退出回放</string>
+    <string name="exit_replay_tip">确定退出回放？</string>
+    <string name="camera_has_closed">摄像头已关闭</string>
+    <string name="video_area">视频区域</string>
+    <string name="time_start">开始时间</string>
+    <string name="copy_link_to_invite">复制邀请链接</string>
+    <string name="hangup_room">挂起房间</string>
+    <string name="hangup_room_exit_tip">课堂正在继续，你是暂时退出挂起房间还是结束上课？</string>
+    <string name="feedback_input_hint">请输入内容</string>
+    <string name="view_all_room_format">查看全部%1$d房间</string>
+    <string name="copy_invite">复制邀请</string>
+    <string name="invite">邀请</string>
 </resources>

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:paddingVertical="10dp"
-        android:text="云盘"
+        android:text="@string/cloud_storage"
         android:textColor="#444E60"
         android:textSize="12sp" />
 

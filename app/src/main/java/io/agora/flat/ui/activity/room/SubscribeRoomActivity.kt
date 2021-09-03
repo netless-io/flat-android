@@ -14,7 +14,7 @@ class SubscribeRoomActivity : ComponentActivity() {
         setContent {
             FlatColumnPage {
                 CloseTopAppBar(
-                    stringResource(id = R.string.subscribe_room),
+                    stringResource(id = R.string.schedule_room),
                     onClose = { finish() }) {
                 }
             }

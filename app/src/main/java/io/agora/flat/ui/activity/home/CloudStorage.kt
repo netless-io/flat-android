@@ -238,7 +238,7 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
                 Row {
                     Text(FlatFormatter.dateDash(file.createAt))
                     Spacer(Modifier.width(16.dp))
-                    Text(FlatFormatter.size(file.fileSize.toLong()))
+                    Text(FlatFormatter.size(file.fileSize))
                 }
             }
             Checkbox(checked = file.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))

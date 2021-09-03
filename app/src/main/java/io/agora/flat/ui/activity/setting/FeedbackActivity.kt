@@ -43,7 +43,11 @@ class FeedbackActivity : ComponentActivity() {
                         unfocusedIndicatorColor = FlatColorBorder
                     ),
                     placeholder = {
-                        Text("请输入内容", style = FlatCommonTextStyle, color = FlatColorGray)
+                        Text(
+                            stringResource(R.string.feedback_input_hint),
+                            style = FlatCommonTextStyle,
+                            color = FlatColorGray
+                        )
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -54,7 +58,7 @@ class FeedbackActivity : ComponentActivity() {
                     colors = ButtonDefaults.textButtonColors(backgroundColor = FlatColorBlue),
                     shape = MaterialTheme.shapes.small,
                     onClick = { viewModel.uploadFeedback(text) }) {
-                    Text(text = stringResource(id = R.string.commit),
+                    Text(stringResource(R.string.commit),
                         style = FlatCommonTextStyle,
                         color = FlatColorWhite)
                 }

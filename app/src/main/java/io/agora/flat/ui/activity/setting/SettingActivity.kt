@@ -90,7 +90,11 @@ private fun SettingItemList() {
 @Composable
 private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
     Box(BottomOptBoxModifier) {
-        FlatHighlightTextButton("退出登录", icon = R.drawable.ic_login_out, onClick = { onLogoutClick() })
+        FlatHighlightTextButton(
+            stringResource(R.string.login_exit),
+            icon = R.drawable.ic_login_out,
+            onClick = { onLogoutClick() }
+        )
     }
 }
 

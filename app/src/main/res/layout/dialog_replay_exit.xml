@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="退出回放"
+            android:text="@string/exit_replay"
             android:textColor="@color/flat_black"
             android:textSize="16sp" />
 
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="确定退出回放？"
+            android:text="@string/exit_replay_tip"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
     </FrameLayout>
@@ -61,7 +61,7 @@
             android:layout_weight="1"
             android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
-            android:text="取消"
+            android:text="@string/cancel"
             android:textColor="#444E60" />
 
         <View
@@ -75,7 +75,7 @@
             android:layout_weight="1"
             android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
-            android:text="确定"
+            android:text="@string/confirm"
             android:textColor="#444E60" />
     </LinearLayout>
 </LinearLayout>
