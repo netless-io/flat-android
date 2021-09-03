@@ -18,6 +18,7 @@ import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
+import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.di.interfaces.RtmEngineProvider
@@ -238,6 +239,12 @@ class ClassRoomViewModel @Inject constructor(
     private fun onEvent(event: ClassRoomEvent) {
         viewModelScope.launch {
             _roomEvent.value = event
+        }
+    }
+
+    fun sendGlobalEvent(event: Event) {
+        viewModelScope.launch {
+            eventbus.produceEvent(event)
         }
     }
 

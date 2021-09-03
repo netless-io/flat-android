@@ -39,11 +39,11 @@ class CloudStorageViewModel @Inject constructor(
         const val TAG = "CloudStorageViewModel"
     }
 
-    private val refreshing = ObservableLoadingCounter()
     private val files = MutableStateFlow(listOf<CloudStorageUIFile>())
     private val uploadFiles = MutableStateFlow(listOf<UploadFile>())
     private val totalUsage = MutableStateFlow(0L)
     private val pageLoading = ObservableLoadingCounter()
+    private val refreshing = ObservableLoadingCounter()
 
     private val _state = MutableStateFlow(CloudStorageViewState())
     val state: StateFlow<CloudStorageViewState>
@@ -111,10 +111,13 @@ class CloudStorageViewModel @Inject constructor(
     fun deleteChecked() {
         viewModelScope.launch {
             pageLoading.addLoader()
-            val fileList = files.value.filter { it.checked }.map { it.fileUUID }
-            val result = cloudStorageRepository.remove(fileList)
+            val checked = files.value.filter { it.checked }
+            val result = cloudStorageRepository.remove(checked.map { it.fileUUID })
             if (result is Success) {
-                files.value = files.value.toMutableList().filter { !fileList.contains(it.fileUUID) }
+                files.value = files.value.filterNot { it.checked }
+
+                val size = checked.sumOf { it.fileSize }
+                totalUsage.value = totalUsage.value - size
             }
             pageLoading.removeLoader()
         }

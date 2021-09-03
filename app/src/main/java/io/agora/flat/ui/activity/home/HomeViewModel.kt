@@ -95,10 +95,6 @@ class HomeViewModel @Inject constructor(
             delay(2000)
             refreshing.removeLoader()
         }
-
-        viewModelScope.launch {
-            cloudStorageRepository.getFileList(1)
-        }
     }
 
     private fun reloadRooms() {

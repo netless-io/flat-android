@@ -110,6 +110,7 @@
     <string name="cloud_storage_upload_music">上传音频</string>
     <string name="cloud_storage_upload_doc">上传文件</string>
     <string name="cloud_storage_upload_list_title">传输列表</string>
+    <string name="cloud_storage_no_files">暂无数据</string>
 
     <string name="upload_success">上传成功</string>
     <string name="upload_failure">上传失败</string>

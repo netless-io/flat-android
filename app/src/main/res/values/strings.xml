@@ -93,6 +93,7 @@
     <string name="cloud_storage_upload_music">Audios</string>
     <string name="cloud_storage_upload_doc">Files</string>
     <string name="cloud_storage_upload_list_title">Upload List</string>
+    <string name="cloud_storage_no_files">No data available</string>
     <string name="upload_success">Upload successfully</string>
     <string name="upload_failure">Upload failed</string>
     <string name="service_agreement">Service Agreement</string>

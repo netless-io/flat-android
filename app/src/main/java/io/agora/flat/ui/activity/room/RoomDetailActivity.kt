@@ -69,6 +69,7 @@ class RoomDetailActivity : ComponentActivity() {
                             action.roomUUID,
                             action.periodicUUID
                         )
+                        finish()
                     }
                     DetailUiAction.Invite -> {
                         // Show Dialog
@@ -78,6 +79,7 @@ class RoomDetailActivity : ComponentActivity() {
                             this@RoomDetailActivity,
                             action.roomUUID
                         )
+                        finish()
                     }
                     DetailUiAction.ShowAllRooms -> {
                         visible = true

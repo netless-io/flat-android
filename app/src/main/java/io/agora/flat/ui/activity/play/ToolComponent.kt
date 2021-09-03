@@ -12,6 +12,7 @@ import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
+import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
@@ -256,6 +257,7 @@ class ToolComponent(
         if (viewModel.state.value.needOwnerExitDialog) {
             showOwnerExitDialog()
         } else {
+            viewModel.sendGlobalEvent(RoomsUpdated)
             activity.finish()
             // showAudienceExitDialog()
         }
@@ -270,6 +272,7 @@ class ToolComponent(
 
             // 挂起房间
             override fun onLeftButtonClick() {
+                viewModel.sendGlobalEvent(RoomsUpdated)
                 activity.finish()
             }
 
@@ -277,6 +280,7 @@ class ToolComponent(
             override fun onRightButtonClick() {
                 lifecycleScope.launch {
                     if (viewModel.stopClass()) {
+                        viewModel.sendGlobalEvent(RoomsUpdated)
                         activity.finish()
                     } else {
                         activity.showToast(R.string.room_class_stop_class_fail)

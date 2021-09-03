@@ -5,9 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -179,26 +177,42 @@ internal fun CloudStorageContent(
     files: List<CloudStorageUIFile>,
     actioner: (CloudStorageUIAction) -> Unit,
 ) {
+    val checked = files.any { it.checked }
+
     Column {
-        Row(Modifier
-            .fillMaxWidth()
-            .background(FlatColorBackground), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
-                Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                FlatColorTextSecondary,
+        if (files.isEmpty()) {
+            EmptyView(
+                R.drawable.img_cloud_storage_no_file,
+                R.string.cloud_storage_no_files,
+                MaxWidthSpread.verticalScroll(rememberScrollState()),
             )
-            Spacer(modifier = Modifier.weight(1f))
-            TextButton(onClick = { actioner(CloudStorageUIAction.Delete) }) {
-                Text(stringResource(R.string.delete), color = Color.Red)
+        } else {
+            Row(Modifier
+                .fillMaxWidth()
+                .background(FlatColorBackground), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
+                    Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    FlatColorTextSecondary,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    enabled = checked,
+                    onClick = { actioner(CloudStorageUIAction.Delete) },
+                ) {
+                    Text(stringResource(R.string.delete),
+                        color = if (checked) FlatColorRed else FlatColorRed.copy(alpha = ContentAlpha.disabled))
+                }
             }
-        }
-        LazyColumn(Modifier.weight(1f)) {
-            items(count = files.size, key = { index: Int ->
-                files[index].fileUUID
-            }) { index ->
-                CloudStorageItem(files[index],
-                    onCheckedChange = { checked -> actioner(CloudStorageUIAction.CheckItem(index, checked)) })
+            LazyColumn(Modifier.weight(1f)) {
+                items(count = files.size, key = { index: Int ->
+                    files[index].fileUUID
+                }) { index ->
+                    CloudStorageItem(files[index]) { checked ->
+                        actioner(CloudStorageUIAction.CheckItem(index,
+                            checked))
+                    }
+                }
             }
         }
     }
