@@ -12,8 +12,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,8 +29,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
-import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.agora.flat.R
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.theme.FlatAndroidTheme
@@ -39,12 +41,10 @@ class ComposeTestActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatAndroidTheme {
-                val controller = rememberAndroidSystemUiController()
+                val controller = rememberSystemUiController()
                 controller.setStatusBarColor(FlatColorWhite)
 
-                CompositionLocalProvider(LocalSystemUiController provides controller) {
-                    ComposeTestScreen()
-                }
+                ComposeTestScreen()
             }
         }
     }
@@ -170,11 +170,9 @@ fun HelloContent(name: String, onNameChange: (String) -> Unit) {
 @Composable
 fun DefaultPreview2() {
     FlatAndroidTheme {
-        val controller = rememberAndroidSystemUiController()
+        val controller = rememberSystemUiController()
         controller.setStatusBarColor(FlatColorWhite)
 
-        CompositionLocalProvider(LocalSystemUiController provides controller) {
-            ComposeTestScreen()
-        }
+        ComposeTestScreen()
     }
 }

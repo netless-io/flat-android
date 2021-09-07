@@ -2,24 +2,19 @@
 buildscript {
     ext {
         gradle_tool_version = '7.0.0'
-        kotlin_version = "1.4.31"
-
+        kotlin_version = "1.5.10"
         hilt_version = '2.36'
-        ktxVersion = '1.0.2'
     }
 
     repositories {
         maven { url 'https://jitpack.io' }
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_tool_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
@@ -27,7 +22,6 @@ allprojects {
     repositories {
         maven { url 'https://jitpack.io' }
         google()
-        jcenter()
         mavenCentral()
     }
 }
