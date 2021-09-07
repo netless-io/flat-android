@@ -13,8 +13,8 @@ import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.RoomsUpdated
+import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.ObservableLoadingCounter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

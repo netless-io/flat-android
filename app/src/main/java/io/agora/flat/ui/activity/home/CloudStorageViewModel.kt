@@ -17,7 +17,7 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.CloudStorageUploadStartResp
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.repository.CloudStorageRepository
-import io.agora.flat.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.fileSuffix
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.delay

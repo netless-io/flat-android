@@ -9,6 +9,7 @@
     <string name="cancel">取消</string>
     <string name="confirm">确定</string>
     <string name="end">结束</string>
+    <string name="create">创建</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -27,6 +28,10 @@
     <string name="title_feedback">吐个槽</string>
     <string name="title_about_us">关于我们</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+
+    <string name="room_type_big_class">大班课</string>
+    <string name="room_type_small_class">小班课</string>
+    <string name="room_type_one_to_one">一对一</string>
 
     <string name="create_room">创建房间</string>
     <string name="room_theme">主题</string>

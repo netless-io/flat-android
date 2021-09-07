@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.agora.flat.util
+package io.agora.flat.ui.util
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

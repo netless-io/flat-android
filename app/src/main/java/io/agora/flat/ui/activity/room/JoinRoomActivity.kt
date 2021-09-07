@@ -32,15 +32,15 @@ class JoinRoomActivity : ComponentActivity() {
         setContent {
             val viewModel = viewModel<JoinRoomViewModel>()
             val clipboardText by viewModel.roomUUID.collectAsState()
-            val errorMessage by viewModel.errorMessage.collectAsState()
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+            val error by viewModel.error.collectAsState()
 
             WindowFocusObserver { isWindowFocused ->
                 if (isWindowFocused) viewModel.checkClipboardText()
             }
 
-            LaunchedEffect(errorMessage) {
-                errorMessage?.let { showToast(it) }
+            LaunchedEffect(error) {
+                error?.message?.let { showToast(it) }
             }
 
             LaunchedEffect(roomPlayInfo) {

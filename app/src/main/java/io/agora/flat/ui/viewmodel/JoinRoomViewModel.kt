@@ -11,6 +11,7 @@ import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.ui.util.UiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,21 +28,19 @@ class JoinRoomViewModel @Inject constructor(
 
     val roomUUID = MutableStateFlow("")
     val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
-    val errorMessage = MutableStateFlow<String?>(null)
+    val error = MutableStateFlow<UiError?>(null)
 
     fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
         viewModelScope.launch {
             roomConfigRepository.updateRoomConfig(RoomConfig(roomUUID, openVideo, openAudio))
 
             when (val result = roomRepository.joinRoom(roomUUID)) {
-                is Success -> {
-                    roomPlayInfo.value = result.data
-                }
+                is Success -> roomPlayInfo.value = result.data
                 is ErrorResult -> {
-                    when (result.error.code) {
-                        FlatErrorCode.Web_RoomNotFound -> errorMessage.value = "room not found"
-                        FlatErrorCode.Web_RoomIsEnded -> errorMessage.value = " room has been ended"
-                        else -> errorMessage.value = "join room error ${result.error.code}"
+                    error.value = when (result.error.code) {
+                        FlatErrorCode.Web_RoomNotFound -> UiError("room not found")
+                        FlatErrorCode.Web_RoomIsEnded -> UiError(" room has been ended")
+                        else -> UiError("join room error ${result.error.code}")
                     }
                 }
             }

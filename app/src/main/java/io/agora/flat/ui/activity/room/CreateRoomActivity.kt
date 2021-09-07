@@ -61,7 +61,7 @@ class CreateRoomActivity : ComponentActivity() {
 @Composable
 private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
     val context = LocalContext.current
-    var title by remember {
+    var theme by remember {
         mutableStateOf(
             context.getString(
                 R.string.join_room_default_time_format,
@@ -91,8 +91,8 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
             Text(stringResource(R.string.room_theme))
             FlatSmallVerticalSpacer()
             FlatPrimaryTextField(
-                value = title,
-                onValueChange = { title = it },
+                value = theme,
+                onValueChange = { theme = it },
                 placeholderValue = stringResource(R.string.create_room_input_theme)
             )
             FlatNormalVerticalSpacer()
@@ -115,8 +115,8 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                FlatPrimaryTextButton(text = "创建", enabled = !viewState.loading) {
-                    actioner(CreateRoomAction.CreateRoom(title, type))
+                FlatPrimaryTextButton(stringResource(R.string.create), enabled = !viewState.loading) {
+                    actioner(CreateRoomAction.CreateRoom(theme, type))
                 }
                 if (viewState.loading) {
                     CircularProgressIndicator(Modifier.size(24.dp))
@@ -131,7 +131,7 @@ private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
     Row(Modifier.fillMaxWidth()) {
         TypeItem(
             checked = type == RoomType.BigClass,
-            text = "大班课",
+            text = stringResource(id = R.string.room_type_big_class),
             id = R.drawable.img_big_class,
             modifier = Modifier
                 .weight(7f)
@@ -139,7 +139,7 @@ private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
         Spacer(Modifier.weight(1f))
         TypeItem(
             checked = type == RoomType.SmallClass,
-            text = "小班课",
+            text = stringResource(id = R.string.room_type_small_class),
             id = R.drawable.img_small_class,
             modifier = Modifier
                 .weight(7f)
@@ -147,7 +147,7 @@ private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
         Spacer(Modifier.weight(1f))
         TypeItem(
             checked = type == RoomType.OneToOne,
-            text = "一对一",
+            text = stringResource(id = R.string.room_type_one_to_one),
             id = R.drawable.img_one_to_one,
             modifier = Modifier
                 .weight(7f)

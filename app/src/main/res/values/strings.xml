@@ -7,6 +7,7 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="end">End</string>
+    <string name="create">Create</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
@@ -21,6 +22,11 @@
     <string name="title_feedback">Feedback</string>
     <string name="title_about_us">About Us</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+
+    <string name="room_type_big_class">Big Class</string>
+    <string name="room_type_small_class">Small Class</string>
+    <string name="room_type_one_to_one">One to One</string>
+
     <string name="create_room">Create Room</string>
     <string name="room_theme">Theme</string>
     <string name="create_room_type">Type</string>

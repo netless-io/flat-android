@@ -11,7 +11,7 @@ import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.event.RoomsUpdated
-import io.agora.flat.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
