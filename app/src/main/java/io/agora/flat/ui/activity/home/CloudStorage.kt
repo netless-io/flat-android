@@ -25,12 +25,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.agora.flat.R
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.FlatSwipeRefresh
 import io.agora.flat.ui.compose.FlatTopAppBar
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
@@ -56,28 +54,19 @@ fun CloudStorage() {
 
 @Composable
 internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
+    val showUploadList = viewState.uploadFiles.isNotEmpty()
+
     FlatPage {
         Column {
             FlatCloudStorageTopBar()
-
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(viewState.refreshing),
-                onRefresh = { actioner(CloudStorageUIAction.Reload) },
-                indicator = { state, trigger ->
-                    SwipeRefreshIndicator(
-                        state = state,
-                        refreshTriggerDistance = trigger,
-                        contentColor = MaterialTheme.colors.primary,
-                    )
-                }) {
+            FlatSwipeRefresh(viewState.refreshing, onRefresh = { actioner(CloudStorageUIAction.Reload) }) {
                 Box(Modifier.fillMaxSize()) {
                     CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
-
                     CloudStorageAddFile(actioner)
                 }
             }
         }
-        if (viewState.uploadFiles.isNotEmpty()) {
+        if (showUploadList) {
             UploadList()
         }
     }
@@ -169,7 +158,6 @@ private fun RowScope.UpdatePickItem(@DrawableRes id: Int, @StringRes text: Int, 
         Text(text = stringResource(text))
     }
 }
-
 
 @Composable
 internal fun CloudStorageContent(

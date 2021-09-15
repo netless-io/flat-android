@@ -43,7 +43,6 @@ class ComposeTestActivity : ComponentActivity() {
             FlatAndroidTheme {
                 val controller = rememberSystemUiController()
                 controller.setStatusBarColor(FlatColorWhite)
-
                 ComposeTestScreen()
             }
         }
@@ -66,12 +65,12 @@ fun GreetingCompose() {
             BackTopAppBar("测试", {})
             Box(modifier = Modifier.padding(16.dp)) {
                 Image(
-                    painter = painterResource(id = R.drawable.header),
+                    painter = painterResource(id = R.drawable.img_home_no_history),
                     modifier = Modifier
                         .height(180.dp)
                         .clip(shape = RoundedCornerShape(12.dp))
                         .fillMaxWidth(),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Inside,
                     contentDescription = null
                 )
             }

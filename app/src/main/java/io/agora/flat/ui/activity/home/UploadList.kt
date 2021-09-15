@@ -28,7 +28,7 @@ import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.*
 
 @Composable
-fun UploadList() {
+internal fun UploadList() {
     val viewModel = viewModel(CloudStorageViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 

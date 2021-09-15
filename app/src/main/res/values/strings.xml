@@ -104,7 +104,7 @@
     <string name="upload_failure">Upload failed</string>
     <string name="service_agreement">Service Agreement</string>
     <string name="privacy_agreement">Privacy Agreement</string>
-    <string name="network_error">The network is abnormal, please check the network settings.</string>
+    <string name="network_error">Please check the network settings.</string>
     <string name="copy_success">Copy successfully</string>
     <string name="invite_title_format">%1$s invites you to join the Flat room</string>
     <string name="invite_room_name_format">Room Theme: %1$s</string>

@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.playback.syncplayer
 
 class ClusterPlayer constructor(private val one: AtomPlayer, private val two: AtomPlayer) : AtomPlayer() {
-
     private var players: Array<AtomPlayer> = arrayOf(one, two)
     private var pauseReason: Array<Boolean> = arrayOf(false, false)
 
@@ -10,7 +9,6 @@ class ClusterPlayer constructor(private val one: AtomPlayer, private val two: At
 
     init {
         val atomPlayerListener = LocalAtomPlayerListener()
-
         players[0].atomPlayerListener = atomPlayerListener
         players[1].atomPlayerListener = atomPlayerListener
     }
@@ -88,8 +86,7 @@ class ClusterPlayer constructor(private val one: AtomPlayer, private val two: At
         override fun onPlayerPhaseChange(atomPlayer: AtomPlayer, phaseChange: AtomPlayerPhase) {
             Logger.d("onPlayerPhaseChange ${atomPlayer.name} $phaseChange")
             when (phaseChange) {
-                AtomPlayerPhase.Idle -> {
-                }
+                AtomPlayerPhase.Idle -> {; }
                 AtomPlayerPhase.Pause -> {
                     if (isPauseWhenBuffering(atomPlayer)) {
                         return
@@ -113,6 +110,7 @@ class ClusterPlayer constructor(private val one: AtomPlayer, private val two: At
                     }
                     updatePlayerPhase(AtomPlayerPhase.Buffering)
                 }
+                else -> {; }
             }
         }
 

@@ -22,15 +22,9 @@ fun FlatPrimaryTextButton(
     onClick: () -> Unit,
 ) {
     val colors = if (enabled)
-        ButtonDefaults.textButtonColors(
-            contentColor = FlatColorGray,
-            backgroundColor = FlatColorBlue
-        )
+        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorBlue)
     else
-        ButtonDefaults.textButtonColors(
-            contentColor = FlatColorGray,
-            backgroundColor = FlatColorGray
-        )
+        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorGray)
 
     TextButton(
         modifier = Modifier

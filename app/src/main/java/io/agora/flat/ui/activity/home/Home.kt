@@ -17,23 +17,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.coil.rememberCoilPainter
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
-import io.agora.flat.ui.compose.CustomInteractionSource
-import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.compose.FlatRoomStatusText
-import io.agora.flat.ui.compose.FlatTopAppBar
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
@@ -63,16 +59,7 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
         // 操作区
         TopOperations()
         // 房间列表区
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(viewState.refreshing),
-            onRefresh = { actioner(HomeViewAction.Reload) },
-            indicator = { state, trigger ->
-                SwipeRefreshIndicator(
-                    state = state,
-                    refreshTriggerDistance = trigger,
-                    contentColor = MaterialTheme.colors.primary,
-                )
-            }) {
+        FlatSwipeRefresh(refreshing = viewState.refreshing, onRefresh = { actioner(HomeViewAction.Reload) }) {
             HomeRoomContent(
                 modifier = MaxWidthSpread,
                 selectedHomeCategory = viewState.category,
@@ -89,22 +76,12 @@ fun FlatNetworkError(onClick: () -> Unit) {
     Box(Modifier
         .fillMaxWidth()
         .height(40.dp)
-        .clickable {
-            onClick()
-        }
+        .clickable(onClick = onClick)
         .background(FlatColorRedLight)
         .padding(horizontal = 16.dp)
     ) {
-        Text(
-            stringResource(R.string.network_error),
-            Modifier.align(Alignment.CenterStart),
-            FlatColorRed
-        )
-        Image(
-            painterResource(R.drawable.ic_arrow_right_red),
-            "",
-            Modifier.align(Alignment.CenterEnd),
-        )
+        Text(stringResource(R.string.network_error), Modifier.align(Alignment.CenterStart), FlatColorRed)
+        Image(painterResource(R.drawable.ic_arrow_right_red), "", Modifier.align(Alignment.CenterEnd))
     }
 }
 
@@ -149,9 +126,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
 @Composable
 fun FlatHomeTopBar(userAvatar: String) {
     FlatTopAppBar(
-        title = {
-            Text(stringResource(R.string.title_home), style = FlatTitleTextStyle)
-        },
+        title = { Text(stringResource(R.string.title_home), style = FlatTitleTextStyle) },
         actions = {
             Box {
                 val context = LocalContext.current
@@ -167,6 +142,11 @@ fun FlatHomeTopBar(userAvatar: String) {
                         contentScale = ContentScale.Crop
                     )
                 }
+
+                val state = LocalLifecycleOwner.current.lifecycle.observeAsSate()
+                if (state.value == Lifecycle.Event.ON_PAUSE) {
+                    expanded = false
+                }
                 DropdownMenu(
                     modifier = Modifier.wrapContentSize(),
                     expanded = expanded,
@@ -174,7 +154,7 @@ fun FlatHomeTopBar(userAvatar: String) {
                 ) {
                     DropdownMenuItem(onClick = {
                         Navigator.launchSettingActivity(context)
-                        expanded = false
+                        // expanded = false
                     }) {
                         Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -182,7 +162,7 @@ fun FlatHomeTopBar(userAvatar: String) {
                     }
                     DropdownMenuItem(onClick = {
                         Navigator.launchMyProfileActivity(context)
-                        expanded = false
+                        // expanded = false
                     }) {
                         Image(painterResource(R.drawable.ic_user_profile_aboutus), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
