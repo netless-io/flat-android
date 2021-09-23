@@ -282,6 +282,15 @@ class ClassRoomViewModel @Inject constructor(
     // RTCCommand Handle
     private fun updateDeviceState(value: DeviceStateValue) {
         userState.updateDeviceState(uuid = value.userUUID, audioOpen = value.mic, videoOpen = value.camera)
+
+        updateRtcStream(value.userUUID)
+    }
+
+    private fun updateRtcStream(userUUID: String) {
+        userState.findFirstUser(userUUID)?.also {
+            rtcApi.rtcEngine().muteRemoteAudioStream(it.rtcUID, !it.audioOpen)
+            rtcApi.rtcEngine().muteRemoteVideoStream(it.rtcUID, !it.videoOpen)
+        }
     }
 
     private fun updateUserState(userUUID: String, state: RTMUserState) {
@@ -298,6 +307,10 @@ class ClassRoomViewModel @Inject constructor(
         userState.updateUserStates(status.uStates)
 
         _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
+
+        status.uStates.forEach { (userUUID, _) ->
+            updateRtcStream(userUUID = userUUID)
+        }
     }
 
     fun requestChannelStatus() {
@@ -595,6 +608,9 @@ class ClassRoomViewModel @Inject constructor(
             "doc", "docx", "ppt", "pptx", "pdf" -> {
                 insertDocs(file, ext)
             }
+            "mp4" -> {
+                onEvent(ClassRoomEvent.InsertVideo(file.fileURL))
+            }
             else -> {
                 // Not Support Mobile
             }
@@ -736,5 +752,6 @@ sealed class ClassRoomEvent {
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
+    data class InsertVideo(val videoUrl: String) : ClassRoomEvent()
     data class ShowDot(val id: Int) : ClassRoomEvent()
 }

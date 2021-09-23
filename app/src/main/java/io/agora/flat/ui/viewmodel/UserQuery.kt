@@ -2,6 +2,7 @@ package io.agora.flat.ui.viewmodel
 
 import android.util.Log
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomRepository
@@ -11,7 +12,6 @@ import javax.inject.Inject
 class UserQuery @Inject constructor(
     private val roomRepository: RoomRepository,
 ) {
-    private val TAG = "MyActivity"
     private lateinit var roomUUID: String
     private var userMap = mutableMapOf<String, RtcUser>()
 
@@ -23,14 +23,14 @@ class UserQuery @Inject constructor(
         val filter = uuids.filter { !userMap.containsKey(it) }
         if (filter.isNotEmpty()) {
             Log.d("UserQuery", "loadUsers more $filter")
-            val result = roomRepository.getRoomUsers(roomUUID, filter)
-            if (result is Success) {
-                result.data.forEach {
-                    it.value.userUUID = it.key
+            when (val result = roomRepository.getRoomUsers(roomUUID, filter)) {
+                is Success -> {
+                    result.data.forEach {
+                        it.value.userUUID = it.key
+                    }
+                    userMap.putAll(result.data)
                 }
-                userMap.putAll(result.data)
-            } else {
-                return emptyMap() // TODO: return empty for failure
+                is ErrorResult -> return emptyMap()
             }
         }
         return userMap.filter { uuids.contains(it.key) }

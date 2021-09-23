@@ -55,9 +55,7 @@ fun Context.dp2px(dp: Int): Int {
 }
 
 fun Context.px2dp(px: Int): Int {
-    return Resources.getSystem().displayMetrics.density.let {
-        (px.toFloat() / it + 0.5).toInt()
-    }
+    return (px.toFloat() / Resources.getSystem().displayMetrics.density + 0.5).toInt()
 }
 
 fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = "") {
@@ -72,13 +70,8 @@ fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = ""
 
 fun Context.contentFileInfo(uri: Uri): ContentFileInfo? {
     val mediaType = contentResolver.getType(uri) ?: "text/plain"
-    return contentResolver.query(
-        uri,
-        arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
-        null,
-        null,
-        null
-    )?.use { cursor ->
+    val projection = arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)
+    return contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
         cursor.moveToFirst()
         val filename = cursor.getString(0)
         val size = cursor.getLong(1)

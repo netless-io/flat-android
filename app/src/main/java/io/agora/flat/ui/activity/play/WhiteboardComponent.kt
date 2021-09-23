@@ -26,7 +26,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.dp2px
-import io.agora.flat.util.showDebugToast
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
@@ -306,6 +305,7 @@ class WhiteboardComponent(
                     is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl)
                     is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles)
+                    is ClassRoomEvent.InsertVideo -> insertVideo(it.videoUrl)
                     else -> {; }
                 }
             }
@@ -330,13 +330,17 @@ class WhiteboardComponent(
             centerX = 0.0
             centerY = 0.0
         })
-        room?.completeImageUpload(uuid, imageUrl);
+        room?.completeImageUpload(uuid, imageUrl)
     }
 
     private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles) {
-        room?.putScenes(dirpath, convertedFiles.scenes, 0)
-        room?.setScenePath("$dirpath/${convertedFiles.scenes[0].name}")
-        room?.scalePptToFit(AnimationMode.Immediately)
+        val param = WindowAppParam.createDocsViewerApp(dirpath, convertedFiles.scenes, "preview")
+        room?.addApp(param, null)
+    }
+
+    private fun insertVideo(videoUrl: String) {
+        val param = WindowAppParam.createMediaPlayerApp(videoUrl, "player")
+        room?.addApp(param, null)
     }
 
     private fun setRoomWritable(writable: Boolean) {
@@ -368,10 +372,11 @@ class WhiteboardComponent(
     }
 
     private fun initWhiteboard() {
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
+        configuration.isEnableSyncedStore = true
 
         whiteSdk = WhiteSdk(binding.whiteboardView, activity, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallbacks {
@@ -510,7 +515,7 @@ class WhiteboardComponent(
             }
             // 设置默认颜色
             if (item == null) {
-                item = ColorItem.colors[0];
+                item = ColorItem.colors[0]
                 room?.memberState = room?.memberState?.apply {
                     strokeColor = item.color
                 }
@@ -533,7 +538,17 @@ class WhiteboardComponent(
     }
 
     private fun join(roomUUID: String, roomToken: String) {
-        whiteSdk.joinRoom(RoomParams(roomUUID, roomToken), roomListener, joinRoomCallback)
+        val roomParams = RoomParams(roomUUID, roomToken).apply {
+            useMultiViews = true
+
+            val styleMap = HashMap<String, String>()
+            styleMap["bottom"] = "60px"
+            styleMap["right"] = "12px"
+            styleMap["position"] = "fixed"
+
+            windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)
+        }
+        whiteSdk.joinRoom(roomParams, roomListener, joinRoomCallback)
     }
 
     override fun onDestroy(owner: LifecycleOwner) {

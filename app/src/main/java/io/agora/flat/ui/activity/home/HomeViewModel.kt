@@ -75,7 +75,7 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            eventBus.events.filter { it is RoomsUpdated }.collect {
+            eventBus.events.filterIsInstance<RoomsUpdated>().collect {
                 reloadRoomList()
             }
         }

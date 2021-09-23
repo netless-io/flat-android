@@ -242,6 +242,7 @@ private fun HomeTabIndicator(
 ) {
     Spacer(modifier
         .height(2.dp)
+        .padding(horizontal = 5.dp)
         .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100)))
 }
 
