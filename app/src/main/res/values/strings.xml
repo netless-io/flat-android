@@ -22,6 +22,7 @@
     <string name="title_feedback">Feedback</string>
     <string name="title_about_us">About Us</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+    <string name="title_call_test" translatable="false">Call Test</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>

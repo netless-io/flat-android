@@ -77,6 +77,12 @@ private fun SettingItemList() {
                 tip = stringResource(R.string.title_about_us),
                 onClick = { Navigator.launchAboutUsActivity(context) })
             Divider(SettingDividerModifier)
+            // Device Test
+            // SettingItem(
+            //     id = R.drawable.ic_user_profile_feedback,
+            //     tip = stringResource(R.string.title_call_test),
+            //     onClick = { Navigator.launchCallTestActivity(context) })
+            // Divider(SettingDividerModifier)
             if (context.isApkInDebug()) {
                 SettingItem(
                     id = R.drawable.ic_user_profile_feedback,
