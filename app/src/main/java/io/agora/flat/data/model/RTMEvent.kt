@@ -4,18 +4,13 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
 
-sealed class RTMEvent {
+sealed class RTMEvent(type: RTMessageType = RTMessageType.ChannelMessage) {
     @SerializedName("t")
-    var t = RTMessageType.ChannelMessage
+    var t = type
 
     // ChannelId
     @SerializedName("r")
     var r = ""
-
-    constructor()
-    constructor(type: RTMessageType) {
-        t = type
-    }
 
     data class ChannelMessage(@SerializedName("v") val text: String) : RTMEvent()
 

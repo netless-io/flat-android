@@ -4,8 +4,8 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomConfigRepository
+import io.agora.flat.di.interfaces.RtcEngineProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -15,9 +15,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
-class UserState @Inject constructor(
+class UserManager @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val userQuery: UserQuery,
+    private val rtcApi: RtcEngineProvider,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()
@@ -51,28 +52,18 @@ class UserState @Inject constructor(
     suspend fun init(uuids: List<String>): Boolean = suspendCoroutine { cont ->
         scope.launch {
             val userMap = userQuery.loadUsers(uuids)
-            if (userMap.isNotEmpty()) {
-                userMap[userUUID]?.run {
-                    val config = roomConfigRepository.getRoomConfig(roomUUID)
-                    this.audioOpen = config?.enableAudio ?: false
-                    this.videoOpen = config?.enableVideo ?: false
-                }
+            userMap[userUUID]?.run {
+                val config = roomConfigRepository.getRoomConfig(roomUUID)
+                this.audioOpen = config?.enableAudio ?: false
+                this.videoOpen = config?.enableVideo ?: false
             }
-            addToCurrent(userMap.values.toList())
+            sortAndNotify(userMap.values.toList())
             cont.resume(true)
         }
     }
 
-    private fun addToCurrent(userUUID: String) {
-        scope.launch {
-            userQuery.loadUsers(listOf(userUUID)).run {
-                addToCurrent(this.values.toList())
-            }
-        }
-    }
-
-    private fun addToCurrent(userList: List<RtcUser>) {
-        userList.forEach {
+    private fun sortAndNotify(users: List<RtcUser>) {
+        users.forEach {
             if (it.userUUID == userUUID) {
                 _currentUser.value = it
             }
@@ -107,8 +98,12 @@ class UserState @Inject constructor(
         notifyUsers()
     }
 
-    private fun hasCache(userUUID: String): Boolean {
-        return userQuery.hasCache(userUUID)
+    fun addUser(userUUID: String) {
+        scope.launch {
+            userQuery.loadUsers(listOf(userUUID)).run {
+                sortAndNotify(values.toList())
+            }
+        }
     }
 
     fun removeUser(userUUID: String, notify: Boolean = true) {
@@ -124,24 +119,9 @@ class UserState @Inject constructor(
         }
     }
 
-    fun addUser(userUUID: String) {
-        if (hasCache(userUUID)) {
-            addToCurrent(userUUID)
-            return
-        }
-
-        scope.launch {
-            val userMap = userQuery.loadUsers(listOf(userUUID))
-            addToCurrent(userMap.values.toList())
-        }
-    }
-
-    private fun updateUser(user: RtcUser, notify: Boolean = true) {
+    private fun updateUser(user: RtcUser) {
         removeUser(user.userUUID, false)
-        addToCurrent(listOf(user))
-        if (notify) {
-            notifyUsers()
-        }
+        sortAndNotify(listOf(user))
     }
 
     private fun notifyUsers() {
@@ -169,10 +149,10 @@ class UserState @Inject constructor(
     }
 
     fun cancelHandRaising() {
-        val list = handRaisingJoiners.toMutableList()
+        val updateUsers = handRaisingJoiners.toMutableList()
         handRaisingJoiners.clear()
-        list.forEach { it.isRaiseHand = false }
-        otherJoiners.addAll(list)
+        updateUsers.forEach { it.isRaiseHand = false }
+        otherJoiners.addAll(updateUsers)
 
         notifyUsers()
     }
@@ -180,6 +160,8 @@ class UserState @Inject constructor(
     fun updateDeviceState(uuid: String, videoOpen: Boolean, audioOpen: Boolean) {
         findUser(uuid)?.apply {
             updateUser(copy(audioOpen = audioOpen, videoOpen = videoOpen))
+
+            updateRtcStream(rtcUID, audioOpen, videoOpen)
         }
     }
 
@@ -208,24 +190,28 @@ class UserState @Inject constructor(
     }
 
     fun updateUserStates(uStates: HashMap<String, String>) {
-        uStates.forEach { (userId, s) ->
-            findUser(userId)?.copy(
+        val defaultFlag = ""
+        val updateUsers = users.value.toMutableList().map { rtcUser ->
+            val s = uStates[rtcUser.userUUID] ?: defaultFlag
+            rtcUser.copy(
                 videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true),
                 audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true),
                 isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true),
-                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true),
-            )?.also {
-                updateUser(it, false)
-            }
+                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true)
+            )
         }
-        notifyUsers()
+        updateUsers.forEach {
+            updateRtcStream(it.rtcUID, it.audioOpen, it.videoOpen)
+        }
+        sortAndNotify(updateUsers)
     }
 
     private fun findUser(uuid: String): RtcUser? {
         return users.value.find { it.userUUID == uuid }
     }
 
-    fun createMessageUsersObserver(): Flow<List<RtcUser>> {
-        return users
+    private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
+        rtcApi.rtcEngine().muteRemoteAudioStream(rtcUID, !audioOpen)
+        rtcApi.rtcEngine().muteRemoteVideoStream(rtcUID, !videoOpen)
     }
 }

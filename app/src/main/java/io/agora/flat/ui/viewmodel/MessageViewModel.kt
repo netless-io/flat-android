@@ -91,6 +91,7 @@ class MessageViewModel @Inject constructor(
 
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
+            rtmApi.sendChannelMessage(message)
             appendMessages(listOf(MessageFactory.createText(userRepository.getUserUUID(), message)))
         }
     }

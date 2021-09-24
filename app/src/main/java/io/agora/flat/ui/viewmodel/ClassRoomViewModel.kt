@@ -43,7 +43,7 @@ class ClassRoomViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
     private val cloudRecordRepository: CloudRecordRepository,
     private val roomConfigRepository: RoomConfigRepository,
-    private val userState: UserState,
+    private val userManager: UserManager,
     private val messageState: MessageState,
     private val rtmApi: RtmEngineProvider,
     private val rtcApi: RtcEngineProvider,
@@ -137,7 +137,7 @@ class ClassRoomViewModel @Inject constructor(
             endTime = roomInfo.endTime,
             roomStatus = roomInfo.roomStatus,
         )
-        userState.reset(
+        userManager.reset(
             roomUUID = roomUUID,
             userUUID = userUUID,
             ownerUUID = roomInfo.ownerUUID,
@@ -156,13 +156,13 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun observerUserState() {
         viewModelScope.launch {
-            userState.currentUser.filterNotNull().collect {
+            userManager.currentUser.filterNotNull().collect {
                 _state.value = _state.value.copy(isSpeak = it.isSpeak, isRaiseHand = it.isRaiseHand)
             }
         }
 
         viewModelScope.launch {
-            userState.users.collect {
+            userManager.users.collect {
                 val users = it.filter { value ->
                     when (_state.value.roomType) {
                         RoomType.BigClass -> (value.userUUID == _state.value.ownerUUID || value.isSpeak)
@@ -179,7 +179,7 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            userState.users.collect {
+            userManager.users.collect {
                 _messageUsers.value = it
             }
         }
@@ -196,7 +196,7 @@ class ClassRoomViewModel @Inject constructor(
                 updateRoomConfig(config)
             }
 
-            userState.findFirstUser(uuid)?.run {
+            userManager.findFirstUser(uuid)?.run {
                 if (isCurrentUser(uuid)) {
                     sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
                 } else if (isRoomOwner() && !enable) {
@@ -216,7 +216,7 @@ class ClassRoomViewModel @Inject constructor(
                 updateRoomConfig(config)
             }
 
-            userState.findFirstUser(uuid)?.run {
+            userManager.findFirstUser(uuid)?.run {
                 if (isCurrentUser(uuid)) {
                     sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
                 } else if (isRoomOwner() && !enable) {
@@ -260,15 +260,15 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     suspend fun initRoomUsers(uuids: List<String>): Boolean {
-        return userState.init(uuids = uuids)
+        return userManager.init(uuids = uuids)
     }
 
     fun removeRtmMember(userUUID: String) {
-        userState.removeUser(userUUID)
+        userManager.removeUser(userUUID)
     }
 
     fun addRtmMember(userUUID: String) {
-        userState.addUser(userUUID)
+        userManager.addUser(userUUID)
     }
 
     fun setVideoAreaShown(shown: Boolean) {
@@ -281,20 +281,11 @@ class ClassRoomViewModel @Inject constructor(
 
     // RTCCommand Handle
     private fun updateDeviceState(value: DeviceStateValue) {
-        userState.updateDeviceState(uuid = value.userUUID, audioOpen = value.mic, videoOpen = value.camera)
-
-        updateRtcStream(value.userUUID)
-    }
-
-    private fun updateRtcStream(userUUID: String) {
-        userState.findFirstUser(userUUID)?.also {
-            rtcApi.rtcEngine().muteRemoteAudioStream(it.rtcUID, !it.audioOpen)
-            rtcApi.rtcEngine().muteRemoteVideoStream(it.rtcUID, !it.videoOpen)
-        }
+        userManager.updateDeviceState(uuid = value.userUUID, audioOpen = value.mic, videoOpen = value.camera)
     }
 
     private fun updateUserState(userUUID: String, state: RTMUserState) {
-        userState.updateUserState(
+        userManager.updateUserState(
             uuid = userUUID,
             audioOpen = state.mic,
             videoOpen = state.camera,
@@ -304,18 +295,15 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun updateChannelState(status: ChannelStatusValue) {
-        userState.updateUserStates(status.uStates)
-
+        // update room state
         _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
 
-        status.uStates.forEach { (userUUID, _) ->
-            updateRtcStream(userUUID = userUUID)
-        }
+        userManager.updateUserStates(status.uStates)
     }
 
     fun requestChannelStatus() {
         viewModelScope.launch {
-            userState.findFirstOtherUser()?.run {
+            userManager.findFirstOtherUser()?.run {
                 val state = RTMUserState(
                     name = userRepository.getUsername(),
                     camera = roomConfig.value.enableVideo,
@@ -366,7 +354,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.AcceptRaiseHand -> {
                 if (senderId == _state.value.ownerUUID) {
-                    userState.updateSpeakAndRaise(
+                    userManager.updateSpeakAndRaise(
                         event.value.userUUID,
                         isSpeak = event.value.accept,
                         isRaiseHand = false,
@@ -379,7 +367,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             is RTMEvent.CancelHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
-                    userState.cancelHandRaising()
+                    userManager.cancelHandRaising()
                 }
             }
             is RTMEvent.ClassMode -> {
@@ -412,17 +400,17 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun updateSpeakStatus(it: SpeakItem) {
-        userState.updateSpeakStatus(uuid = it.userUUID, isSpeak = it.speak)
+        userManager.updateSpeakStatus(uuid = it.userUUID, isSpeak = it.speak)
     }
 
     private fun updateRaiseHandStatus(userUUID: String, event: RTMEvent.RaiseHand) {
-        userState.updateRaiseHandStatus(uuid = userUUID, isRaiseHand = event.v)
+        userManager.updateRaiseHandStatus(uuid = userUUID, isRaiseHand = event.v)
     }
 
     private fun sendChannelStatus(senderId: String) {
         viewModelScope.launch {
             val uStates = HashMap<String, String>()
-            userState.users.value.forEach {
+            userManager.users.value.forEach {
                 uStates[it.userUUID] = StringBuilder().apply {
                     if (it.isSpeak) append(RTMUserProp.IsSpeak.flag)
                     if (it.isRaiseHand) append(RTMUserProp.IsRaiseHand.flag)
@@ -444,7 +432,7 @@ class ClassRoomViewModel @Inject constructor(
 
     fun sendRaiseHand() {
         viewModelScope.launch {
-            userState.currentUser.value?.run {
+            userManager.currentUser.value?.run {
                 if (this.isSpeak) {
                     return@run
                 }
@@ -654,7 +642,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             if (isRoomOwner()) {
                 rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, true))))
-                userState.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false);
+                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false);
             }
         }
     }

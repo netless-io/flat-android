@@ -379,7 +379,6 @@ class RtcComponent(
 
         override fun onUserJoined(uid: Int, elapsed: Int) {
             Log.d(TAG, "onUserJoined:$uid $elapsed")
-            // adapter.onUserJoined(uid)
         }
     }
 }
