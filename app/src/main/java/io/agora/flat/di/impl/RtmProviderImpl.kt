@@ -31,6 +31,21 @@ class RtmProviderImpl @Inject constructor() : RtmEngineProvider, StartupInitiali
 
     companion object {
         val TAG = RtmProviderImpl::class.simpleName
+
+        const val CONNECTION_STATE_DISCONNECTED = 1
+        const val CONNECTION_STATE_CONNECTING = 2
+        const val CONNECTION_STATE_CONNECTED = 3
+        const val CONNECTION_STATE_RECONNECTING = 4
+        const val CONNECTION_STATE_ABORTED = 5
+
+        const val CONNECTION_CHANGE_REASON_LOGIN = 1
+        const val CONNECTION_CHANGE_REASON_LOGIN_SUCCESS = 2
+        const val CONNECTION_CHANGE_REASON_LOGIN_FAILURE = 3
+        const val CONNECTION_CHANGE_REASON_LOGIN_TIMEOUT = 4
+        const val CONNECTION_CHANGE_REASON_INTERRUPTED = 5
+        const val CONNECTION_CHANGE_REASON_LOGOUT = 6
+        const val CONNECTION_CHANGE_REASON_BANNED_BY_SERVER = 7
+        const val CONNECTION_CHANGE_REASON_REMOTE_LOGIN = 8
     }
 
     @EntryPoint
@@ -49,6 +64,9 @@ class RtmProviderImpl @Inject constructor() : RtmEngineProvider, StartupInitiali
             rtmClient = RtmClient.createInstance(context, Constants.AGORA_APP_ID, object : RtmClientListener {
                 override fun onConnectionStateChanged(state: Int, reason: Int) {
                     Log.d(TAG, "Connection state changes to $state reason:$reason")
+                    if (reason == CONNECTION_CHANGE_REASON_REMOTE_LOGIN) {
+                        flatRTMListeners.forEach { it.onRemoteLogin() }
+                    }
                 }
 
                 override fun onMessageReceived(message: RtmMessage, peerId: String) {

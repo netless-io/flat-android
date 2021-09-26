@@ -8,4 +8,6 @@ interface RTMListener {
     fun onMemberJoined(userId: String, channelId: String)
 
     fun onMemberLeft(userId: String, channelId: String)
+
+    fun onRemoteLogin() {}
 }

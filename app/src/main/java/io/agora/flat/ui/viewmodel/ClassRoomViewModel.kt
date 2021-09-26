@@ -597,7 +597,7 @@ class ClassRoomViewModel @Inject constructor(
                 insertDocs(file, ext)
             }
             "mp4" -> {
-                onEvent(ClassRoomEvent.InsertVideo(file.fileURL))
+                onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
             }
             else -> {
                 // Not Support Mobile
@@ -618,7 +618,7 @@ class ClassRoomViewModel @Inject constructor(
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
                     val uuid = UUID.randomUUID().toString()
-                    onEvent(ClassRoomEvent.InsertPpt("/${file.taskUUID}/${uuid}", ppt))
+                    onEvent(ClassRoomEvent.InsertPpt("/${file.taskUUID}/${uuid}", ppt, file.fileName))
                 }
 
                 override fun onFailure(e: ConvertException) {
@@ -645,6 +645,10 @@ class ClassRoomViewModel @Inject constructor(
                 userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false);
             }
         }
+    }
+
+    fun onRemoteLogin() {
+
     }
 }
 
@@ -682,7 +686,7 @@ data class ClassRoomState(
     val isWritable: Boolean
         get() = when (roomType) {
             RoomType.BigClass -> {
-                ownerUUID == userUUID || isSpeak
+                isOwner || isSpeak
             }
             RoomType.SmallClass -> {
                 classMode == ClassModeType.Interaction
@@ -703,7 +707,14 @@ data class ClassRoomState(
 
     val showRaiseHand: Boolean
         get() {
-            return !(isOwner || RoomType.OneToOne == roomType)
+            if (isOwner) {
+                return false
+            }
+            return when (roomType) {
+                RoomType.OneToOne -> false
+                RoomType.BigClass -> true
+                RoomType.SmallClass -> classMode == ClassModeType.Interaction
+            }
         }
 
     val needOwnerExitDialog: Boolean
@@ -739,7 +750,7 @@ sealed class ClassRoomEvent {
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
-    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles) : ClassRoomEvent()
-    data class InsertVideo(val videoUrl: String) : ClassRoomEvent()
+    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles,val title:String) : ClassRoomEvent()
+    data class InsertVideo(val videoUrl: String, val title:String) : ClassRoomEvent()
     data class ShowDot(val id: Int) : ClassRoomEvent()
 }

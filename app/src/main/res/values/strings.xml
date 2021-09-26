@@ -119,11 +119,15 @@
     <string name="video_area">Video area</string>
     <string name="time_start">Start Time</string>
     <string name="copy_link_to_invite">Copy Invite</string>
-    <string name="hangup_room">Hangup the room</string>
+    <string name="hangup_room">Hangup</string>
     <string name="hangup_room_exit_tip">The class is continuing. Do you leave the suspended room temporarily or end the class?</string>
     <string name="feedback_input_hint">Enter the content</string>
     <string name="login_exit">Login Exit</string>
     <string name="view_all_room_format">View all %1$d rooms</string>
     <string name="copy_invite">Invite</string>
     <string name="invite">Invite</string>
+    <string name="exit_room_i_known_format">I know(%1$d)</string>
+    <string name="exit_remote_login_message">You have entered the room at another device</string>
+    <string name="exit_room_stopped_message">The room ends, exiting…</string>
+    <string name="exit_room_title">Exit Room</string>
 </resources>

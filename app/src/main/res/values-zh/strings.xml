@@ -143,4 +143,8 @@
     <string name="view_all_room_format">查看全部%1$d房间</string>
     <string name="copy_invite">复制邀请</string>
     <string name="invite">邀请</string>
+    <string name="exit_room_i_known_format">知道了（%1$d）</string>
+    <string name="exit_remote_login_message">你已在另外一台设备进入房间</string>
+    <string name="exit_room_stopped_message">房间结束，退出中…</string>
+    <string name="exit_room_title">退出房间</string>
 </resources>

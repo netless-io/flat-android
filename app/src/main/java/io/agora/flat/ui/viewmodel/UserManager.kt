@@ -65,7 +65,7 @@ class UserManager @Inject constructor(
     private fun sortAndNotify(users: List<RtcUser>) {
         users.forEach {
             if (it.userUUID == userUUID) {
-                _currentUser.value = it
+                _currentUser.value = it.copy()
             }
             when {
                 it.userUUID == ownerUUID -> {
@@ -152,9 +152,8 @@ class UserManager @Inject constructor(
         val updateUsers = handRaisingJoiners.toMutableList()
         handRaisingJoiners.clear()
         updateUsers.forEach { it.isRaiseHand = false }
-        otherJoiners.addAll(updateUsers)
 
-        notifyUsers()
+        sortAndNotify(updateUsers)
     }
 
     fun updateDeviceState(uuid: String, videoOpen: Boolean, audioOpen: Boolean) {

@@ -304,8 +304,8 @@ class WhiteboardComponent(
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                     is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl)
-                    is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles)
-                    is ClassRoomEvent.InsertVideo -> insertVideo(it.videoUrl)
+                    is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles, it.title)
+                    is ClassRoomEvent.InsertVideo -> insertVideo(it.videoUrl, it.title)
                     else -> {; }
                 }
             }
@@ -333,13 +333,13 @@ class WhiteboardComponent(
         room?.completeImageUpload(uuid, imageUrl)
     }
 
-    private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles) {
-        val param = WindowAppParam.createDocsViewerApp(dirpath, convertedFiles.scenes, "preview")
+    private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles, title: String) {
+        val param = WindowAppParam.createDocsViewerApp(dirpath, convertedFiles.scenes, title)
         room?.addApp(param, null)
     }
 
-    private fun insertVideo(videoUrl: String) {
-        val param = WindowAppParam.createMediaPlayerApp(videoUrl, "player")
+    private fun insertVideo(videoUrl: String, title: String) {
+        val param = WindowAppParam.createMediaPlayerApp(videoUrl, title)
         room?.addApp(param, null)
     }
 

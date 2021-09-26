@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -10,6 +11,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
+import io.agora.flat.R
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.RTMEvent
@@ -18,6 +20,7 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.view.MessageListView
+import io.agora.flat.ui.view.RoomExitDialog
 import io.agora.flat.ui.viewmodel.*
 import io.agora.flat.util.delayAndFinish
 import io.agora.rtm.ErrorInfo
@@ -85,9 +88,8 @@ class RtmComponent(
         lifecycleScope.launch {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 if (it.roomStatus == RoomStatus.Stopped) {
-                    activity.delayAndFinish(message = "房间结束，退出中...")
+                    showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }
-
                 binding.messageLv.setBan(it.ban)
             }
         }
@@ -144,6 +146,20 @@ class RtmComponent(
         override fun onMemberLeft(userId: String, channelId: String) {
             viewModel.removeRtmMember(userId)
         }
+
+        override fun onRemoteLogin() {
+            showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
+        }
+    }
+
+    private fun showRoomExitDialog(message: String) {
+        val dialog = RoomExitDialog().apply {
+            arguments = Bundle().apply {
+                putString(RoomExitDialog.MESSAGE, message)
+            }
+        }
+        dialog.setListener { activity.delayAndFinish(250) }
+        dialog.show(activity.supportFragmentManager, "RoomExitDialog")
     }
 
     private fun enterChannel(rtmToken: String, channelId: String) {

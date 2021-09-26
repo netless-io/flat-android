@@ -53,8 +53,7 @@ class ToolComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
-                    is ClassRoomEvent.StartRoomResult -> {
-                    }
+                    is ClassRoomEvent.StartRoomResult -> {; }
                 }
             }
         }
@@ -333,7 +332,6 @@ class ToolComponent(
         dialog.show(activity.supportFragmentManager, "InviteDialog")
     }
 
-    // TODO
     private val expandHeight = activity.dp2px(160)
     private val collapseHeight = activity.dp2px(32)
 
