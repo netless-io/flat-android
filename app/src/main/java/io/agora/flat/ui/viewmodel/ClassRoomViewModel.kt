@@ -11,7 +11,9 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
+import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.ClipboardController
+import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.ErrorResult
@@ -49,6 +51,7 @@ class ClassRoomViewModel @Inject constructor(
     private val rtcApi: RtcEngineProvider,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
+    private val stringFetcher: StringFetcher,
 ) : ViewModel() {
     private var timer: Job? = null
 
@@ -109,12 +112,16 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             if (playInfo != null) {
                 _roomPlayInfo.value = playInfo
-            } else {
-                when (val result = roomRepository.joinRoom(roomUUID)) {
-                    is Success -> {
-                        _roomPlayInfo.value = result.data
+            } else when (val result = roomRepository.joinRoom(roomUUID)) {
+                is Success -> {
+                    _roomPlayInfo.value = result.data
+                }
+                is ErrorResult -> {
+                    _errorMessage.value = when (result.error.code) {
+                        FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
+                        FlatErrorCode.Web_RoomIsEnded -> stringFetcher.roomIsEnded()
+                        else -> stringFetcher.joinRoomError(result.error.code)
                     }
-                    is ErrorResult -> _errorMessage.value = "join room error"
                 }
             }
         }
@@ -451,6 +458,7 @@ class ClassRoomViewModel @Inject constructor(
                     _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
                     startRecord()
                 }
+                else -> {; }
             }
         }
     }
@@ -500,7 +508,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun getBackgroundConfig(): List<BackgroundConfig> {
-        return _videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
+        return _videoUsers.value.map { user: RtcUser ->
             BackgroundConfig(uid = user.rtcUID.toString(), image_url = user.avatarURL)
         }
     }
@@ -642,13 +650,9 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             if (isRoomOwner()) {
                 rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, true))))
-                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false);
+                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
             }
         }
-    }
-
-    fun onRemoteLogin() {
-
     }
 }
 
@@ -750,7 +754,7 @@ sealed class ClassRoomEvent {
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String) : ClassRoomEvent()
-    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles,val title:String) : ClassRoomEvent()
-    data class InsertVideo(val videoUrl: String, val title:String) : ClassRoomEvent()
+    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()
+    data class InsertVideo(val videoUrl: String, val title: String) : ClassRoomEvent()
     data class ShowDot(val id: Int) : ClassRoomEvent()
 }

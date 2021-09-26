@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.agora.flat.common.android.AndroidClipboardController
 import io.agora.flat.common.android.ClipboardController
+import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
@@ -63,5 +64,11 @@ class AppModule {
     @Provides
     fun providerClipboardController(@ApplicationContext context: Context): ClipboardController {
         return AndroidClipboardController(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providerStringFetcher(@ApplicationContext context: Context): StringFetcher {
+        return StringFetcher(context)
     }
 }

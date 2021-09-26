@@ -147,4 +147,9 @@
     <string name="exit_remote_login_message">你已在另外一台设备进入房间</string>
     <string name="exit_room_stopped_message">房间结束，退出中…</string>
     <string name="exit_room_title">退出房间</string>
+
+    <!-- String Fetcher -->
+    <string name="fetcher_room_not_found">房间不存在</string>
+    <string name="fetcher_room_is_ended">房间已结束</string>
+    <string name="fetcher_join_room_error">加入房间错误(%1$d)</string>
 </resources>

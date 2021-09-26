@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.ClipboardController
+import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
@@ -21,6 +22,7 @@ class JoinRoomViewModel @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val roomRepository: RoomRepository,
     private val clipboard: ClipboardController,
+    private val stringFetcher: StringFetcher,
 ) : ViewModel() {
     companion object {
         const val ROOM_UUID_PATTERN = """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
@@ -38,9 +40,9 @@ class JoinRoomViewModel @Inject constructor(
                 is Success -> roomPlayInfo.value = result.data
                 is ErrorResult -> {
                     error.value = when (result.error.code) {
-                        FlatErrorCode.Web_RoomNotFound -> UiError("room not found")
-                        FlatErrorCode.Web_RoomIsEnded -> UiError(" room has been ended")
-                        else -> UiError("join room error ${result.error.code}")
+                        FlatErrorCode.Web_RoomNotFound -> UiError(stringFetcher.roomNotFound())
+                        FlatErrorCode.Web_RoomIsEnded -> UiError(stringFetcher.roomIsEnded())
+                        else -> UiError(stringFetcher.joinRoomError(result.error.code))
                     }
                 }
             }

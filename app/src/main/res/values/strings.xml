@@ -130,4 +130,8 @@
     <string name="exit_remote_login_message">You have entered the room at another device</string>
     <string name="exit_room_stopped_message">The room ends, exiting…</string>
     <string name="exit_room_title">Exit Room</string>
+
+    <string name="fetcher_room_not_found">room not found.</string>
+    <string name="fetcher_room_is_ended">room has ended.</string>
+    <string name="fetcher_join_room_error">join room error (%1$d)</string>
 </resources>
