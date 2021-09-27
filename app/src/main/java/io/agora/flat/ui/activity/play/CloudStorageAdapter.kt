@@ -27,6 +27,10 @@ class CloudStorageAdapter(
         viewHolder.add.setOnClickListener {
             onItemClickListener?.onAddClick(item)
         }
+
+        viewHolder.itemView.setOnClickListener {
+            onItemClickListener?.onAddClick(item)
+        }
     }
 
     override fun getItemCount() = dataSet.size

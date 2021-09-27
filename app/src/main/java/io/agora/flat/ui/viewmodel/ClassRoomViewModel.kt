@@ -1,5 +1,6 @@
 package io.agora.flat.ui.viewmodel
 
+import android.graphics.BitmapFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,11 +28,10 @@ import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.fileSuffix
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import java.io.IOException
+import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -585,30 +585,53 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             when (val res = cloudStorageRepository.getFileList(1)) {
                 is Success -> {
-                    _cloudStorageFiles.value = res.data.files.asReversed()
+                    _cloudStorageFiles.value = res.data.files.filter {
+                        it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
+                    }.asReversed()
                 }
             }
         }
     }
 
     fun insertCourseware(file: CloudStorageFile) {
-        if (file.convertStep == FileConvertStep.Converting) {
-            // "正在转码中，请稍后再试"
-            return
+        viewModelScope.launch {
+            // "正在插入课件……"
+            when (val ext = file.fileURL.fileSuffix()) {
+                "jpg", "jpeg", "png", "webp" -> {
+                    val imageSize = loadImageSize(file.fileURL)
+                    onEvent(ClassRoomEvent.InsertImage(file.fileURL, imageSize.width, imageSize.height))
+                }
+                "doc", "docx", "ppt", "pptx", "pdf" -> {
+                    insertDocs(file, ext)
+                }
+                "mp4", "mp3" -> {
+                    onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
+                }
+                else -> {
+                    // Not Support Mobile
+                }
+            }
         }
-        // "正在插入课件……"
-        when (val ext = file.fileURL.fileSuffix()) {
-            "jpg", "jpeg", "png", "webp" -> {
-                onEvent(ClassRoomEvent.InsertImage(file.fileURL))
-            }
-            "doc", "docx", "ppt", "pptx", "pdf" -> {
-                insertDocs(file, ext)
-            }
-            "mp4" -> {
-                onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
-            }
-            else -> {
-                // Not Support Mobile
+    }
+
+    /**
+     * This code is used as an example, the application needs to manage io and async itself.
+     * The application may get the image width and height from the api
+     *
+     * @param src
+     */
+    private suspend fun loadImageSize(src: String): ImageSize {
+        return withContext(Dispatchers.IO) {
+            return@withContext try {
+                URL(src).openStream().use {
+                    val options = BitmapFactory.Options().apply {
+                        inJustDecodeBounds = true
+                    }
+                    BitmapFactory.decodeStream(it, null, options)
+                    ImageSize(options.outWidth, options.outHeight)
+                }
+            } catch (e: IOException) {
+                ImageSize(720, 360)
             }
         }
     }
@@ -735,6 +758,8 @@ data class RecordState constructor(
     val recordTime: Long = 0,
 )
 
+data class ImageSize(val width: Int, val height: Int)
+
 sealed class ClassRoomEvent {
     companion object {
         const val AREA_ID_APPLIANCE = 1
@@ -748,12 +773,13 @@ sealed class ClassRoomEvent {
         const val AREA_ID_USER_LIST = 9
     }
 
+    data class RoomPlayInfoFetched(val info:RoomPlayInfo) :ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 
     data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
-    data class InsertImage(val imageUrl: String) : ClassRoomEvent()
+    data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()
     data class InsertVideo(val videoUrl: String, val title: String) : ClassRoomEvent()
     data class ShowDot(val id: Int) : ClassRoomEvent()

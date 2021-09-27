@@ -56,7 +56,6 @@ class RtmComponent(
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
         rtmApi = entryPoint.rtmApi()
-        rtmApi.addRtmListener(flatRTMListener)
 
         initView()
         loadData()
@@ -166,7 +165,8 @@ class RtmComponent(
         lifecycleScope.launch {
             try {
                 rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                viewModel.initRoomUsers(rtmApi.getMembers().map { it.userId })
+                rtmApi.getMembers().map { it.userId }.also { viewModel.initRoomUsers(it) }
+                rtmApi.addRtmListener(flatRTMListener)
                 viewModel.requestChannelStatus()
                 Log.d(TAG, "notify rtm joined success")
                 viewModel.notifyRTMChannelJoined()
