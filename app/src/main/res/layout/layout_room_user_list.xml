@@ -8,13 +8,12 @@
     tools:layout_width="260dp">
 
     <TextView
+        style="@style/RoomTextViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:paddingVertical="10dp"
-        android:text="@string/user_list"
-        android:textColor="#444E60"
-        android:textSize="12sp" />
+        android:text="@string/user_list" />
 
     <FrameLayout
         android:layout_width="match_parent"

@@ -93,6 +93,10 @@
     <string name="exit_room">Exit</string>
     <string name="start_record">Start Record</string>
     <string name="chat">Chat</string>
+    <string name="class_settings">Class settings</string>
+    <string name="interaction_mode">Interaction</string>
+    <string name="lecture_mode">Lecture</string>
+
     <string name="cloud_storage">Cloud Storage</string>
     <string name="cloud_storage_usage_format">%1$s used</string>
     <string name="cloud_storage_upload_image">Photos</string>
@@ -134,4 +138,5 @@
     <string name="fetcher_room_not_found">room not found.</string>
     <string name="fetcher_room_is_ended">room has ended.</string>
     <string name="fetcher_join_room_error">join room error (%1$d)</string>
+    <string name="fetcher_start_room_with_record">Start class and recording…</string>
 </resources>

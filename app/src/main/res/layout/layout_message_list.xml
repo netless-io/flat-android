@@ -9,13 +9,12 @@
     android:visibility="visible">
 
     <TextView
+        style="@style/RoomTextViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:paddingVertical="10dp"
-        android:text="@string/chat"
-        android:textColor="#444E60"
-        android:textSize="12sp" />
+        android:text="@string/chat" />
 
     <FrameLayout
         android:layout_width="match_parent"

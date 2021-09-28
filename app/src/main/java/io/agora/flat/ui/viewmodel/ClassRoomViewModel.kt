@@ -10,6 +10,7 @@ import com.herewhite.sdk.converter.ConverterV5
 import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.ViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
@@ -456,6 +457,7 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> {
                     rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
                     _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
+                    _errorMessage.value = stringFetcher.startRoomWithRecord()
                     startRecord()
                 }
                 else -> {; }
@@ -677,6 +679,21 @@ class ClassRoomViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateClassMode(classMode: ClassModeType) {
+        viewModelScope.launch {
+            rtmApi.sendChannelCommand(RTMEvent.ClassMode(classMode))
+            _state.value = _state.value.copy(classMode = classMode)
+        }
+    }
+
+    fun updateViewMode(viewMode: ViewMode) {
+        viewModelScope.launch {
+            if (_state.value.viewMode != viewMode) {
+                _state.value = _state.value.copy(viewMode = viewMode)
+            }
+        }
+    }
 }
 
 data class ClassRoomState(
@@ -702,6 +719,9 @@ data class ClassRoomState(
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
 
+    // 白班视角模式
+    val viewMode: ViewMode = ViewMode.Freedom,
+
     // 当前用户
     val userUUID: String = "",
     val userName: String = "",
@@ -716,32 +736,25 @@ data class ClassRoomState(
                 isOwner || isSpeak
             }
             RoomType.SmallClass -> {
-                classMode == ClassModeType.Interaction
+                isOwner || isSpeak || classMode == ClassModeType.Interaction
             }
-            else -> true
+            RoomType.OneToOne -> true
         }
 
     val isOwner: Boolean
         get() = ownerUUID == userUUID
 
-    val showStartButton: Boolean
-        get() {
-            return isOwner && RoomStatus.Idle == roomStatus
-        }
-
     val isRecording: Boolean
         get() = recordState != null
 
+    val showChangeClassMode:Boolean
+        get() = roomType == RoomType.SmallClass
+
     val showRaiseHand: Boolean
-        get() {
-            if (isOwner) {
-                return false
-            }
-            return when (roomType) {
-                RoomType.OneToOne -> false
-                RoomType.BigClass -> true
-                RoomType.SmallClass -> classMode == ClassModeType.Interaction
-            }
+        get() = when (roomType) {
+            RoomType.OneToOne -> false
+            RoomType.BigClass -> !isOwner
+            RoomType.SmallClass -> !isOwner && classMode == ClassModeType.Lecture
         }
 
     val needOwnerExitDialog: Boolean
@@ -771,9 +784,10 @@ sealed class ClassRoomEvent {
         const val AREA_ID_INVITE_DIALOG = 7
         const val AREA_ID_OWNER_EXIT_DIALOG = 8
         const val AREA_ID_USER_LIST = 9
+        const val AREA_ID_ROOM_STATE_SETTING = 10
     }
 
-    data class RoomPlayInfoFetched(val info:RoomPlayInfo) :ClassRoomEvent()
+    data class RoomPlayInfoFetched(val info: RoomPlayInfo) : ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 

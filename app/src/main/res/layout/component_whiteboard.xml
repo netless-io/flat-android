@@ -11,15 +11,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+
     <LinearLayout
         android:id="@+id/undoRedoLayout"
-        android:layout_width="64dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/shape_gray_border_round_16_bg"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="32dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/shape_gray_border_right_round_12_bg"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
@@ -44,7 +50,8 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/shape_gray_border_round_16_bg"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/undoRedoLayout">
 
         <ImageView
@@ -63,75 +70,64 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/page_indicate_ly"
+        android:id="@+id/boardToolsLayout"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_margin="12dp"
-        android:background="@drawable/shape_gray_border_round_16_bg"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_gray_border_right_round_12_bg"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline">
 
         <ImageView
-            android:id="@+id/pageStart"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_toolbox_page_start_selector" />
+            android:id="@+id/handup"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_room_hand_up_selector" />
+
+        <FrameLayout
+            android:id="@+id/toolsSub"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/toolsSubPaint"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                tools:src="@drawable/ic_toolbox_color_blue"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/toolsSubDelete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_toolbox_scene_delete"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <ImageView
-            android:id="@+id/pagePreview"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_toolbox_prevpage_selector" />
-
-        <TextView
-            android:id="@+id/pageIndicate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            tools:text="12/113" />
-
-        <ImageView
-            android:id="@+id/pageNext"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_toolbox_nextpage_selector" />
-
-        <ImageView
-            android:id="@+id/pageEnd"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_toolbox_page_end_selector" />
+            android:id="@+id/tools"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:visibility="visible"
+            tools:src="@drawable/ic_toolbox_pencil_selector" />
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/tools"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_margin="12dp"
-        android:background="@drawable/shape_gray_border_round_16_bg"
-        android:padding="4dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:src="@drawable/ic_toolbox_pencil_selector" />
 
     <LinearLayout
         android:id="@+id/toolsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/shape_gray_border_round_4_bg"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/tools"
-        app:layout_constraintEnd_toEndOf="@+id/tools"
-        tools:visibility="gone">
+        app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
+        app:layout_constraintTop_toTopOf="@+id/guideline"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -172,7 +168,6 @@
                 android:layout_height="32dp"
                 android:padding="4dp"
                 android:src="@drawable/ic_toolbox_circle_selector" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -237,46 +232,19 @@
         </LinearLayout>
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/toolsSub"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/shape_gray_border_round_16_bg"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/tools">
-
-        <ImageView
-            android:id="@+id/toolsSubPaint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            tools:src="@drawable/ic_toolbox_color_blue"
-            tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/toolsSubDelete"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_toolbox_scene_delete"
-            android:visibility="gone" />
-    </FrameLayout>
-
     <LinearLayout
         android:id="@+id/toolsSubLayout"
         android:layout_width="128dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/shape_gray_border_round_4_bg"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/toolsSub"
-        app:layout_constraintEnd_toEndOf="@+id/toolsSub">
+        app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
+        app:layout_constraintTop_toTopOf="@+id/guideline"
+        tools:visibility="visible">
 
-        <com.agora.netless.simpleui.StrokeSeeker
+        <io.agora.flat.ui.view.StrokeSeeker
             android:id="@+id/seeker"
             android:layout_width="match_parent"
             android:layout_height="24dp"
@@ -303,15 +271,53 @@
             tools:listitem="@layout/item_toolbox_color" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/handup"
-        android:layout_width="32dp"
+    <LinearLayout
+        android:id="@+id/page_indicate_ly"
+        android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_margin="12dp"
         android:background="@drawable/shape_gray_border_round_16_bg"
-        android:padding="4dp"
-        android:src="@drawable/ic_room_hand_up_selector"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/toolsSub" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/pageStart"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_toolbox_page_start_selector"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/pagePreview"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_toolbox_prevpage_selector" />
+
+        <TextView
+            android:id="@+id/pageIndicate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            tools:text="12/113" />
+
+        <ImageView
+            android:id="@+id/pageNext"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_toolbox_nextpage_selector" />
+
+        <ImageView
+            android:id="@+id/pageEnd"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_toolbox_page_end_selector"
+            android:visibility="gone" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

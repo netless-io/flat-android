@@ -1,4 +1,4 @@
-package com.agora.netless.simpleui
+package io.agora.flat.ui.view
 
 import android.content.Context
 import android.graphics.*

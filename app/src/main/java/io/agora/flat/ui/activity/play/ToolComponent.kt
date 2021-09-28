@@ -2,14 +2,18 @@ package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.herewhite.sdk.domain.ViewMode
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.event.RoomsUpdated
@@ -45,10 +49,10 @@ class ToolComponent(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         initView()
-        loadData()
+        observeState()
     }
 
-    private fun loadData() {
+    private fun observeState() {
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
@@ -67,27 +71,36 @@ class ToolComponent(
 
         lifecycleScope.launch {
             viewModel.roomConfig.collect {
-                binding.switchVideo.isChecked = it.enableVideo
-                binding.switchAudio.isChecked = it.enableAudio
+                binding.layoutSettings.switchVideo.isChecked = it.enableVideo
+                binding.layoutSettings.switchAudio.isChecked = it.enableAudio
             }
         }
 
         lifecycleScope.launch {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
-                binding.roomStart.isVisible = it.showStartButton
-                if (it.roomStatus == RoomStatus.Started && it.isOwner) {
-                    binding.recordDisplayingLy.isVisible = it.isRecording
-                    binding.startRecord.isVisible = !it.isRecording
-                    if (it.recordState != null) {
-                        binding.recordTime.text = FlatFormatter.timeMS(it.recordState.recordTime * 1000)
-                    } else {
-                        binding.stopRecordLy.isVisible = false
+                binding.roomCtrlTool.isVisible = it.isOwner
+                if (it.isOwner) {
+                    binding.roomStart.isVisible = it.roomStatus == RoomStatus.Idle
+                    binding.roomStateSetting.isVisible = it.roomStatus != RoomStatus.Idle
+
+                    if (it.roomStatus == RoomStatus.Started) {
+                        binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = it.isRecording
+                        binding.layoutRoomStateSettings.startRecord.isVisible = !it.isRecording
+                        binding.layoutRoomStateSettings.stopRecord.isVisible = it.isRecording
+                        if (it.recordState != null) {
+                            binding.layoutRoomStateSettings.recordTime.text =
+                                FlatFormatter.timeMS(it.recordState.recordTime * 1000)
+                        }
+                        binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
                     }
-                } else {
-                    binding.recordDisplayingLy.isVisible = false
-                    binding.startRecord.isVisible = false
-                    binding.stopRecordLy.isVisible = false
+
+                    updateClassMode(it.classMode)
                 }
+
+                binding.viewfollow.isVisible = it.isWritable
+                binding.viewfollow.isSelected = it.viewMode == ViewMode.Broadcaster
+
+                binding.cloudservice.isVisible = it.isWritable
             }
         }
 
@@ -123,15 +136,29 @@ class ToolComponent(
         if (areaId != ClassRoomEvent.AREA_ID_USER_LIST) {
             hideUserListLayout()
         }
+
+        if (areaId != ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING) {
+            hideRoomStateSettings()
+        }
+    }
+
+    private fun hideRoomStateSettings() {
+        binding.layoutRoomStateSettings.root.isVisible = false
+        binding.roomStateSetting.isSelected = false
+    }
+
+    private fun showRoomStateSettings() {
+        binding.layoutRoomStateSettings.root.isVisible = true
+        binding.roomStateSetting.isSelected = true
     }
 
     private fun hideSettingLayout() {
-        binding.settingLayout.isVisible = false
+        binding.layoutSettings.settingLayout.isVisible = false
         binding.setting.isSelected = false
     }
 
     private fun showSettingLayout() {
-        binding.settingLayout.isVisible = true
+        binding.layoutSettings.settingLayout.isVisible = true
         binding.setting.isSelected = true
     }
 
@@ -187,7 +214,7 @@ class ToolComponent(
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG)
             },
             binding.setting to {
-                if (binding.settingLayout.isVisible) {
+                if (binding.layoutSettings.settingLayout.isVisible) {
                     hideSettingLayout()
                 } else {
                     showSettingLayout()
@@ -196,18 +223,40 @@ class ToolComponent(
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
-            binding.exit to { handleExit() },
+            binding.layoutSettings.exit to { handleExit() },
+
             binding.roomStart to {
                 viewModel.startClass()
             },
-            binding.startRecord to {
+            binding.roomStateSetting to {
+                if (binding.layoutRoomStateSettings.root.isVisible) {
+                    hideRoomStateSettings()
+                } else {
+                    showRoomStateSettings()
+                }
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING)
+            },
+            binding.layoutRoomStateSettings.startRecord to {
                 viewModel.startRecord()
             },
-            binding.recordDisplayingLy to {
-                binding.stopRecordLy.isVisible = !binding.stopRecordLy.isVisible
-            },
-            binding.stopRecord to {
+            binding.layoutRoomStateSettings.stopRecord to {
                 viewModel.stopRecord()
+            },
+            binding.layoutRoomStateSettings.classModeInteraction to {
+                if (!it.isSelected) {
+                    updateClassMode(ClassModeType.Interaction)
+                    viewModel.updateClassMode(ClassModeType.Interaction)
+                }
+            },
+            binding.layoutRoomStateSettings.classModeLecture to {
+                if (!it.isSelected) {
+                    updateClassMode(ClassModeType.Lecture)
+                    viewModel.updateClassMode(ClassModeType.Lecture)
+                }
+            },
+            binding.viewfollow to {
+                val targetMode = if (it.isSelected) ViewMode.Freedom else ViewMode.Broadcaster
+                viewModel.updateViewMode(targetMode)
             }
         )
 
@@ -218,6 +267,7 @@ class ToolComponent(
             onShowEnd = {
                 binding.collapse.visibility = View.VISIBLE
                 binding.expand.visibility = View.INVISIBLE
+                resetToolsLayoutParams()
             },
             onHideEnd = {
                 binding.collapse.visibility = View.INVISIBLE
@@ -225,17 +275,17 @@ class ToolComponent(
             }
         )
 
-        binding.switchVideoArea.isChecked = viewModel.videoAreaShown.value
-        binding.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
+        binding.layoutSettings.switchVideoArea.isChecked = viewModel.videoAreaShown.value
+        binding.layoutSettings.switchVideoArea.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setVideoAreaShown(isChecked)
             hideSettingLayout()
         }
 
-        binding.switchVideo.setOnCheckedChangeListener { _, isChecked ->
+        binding.layoutSettings.switchVideo.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableVideo(isChecked)
         }
 
-        binding.switchAudio.setOnCheckedChangeListener { _, isChecked ->
+        binding.layoutSettings.switchAudio.setOnCheckedChangeListener { _, isChecked ->
             viewModel.enableAudio(isChecked)
         }
 
@@ -250,6 +300,11 @@ class ToolComponent(
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter
         binding.layoutUserList.userList.layoutManager = LinearLayoutManager(activity)
+    }
+
+    private fun updateClassMode(classMode: ClassModeType) {
+        binding.layoutRoomStateSettings.classModeInteraction.isSelected = classMode == ClassModeType.Interaction
+        binding.layoutRoomStateSettings.classModeLecture.isSelected = classMode == ClassModeType.Lecture
     }
 
     private fun handleExit() {
@@ -332,12 +387,23 @@ class ToolComponent(
         dialog.show(activity.supportFragmentManager, "InviteDialog")
     }
 
-    private val expandHeight = activity.dp2px(160)
     private val collapseHeight = activity.dp2px(32)
+    private val expandHeight: Int
+        get() {
+            val visibleCount = binding.extTools.children.count { it.isVisible }
+            return activity.dp2px(32 * visibleCount)
+        }
 
     private fun onUpdateTool(value: Float) {
         val layoutParams = binding.extTools.layoutParams
         layoutParams.height = collapseHeight + (value * (expandHeight - collapseHeight)).toInt()
+        binding.extTools.layoutParams = layoutParams
+    }
+
+    // TODO free layoutParams height for visible change of items
+    private fun resetToolsLayoutParams() {
+        val layoutParams = binding.extTools.layoutParams
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
         binding.extTools.layoutParams = layoutParams
     }
 }

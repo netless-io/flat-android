@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.agora.netless.simpleui.StrokeSeeker
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.*
 import io.agora.flat.BuildConfig
@@ -22,6 +21,7 @@ import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.databinding.LayoutScenePreviewBinding
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.view.PaddingItemDecoration
+import io.agora.flat.ui.view.StrokeSeeker
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
@@ -58,7 +58,7 @@ class WhiteboardComponent(
 
         initView()
         initWhiteboard()
-        loadData()
+        observeState()
     }
 
     private fun initView() {
@@ -187,23 +187,25 @@ class WhiteboardComponent(
                 scenePreview.isVisible = false
             }
         )
+
+        setViewWritable(false)
     }
 
     private fun onSelectAppliance(appliance: String) {
         binding.toolsLayout.isVisible = false
-        updateAppliance(appliance)
+        updateAppliance(viewModel.state.value.isWritable, appliance)
         room?.memberState = MemberState().apply {
             currentApplianceName = appliance
         }
     }
 
     // TODO
-    private fun updateAppliance(appliance: String) {
+    private fun updateAppliance(isWritable: Boolean, appliance: String) {
         binding.tools.setImageResource(applianceResource(appliance))
 
         when (appliance) {
             Appliance.SELECTOR -> {
-                binding.toolsSub.isVisible = viewModel.state.value.isWritable
+                binding.toolsSub.isVisible = isWritable
                 binding.toolsSubDelete.isVisible = true
                 binding.toolsSubPaint.isVisible = false
             }
@@ -211,7 +213,7 @@ class WhiteboardComponent(
                 binding.toolsSub.isVisible = false
             }
             else -> {
-                binding.toolsSub.isVisible = viewModel.state.value.isWritable
+                binding.toolsSub.isVisible = isWritable
                 binding.toolsSubDelete.isVisible = false
                 binding.toolsSubPaint.isVisible = true
             }
@@ -291,7 +293,7 @@ class WhiteboardComponent(
         })
     }
 
-    private fun loadData() {
+    private fun observeState() {
         lifecycleScope.launch {
             viewModel.roomPlayInfo.filterNotNull().collect {
                 join(it.whiteboardRoomUUID, it.whiteboardRoomToken)
@@ -314,8 +316,11 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 setRoomWritable(it.isWritable)
+
                 binding.handup.isVisible = it.showRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
+
+                room?.setViewMode(it.viewMode)
             }
         }
     }
@@ -343,6 +348,7 @@ class WhiteboardComponent(
     }
 
     private fun setRoomWritable(writable: Boolean) {
+        room ?: return
         room?.setWritable(writable, object : Promise<Boolean> {
             override fun then(result: Boolean) {
                 if (result) {
@@ -353,11 +359,16 @@ class WhiteboardComponent(
             override fun catchEx(error: SDKError) {
             }
         })
+        setViewWritable(writable)
+    }
 
+    private fun setViewWritable(writable: Boolean) {
         binding.tools.isVisible = writable
         binding.toolsSub.isVisible = writable
-        binding.showScenes.isVisible = writable
-        binding.pageIndicateLy.isVisible = writable
+
+        // TODO
+        // binding.showScenes.isVisible = writable
+        // binding.pageIndicateLy.isVisible = writable
         binding.undoRedoLayout.isVisible = writable
     }
 
@@ -432,19 +443,18 @@ class WhiteboardComponent(
 
         override fun onRoomStateChanged(modifyState: RoomState) {
             Log.d(TAG, "onRoomStateChanged:${modifyState}")
-            activity.runOnUiThread {
-                room?.roomState?.sceneState?.let(::onSceneStateChanged)
-            }
+            room?.roomState?.sceneState?.let(::onSceneStateChanged)
+            room?.roomState?.broadcastState?.let(::onBroadcastStateChanged)
         }
 
         override fun onCanUndoStepsUpdate(canUndoSteps: Long) {
             Log.d(TAG, "onCanUndoStepsUpdate:${canUndoSteps}")
-            activity.runOnUiThread { onUndoStepsChanged(canUndoSteps) }
+            onUndoStepsChanged(canUndoSteps)
         }
 
         override fun onCanRedoStepsUpdate(canRedoSteps: Long) {
             Log.d(TAG, "onCanRedoStepsUpdate:${canRedoSteps}")
-            activity.runOnUiThread { onRedoStepsChanged(canRedoSteps) }
+            onRedoStepsChanged(canRedoSteps)
         }
 
         override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
@@ -465,15 +475,7 @@ class WhiteboardComponent(
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
             this@WhiteboardComponent.room = room
-            // On Room Ready
-            room.getRoomState(object : Promise<RoomState> {
-                override fun then(roomState: RoomState) {
-                    onInitRoomState(roomState)
-                }
-
-                override fun catchEx(t: SDKError?) {
-                }
-            })
+            onInitRoomState(room.roomState)
             setRoomWritable(viewModel.state.value.isWritable)
         }
 
@@ -506,7 +508,7 @@ class WhiteboardComponent(
     }
 
     private fun onMemberStateChanged(memberState: MemberState) {
-        updateAppliance(memberState.currentApplianceName)
+        updateAppliance(viewModel.state.value.isWritable, memberState.currentApplianceName)
         memberState.apply {
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
             var item = ColorItem.colors.find {
@@ -536,13 +538,17 @@ class WhiteboardComponent(
         }
     }
 
+    private fun onBroadcastStateChanged(broadcastState: BroadcastState) {
+        viewModel.updateViewMode(broadcastState.mode)
+    }
+
     private fun join(roomUUID: String, roomToken: String) {
         val roomParams = RoomParams(roomUUID, roomToken).apply {
             useMultiViews = true
 
             val styleMap = HashMap<String, String>()
-            styleMap["bottom"] = "60px"
-            styleMap["right"] = "12px"
+            styleMap["bottom"] = "30px"
+            styleMap["right"] = "44px"
             styleMap["position"] = "fixed"
 
             windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)

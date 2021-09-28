@@ -107,6 +107,9 @@
     <string name="exit_room">退出教室</string>
     <string name="start_record">开始录制</string>
     <string name="chat">聊天</string>
+    <string name="class_settings">课堂设置</string>
+    <string name="interaction_mode">互动模式</string>
+    <string name="lecture_mode">讲课模式</string>
 
     <string name="cloud_storage">云盘</string>
     <string name="cloud_storage_usage_format">已使用 %1$s</string>
@@ -152,4 +155,5 @@
     <string name="fetcher_room_not_found">房间不存在</string>
     <string name="fetcher_room_is_ended">房间已结束</string>
     <string name="fetcher_join_room_error">加入房间错误(%1$d)</string>
+    <string name="fetcher_start_room_with_record">开始上课并录制…</string>
 </resources>
