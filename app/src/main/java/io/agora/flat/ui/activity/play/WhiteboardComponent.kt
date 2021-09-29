@@ -46,10 +46,11 @@ class WhiteboardComponent(
     private lateinit var binding: ComponentWhiteboardBinding
     private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
 
-    private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var whiteSdk: WhiteSdk
+    private val viewModel: ClassRoomViewModel by activity.viewModels()
     private var room: Room? = null
     private lateinit var colorAdapter: ColorAdapter
+    private lateinit var applianceAdapter: ApplianceAdapter
     private lateinit var slideAdapter: SceneAdapter
     private lateinit var slideAnimator: SimpleAnimator
 
@@ -98,30 +99,11 @@ class WhiteboardComponent(
             binding.showScenes to { previewSlide() },
 
             binding.tools to {
-                binding.toolsLayout.apply { isVisible = !isVisible }
-
+                with(binding.toolsLayout) { isVisible = !isVisible }
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
             },
-            binding.clear to {
-                binding.toolsLayout.visibility = View.GONE
-
-                room?.cleanScene(true)
-            },
-            binding.hand to { onSelectAppliance(Appliance.HAND) },
-            binding.clicker to { onSelectAppliance(Appliance.CLICKER) },
-            binding.text to { onSelectAppliance(Appliance.TEXT) },
-            binding.selector to { onSelectAppliance(Appliance.SELECTOR) },
-            binding.eraser to { onSelectAppliance(Appliance.ERASER) },
-            binding.pencil to { onSelectAppliance(Appliance.PENCIL) },
-            binding.laser to { onSelectAppliance(Appliance.LASER_POINTER) },
-            binding.rectangle to { onSelectAppliance(Appliance.RECTANGLE) },
-            binding.arrow to { onSelectAppliance(Appliance.ARROW) },
-            binding.circle to { onSelectAppliance(Appliance.ELLIPSE) },
-            binding.line to { onSelectAppliance(Appliance.STRAIGHT) },
-
             binding.toolsSubPaint to {
-                binding.toolsSubLayout.apply { isVisible = !isVisible }
-
+                with(binding.toolsSubLayout) { isVisible = !isVisible }
                 viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT)
             },
             binding.toolsSubDelete to {
@@ -146,6 +128,22 @@ class WhiteboardComponent(
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
+
+        applianceAdapter = ApplianceAdapter(ApplianceItem.appliancesPhone)
+        applianceAdapter.setOnItemClickListener {
+            when (it) {
+                ApplianceItem.OTHER_CLEAR -> {
+                    binding.toolsLayout.visibility = View.GONE
+                    room?.cleanScene(true)
+                }
+                else -> {
+                    setAppliance(it.type)
+                    onSelectAppliance(it)
+                }
+            }
+        }
+        binding.applianceRecyclerView.adapter = applianceAdapter
+        binding.colorRecyclerView.layoutManager = GridLayoutManager(activity, 4)
 
         colorAdapter = ColorAdapter(ColorItem.colors)
         colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
@@ -191,17 +189,20 @@ class WhiteboardComponent(
         setViewWritable(false)
     }
 
-    private fun onSelectAppliance(appliance: String) {
+    private fun onSelectAppliance(appliance: ApplianceItem) {
         binding.toolsLayout.isVisible = false
-        updateAppliance(viewModel.state.value.isWritable, appliance)
+        updateAppliance(viewModel.state.value.isWritable, appliance.type)
+    }
+
+    private fun setAppliance(type: String) {
         room?.memberState = MemberState().apply {
-            currentApplianceName = appliance
+            currentApplianceName = type
         }
     }
 
-    // TODO
     private fun updateAppliance(isWritable: Boolean, appliance: String) {
-        binding.tools.setImageResource(applianceResource(appliance))
+        binding.tools.setImageResource(ApplianceItem.drawableResOf(appliance))
+        binding.tools.isSelected = true
 
         when (appliance) {
             Appliance.SELECTOR -> {
@@ -249,7 +250,6 @@ class WhiteboardComponent(
 
     private var targetIndex: Int = 0
 
-    // TODO 限制多次点击
     private fun addSlideToNext() {
         room?.getSceneState(object : Promise<SceneState> {
             override fun then(sceneState: SceneState) {
@@ -443,8 +443,9 @@ class WhiteboardComponent(
 
         override fun onRoomStateChanged(modifyState: RoomState) {
             Log.d(TAG, "onRoomStateChanged:${modifyState}")
-            room?.roomState?.sceneState?.let(::onSceneStateChanged)
-            room?.roomState?.broadcastState?.let(::onBroadcastStateChanged)
+            modifyState.sceneState?.let(::onSceneStateChanged)
+            modifyState.memberState?.let(::onMemberStateChanged)
+            modifyState.broadcastState?.let(::onBroadcastStateChanged)
         }
 
         override fun onCanUndoStepsUpdate(canUndoSteps: Long) {
@@ -489,39 +490,14 @@ class WhiteboardComponent(
         roomState.sceneState?.let(::onSceneStateChanged)
     }
 
-    private val applianceMap = mapOf(
-        Appliance.PENCIL to R.drawable.ic_toolbox_pencil_selected,
-        Appliance.SELECTOR to R.drawable.ic_toolbox_selector_selected,
-        Appliance.RECTANGLE to R.drawable.ic_toolbox_rectangle_selected,
-        Appliance.ELLIPSE to R.drawable.ic_toolbox_circle_selected,
-        Appliance.ERASER to R.drawable.ic_toolbox_eraser_selected,
-        Appliance.TEXT to R.drawable.ic_toolbox_text_selected,
-        Appliance.STRAIGHT to R.drawable.ic_toolbox_line_selected,
-        Appliance.ARROW to R.drawable.ic_toolbox_arrow_selected,
-        Appliance.HAND to R.drawable.ic_toolbox_hand_selected,
-        Appliance.LASER_POINTER to R.drawable.ic_toolbox_laser_selected,
-        Appliance.CLICKER to R.drawable.ic_toolbox_clicker_selected,
-    )
-
-    private fun applianceResource(appliance: String): Int {
-        return applianceMap[appliance] ?: 0
-    }
-
     private fun onMemberStateChanged(memberState: MemberState) {
-        updateAppliance(viewModel.state.value.isWritable, memberState.currentApplianceName)
-        memberState.apply {
+        with(memberState) {
+            updateAppliance(viewModel.state.value.isWritable, currentApplianceName)
+            applianceAdapter.setCurrentAppliance(ApplianceItem.of(currentApplianceName))
+
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
-            var item = ColorItem.colors.find {
-                it.color.contentEquals(strokeColor)
-            }
-            // 设置默认颜色
-            if (item == null) {
-                item = ColorItem.colors[0]
-                room?.memberState = room?.memberState?.apply {
-                    strokeColor = item.color
-                }
-            }
-            colorAdapter.setCurrentColor(item.color)
+            val item = ColorItem.of(strokeColor)
+            colorAdapter.setCurrentColor(ColorItem.of(strokeColor).color)
             binding.toolsSubPaint.setImageResource(item.drawableRes)
         }
     }

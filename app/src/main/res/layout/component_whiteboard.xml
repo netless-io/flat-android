@@ -117,120 +117,26 @@
             tools:src="@drawable/ic_toolbox_pencil_selector" />
     </LinearLayout>
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/toolsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:background="@drawable/shape_gray_border_round_4_bg"
-        android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
         app:layout_constraintTop_toTopOf="@+id/guideline"
         tools:visibility="visible">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/applianceRecyclerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/clicker"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_clicker_selector" />
-
-            <ImageView
-                android:id="@+id/selector"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_selector_selector" />
-
-            <ImageView
-                android:id="@+id/pencil"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_pencil_selector" />
-
-            <ImageView
-                android:id="@+id/rectangle"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_rectangle_selector" />
-
-            <ImageView
-                android:id="@+id/circle"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_circle_selector" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/text"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_text_selector" />
-
-            <ImageView
-                android:id="@+id/eraser"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_eraser_selector" />
-
-            <ImageView
-                android:id="@+id/laser"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_laser_selector" />
-
-            <ImageView
-                android:id="@+id/arrow"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_arrow_selector" />
-
-            <ImageView
-                android:id="@+id/line"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_line_selector" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/clear"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_clear_normal" />
-
-            <ImageView
-                android:id="@+id/hand"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_hand_selector" />
-        </LinearLayout>
-    </LinearLayout>
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:itemCount="12"
+            tools:listitem="@layout/item_toolbox_appliance" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/toolsSubLayout"
@@ -242,7 +148,7 @@
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
         app:layout_constraintTop_toTopOf="@+id/guideline"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <io.agora.flat.ui.view.StrokeSeeker
             android:id="@+id/seeker"

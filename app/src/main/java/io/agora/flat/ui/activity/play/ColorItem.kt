@@ -6,7 +6,7 @@ import io.agora.flat.R
 data class ColorItem(val color: IntArray, @DrawableRes val drawableRes: Int) {
     companion object {
         var colors = listOf(
-            ColorItem(arrayOf(0xE0, 0x20, 0x20).toIntArray(), R.drawable.ic_toolbox_color_red),
+            ColorItem(arrayOf(0xEC, 0x34, 0x55).toIntArray(), R.drawable.ic_toolbox_color_red),
             ColorItem(arrayOf(0xFA, 0x64, 0x00).toIntArray(), R.drawable.ic_toolbox_color_orange),
             ColorItem(arrayOf(0xF7, 0xB5, 0x00).toIntArray(), R.drawable.ic_toolbox_color_yellow),
             ColorItem(arrayOf(0x6D, 0xD4, 0x00).toIntArray(), R.drawable.ic_toolbox_color_green),
@@ -19,6 +19,12 @@ data class ColorItem(val color: IntArray, @DrawableRes val drawableRes: Int) {
             ColorItem(arrayOf(0x00, 0x00, 0x00).toIntArray(), R.drawable.ic_toolbox_color_black),
             ColorItem(arrayOf(0xFF, 0xFF, 0xFF).toIntArray(), R.drawable.ic_toolbox_color_white)
         )
+
+        fun of(strokeColor: IntArray): ColorItem {
+            return colors.find {
+                it.color.contentEquals(strokeColor)
+            } ?: colors[0]
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -27,15 +33,15 @@ data class ColorItem(val color: IntArray, @DrawableRes val drawableRes: Int) {
 
         other as ColorItem
 
-        if (drawableRes != other.drawableRes) return false
         if (!color.contentEquals(other.color)) return false
+        if (drawableRes != other.drawableRes) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = drawableRes
-        result = 31 * result + color.contentHashCode()
+        var result = color.contentHashCode()
+        result = 31 * result + drawableRes
         return result
     }
 }

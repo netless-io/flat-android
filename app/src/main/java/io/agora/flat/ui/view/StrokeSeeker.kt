@@ -164,6 +164,6 @@ class StrokeSeeker @JvmOverloads constructor(
     }
 
     interface OnStrokeChangedListener {
-        fun onStroke(strokeWidth: Int)
+        fun onStroke(width: Int)
     }
 }

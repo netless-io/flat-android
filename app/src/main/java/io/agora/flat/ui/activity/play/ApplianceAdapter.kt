@@ -7,25 +7,27 @@ import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.util.inflate
 
-class ColorAdapter(
-    private val dataSet: List<ColorItem>,
-) : RecyclerView.Adapter<ColorAdapter.ViewHolder>() {
+class ApplianceAdapter(
+    private val dataSet: List<ApplianceItem>,
+) : RecyclerView.Adapter<ApplianceAdapter.ViewHolder>() {
 
-    private var currentColor: IntArray? = null
+    private var currentAppliance: ApplianceItem? = null
     private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(viewGroup.inflate(R.layout.item_toolbox_color, viewGroup, false))
+        return ViewHolder(viewGroup.inflate(R.layout.item_toolbox_appliance, viewGroup, false))
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = dataSet[position]
 
-        viewHolder.color.setImageResource(item.drawableRes)
-        viewHolder.itemView.isSelected = (item.color.contentEquals(currentColor))
+        viewHolder.appliance.setImageResource(item.drawableRes)
+        viewHolder.itemView.isSelected = (item == currentAppliance)
         viewHolder.itemView.setOnClickListener {
-            currentColor = item.color
-            onItemClickListener?.onColorSelected(item)
+            if (item != ApplianceItem.OTHER_CLEAR) {
+                currentAppliance = item
+            }
+            onItemClickListener?.onApplianceClick(item)
             notifyDataSetChanged()
         }
     }
@@ -38,15 +40,15 @@ class ColorAdapter(
         this.onItemClickListener = onItemClickListener
     }
 
-    fun setCurrentColor(color: IntArray?) {
-        currentColor = color
+    fun setCurrentAppliance(appliance: ApplianceItem) {
+        currentAppliance = appliance
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val color: ImageView = view.findViewById(R.id.color)
+        val appliance: ImageView = view.findViewById(R.id.appliance)
     }
 
-    interface OnItemClickListener {
-        fun onColorSelected(item: ColorItem)
+    fun interface OnItemClickListener {
+        fun onApplianceClick(item: ApplianceItem)
     }
 }
