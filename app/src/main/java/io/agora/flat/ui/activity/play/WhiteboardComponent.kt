@@ -45,10 +45,10 @@ class WhiteboardComponent(
 
     private lateinit var binding: ComponentWhiteboardBinding
     private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
-
-    private lateinit var whiteSdk: WhiteSdk
     private val viewModel: ClassRoomViewModel by activity.viewModels()
+
     private var room: Room? = null
+    private lateinit var whiteSdk: WhiteSdk
     private lateinit var colorAdapter: ColorAdapter
     private lateinit var applianceAdapter: ApplianceAdapter
     private lateinit var slideAdapter: SceneAdapter
@@ -99,12 +99,16 @@ class WhiteboardComponent(
             binding.showScenes to { previewSlide() },
 
             binding.tools to {
-                with(binding.toolsLayout) { isVisible = !isVisible }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE)
+                with(binding.appliancesLayout) {
+                    isVisible = !isVisible
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, isVisible)
+                }
             },
             binding.toolsSubPaint to {
-                with(binding.toolsSubLayout) { isVisible = !isVisible }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT)
+                with(binding.toolsSubLayout) {
+                    isVisible = !isVisible
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT, isVisible)
+                }
             },
             binding.toolsSubDelete to {
                 room?.deleteOperation()
@@ -133,7 +137,7 @@ class WhiteboardComponent(
         applianceAdapter.setOnItemClickListener {
             when (it) {
                 ApplianceItem.OTHER_CLEAR -> {
-                    binding.toolsLayout.visibility = View.GONE
+                    binding.appliancesLayout.isVisible = false
                     room?.cleanScene(true)
                 }
                 else -> {
@@ -190,7 +194,7 @@ class WhiteboardComponent(
     }
 
     private fun onSelectAppliance(appliance: ApplianceItem) {
-        binding.toolsLayout.isVisible = false
+        binding.appliancesLayout.isVisible = false
         updateAppliance(viewModel.state.value.isWritable, appliance.type)
     }
 
@@ -303,7 +307,7 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId, it.shown)
                     is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl, it.width, it.height)
                     is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles, it.title)
@@ -337,8 +341,8 @@ class WhiteboardComponent(
         room?.completeImageUpload(uuid, imageUrl)
     }
 
-    private fun insertPpt(dirpath: String, convertedFiles: ConvertedFiles, title: String) {
-        val param = WindowAppParam.createDocsViewerApp(dirpath, convertedFiles.scenes, title)
+    private fun insertPpt(dir: String, convertedFiles: ConvertedFiles, title: String) {
+        val param = WindowAppParam.createDocsViewerApp(dir, convertedFiles.scenes, title)
         room?.addApp(param, null)
     }
 
@@ -348,7 +352,9 @@ class WhiteboardComponent(
     }
 
     private fun setRoomWritable(writable: Boolean) {
-        room ?: return
+        if (room == null) {
+            return
+        }
         room?.setWritable(writable, object : Promise<Boolean> {
             override fun then(result: Boolean) {
                 if (result) {
@@ -363,21 +369,25 @@ class WhiteboardComponent(
     }
 
     private fun setViewWritable(writable: Boolean) {
-        binding.tools.isVisible = writable
-        binding.toolsSub.isVisible = writable
-
-        // TODO
+        binding.boardToolsLayout.isVisible = writable
         // binding.showScenes.isVisible = writable
         // binding.pageIndicateLy.isVisible = writable
         binding.undoRedoLayout.isVisible = writable
     }
 
-    private fun handleAreaShown(areaId: Int) {
+    private fun handleAreaShown(areaId: Int, shown: Boolean) {
         if (areaId != ClassRoomEvent.AREA_ID_APPLIANCE) {
-            binding.toolsLayout.isVisible = false
+            binding.appliancesLayout.isVisible = false
         }
+
         if (areaId != ClassRoomEvent.AREA_ID_PAINT) {
             binding.toolsSubLayout.isVisible = false
+        }
+
+        if (areaId != ClassRoomEvent.AREA_ID_CLEAR_ALL) {
+            binding.clickHandleView.show(shown) {
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLEAR_ALL, true)
+            }
         }
     }
 

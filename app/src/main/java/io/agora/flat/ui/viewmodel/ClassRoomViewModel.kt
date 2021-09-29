@@ -256,11 +256,8 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun notifyOperatingAreaShown(areaId: Int) {
-        onEvent(ClassRoomEvent.OperatingAreaShown(areaId))
-        if (areaId != ClassRoomEvent.AREA_ID_MESSAGE) {
-            _messageAreaShown.value = false
-        }
+    fun notifyOperatingAreaShown(areaId: Int, shown: Boolean) {
+        onEvent(ClassRoomEvent.OperatingAreaShown(areaId, shown))
     }
 
     fun notifyRTMChannelJoined() {
@@ -747,7 +744,7 @@ data class ClassRoomState(
     val isRecording: Boolean
         get() = recordState != null
 
-    val showChangeClassMode:Boolean
+    val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
 
     val showRaiseHand: Boolean
@@ -775,6 +772,7 @@ data class ImageSize(val width: Int, val height: Int)
 
 sealed class ClassRoomEvent {
     companion object {
+        const val AREA_ID_CLEAR_ALL = 0
         const val AREA_ID_APPLIANCE = 1
         const val AREA_ID_PAINT = 2
         const val AREA_ID_SETTING = 3
@@ -791,7 +789,7 @@ sealed class ClassRoomEvent {
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 
-    data class OperatingAreaShown(val areaId: Int) : ClassRoomEvent()
+    data class OperatingAreaShown(val areaId: Int, val shown: Boolean) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()

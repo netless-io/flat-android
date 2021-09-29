@@ -125,6 +125,10 @@ class ToolComponent(
     }
 
     private fun handleAreaShown(areaId: Int) {
+        if (areaId != ClassRoomEvent.AREA_ID_MESSAGE) {
+            viewModel.setMessageAreaShown(false)
+        }
+
         if (areaId != ClassRoomEvent.AREA_ID_SETTING) {
             hideSettingLayout()
         }
@@ -190,36 +194,42 @@ class ToolComponent(
                 binding.messageDot.isVisible = false
                 val shown = !viewModel.messageAreaShown.value
                 viewModel.setMessageAreaShown(shown)
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_MESSAGE, shown)
             },
             binding.cloudservice to {
-                if (binding.layoutCloudStorage.root.isVisible) {
-                    hideCloudStorageLayout()
-                } else {
-                    showCloudStorageLayout()
-                    viewModel.requestCloudStorageFiles()
+                with(binding.layoutCloudStorage.root) {
+                    if (isVisible) {
+                        hideCloudStorageLayout()
+                    } else {
+                        showCloudStorageLayout()
+                        viewModel.requestCloudStorageFiles()
+                    }
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLOUD_STORAGE, isVisible)
                 }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLOUD_STORAGE)
             },
             binding.userlist to {
-                if (binding.layoutUserList.root.isVisible) {
-                    hideUserListLayout()
-                } else {
-                    showUserListLayout()
+                with(binding.layoutUserList.root) {
+                    if (isVisible) {
+                        hideUserListLayout()
+                    } else {
+                        showUserListLayout()
+                    }
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_USER_LIST, isVisible)
                 }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_USER_LIST)
             },
             binding.invite to {
                 showInviteDialog()
                 binding.invite.isSelected = true
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG)
             },
             binding.setting to {
-                if (binding.layoutSettings.settingLayout.isVisible) {
-                    hideSettingLayout()
-                } else {
-                    showSettingLayout()
+                with(binding.layoutSettings.settingLayout) {
+                    if (isVisible) {
+                        hideSettingLayout()
+                    } else {
+                        showSettingLayout()
+                    }
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING, isVisible)
                 }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING)
             },
             binding.collapse to { toolAnimator.hide() },
             binding.expand to { toolAnimator.show() },
@@ -229,12 +239,14 @@ class ToolComponent(
                 viewModel.startClass()
             },
             binding.roomStateSetting to {
-                if (binding.layoutRoomStateSettings.root.isVisible) {
-                    hideRoomStateSettings()
-                } else {
-                    showRoomStateSettings()
+                with(binding.layoutRoomStateSettings.root) {
+                    if (isVisible) {
+                        hideRoomStateSettings()
+                    } else {
+                        showRoomStateSettings()
+                    }
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING, isVisible)
                 }
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING)
             },
             binding.layoutRoomStateSettings.startRecord to {
                 viewModel.startRecord()
@@ -342,9 +354,12 @@ class ToolComponent(
                 }
             }
 
+            override fun onDismiss() {
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG, false)
+            }
         })
         dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
-        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG)
+        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG, true)
     }
 
     private fun showAudienceExitDialog() {
@@ -382,9 +397,11 @@ class ToolComponent(
 
             override fun onHide() {
                 binding.invite.isSelected = false
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG, false)
             }
         })
         dialog.show(activity.supportFragmentManager, "InviteDialog")
+        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG, true)
     }
 
     private val collapseHeight = activity.dp2px(32)

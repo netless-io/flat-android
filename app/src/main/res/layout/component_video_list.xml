@@ -8,6 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <io.agora.flat.ui.view.room.ClickHandleView
+        android:id="@+id/clickHandleView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <LinearLayout
         android:id="@+id/videoListOptArea"
         android:layout_width="wrap_content"

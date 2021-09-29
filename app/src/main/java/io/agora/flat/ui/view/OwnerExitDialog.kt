@@ -1,6 +1,7 @@
 package io.agora.flat.ui.view
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.DialogFragment
@@ -37,10 +38,15 @@ class OwnerExitDialog : DialogFragment(R.layout.dialog_owner_exit) {
         }
     }
 
+    override fun onDismiss(dialog: DialogInterface) {
+        listener?.onDismiss()
+    }
+
     interface Listener {
         fun onClose()
         fun onLeftButtonClick()
         fun onRightButtonClick()
+        fun onDismiss()
     }
 
     fun setListener(listener: Listener) {

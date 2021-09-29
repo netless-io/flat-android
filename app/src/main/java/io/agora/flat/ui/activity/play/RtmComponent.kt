@@ -21,7 +21,10 @@ import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmEngineProvider
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.view.RoomExitDialog
-import io.agora.flat.ui.viewmodel.*
+import io.agora.flat.ui.viewmodel.ClassRoomState
+import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.ui.viewmodel.MessageViewModel
+import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.delayAndFinish
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.ResultCallback
@@ -109,11 +112,8 @@ class RtmComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageAreaShown.collect {
-                binding.root.isVisible = it
-                if (it) {
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_MESSAGE)
-                }
+            viewModel.messageAreaShown.collect { areaShown ->
+                binding.root.isVisible = areaShown
             }
         }
     }

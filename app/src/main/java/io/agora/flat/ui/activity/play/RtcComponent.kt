@@ -82,7 +82,7 @@ class RtcComponent(
         checkPermission(::actionAfterPermission)
     }
 
-    private fun loadData() {
+    private fun observeState() {
         lifecycleScope.launch {
             viewModel.videoUsers.collect { users ->
                 Log.d(TAG, "currentUsersMap $users")
@@ -92,7 +92,7 @@ class RtcComponent(
                     users.find { it.userUUID == this.userUUID }
                 }
                 if (findUser == null) {
-                    hideVideoListOptArea()
+                    clearCallOutAndNotify()
                     fullScreenAnimator.hide()
                 } else {
                     userCallOut = findUser
@@ -105,7 +105,7 @@ class RtcComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
-                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
+                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId, it.shown)
                     else -> {; }
                 }
             }
@@ -177,11 +177,10 @@ class RtcComponent(
 
                 if (userCallOut == null || userCallOut != user) {
                     userCallOut = user
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT)
                     showVideoListOptArea(start)
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT, true)
                 } else {
-                    userCallOut = null
-                    hideVideoListOptArea()
+                    clearCallOutAndNotify()
                 }
             }
 
@@ -249,15 +248,23 @@ class RtcComponent(
         )
     }
 
+    private fun hideVideoListOptArea() {
+        videoListBinding.videoListOptArea.isVisible = false
+    }
+
     private fun showVideoListOptArea(videoArea: Rect) {
         videoListBinding.videoListOptArea.run {
             val lp = layoutParams as FrameLayout.LayoutParams
-            lp.topMargin = videoArea.bottom
+            lp.topMargin = videoArea.bottom.coerceAtMost(maxTopMargin())
             layoutParams = lp
             isVisible = true
         }
 
         updateCallOutUser()
+    }
+
+    private fun maxTopMargin(): Int {
+        return videoListBinding.videoList.height - activity.dp2px(32)
     }
 
     // 更新显示浮窗及全屏按钮状态
@@ -272,15 +279,26 @@ class RtcComponent(
         }
     }
 
-    private fun hideVideoListOptArea() {
-        videoListBinding.videoListOptArea.isVisible = false
+    private fun handleAreaShown(areaId: Int, shown: Boolean) {
+        if (areaId != ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT) {
+            clearCallOut()
+        }
+
+        if (areaId != ClassRoomEvent.AREA_ID_CLEAR_ALL) {
+            videoListBinding.clickHandleView.show(shown) {
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLEAR_ALL, true)
+            }
+        }
     }
 
-    private fun handleAreaShown(areaId: Int) {
-        if (areaId != ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT) {
-            hideVideoListOptArea()
-            userCallOut = null
-        }
+    private fun clearCallOut() {
+        userCallOut = null
+        hideVideoListOptArea()
+    }
+
+    private fun clearCallOutAndNotify() {
+        clearCallOut()
+        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT, false)
     }
 
     private var start = Rect()
@@ -350,7 +368,7 @@ class RtcComponent(
     }
 
     private fun actionAfterPermission() {
-        loadData()
+        observeState()
     }
 
     private fun initListener() {

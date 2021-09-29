@@ -11,6 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <io.agora.flat.ui.view.room.ClickHandleView
+        android:id="@+id/clickHandleView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
@@ -70,7 +75,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/boardToolsLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/shape_gray_border_right_round_12_bg"
@@ -85,48 +89,55 @@
             android:padding="4dp"
             android:src="@drawable/ic_room_hand_up_selector" />
 
-        <FrameLayout
-            android:id="@+id/toolsSub"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:visibility="visible">
+        <LinearLayout
+            android:id="@+id/boardToolsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/toolsSub"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/toolsSubPaint"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    tools:src="@drawable/ic_toolbox_color_blue"
+                    tools:visibility="visible" />
+
+                <ImageView
+                    android:id="@+id/toolsSubDelete"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_toolbox_scene_delete"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <ImageView
-                android:id="@+id/toolsSubPaint"
+                android:id="@+id/tools"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="4dp"
-                tools:src="@drawable/ic_toolbox_color_blue"
-                tools:visibility="visible" />
-
-            <ImageView
-                android:id="@+id/toolsSubDelete"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_scene_delete"
-                android:visibility="gone" />
-        </FrameLayout>
-
-        <ImageView
-            android:id="@+id/tools"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="4dp"
-            android:visibility="visible"
-            tools:src="@drawable/ic_toolbox_pencil_selector" />
+                android:visibility="visible"
+                tools:src="@drawable/ic_toolbox_pencil_selector" />
+        </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/toolsLayout"
+        android:id="@+id/appliancesLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="40dp"
         android:background="@drawable/shape_gray_border_round_4_bg"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/applianceRecyclerView"
@@ -142,13 +153,13 @@
         android:id="@+id/toolsSubLayout"
         android:layout_width="128dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="40dp"
         android:background="@drawable/shape_gray_border_round_4_bg"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/boardToolsLayout"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <io.agora.flat.ui.view.StrokeSeeker
             android:id="@+id/seeker"

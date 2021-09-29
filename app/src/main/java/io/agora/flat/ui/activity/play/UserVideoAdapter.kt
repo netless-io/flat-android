@@ -47,10 +47,19 @@ class UserVideoAdapter(
         return ViewHolder(view)
     }
 
+    val avatars = listOf(
+        R.drawable.default_avatars_0,
+        R.drawable.default_avatars_1,
+        R.drawable.default_avatars_2,
+        R.drawable.default_avatars_3,
+        R.drawable.default_avatars_4,
+    )
+
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         var itemData = dataSet[position]
 
         viewHolder.avatar.load(itemData.avatarURL) {
+            placeholder(avatars[itemData.rtcUID % avatars.size])
             crossfade(true)
             transformations(CircleCropTransformation())
         }
