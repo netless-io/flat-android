@@ -54,9 +54,7 @@ class JoinRoomActivity : ComponentActivity() {
                 when (action) {
                     JoinRoomAction.Close -> finish()
                     is JoinRoomAction.JoinRoom -> {
-                        viewModel.joinRoom(action.roomUUID,
-                            action.openVideo,
-                            action.openAudio)
+                        viewModel.joinRoom(action.roomUUID, action.openVideo, action.openAudio)
                     }
                 }
             }

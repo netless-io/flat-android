@@ -65,4 +65,8 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
+    fun isLoggedIn(): Boolean {
+        return userRepository.isLoggedIn()
+    }
 }

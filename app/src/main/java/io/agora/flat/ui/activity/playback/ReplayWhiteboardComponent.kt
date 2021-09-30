@@ -79,6 +79,7 @@ class ReplayWhiteboardComponent(
         super.onDestroy(owner)
 
         mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar)
+        clusterPlayer?.release()
     }
 
     private fun initView() {

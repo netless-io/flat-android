@@ -211,7 +211,7 @@
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/pagePreview"
+            android:id="@+id/page_prev"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_toolbox_prevpage_selector" />

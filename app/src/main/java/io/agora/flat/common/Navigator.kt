@@ -24,6 +24,15 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    // join room
+    fun launchHomeActivity(context: Context, roomUUID: String) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
+        }
+        context.startActivity(intent)
+    }
+
     fun launchLoginActivity(context: Context) {
         val intent = Intent(context, LoginActivity::class.java)
         context.startActivity(intent)

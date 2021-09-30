@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
@@ -26,6 +27,9 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.MaxWidthSpread
+import io.agora.flat.util.showToast
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,6 +42,21 @@ class MainActivity : ComponentActivity() {
             MainContent()
         }
         loginHelper.register()
+
+        observerState()
+    }
+
+    private fun observerState() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.roomPlayInfo.filterNotNull().collect {
+                Navigator.launchRoomPlayActivity(this@MainActivity, it)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.error.filterNotNull().collect {
+                showToast(it.message)
+            }
+        }
     }
 
     override fun onResume() {

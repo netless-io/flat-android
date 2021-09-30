@@ -114,6 +114,19 @@ class LoginActivity : ComponentActivity() {
                     }
                 }
             }
+            else -> {
+                // login for url
+                lifecycleScope.launch {
+                    if (intent.data?.scheme == "x-agora-flat-client" &&
+                        intent.data?.authority == "joinRoom"
+                    ) {
+                        val roomUUID = intent.data?.getQueryParameter("roomUUID")
+                        if (viewModel.isLoggedIn() && roomUUID != null) {
+                            Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -69,7 +69,7 @@ class WhiteboardComponent(
             binding.undo to { room?.undo() },
             binding.redo to { room?.redo() },
             binding.pageStart to { room?.setSceneIndex(0, null) },
-            binding.pagePreview to { room?.pptPreviousStep() },
+            binding.pagePrev to { room?.pptPreviousStep() },
             binding.pageNext to { room?.pptNextStep() },
             binding.pageEnd to {
                 room?.sceneState?.apply {
@@ -138,10 +138,10 @@ class WhiteboardComponent(
             when (it) {
                 ApplianceItem.OTHER_CLEAR -> {
                     binding.appliancesLayout.isVisible = false
+                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, false)
                     room?.cleanScene(true)
                 }
                 else -> {
-                    setAppliance(it.type)
                     onSelectAppliance(it)
                 }
             }
@@ -153,6 +153,7 @@ class WhiteboardComponent(
         colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
             override fun onColorSelected(item: ColorItem) {
                 binding.toolsSubLayout.isVisible = false
+                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT, false)
                 room?.memberState = room?.memberState?.apply {
                     strokeColor = item.color
                 }
@@ -194,7 +195,9 @@ class WhiteboardComponent(
     }
 
     private fun onSelectAppliance(appliance: ApplianceItem) {
+        setAppliance(appliance.type)
         binding.appliancesLayout.isVisible = false
+        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, false)
         updateAppliance(viewModel.state.value.isWritable, appliance.type)
     }
 
@@ -517,7 +520,7 @@ class WhiteboardComponent(
             val currentDisplay = index + 1
             val lastDisplay = scenes.size
             binding.pageIndicate.text = "${currentDisplay}/${lastDisplay}"
-            binding.pagePreview.isEnabled = currentDisplay != 1
+            binding.pagePrev.isEnabled = currentDisplay != 1
             binding.pageNext.isEnabled = currentDisplay != lastDisplay
             binding.pageStart.isEnabled = currentDisplay != 1
             binding.pageEnd.isEnabled = currentDisplay != lastDisplay
