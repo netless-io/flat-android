@@ -51,6 +51,7 @@
         <activity android:name=".ui.activity.setting.FeedbackActivity" />
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
         <activity android:name=".ui.activity.setting.CallTestActivity" />
+        <activity android:name=".ui.activity.setting.WebViewActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"

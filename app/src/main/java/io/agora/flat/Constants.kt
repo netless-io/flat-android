@@ -13,11 +13,19 @@ class Constants {
         const val BASE_INVITE_URL = "https://flat-web.whiteboard.agora.io"
     }
 
+    object URL {
+        const val Service = "https://flat.whiteboard.agora.io/service.html"
+        const val Privacy = "https://flat.whiteboard.agora.io/privacy.html"
+    }
+
     object IntentKey {
         const val ROOM_UUID = "room_uuid"
         const val PERIODIC_UUID = "periodic_uuid"
         const val ROOM_INFO = "room_info"
         const val ROOM_PLAY_INFO = "room_play_info"
+
+        const val URL = "url"
+        const val TITLE = "title"
     }
 
     object Login {

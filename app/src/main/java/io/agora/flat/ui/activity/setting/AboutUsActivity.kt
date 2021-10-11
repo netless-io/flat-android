@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.common.Navigator
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.*
@@ -34,8 +36,12 @@ class AboutUsActivity : ComponentActivity() {
             AboutUsPage { action ->
                 when (action) {
                     is AboutUiAction.Back -> finish()
-                    is AboutUiAction.OpenServiceProtocol -> showDebugToast("OpenServiceProtocol")
-                    is AboutUiAction.OpenPrivacyProtocol -> showDebugToast("OpenPrivacyProtocol")
+                    is AboutUiAction.OpenServiceProtocol -> {
+                        Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Service)
+                    }
+                    is AboutUiAction.OpenPrivacyProtocol -> {
+                        Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Privacy)
+                    }
                 }
             }
         }

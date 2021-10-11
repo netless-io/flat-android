@@ -119,6 +119,13 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    fun launchWebViewActivity(context: Context, url: String) {
+        val intent = Intent(context, WebViewActivity::class.java).apply {
+            putExtra(Constants.IntentKey.URL, url)
+        }
+        context.startActivity(intent)
+    }
+
     // system
     fun gotoNetworkSetting(context: Context) {
         context.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
