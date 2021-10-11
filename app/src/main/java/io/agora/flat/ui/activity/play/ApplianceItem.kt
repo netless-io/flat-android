@@ -21,6 +21,7 @@ enum class ApplianceItem(val drawableRes: Int, val type: String) {
 
     companion object {
         var appliancesPhone = listOf(
+            CLICKER,
             SELECTOR,
             PENCIL,
             RECTANGLE,

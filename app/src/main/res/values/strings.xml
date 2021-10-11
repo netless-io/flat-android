@@ -78,7 +78,7 @@
     <string name="class_room_message_muted">All members are mute</string>
     <string name="room_class_message_empty_hit">Say something…</string>
     <string name="room_class_cloudstorage_empty_hit">No files</string>
-    <string name="room_class_teacher_leave">The teacher leaves temporarily</string>
+    <string name="room_class_teacher_leave">Teacher has left</string>
     <string name="user_list">User List</string>
     <string name="room_class_userlist_state_speaking">(Speaking)</string>
     <string name="room_class_userlist_state_handup">(Hands raised)</string>

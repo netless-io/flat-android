@@ -177,8 +177,7 @@ class WhiteboardComponent(
             }
         })
         scenePreviewBinding.sceneRecyclerView.adapter = slideAdapter
-        scenePreviewBinding.sceneRecyclerView.layoutManager =
-            LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
+        scenePreviewBinding.sceneRecyclerView.layoutManager = LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
         scenePreviewBinding.sceneRecyclerView.addItemDecoration(PaddingItemDecoration(horizontal = activity.dp2px(8)))
 
         slideAnimator = SimpleAnimator(
@@ -323,13 +322,16 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
                 setRoomWritable(it.isWritable)
+                setViewMode(it.viewMode)
 
                 binding.handup.isVisible = it.showRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
-
-                room?.setViewMode(it.viewMode)
             }
         }
+    }
+
+    private fun setViewMode(viewMode: ViewMode) {
+        room?.setViewMode(viewMode)
     }
 
     private fun insertImage(imageUrl: String, w: Int, h: Int) {
@@ -400,6 +402,7 @@ class WhiteboardComponent(
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
         configuration.isEnableSyncedStore = true
+        configuration.useMultiViews = true
 
         whiteSdk = WhiteSdk(binding.whiteboardView, activity, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallbacks {
@@ -533,8 +536,6 @@ class WhiteboardComponent(
 
     private fun join(roomUUID: String, roomToken: String) {
         val roomParams = RoomParams(roomUUID, roomToken).apply {
-            useMultiViews = true
-
             val styleMap = HashMap<String, String>()
             styleMap["bottom"] = "30px"
             styleMap["right"] = "44px"

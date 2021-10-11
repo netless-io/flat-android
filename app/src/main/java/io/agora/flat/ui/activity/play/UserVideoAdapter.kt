@@ -59,7 +59,7 @@ class UserVideoAdapter(
         var itemData = dataSet[position]
 
         viewHolder.avatar.load(itemData.avatarURL) {
-            placeholder(avatars[itemData.rtcUID % avatars.size])
+            // placeholder(avatars[itemData.rtcUID % avatars.size])
             crossfade(true)
             transformations(CircleCropTransformation())
         }

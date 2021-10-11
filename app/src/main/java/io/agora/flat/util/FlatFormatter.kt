@@ -48,7 +48,6 @@ object FlatFormatter {
         return "${timeFormatter.format(begin)}~${timeFormatter.format(end)}"
     }
 
-    // TODO 国际化支持
     fun diffTime(context: Context, begin: Long, end: Long): String {
         val diff = end - begin
         if (diff < 0) {
