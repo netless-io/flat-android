@@ -40,7 +40,7 @@ import kotlin.collections.HashMap
 
 @HiltViewModel
 class ClassRoomViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
     private val cloudStorageRepository: CloudStorageRepository,
@@ -254,10 +254,6 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             eventbus.produceEvent(event)
         }
-    }
-
-    fun notifyOperatingAreaShown(areaId: Int, shown: Boolean) {
-        onEvent(ClassRoomEvent.OperatingAreaShown(areaId, shown))
     }
 
     fun notifyRTMChannelJoined() {
@@ -771,25 +767,10 @@ data class RecordState constructor(
 data class ImageSize(val width: Int, val height: Int)
 
 sealed class ClassRoomEvent {
-    companion object {
-        const val AREA_ID_CLEAR_ALL = 0
-        const val AREA_ID_APPLIANCE = 1
-        const val AREA_ID_PAINT = 2
-        const val AREA_ID_SETTING = 3
-        const val AREA_ID_MESSAGE = 4
-        const val AREA_ID_CLOUD_STORAGE = 5
-        const val AREA_ID_VIDEO_OP_CALL_OUT = 6
-        const val AREA_ID_INVITE_DIALOG = 7
-        const val AREA_ID_OWNER_EXIT_DIALOG = 8
-        const val AREA_ID_USER_LIST = 9
-        const val AREA_ID_ROOM_STATE_SETTING = 10
-    }
-
     data class RoomPlayInfoFetched(val info: RoomPlayInfo) : ClassRoomEvent()
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 
-    data class OperatingAreaShown(val areaId: Int, val shown: Boolean) : ClassRoomEvent()
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()

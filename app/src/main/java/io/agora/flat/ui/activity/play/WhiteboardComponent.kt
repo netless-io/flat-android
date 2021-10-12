@@ -20,6 +20,7 @@ import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.databinding.LayoutScenePreviewBinding
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.view.StrokeSeeker
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
@@ -101,13 +102,13 @@ class WhiteboardComponent(
             binding.tools to {
                 with(binding.appliancesLayout) {
                     isVisible = !isVisible
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, isVisible)
                 }
             },
             binding.toolsSubPaint to {
                 with(binding.toolsSubLayout) {
                     isVisible = !isVisible
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_PAINT, isVisible)
                 }
             },
             binding.toolsSubDelete to {
@@ -138,7 +139,7 @@ class WhiteboardComponent(
             when (it) {
                 ApplianceItem.OTHER_CLEAR -> {
                     binding.appliancesLayout.isVisible = false
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, false)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
                     room?.cleanScene(true)
                 }
                 else -> {
@@ -153,7 +154,7 @@ class WhiteboardComponent(
         colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
             override fun onColorSelected(item: ColorItem) {
                 binding.toolsSubLayout.isVisible = false
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_PAINT, false)
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_PAINT, false)
                 room?.memberState = room?.memberState?.apply {
                     strokeColor = item.color
                 }
@@ -177,7 +178,8 @@ class WhiteboardComponent(
             }
         })
         scenePreviewBinding.sceneRecyclerView.adapter = slideAdapter
-        scenePreviewBinding.sceneRecyclerView.layoutManager = LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
+        scenePreviewBinding.sceneRecyclerView.layoutManager =
+            LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
         scenePreviewBinding.sceneRecyclerView.addItemDecoration(PaddingItemDecoration(horizontal = activity.dp2px(8)))
 
         slideAnimator = SimpleAnimator(
@@ -196,7 +198,7 @@ class WhiteboardComponent(
     private fun onSelectAppliance(appliance: ApplianceItem) {
         setAppliance(appliance.type)
         binding.appliancesLayout.isVisible = false
-        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_APPLIANCE, false)
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
         updateAppliance(viewModel.state.value.isWritable, appliance.type)
     }
 
@@ -309,12 +311,27 @@ class WhiteboardComponent(
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId, it.shown)
                     is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
                     is ClassRoomEvent.InsertImage -> insertImage(it.imageUrl, it.width, it.height)
                     is ClassRoomEvent.InsertPpt -> insertPpt(it.dirPath, it.convertedFiles, it.title)
                     is ClassRoomEvent.InsertVideo -> insertVideo(it.videoUrl, it.title)
                     else -> {; }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            RoomOverlayManager.observeShowId().collect { areaId ->
+                if (areaId != RoomOverlayManager.AREA_ID_APPLIANCE) {
+                    binding.appliancesLayout.isVisible = false
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_PAINT) {
+                    binding.toolsSubLayout.isVisible = false
+                }
+
+                binding.clickHandleView.show(areaId != RoomOverlayManager.AREA_ID_NO_OVERLAY) {
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_NO_OVERLAY)
                 }
             }
         }
@@ -378,22 +395,6 @@ class WhiteboardComponent(
         // binding.showScenes.isVisible = writable
         // binding.pageIndicateLy.isVisible = writable
         binding.undoRedoLayout.isVisible = writable
-    }
-
-    private fun handleAreaShown(areaId: Int, shown: Boolean) {
-        if (areaId != ClassRoomEvent.AREA_ID_APPLIANCE) {
-            binding.appliancesLayout.isVisible = false
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_PAINT) {
-            binding.toolsSubLayout.isVisible = false
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_CLEAR_ALL) {
-            binding.clickHandleView.show(shown) {
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLEAR_ALL, true)
-            }
-        }
     }
 
     private fun initWhiteboard() {

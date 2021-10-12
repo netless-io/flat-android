@@ -18,6 +18,7 @@ import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
@@ -56,8 +57,31 @@ class ToolComponent(
         lifecycleScope.launch {
             viewModel.roomEvent.collect {
                 when (it) {
-                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId)
                     is ClassRoomEvent.StartRoomResult -> {; }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            RoomOverlayManager.observeShowId().collect { areaId ->
+                if (areaId != RoomOverlayManager.AREA_ID_MESSAGE) {
+                    viewModel.setMessageAreaShown(false)
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
+                    hideSettingLayout()
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_CLOUD_STORAGE) {
+                    hideCloudStorageLayout()
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_USER_LIST) {
+                    hideUserListLayout()
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_ROOM_STATE_SETTING) {
+                    hideRoomStateSettings()
                 }
             }
         }
@@ -124,28 +148,6 @@ class ToolComponent(
         }
     }
 
-    private fun handleAreaShown(areaId: Int) {
-        if (areaId != ClassRoomEvent.AREA_ID_MESSAGE) {
-            viewModel.setMessageAreaShown(false)
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_SETTING) {
-            hideSettingLayout()
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_CLOUD_STORAGE) {
-            hideCloudStorageLayout()
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_USER_LIST) {
-            hideUserListLayout()
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING) {
-            hideRoomStateSettings()
-        }
-    }
-
     private fun hideRoomStateSettings() {
         binding.layoutRoomStateSettings.root.isVisible = false
         binding.roomStateSetting.isSelected = false
@@ -194,7 +196,7 @@ class ToolComponent(
                 binding.messageDot.isVisible = false
                 val shown = !viewModel.messageAreaShown.value
                 viewModel.setMessageAreaShown(shown)
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_MESSAGE, shown)
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_MESSAGE, shown)
             },
             binding.cloudservice to {
                 with(binding.layoutCloudStorage.root) {
@@ -204,7 +206,7 @@ class ToolComponent(
                         showCloudStorageLayout()
                         viewModel.requestCloudStorageFiles()
                     }
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLOUD_STORAGE, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, isVisible)
                 }
             },
             binding.userlist to {
@@ -214,7 +216,7 @@ class ToolComponent(
                     } else {
                         showUserListLayout()
                     }
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_USER_LIST, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_USER_LIST, isVisible)
                 }
             },
             binding.invite to {
@@ -228,7 +230,7 @@ class ToolComponent(
                     } else {
                         showSettingLayout()
                     }
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_SETTING, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_SETTING, isVisible)
                 }
             },
             binding.collapse to { toolAnimator.hide() },
@@ -245,7 +247,7 @@ class ToolComponent(
                     } else {
                         showRoomStateSettings()
                     }
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_ROOM_STATE_SETTING, isVisible)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_ROOM_STATE_SETTING, isVisible)
                 }
             },
             binding.layoutRoomStateSettings.startRecord to {
@@ -355,11 +357,11 @@ class ToolComponent(
             }
 
             override fun onDismiss() {
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG, false)
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_OWNER_EXIT_DIALOG, false)
             }
         })
         dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
-        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_OWNER_EXIT_DIALOG, true)
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_OWNER_EXIT_DIALOG, true)
     }
 
     private fun showAudienceExitDialog() {
@@ -397,11 +399,11 @@ class ToolComponent(
 
             override fun onHide() {
                 binding.invite.isSelected = false
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG, false)
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_INVITE_DIALOG, false)
             }
         })
         dialog.show(activity.supportFragmentManager, "InviteDialog")
-        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_INVITE_DIALOG, true)
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_INVITE_DIALOG, true)
     }
 
     private val collapseHeight = activity.dp2px(32)

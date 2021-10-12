@@ -27,6 +27,7 @@ import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.RtcEngineProvider
 import io.agora.flat.ui.animator.SimpleAnimator
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
@@ -88,15 +89,15 @@ class RtcComponent(
                 Log.d(TAG, "currentUsersMap $users")
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示
-                val findUser = userCallOut?.run {
-                    users.find { it.userUUID == this.userUUID }
-                }
-                if (findUser == null) {
-                    clearCallOutAndNotify()
-                    fullScreenAnimator.hide()
-                } else {
-                    userCallOut = findUser
-                    updateCallOutUser()
+                if (userCallOut != null) {
+                    val findUser = users.find { it.userUUID == userCallOut!!.userUUID }
+                    if (findUser == null) {
+                        clearCallOutAndNotify()
+                        fullScreenAnimator.hide()
+                    } else {
+                        userCallOut = findUser
+                        updateCallOutUser()
+                    }
                 }
             }
         }
@@ -105,8 +106,19 @@ class RtcComponent(
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
-                    is ClassRoomEvent.OperatingAreaShown -> handleAreaShown(it.areaId, it.shown)
                     else -> {; }
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            RoomOverlayManager.observeShowId().collect { areaId ->
+                if (areaId != RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT) {
+                    clearCallOut()
+                }
+
+                videoListBinding.clickHandleView.show(areaId != RoomOverlayManager.AREA_ID_NO_OVERLAY) {
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_NO_OVERLAY)
                 }
             }
         }
@@ -178,7 +190,7 @@ class RtcComponent(
                 if (userCallOut == null || userCallOut != user) {
                     userCallOut = user
                     showVideoListOptArea(start)
-                    viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT, true)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
                 } else {
                     clearCallOutAndNotify()
                 }
@@ -279,18 +291,6 @@ class RtcComponent(
         }
     }
 
-    private fun handleAreaShown(areaId: Int, shown: Boolean) {
-        if (areaId != ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT) {
-            clearCallOut()
-        }
-
-        if (areaId != ClassRoomEvent.AREA_ID_CLEAR_ALL) {
-            videoListBinding.clickHandleView.show(shown) {
-                viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_CLEAR_ALL, true)
-            }
-        }
-    }
-
     private fun clearCallOut() {
         userCallOut = null
         hideVideoListOptArea()
@@ -298,7 +298,7 @@ class RtcComponent(
 
     private fun clearCallOutAndNotify() {
         clearCallOut()
-        viewModel.notifyOperatingAreaShown(ClassRoomEvent.AREA_ID_VIDEO_OP_CALL_OUT, false)
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT, false)
     }
 
     private var start = Rect()

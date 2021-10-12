@@ -48,6 +48,7 @@
         <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
+        <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity android:name=".ui.activity.setting.FeedbackActivity" />
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
         <activity android:name=".ui.activity.setting.CallTestActivity" />
@@ -64,7 +65,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity
             android:name=".ui.activity.dev.ComposeTestActivity"
             android:exported="true"
