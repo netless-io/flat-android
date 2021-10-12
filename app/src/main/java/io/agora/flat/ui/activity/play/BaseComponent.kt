@@ -14,4 +14,8 @@ abstract class BaseComponent(
     override fun getLifecycle(): Lifecycle {
         return activity.lifecycle
     }
+
+    open fun handleBackPressed(): Boolean {
+        return false
+    }
 }

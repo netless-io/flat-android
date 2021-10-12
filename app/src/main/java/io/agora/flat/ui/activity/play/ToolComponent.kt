@@ -423,4 +423,9 @@ class ToolComponent(
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
         binding.extTools.layoutParams = layoutParams
     }
+
+    override fun handleBackPressed(): Boolean {
+        handleExit()
+        return true
+    }
 }

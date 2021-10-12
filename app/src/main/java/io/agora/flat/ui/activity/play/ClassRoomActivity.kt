@@ -46,4 +46,13 @@ class ClassRoomActivity : AppCompatActivity() {
         supportActionBar?.hide()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+
+    override fun onBackPressed() {
+        componentSet.forEach {
+            if (it.handleBackPressed()) {
+                return
+            }
+        }
+        super.onBackPressed()
+    }
 }
