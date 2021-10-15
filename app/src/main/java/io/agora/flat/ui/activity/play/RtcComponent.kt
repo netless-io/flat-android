@@ -34,7 +34,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
-import io.agora.rtc.IRtcEngineEventHandler
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -42,6 +41,7 @@ class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
     private val fullScreenLayout: FrameLayout,
+    private val shareScreenContainer: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = RtcComponent::class.simpleName
@@ -58,6 +58,7 @@ class RtcComponent(
     interface RtcComponentEntryPoint {
         fun userRepository(): UserRepository
         fun rtcApi(): RtcEngineProvider
+        fun rtcVideoController(): RtcVideoController
     }
 
     private lateinit var fullScreenBinding: ComponentFullscreenBinding
@@ -65,8 +66,8 @@ class RtcComponent(
 
     private lateinit var userRepository: UserRepository
     private lateinit var rtcApi: RtcEngineProvider
+    private lateinit var rtcVideoController: RtcVideoController
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private val rtcVideoController: RtcVideoController by activity.viewModels()
 
     private lateinit var adapter: UserVideoAdapter
 
@@ -74,19 +75,23 @@ class RtcComponent(
     private lateinit var fullScreenAnimator: SimpleAnimator
 
     override fun onCreate(owner: LifecycleOwner) {
+        injectApi()
+        initView()
+        initListener()
+        checkPermission(::observeState)
+    }
+
+    private fun injectApi() {
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtcComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
         rtcApi = entryPoint.rtcApi()
-
-        initView()
-        initListener()
-        checkPermission(::actionAfterPermission)
+        rtcVideoController = entryPoint.rtcVideoController()
     }
 
     private fun observeState() {
         lifecycleScope.launch {
             viewModel.videoUsers.collect { users ->
-                Log.d(TAG, "currentUsersMap $users")
+                Log.d(TAG, "videoUsers changed to $users")
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
@@ -135,11 +140,10 @@ class RtcComponent(
     }
 
     private val expandWidth = activity.dp2px(120)
-    private fun updateVideoContainer(value: Float) {
-        val width = (value * expandWidth).toInt()
 
-        val layoutParams = videoListBinding.root.layoutParams as ViewGroup.MarginLayoutParams
-        layoutParams.width = width
+    private fun updateVideoContainer(value: Float) {
+        val layoutParams = videoListBinding.root.layoutParams
+        layoutParams.width = (value * expandWidth).toInt()
         videoListBinding.root.layoutParams = layoutParams
     }
 
@@ -147,7 +151,10 @@ class RtcComponent(
         Log.d(TAG, "call rtc joinChannel")
         viewModel.roomPlayInfo.value?.apply {
             rtcApi.rtcEngine().joinChannel(rtcToken, roomUUID, "{}", rtcUID)
-            rtcVideoController.setLocalUid(rtcUID)
+
+            rtcVideoController.localUid = rtcUID
+            rtcVideoController.shareScreenUid = rtcShareScreen.uid
+            rtcVideoController.shareScreenContainer = shareScreenContainer
         }
     }
 
@@ -159,8 +166,9 @@ class RtcComponent(
             fullScreenBinding.fullVideoOpt, videoListBinding.videoOpt -> userCallOut?.run {
                 viewModel.enableVideo(!it.isSelected, userUUID)
             }
-            fullScreenBinding.exitFullScreen -> fullScreenAnimator.hide()
-
+            fullScreenBinding.exitFullScreen -> {
+                fullScreenAnimator.hide()
+            }
             videoListBinding.enterFullScreen -> {
                 hideVideoListOptArea()
                 fullScreenAnimator.show()
@@ -180,6 +188,8 @@ class RtcComponent(
         videoListBinding.videoOpt.setOnClickListener(onClickListener)
         videoListBinding.audioOpt.setOnClickListener(onClickListener)
         videoListBinding.enterFullScreen.setOnClickListener(onClickListener)
+
+        shareScreenContainer.setOnClickListener { /* disable click pass through */ }
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
         adapter.listener = object : UserVideoAdapter.Listener {
@@ -218,7 +228,7 @@ class RtcComponent(
                 fullScreenBinding.fullVideoView.isVisible = true
                 userCallOut?.run {
                     fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
-                    rtcVideoController.setupUserVideo(fullScreenBinding.fullVideoView, rtcUID, true)
+                    rtcVideoController.setupFullscreenVideo(fullScreenBinding.fullVideoView, rtcUID)
                     fullScreenBinding.fullScreenAvatar.load(avatarURL) {
                         crossfade(true)
                         transformations(CircleCropTransformation())
@@ -239,7 +249,6 @@ class RtcComponent(
                 userCallOut?.run {
                     adapter.updateVideoView(rtcUID)
                 }
-                // call out 状态清除
                 userCallOut = null
             }
         )
@@ -356,7 +365,7 @@ class RtcComponent(
             actionAfterPermission()
         }
 
-        Log.i(TAG, "requestPermissions $permissions")
+        Log.i(TAG, "checkPermission request $permissions")
         activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { it ->
             val allGranted = it.mapNotNull { it.key }.size == it.size
             if (allGranted) {
@@ -367,36 +376,23 @@ class RtcComponent(
         }.launch(permissions)
     }
 
-    private fun actionAfterPermission() {
-        observeState()
-    }
-
     private fun initListener() {
         rtcApi.addEventListener(eventListener)
     }
 
     private var eventListener = object : RTCEventListener {
-        override fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {
-            Log.d(TAG, "onFirstRemoteVideoDecoded")
-        }
-
-        override fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {
-            Log.d(TAG, "onLeaveChannel")
-        }
-
-        override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
-            Log.d(TAG, "onJoinChannelSuccess:$channel\t$uid\t$elapsed")
-        }
-
         override fun onUserOffline(uid: Int, reason: Int) {
-            Log.d(TAG, "onUserOffline:$uid $reason")
+            Log.d(TAG, "onUserOffline uid: $uid reason: $reason")
             lifecycleScope.launch {
-                rtcVideoController.releaseVideo(uid)
+                rtcVideoController.handleOffline(uid)
             }
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {
-            Log.d(TAG, "onUserJoined:$uid $elapsed")
+            Log.d(TAG, "onUserJoined uid: $uid elapsed: $elapsed")
+            lifecycleScope.launch {
+                rtcVideoController.handlerJoined(uid)
+            }
         }
     }
 }

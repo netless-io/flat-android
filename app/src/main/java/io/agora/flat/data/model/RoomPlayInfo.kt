@@ -20,8 +20,13 @@ data class RoomPlayInfo(
     val whiteboardRoomUUID: String,
     // rtc 的 uid
     val rtcUID: Int,
+    // rtc 分享屏幕
+    val rtcShareScreen: RtcShareScreen,
     // rtc token
     val rtcToken: String,
     // rtm token
     val rtmToken: String,
 ) : Parcelable
+
+@Parcelize
+data class RtcShareScreen(val uid: Int, val token: String) : Parcelable
