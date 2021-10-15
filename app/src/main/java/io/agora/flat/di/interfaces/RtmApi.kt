@@ -7,10 +7,12 @@ import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
 import io.agora.rtm.RtmClient
 
-interface RtmEngineProvider {
+interface RtmApi {
     fun rtmEngine(): RtmClient
 
     suspend fun initChannel(rtmToken: String, channelId: String, userUUID: String): Boolean
+
+    suspend fun logout(): Boolean
 
     suspend fun getMembers(): List<RtmChannelMember>
 

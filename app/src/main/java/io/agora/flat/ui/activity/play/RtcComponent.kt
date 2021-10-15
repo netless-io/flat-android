@@ -25,7 +25,7 @@ import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
-import io.agora.flat.di.interfaces.RtcEngineProvider
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
@@ -57,7 +57,7 @@ class RtcComponent(
     @InstallIn(ActivityComponent::class)
     interface RtcComponentEntryPoint {
         fun userRepository(): UserRepository
-        fun rtcApi(): RtcEngineProvider
+        fun rtcApi(): RtcApi
         fun rtcVideoController(): RtcVideoController
     }
 
@@ -65,7 +65,7 @@ class RtcComponent(
     private lateinit var videoListBinding: ComponentVideoListBinding
 
     private lateinit var userRepository: UserRepository
-    private lateinit var rtcApi: RtcEngineProvider
+    private lateinit var rtcApi: RtcApi
     private lateinit var rtcVideoController: RtcVideoController
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
@@ -150,7 +150,7 @@ class RtcComponent(
     private fun joinRtcChannel() {
         Log.d(TAG, "call rtc joinChannel")
         viewModel.roomPlayInfo.value?.apply {
-            rtcApi.rtcEngine().joinChannel(rtcToken, roomUUID, "{}", rtcUID)
+            rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
 
             rtcVideoController.localUid = rtcUID
             rtcVideoController.shareScreenUid = rtcShareScreen.uid
@@ -228,7 +228,7 @@ class RtcComponent(
                 fullScreenBinding.fullVideoView.isVisible = true
                 userCallOut?.run {
                     fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
-                    rtcVideoController.setupFullscreenVideo(fullScreenBinding.fullVideoView, rtcUID)
+                    rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
                     fullScreenBinding.fullScreenAvatar.load(avatarURL) {
                         crossfade(true)
                         transformations(CircleCropTransformation())
@@ -349,7 +349,7 @@ class RtcComponent(
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        rtcApi.rtcEngine().leaveChannel()
+        rtcApi.leaveChannel()
         rtcApi.removeEventListener(eventListener)
     }
 

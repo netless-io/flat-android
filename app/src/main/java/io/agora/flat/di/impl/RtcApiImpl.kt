@@ -4,21 +4,22 @@ import android.content.Context
 import io.agora.flat.Constants
 import io.agora.flat.common.rtc.RTCEventHandler
 import io.agora.flat.common.rtc.RTCEventListener
-import io.agora.flat.di.interfaces.RtcEngineProvider
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
+import io.agora.rtc.video.VideoCanvas
 import io.agora.rtc.video.VideoEncoderConfiguration
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RtcProviderImpl @Inject constructor() : RtcEngineProvider, StartupInitializer {
-    private lateinit var mRtcEngine: RtcEngine
+class RtcApiImpl @Inject constructor() : RtcApi, StartupInitializer {
+    private lateinit var rtcEngine: RtcEngine
     private val mHandler: RTCEventHandler = RTCEventHandler()
 
     override fun init(context: Context) {
         try {
-            mRtcEngine = RtcEngine.create(context, Constants.AGORA_APP_ID, mHandler)
+            rtcEngine = RtcEngine.create(context, Constants.AGORA_APP_ID, mHandler)
             // mRtcEngine.setLogFile(FileUtil.initializeLogFile(this))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -28,8 +29,8 @@ class RtcProviderImpl @Inject constructor() : RtcEngineProvider, StartupInitiali
     }
 
     private fun setupVideoConfig() {
-        mRtcEngine.enableVideo()
-        mRtcEngine.setVideoEncoderConfiguration(
+        rtcEngine.enableVideo()
+        rtcEngine.setVideoEncoderConfiguration(
             VideoEncoderConfiguration(
                 VideoEncoderConfiguration.VD_640x480,
                 VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
@@ -40,7 +41,23 @@ class RtcProviderImpl @Inject constructor() : RtcEngineProvider, StartupInitiali
     }
 
     override fun rtcEngine(): RtcEngine {
-        return mRtcEngine
+        return rtcEngine
+    }
+
+    override fun joinChannel(token: String, channelName: String, optionalUid: Int): Int {
+        return rtcEngine.joinChannel(token, channelName, "{}", optionalUid)
+    }
+
+    override fun leaveChannel() {
+        rtcEngine.leaveChannel()
+    }
+
+    override fun setupLocalVideo(local: VideoCanvas) {
+        rtcEngine.setupLocalVideo(local)
+    }
+
+    override fun setupRemoteVideo(remote: VideoCanvas) {
+        rtcEngine.setupRemoteVideo(remote)
     }
 
     override fun addEventListener(listener: RTCEventListener) {

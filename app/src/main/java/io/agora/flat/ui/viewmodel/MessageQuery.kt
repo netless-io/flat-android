@@ -5,12 +5,12 @@ import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.ORDER_DESC
-import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.di.interfaces.RtmApi
 import javax.inject.Inject
 
 @ActivityRetainedScoped
 class MessageQuery @Inject constructor(
-    private val rtmApi: RtmEngineProvider,
+    private val rtmApi: RtmApi,
     private val userQuery: UserQuery,
 ) {
     companion object {

@@ -9,7 +9,7 @@ import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
-import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +24,7 @@ class MessageViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val messageState: MessageState,
     private val messageQuery: MessageQuery,
-    private val rtmApi: RtmEngineProvider,
+    private val rtmApi: RtmApi,
     private val eventbus: EventBus,
 ) : ViewModel() {
     val roomUUID: String = savedStateHandle.get(Constants.IntentKey.ROOM_UUID)!!

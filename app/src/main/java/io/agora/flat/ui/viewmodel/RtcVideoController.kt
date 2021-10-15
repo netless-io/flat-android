@@ -5,15 +5,15 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import io.agora.flat.di.interfaces.RtcEngineProvider
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
 import javax.inject.Inject
 import kotlin.collections.set
 
 @ActivityRetainedScoped
-class RtcVideoController @Inject constructor(private val rtcApi: RtcEngineProvider) {
-    private var uidTextureMap = HashMap<Int, TextureView>()
+class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
+    private var textureMap = HashMap<Int, TextureView>()
     private var fullScreenUid: Int = 0
 
     var shareScreenContainer: FrameLayout? = null
@@ -28,22 +28,22 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcEngineProvid
         fullScreenUid = 0
     }
 
-    fun setupFullscreenVideo(videoContainer: FrameLayout, uid: Int) {
+    fun updateFullScreenVideo(videoContainer: FrameLayout, uid: Int) {
         if (fullScreenUid == uid) {
             setupUserVideo(videoContainer, uid)
         }
     }
 
     fun setupUserVideo(videoContainer: FrameLayout, uid: Int) {
-        if (uidTextureMap[uid] == null) {
-            uidTextureMap[uid] = RtcEngine.CreateTextureView(videoContainer.context)
+        if (textureMap[uid] == null) {
+            textureMap[uid] = RtcEngine.CreateTextureView(videoContainer.context)
         } else {
-            if (uidTextureMap[uid]!!.parent == videoContainer) {
-                setupVideo(uidTextureMap[uid]!!, uid)
+            if (textureMap[uid]!!.parent == videoContainer) {
+                setupVideo(textureMap[uid]!!, uid)
                 return
             }
 
-            uidTextureMap[uid]!!.parent?.run {
+            textureMap[uid]!!.parent?.run {
                 this as FrameLayout
                 removeAllViews()
             }
@@ -53,7 +53,7 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcEngineProvid
                 removeAllViews()
             }
 
-            val textureView = uidTextureMap[uid]!!
+            val textureView = textureMap[uid]!!
             addView(textureView, generateLayoutParams())
             setupVideo(textureView, uid)
         }
@@ -72,13 +72,11 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcEngineProvid
         setupVideoByVideoCanvas(uid, VideoCanvas(textureView, VideoCanvas.RENDER_MODE_HIDDEN, uid))
     }
 
-    private fun setupVideoByVideoCanvas(uid: Int, videoCanvas: VideoCanvas?) {
-        with(rtcApi.rtcEngine()) {
-            if (uid == localUid) {
-                setupLocalVideo(videoCanvas)
-            } else {
-                setupRemoteVideo(videoCanvas)
-            }
+    private fun setupVideoByVideoCanvas(uid: Int, videoCanvas: VideoCanvas) {
+        if (uid == localUid) {
+            rtcApi.setupLocalVideo(videoCanvas)
+        } else {
+            rtcApi.setupRemoteVideo(videoCanvas)
         }
     }
 

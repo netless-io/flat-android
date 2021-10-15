@@ -4,7 +4,7 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomConfigRepository
-import io.agora.flat.di.interfaces.RtcEngineProvider
+import io.agora.flat.di.interfaces.RtcApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +18,7 @@ import kotlin.coroutines.suspendCoroutine
 class UserManager @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val userQuery: UserQuery,
-    private val rtcApi: RtcEngineProvider,
+    private val rtcApi: RtcApi,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()

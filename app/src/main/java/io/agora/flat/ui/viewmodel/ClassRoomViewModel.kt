@@ -24,8 +24,8 @@ import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
 import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
-import io.agora.flat.di.interfaces.RtcEngineProvider
-import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.di.interfaces.RtcApi
+import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.fileSuffix
@@ -48,8 +48,8 @@ class ClassRoomViewModel @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val userManager: UserManager,
     private val messageState: MessageState,
-    private val rtmApi: RtmEngineProvider,
-    private val rtcApi: RtcEngineProvider,
+    private val rtmApi: RtmApi,
+    private val rtcApi: RtcApi,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,

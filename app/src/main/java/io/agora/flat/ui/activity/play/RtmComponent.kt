@@ -18,7 +18,7 @@ import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
-import io.agora.flat.di.interfaces.RtmEngineProvider
+import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.view.RoomExitDialog
 import io.agora.flat.ui.viewmodel.ClassRoomState
@@ -26,8 +26,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.delayAndFinish
-import io.agora.rtm.ErrorInfo
-import io.agora.rtm.ResultCallback
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -44,14 +42,14 @@ class RtmComponent(
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
         fun userRepository(): UserRepository
-        fun rtmApi(): RtmEngineProvider
+        fun rtmApi(): RtmApi
     }
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val messageViewModel: MessageViewModel by activity.viewModels()
 
     private lateinit var userRepository: UserRepository
-    private lateinit var rtmApi: RtmEngineProvider
+    private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -120,16 +118,10 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        rtmApi.removeRtmListener(flatRTMListener)
-        rtmApi.rtmEngine().logout(object : ResultCallback<Void> {
-            override fun onSuccess(p0: Void?) {
-
-            }
-
-            override fun onFailure(p0: ErrorInfo?) {
-
-            }
-        })
+        lifecycleScope.launch {
+            rtmApi.logout()
+            rtmApi.removeRtmListener(flatRTMListener)
+        }
     }
 
     private val flatRTMListener = object : RTMListener {
