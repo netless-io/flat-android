@@ -135,11 +135,12 @@ class ClassRoomViewModel @Inject constructor(
     private fun initRoomInfo(roomInfo: RoomInfo) {
         _state.value = ClassRoomState(
             roomUUID = roomUUID,
+            inviteCode = roomInfo.inviteCode,
             userUUID = userUUID,
             userName = userName,
             roomType = roomInfo.roomType,
             ownerUUID = roomInfo.ownerUUID,
-            ownerName = roomInfo.ownerName,
+            ownerName = roomInfo.ownerUserName,
             title = roomInfo.title,
             beginTime = roomInfo.beginTime,
             endTime = roomInfo.endTime,
@@ -692,6 +693,8 @@ class ClassRoomViewModel @Inject constructor(
 data class ClassRoomState(
     // 房间的 uuid
     val roomUUID: String = "",
+    // 房间邀请码
+    val inviteCode: String = "",
     // 房间类型
     val roomType: RoomType = RoomType.SmallClass,
     // 房间状态
@@ -775,5 +778,4 @@ sealed class ClassRoomEvent {
     data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()
     data class InsertVideo(val videoUrl: String, val title: String) : ClassRoomEvent()
-    data class ShowDot(val id: Int) : ClassRoomEvent()
 }

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
-import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.ErrorResult
 import io.agora.flat.data.Success
@@ -21,23 +20,20 @@ import javax.inject.Inject
 class JoinRoomViewModel @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val roomRepository: RoomRepository,
-    private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,
 ) : ViewModel() {
-    companion object {
-        const val ROOM_UUID_PATTERN = """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
-    }
-
-    val roomUUID = MutableStateFlow("")
     val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val error = MutableStateFlow<UiError?>(null)
 
-    fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
-        viewModelScope.launch {
-            roomConfigRepository.updateRoomConfig(RoomConfig(roomUUID, openVideo, openAudio))
+    fun joinRoom(uuid: String, openVideo: Boolean, openAudio: Boolean) {
+        val trimID = uuid.replace("\\s".toRegex(), "")
 
-            when (val result = roomRepository.joinRoom(roomUUID)) {
-                is Success -> roomPlayInfo.value = result.data
+        viewModelScope.launch {
+            when (val result = roomRepository.joinRoom(trimID)) {
+                is Success -> {
+                    roomPlayInfo.value = result.data
+                    roomConfigRepository.updateRoomConfig(RoomConfig(result.data.roomUUID, openVideo, openAudio))
+                }
                 is ErrorResult -> {
                     error.value = when (result.error.code) {
                         FlatErrorCode.Web_RoomNotFound -> UiError(stringFetcher.roomNotFound())
@@ -48,27 +44,9 @@ class JoinRoomViewModel @Inject constructor(
             }
         }
     }
-
-    fun checkClipboardText() {
-        val ct = currentClipboardText()
-        if (ct.isNotBlank()) {
-            roomUUID.value = ct
-        }
-    }
-
-    private fun currentClipboardText(): String {
-        if (clipboard.getText().isNotBlank()) {
-            val regex = ROOM_UUID_PATTERN.toRegex()
-            val entire = regex.find(clipboard.getText())
-            if (entire != null) {
-                return entire.value
-            }
-        }
-        return ""
-    }
 }
 
 internal sealed class JoinRoomAction {
     object Close : JoinRoomAction()
-    data class JoinRoom(val roomUUID: String, val openVideo: Boolean, val openAudio: Boolean) : JoinRoomAction()
+    data class JoinRoom(val roomID: String, val openVideo: Boolean, val openAudio: Boolean) : JoinRoomAction()
 }

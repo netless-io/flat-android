@@ -296,35 +296,22 @@ private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
         if (roomInfo.showDayHead) {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painterResource(R.drawable.ic_home_calendar),
-                    contentDescription = null
-                )
+                Image(painterResource(R.drawable.ic_home_calendar), contentDescription = "")
                 Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = FlatFormatter.dateMisc(roomInfo.beginTime),
-                    style = typography.body1
-                )
+                Text(FlatFormatter.dateMisc(roomInfo.beginTime), style = typography.body1)
             }
         }
-        Box(MaxWidth
-            .height(72.dp)
-            .padding(16.dp, 12.dp)
-        ) {
-            Text(
-                roomInfo.title,
-                Modifier.align(Alignment.TopStart),
-                style = typography.body1
-            )
-            Text(
-                "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
-                Modifier.align(Alignment.BottomStart),
-                style = typography.body2
-            )
-            FlatRoomStatusText(
-                roomStatus = roomInfo.roomStatus,
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
+        Row(Modifier.padding(16.dp, 12.dp)) {
+            Column(Modifier.weight(1f)) {
+                Text(roomInfo.title, style = typography.body1)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
+                    style = typography.body2
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            FlatRoomStatusText(roomInfo.roomStatus, Modifier.align(Alignment.Bottom))
         }
         Spacer(
             Modifier

@@ -17,7 +17,7 @@ data class RoomInfo(
     // 房间所有者的名称
     val ownerUUID: String,
     // 房间所有者的名称
-    val ownerName: String? = null,
+    val ownerUserName: String? = null,
     // 房间标题
     val title: String,
     // 房间开始时间
@@ -28,6 +28,8 @@ data class RoomInfo(
     val roomStatus: RoomStatus,
     // 是否存在录制(只有历史记录才会有)
     val hasRecord: Boolean,
+    // 邀请短号
+    val inviteCode: String,
 ) : Parcelable {
     // local for listHead
     var showDayHead: Boolean = false

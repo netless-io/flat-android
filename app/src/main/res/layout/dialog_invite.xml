@@ -16,16 +16,17 @@
         android:textSize="16sp"
         tools:text="XXX 邀请您参加 Flat 房间" />
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="@string/room_type"
+            android:text="@string/room_theme"
             android:textColor="#7A7B7C"
             android:textSize="14sp" />
 
@@ -34,15 +35,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:maxLines="1"
             android:textColor="#444E60"
             android:textSize="14sp"
             tools:text="会议名称" />
-    </FrameLayout>
+    </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -57,10 +64,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:maxLines="1"
             android:textColor="#444E60"
             android:textSize="14sp"
-            tools:text="2146534612" />
-    </FrameLayout>
+            tools:text="21465346122" />
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -89,6 +101,7 @@
         android:id="@+id/copy"
         android:layout_width="232dp"
         android:layout_height="36dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="24dp"
         android:background="@drawable/shape_blue_solid_round_4_bg"
         android:text="@string/copy_link_to_invite"

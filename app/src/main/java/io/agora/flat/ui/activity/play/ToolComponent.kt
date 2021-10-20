@@ -27,6 +27,7 @@ import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
+import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -377,9 +378,11 @@ class ToolComponent(
 
         val copyText = """
             |${activity.getString(R.string.invite_title_format, state.userName)}
+            |
             |${activity.getString(R.string.invite_room_name_format, state.title)}
             |${activity.getString(R.string.invite_begin_time_format, roomTime)}
-            |${activity.getString(R.string.invite_room_number_format, state.roomUUID)}
+            |
+            |${activity.getString(R.string.invite_room_number_format, state.inviteCode.toInviteCodeDisplay())}
             |${activity.getString(R.string.invite_join_link_format, inviteLink)}
             """.trimMargin()
 
@@ -387,7 +390,7 @@ class ToolComponent(
             arguments = Bundle().apply {
                 putString(InviteDialog.INVITE_TITLE, inviteTitle)
                 putString(InviteDialog.ROOM_TITLE, state.title)
-                putString(InviteDialog.ROOM_NUMBER, state.roomUUID.substringAfterLast("-"))
+                putString(InviteDialog.ROOM_NUMBER, state.inviteCode.toInviteCodeDisplay())
                 putString(InviteDialog.ROOM_TIME, roomTime)
             }
         }

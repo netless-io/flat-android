@@ -44,8 +44,8 @@
     <string name="input_nickname_hint">Please enter anonymous</string>
     <string name="join">Join In</string>
     <string name="join_option">Join Option</string>
-    <string name="turn_on_camera">Turn on the camera</string>
-    <string name="turn_on_mic">Turn on the microphone</string>
+    <string name="turn_on_camera">Turn on camera</string>
+    <string name="turn_on_mic">Turn on microphone</string>
     <string name="join_room_default_time_format">Room created by %1$s</string>
     <string name="home_room_list">Room List</string>
     <string name="home_room_history">History Record</string>

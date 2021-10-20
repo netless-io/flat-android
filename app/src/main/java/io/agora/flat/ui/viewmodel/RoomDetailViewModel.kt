@@ -82,7 +82,8 @@ class RoomDetailViewModel @Inject constructor(
             if (resp is Success) {
                 resp.data.roomInfo.map(
                     intentValue(Constants.IntentKey.ROOM_UUID),
-                    intentValueNullable(Constants.IntentKey.PERIODIC_UUID)
+                    intentValueNullable(Constants.IntentKey.PERIODIC_UUID),
+                    userRepository.getUsername()
                 ).also { roomInfo.value = it }
             }
             decLoadingCount()
@@ -145,25 +146,29 @@ data class UIRoomInfo(
     val roomUUID: String,
     val periodicUUID: String? = null,
     val ownerUUID: String = "",
+    val username: String = "",
     val title: String = "",
     val beginTime: Long = 0,
     val endTime: Long = 0,
     val roomType: RoomType,
     val roomStatus: RoomStatus = RoomStatus.Idle,
     val isPeriodic: Boolean = false,
-    val hasRecord: Boolean,
+    val hasRecord: Boolean = false,
+    val inviteCode: String,
 )
 
-private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?): UIRoomInfo {
+private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?, inUsername: String): UIRoomInfo {
     return UIRoomInfo(
         roomUUID = inRoomUUID,
         periodicUUID = inPeriodicUUID,
         ownerUUID = ownerUUID,
+        username = inUsername,
         title = title,
         beginTime = beginTime,
         endTime = endTime,
         roomType = roomType,
         roomStatus = roomStatus,
         hasRecord = hasRecord,
+        inviteCode = inviteCode,
     )
 }

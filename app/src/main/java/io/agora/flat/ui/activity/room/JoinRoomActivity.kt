@@ -4,25 +4,28 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.android.WindowFocusObserver
+import io.agora.flat.common.android.rememberAndroidClipboardController
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
+import io.agora.flat.util.parseRoomID
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class JoinRoomActivity : ComponentActivity() {
@@ -31,13 +34,8 @@ class JoinRoomActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel = viewModel<JoinRoomViewModel>()
-            val clipboardText by viewModel.roomUUID.collectAsState()
-            val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
             val error by viewModel.error.collectAsState()
-
-            WindowFocusObserver { isWindowFocused ->
-                if (isWindowFocused) viewModel.checkClipboardText()
-            }
+            val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
 
             LaunchedEffect(error) {
                 error?.message?.let { showToast(it) }
@@ -50,11 +48,11 @@ class JoinRoomActivity : ComponentActivity() {
                 }
             }
 
-            JoinRoomPage(clipboardText) { action ->
+            JoinRoomPage { action ->
                 when (action) {
                     JoinRoomAction.Close -> finish()
                     is JoinRoomAction.JoinRoom -> {
-                        viewModel.joinRoom(action.roomUUID, action.openVideo, action.openAudio)
+                        viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
                     }
                 }
             }
@@ -63,23 +61,21 @@ class JoinRoomActivity : ComponentActivity() {
 }
 
 @Composable
-internal fun WindowFocusObserver(onWindowFocusChanged: (isWindowFocused: Boolean) -> Unit) {
-    val windowInfo = LocalWindowInfo.current
-    val callback = rememberUpdatedState(onWindowFocusChanged)
-    LaunchedEffect(windowInfo) {
-        snapshotFlow { windowInfo.isWindowFocused }.collect { callback.value(it) }
-    }
-}
-
-@Composable
-private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Unit) {
+private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
     var uuid by remember { mutableStateOf("") }
     var openAudio by remember { mutableStateOf(false) }
     var openVideo by remember { mutableStateOf(false) }
+
+    val clipboard = rememberAndroidClipboardController()
     val context = LocalContext.current
 
-    if (clipboardText.isNotBlank()) {
-        uuid = clipboardText
+    WindowFocusObserver { isWindowFocused ->
+        if (isWindowFocused) {
+            val id = clipboard.getText().toString().parseRoomID()
+            if (!id.isNullOrBlank()) {
+                uuid = id
+            }
+        }
     }
 
     FlatColumnPage {
@@ -93,7 +89,8 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
             FlatPrimaryTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
-                placeholderValue = stringResource(R.string.input_room_id_hint)
+                placeholderValue = stringResource(R.string.input_room_id_hint),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Ascii)
             )
             FlatNormalVerticalSpacer()
             Text(stringResource(R.string.join_option))
@@ -103,17 +100,17 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
                     checked = openAudio,
                     onCheckedChange = { openAudio = it }
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(stringResource(R.string.turn_on_mic))
-                Spacer(modifier = Modifier.width(40.dp))
+                Spacer(Modifier.width(40.dp))
                 Checkbox(
                     checked = openVideo,
                     onCheckedChange = { openVideo = it }
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(stringResource(R.string.turn_on_camera))
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(Modifier.height(32.dp))
             FlatPrimaryTextButton(stringResource(R.string.join)) {
                 if (uuid.isNotBlank()) {
                     actioner(JoinRoomAction.JoinRoom(uuid, openVideo, openAudio))
@@ -128,5 +125,5 @@ private fun JoinRoomPage(clipboardText: String, actioner: (JoinRoomAction) -> Un
 @Composable
 @Preview
 private fun PagePreview() {
-    JoinRoomPage("1234", {})
+    JoinRoomPage({})
 }
