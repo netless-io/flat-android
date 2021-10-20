@@ -56,12 +56,11 @@ Flat 试图使用最新 Android 开发库和工具开发应用程序。主要使
 * 完全用 Kotlin 编写。
 * UI 大部分是用 Jetpack Compose 编写的。
 * 始终使用 Kotlin Coroutines 及 Kotlin Flow。
-* 使用了许多 Jetpack 架构组件。包括：Room, Lifecycle, ViewMedel
+* 使用了许多 Jetpack 架构组件。包括：Room, Lifecycle, ViewModel
 * 使用Hilt进行依赖性注入
 
 ## 开发工具
-你需要最新的Android Studio Arctic Fox版本，以便能够构建该应用程序。这是因为该项目是用Jetpack Compose编写的。
-
+本项目使用 Jetpack Compose，你需要最新的 Android Studio Arctic Fox 版本，以便能够构建该应用程序。
 
 ## 环境配置
 

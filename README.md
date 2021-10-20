@@ -61,7 +61,7 @@ Flat is an app that attempts to use the latest cutting edge libraries and tools.
 * Entirely written in Kotlin.
 * UI Mostly written in Jetpack Compose (see below).
 * Uses Kotlin Coroutines throughout.
-* Uses many of the Architecture Components, including: Room, Lifecycle, ViewMedel.
+* Uses many of the Architecture Components, including: Room, Lifecycle, ViewModel.
 * Uses Hilt for dependency injection
 
 ## Development Tool
