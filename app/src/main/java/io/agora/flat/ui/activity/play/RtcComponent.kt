@@ -363,6 +363,7 @@ class RtcComponent(
 
         if (permissions.isEmpty()) {
             actionAfterPermission()
+            return
         }
 
         Log.i(TAG, "checkPermission request $permissions")

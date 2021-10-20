@@ -29,6 +29,7 @@ import io.agora.flat.util.delayAndFinish
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class RtmComponent(
     activity: ClassRoomActivity,
@@ -118,7 +119,7 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        lifecycleScope.launch {
+        runBlocking {
             rtmApi.logout()
             rtmApi.removeRtmListener(flatRTMListener)
         }
