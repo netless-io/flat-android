@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.2] - October 21, 2021
+- Accept ShareScreen
+- Support Short-InviteCode
+
 ## [1.0.1] - September 30, 2021
 - Update Room UI
 - Add support multi-window in Room
