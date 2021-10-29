@@ -302,7 +302,7 @@ class WhiteboardComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.roomPlayInfo.filterNotNull().collect {
                 join(it.whiteboardRoomUUID, it.whiteboardRoomToken)
             }
@@ -364,7 +364,7 @@ class WhiteboardComponent(
     }
 
     private fun insertPpt(dir: String, convertedFiles: ConvertedFiles, title: String) {
-        val param = WindowAppParam.createDocsViewerApp(dir, convertedFiles.scenes, title)
+        val param = WindowAppParam.createSlideApp(dir, convertedFiles.scenes, title)
         room?.addApp(param, null)
     }
 
@@ -402,7 +402,6 @@ class WhiteboardComponent(
 
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
-        configuration.isEnableSyncedStore = true
         configuration.useMultiViews = true
 
         whiteSdk = WhiteSdk(binding.whiteboardView, activity, configuration)
