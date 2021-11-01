@@ -304,7 +304,7 @@ class WhiteboardComponent(
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             viewModel.roomPlayInfo.filterNotNull().collect {
-                join(it.whiteboardRoomUUID, it.whiteboardRoomToken)
+                join(it.whiteboardRoomUUID, it.whiteboardRoomToken, viewModel.state.value.userUUID)
             }
         }
 
@@ -385,6 +385,7 @@ class WhiteboardComponent(
             }
 
             override fun catchEx(error: SDKError) {
+                Log.e(TAG, "")
             }
         })
         setViewWritable(writable)
@@ -491,6 +492,7 @@ class WhiteboardComponent(
 
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
+            Log.i(TAG, "join room success")
             this@WhiteboardComponent.room = room
             onInitRoomState(room.roomState)
             setRoomWritable(viewModel.state.value.isWritable)
@@ -498,6 +500,7 @@ class WhiteboardComponent(
 
         override fun catchEx(t: SDKError) {
             // showError Dialog & restart activity
+            Log.e(TAG, "join room error $t")
         }
     }
 
@@ -534,8 +537,8 @@ class WhiteboardComponent(
         viewModel.updateViewMode(broadcastState.mode)
     }
 
-    private fun join(roomUUID: String, roomToken: String) {
-        val roomParams = RoomParams(roomUUID, roomToken).apply {
+    private fun join(roomUUID: String, roomToken: String, userId: String) {
+        val roomParams = RoomParams(roomUUID, roomToken, userId).apply {
             val styleMap = HashMap<String, String>()
             styleMap["bottom"] = "30px"
             styleMap["right"] = "44px"
