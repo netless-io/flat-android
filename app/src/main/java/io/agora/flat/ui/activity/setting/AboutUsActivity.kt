@@ -26,7 +26,6 @@ import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.getAppVersion
-import io.agora.flat.util.showDebugToast
 
 class AboutUsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

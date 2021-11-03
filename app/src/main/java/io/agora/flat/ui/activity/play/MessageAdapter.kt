@@ -105,7 +105,7 @@ class MessageAdapter constructor(
 
     fun addMessagesAtTail(msgs: List<Message>) {
         dataSet.addAll(msgs)
-        notifyItemRangeInserted(dataSet.size - msgs.size, msgs.size);
+        notifyItemRangeInserted(dataSet.size - msgs.size, msgs.size)
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

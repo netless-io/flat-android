@@ -261,7 +261,6 @@ class WhiteboardComponent(
     private fun addSlideToNext() {
         room?.getSceneState(object : Promise<SceneState> {
             override fun then(sceneState: SceneState) {
-                val sceneList = sceneState.scenes.toMutableList()
                 val sceneDir = sceneState.scenePath.substringBeforeLast('/')
                 targetIndex = sceneState.index + 1
 
@@ -269,6 +268,7 @@ class WhiteboardComponent(
                 room?.putScenes(sceneDir, arrayOf(scene), targetIndex)
                 room?.setSceneIndex(targetIndex, null)
 
+                val sceneList = sceneState.scenes.toMutableList()
                 sceneList.add(targetIndex, scene)
                 val list = sceneList.filterNotNull().map {
                     SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
@@ -277,6 +277,7 @@ class WhiteboardComponent(
             }
 
             override fun catchEx(t: SDKError?) {
+
             }
         })
     }

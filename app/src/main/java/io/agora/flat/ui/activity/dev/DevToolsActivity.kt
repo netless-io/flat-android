@@ -38,10 +38,7 @@ class DevToolsActivity : ComponentActivity() {
 
         setContent {
             FlatColumnPage {
-                BackTopAppBar(
-                    title = "DevTools",
-                    onBackPressed = { finish() }
-                )
+                BackTopAppBar(title = "DevTools", onBackPressed = { finish() })
 
                 LazyColumn(MaxWidthSpread) {
                     item {
@@ -60,7 +57,7 @@ class DevToolsActivity : ComponentActivity() {
 private fun EnvSwitch() {
     val context = LocalContext.current
     val appEnv = AppEnv(context)
-    val currentEnv = appEnv.getEnv()
+    val curEnv = appEnv.getEnv()
     val flatServiceUrl = appEnv.flatServiceUrl
     val userViewModel: UserViewModel = viewModel()
 
@@ -76,7 +73,7 @@ private fun EnvSwitch() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "current $currentEnv $flatServiceUrl")
+            Text(text = "current $curEnv $flatServiceUrl")
             Spacer(modifier = Modifier.width(16.dp))
         }
         AnimatedVisibility(visible = expanded) {
@@ -88,7 +85,7 @@ private fun EnvSwitch() {
                             .height(56.dp)
                             .clickable {
                                 expanded = !expanded
-                                if (k != currentEnv) {
+                                if (k != curEnv) {
                                     appEnv.setEnv(k)
 
                                     scope.launch {

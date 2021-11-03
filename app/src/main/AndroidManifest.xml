@@ -48,6 +48,7 @@
         <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
+        <activity android:name=".ui.activity.room.RoomDetailActivity" />
         <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity android:name=".ui.activity.setting.FeedbackActivity" />
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
@@ -81,13 +82,11 @@
         <activity android:name=".ui.activity.setting.UserInfoActivity" />
         <activity android:name=".ui.activity.setting.MyProfileActivity" />
         <activity
-            android:name=".wxapi.WXEntryActivity"
+            android:name="${applicationId}.wxapi.WXEntryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:taskAffinity="io.agora.flat"
+            android:taskAffinity="${applicationId}"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name=".ui.activity.room.RoomDetailActivity" />
     </application>
-
 </manifest>

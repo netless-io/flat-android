@@ -598,7 +598,7 @@ class ClassRoomViewModel @Inject constructor(
                     onEvent(ClassRoomEvent.InsertImage(file.fileURL, imageSize.width, imageSize.height))
                 }
                 "doc", "docx", "ppt", "pptx", "pdf" -> {
-                    insertDocs(file, ext)
+                    insertDocs(file, ext == "pptx")
                 }
                 "mp4", "mp3" -> {
                     onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
@@ -632,15 +632,14 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun insertDocs(file: CloudStorageFile, ext: String) {
+    private fun insertDocs(file: CloudStorageFile, dynamic: Boolean) {
         val convert = ConverterV5.Builder().apply {
             setResource(file.fileURL)
-            setType(if (ext == "pptx") ConvertType.Dynamic else ConvertType.Static)
+            setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
             setTaskUuid(file.taskUUID)
             setTaskToken(file.taskToken)
             setCallback(object : ConverterCallbacks {
                 override fun onProgress(progress: Double, convertInfo: ConversionInfo?) {
-
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {

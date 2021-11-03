@@ -20,7 +20,7 @@ class RtcApiImpl @Inject constructor() : RtcApi, StartupInitializer {
     override fun init(context: Context) {
         try {
             rtcEngine = RtcEngine.create(context, Constants.AGORA_APP_ID, mHandler)
-            // mRtcEngine.setLogFile(FileUtil.initializeLogFile(this))
+            // rtcEngine.setLogFile(FileUtil.initializeLogFile(this))
         } catch (e: Exception) {
             e.printStackTrace()
         }

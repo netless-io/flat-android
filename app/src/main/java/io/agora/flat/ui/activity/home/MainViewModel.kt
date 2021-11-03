@@ -79,7 +79,6 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-
 }
 
 enum class MainTab {

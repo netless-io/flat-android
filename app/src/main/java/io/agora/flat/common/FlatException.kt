@@ -6,8 +6,7 @@ class FlatException @JvmOverloads constructor(
     errorCode: Int,
     message: String,
     exception: Exception? = null,
-) :
-    RuntimeException(message, exception)
+) : RuntimeException(message, exception)
 
 fun ErrorInfo.toFlatException(): FlatException {
     return FlatException(errorCode, errorDescription)

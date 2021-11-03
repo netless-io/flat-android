@@ -15,9 +15,6 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * TODO
- */
 @Singleton
 class MessageRepository @Inject constructor(
     private val messageService: MessageService,
