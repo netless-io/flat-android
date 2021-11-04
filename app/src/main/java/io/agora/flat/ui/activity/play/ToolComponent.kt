@@ -11,11 +11,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.herewhite.sdk.domain.ViewMode
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
+import io.agora.flat.di.interfaces.BoardRoomApi
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -40,18 +45,31 @@ class ToolComponent(
         val TAG = ToolComponent::class.simpleName
     }
 
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface ToolComponentEntryPoint {
+        fun boardRoom(): BoardRoomApi
+    }
+
     private lateinit var binding: ComponentToolBinding
     private lateinit var toolAnimator: SimpleAnimator
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
+    private lateinit var boardRoom: BoardRoomApi
 
     private lateinit var cloudStorageAdapter: CloudStorageAdapter
     private lateinit var userListAdapter: UserListAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        injectApi()
         initView()
         observeState()
+    }
+
+    private fun injectApi() {
+        val entryPoint = EntryPointAccessors.fromActivity(activity, ToolComponentEntryPoint::class.java)
+        boardRoom = entryPoint.boardRoom()
     }
 
     private fun observeState() {
@@ -123,8 +141,6 @@ class ToolComponent(
                 }
 
                 binding.viewfollow.isVisible = it.isWritable
-                binding.viewfollow.isSelected = it.viewMode == ViewMode.Broadcaster
-
                 binding.cloudservice.isVisible = it.isWritable
             }
         }
@@ -271,7 +287,7 @@ class ToolComponent(
             },
             binding.viewfollow to {
                 val targetMode = if (it.isSelected) ViewMode.Freedom else ViewMode.Broadcaster
-                viewModel.updateViewMode(targetMode)
+                boardRoom.setViewMode(targetMode)
             }
         )
 

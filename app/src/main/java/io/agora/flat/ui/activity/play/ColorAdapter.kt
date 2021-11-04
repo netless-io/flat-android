@@ -46,7 +46,7 @@ class ColorAdapter(
         val color: ImageView = view.findViewById(R.id.color)
     }
 
-    interface OnItemClickListener {
+    fun interface OnItemClickListener {
         fun onColorSelected(item: ColorItem)
     }
 }

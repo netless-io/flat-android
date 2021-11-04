@@ -170,20 +170,18 @@ class RtmApiImpl @Inject constructor(private val messageRepository: MessageRepos
     }
 
     override suspend fun sendChannelMessage(msg: String): Boolean = suspendCoroutine { cont ->
-        run {
-            val message = rtmClient.createMessage()
-            message.text = msg
+        val message = rtmClient.createMessage()
+        message.text = msg
 
-            channelMessage?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
-                override fun onSuccess(v: Void?) {
-                    cont.resume(true)
-                }
+        channelMessage?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
+            override fun onSuccess(v: Void?) {
+                cont.resume(true)
+            }
 
-                override fun onFailure(errorIn: ErrorInfo) {
-                    cont.resume(false)
-                }
-            }) ?: cont.resume(false)
-        }
+            override fun onFailure(errorIn: ErrorInfo) {
+                cont.resume(false)
+            }
+        }) ?: cont.resume(false)
     }
 
     override suspend fun sendChannelCommand(event: RTMEvent) = suspendCoroutine<Boolean> { cont ->
@@ -204,27 +202,25 @@ class RtmApiImpl @Inject constructor(private val messageRepository: MessageRepos
     }
 
     override suspend fun sendPeerCommand(event: RTMEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
-        run {
-            // Peer command requires setting the channel id
-            event.r = channelCommandID
+        // Peer command requires setting the channel id
+        event.r = channelCommandID
 
-            val message = rtmClient.createMessage()
-            message.text = RTMEvent.toText(event)
+        val message = rtmClient.createMessage()
+        message.text = RTMEvent.toText(event)
 
-            val option = SendMessageOptions().apply {
-                enableOfflineMessaging = true
+        val option = SendMessageOptions().apply {
+            enableOfflineMessaging = true
+        }
+
+        rtmClient.sendMessageToPeer(peerId, message, option, object : ResultCallback<Void?> {
+            override fun onSuccess(v: Void?) {
+                cont.resume(true)
             }
 
-            rtmClient.sendMessageToPeer(peerId, message, option, object : ResultCallback<Void?> {
-                override fun onSuccess(v: Void?) {
-                    cont.resume(true)
-                }
-
-                override fun onFailure(error: ErrorInfo) {
-                    cont.resume(false)
-                }
-            })
-        }
+            override fun onFailure(error: ErrorInfo) {
+                cont.resume(false)
+            }
+        })
     }
 
     override suspend fun getTextHistory(

@@ -24,6 +24,7 @@ import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
 import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
+import io.agora.flat.di.interfaces.BoardRoomApi
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
@@ -50,6 +51,7 @@ class ClassRoomViewModel @Inject constructor(
     private val messageState: MessageState,
     private val rtmApi: RtmApi,
     private val rtcApi: RtcApi,
+    // private val boardRoomApi: BoardRoomApi,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,
@@ -679,14 +681,6 @@ class ClassRoomViewModel @Inject constructor(
             _state.value = _state.value.copy(classMode = classMode)
         }
     }
-
-    fun updateViewMode(viewMode: ViewMode) {
-        viewModelScope.launch {
-            if (_state.value.viewMode != viewMode) {
-                _state.value = _state.value.copy(viewMode = viewMode)
-            }
-        }
-    }
 }
 
 data class ClassRoomState(
@@ -713,9 +707,6 @@ data class ClassRoomState(
     val ban: Boolean = false,
     // 交互模式
     val classMode: ClassModeType = ClassModeType.Interaction,
-
-    // 白班视角模式
-    val viewMode: ViewMode = ViewMode.Freedom,
 
     // 当前用户
     val userUUID: String = "",

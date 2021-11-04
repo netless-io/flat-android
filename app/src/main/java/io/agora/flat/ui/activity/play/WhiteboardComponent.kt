@@ -1,28 +1,30 @@
 package io.agora.flat.ui.activity.play
 
-import android.util.Log
 import android.view.View
-import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.activity.viewModels
-import androidx.annotation.UiThread
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.herewhite.sdk.*
-import com.herewhite.sdk.domain.*
-import io.agora.flat.BuildConfig
-import io.agora.flat.Constants
+import com.herewhite.sdk.domain.Appliance
+import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.MemberState
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
+import io.agora.flat.common.board.BoardSceneState
+import io.agora.flat.common.board.SceneItem
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.databinding.LayoutScenePreviewBinding
+import io.agora.flat.di.interfaces.BoardRoomApi
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
-import io.agora.flat.ui.view.StrokeSeeker
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
@@ -31,9 +33,6 @@ import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
-import org.json.JSONObject
-import java.util.*
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
@@ -44,12 +43,17 @@ class WhiteboardComponent(
         val TAG = WhiteboardComponent::class.simpleName
     }
 
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface BoardComponentEntryPoint {
+        fun boardRoom(): BoardRoomApi
+    }
+
     private lateinit var binding: ComponentWhiteboardBinding
     private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
-    private var room: Room? = null
-    private lateinit var whiteSdk: WhiteSdk
+    private lateinit var boardRoom: BoardRoomApi
     private lateinit var colorAdapter: ColorAdapter
     private lateinit var applianceAdapter: ApplianceAdapter
     private lateinit var slideAdapter: SceneAdapter
@@ -57,46 +61,29 @@ class WhiteboardComponent(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-
+        injectApi()
         initView()
         initWhiteboard()
         observeState()
     }
 
+    private fun injectApi() {
+        val entryPoint = EntryPointAccessors.fromActivity(activity, BoardComponentEntryPoint::class.java)
+        boardRoom = entryPoint.boardRoom()
+    }
+
     private fun initView() {
         binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
         scenePreviewBinding = LayoutScenePreviewBinding.inflate(activity.layoutInflater, scenePreview, true)
-        val map: Map<View, (View) -> Unit> = mapOf(
-            binding.undo to { room?.undo() },
-            binding.redo to { room?.redo() },
-            binding.pageStart to { room?.setSceneIndex(0, null) },
-            binding.pagePrev to { room?.pptPreviousStep() },
-            binding.pageNext to { room?.pptNextStep() },
-            binding.pageEnd to {
-                room?.sceneState?.apply {
-                    room?.setSceneIndex(scenes.size - 1, null)
-                }
-            },
-            binding.reset to {
-                room?.getSceneState(object : Promise<SceneState> {
-                    override fun then(sceneState: SceneState) {
-                        val scene = sceneState.scenes[sceneState.index]
-                        if (scene.ppt != null) {
-                            room?.scalePptToFit()
-                        } else {
-                            room?.moveCamera(CameraConfig().apply {
-                                scale = 1.0
-                                centerX = 0.0
-                                centerY = 0.0
-                                animationMode = AnimationMode.Continuous
-                            })
-                        }
-                    }
 
-                    override fun catchEx(t: SDKError?) {
-                    }
-                })
-            },
+        val map: Map<View, (View) -> Unit> = mapOf(
+            binding.undo to { boardRoom.undo() },
+            binding.redo to { boardRoom.redo() },
+            binding.pageStart to { boardRoom.startPage() },
+            binding.pagePrev to { boardRoom.prevPage() },
+            binding.pageNext to { boardRoom.nextPage() },
+            binding.pageEnd to { boardRoom.finalPage() },
+            binding.reset to { boardRoom.resetView() },
             binding.showScenes to { previewSlide() },
 
             binding.tools to {
@@ -111,76 +98,40 @@ class WhiteboardComponent(
                     RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_PAINT, isVisible)
                 }
             },
-            binding.toolsSubDelete to {
-                room?.deleteOperation()
-            },
+            binding.toolsSubDelete to { boardRoom.deleteSelection() },
             // slide
-            scenePreviewBinding.root to {
+            scenePreviewBinding.root to { ; },
+            scenePreviewBinding.sceneAdd to { boardRoom.addSlideToNext() },
+            scenePreviewBinding.sceneDelete to { boardRoom.deleteCurrentSlide() },
+            scenePreviewBinding.sceneCover to { slideAnimator.hide() },
 
-            },
-            scenePreviewBinding.sceneAdd to {
-                addSlideToNext()
-            },
-            scenePreviewBinding.sceneDelete to {
-                deleteCurrentSlide()
-            },
-            scenePreviewBinding.sceneCover to {
-                slideAnimator.hide()
-            },
-            binding.handup to {
-                viewModel.sendRaiseHand()
-            }
+            binding.handup to { viewModel.sendRaiseHand() },
         )
-
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }
 
         applianceAdapter = ApplianceAdapter(ApplianceItem.appliancesPhone)
-        applianceAdapter.setOnItemClickListener {
-            when (it) {
-                ApplianceItem.OTHER_CLEAR -> {
-                    binding.appliancesLayout.isVisible = false
-                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
-                    room?.cleanScene(true)
-                }
-                else -> {
-                    onSelectAppliance(it)
-                }
-            }
-        }
+        applianceAdapter.setOnItemClickListener(::onApplianceItemSelected)
         binding.applianceRecyclerView.adapter = applianceAdapter
-        binding.colorRecyclerView.layoutManager = GridLayoutManager(activity, 4)
+        binding.applianceRecyclerView.layoutManager = GridLayoutManager(activity, 4)
 
         colorAdapter = ColorAdapter(ColorItem.colors)
-        colorAdapter.setOnItemClickListener(object : ColorAdapter.OnItemClickListener {
-            override fun onColorSelected(item: ColorItem) {
-                binding.toolsSubLayout.isVisible = false
-                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_PAINT, false)
-                room?.memberState = room?.memberState?.apply {
-                    strokeColor = item.color
-                }
-                binding.toolsSubPaint.setImageResource(item.drawableRes)
-            }
-        })
+        colorAdapter.setOnItemClickListener(::onColorSelected)
         binding.colorRecyclerView.adapter = colorAdapter
         binding.colorRecyclerView.layoutManager = GridLayoutManager(activity, 4)
-        binding.seeker.setOnStrokeChangedListener(object : StrokeSeeker.OnStrokeChangedListener {
-            override fun onStroke(width: Int) {
-                room?.memberState = room?.memberState?.apply {
-                    strokeWidth = width.toDouble()
-                }
-            }
-        })
+
+        binding.seeker.setOnStrokeChangedListener { boardRoom.setStrokeWidth(it.toDouble()) }
 
         slideAdapter = SceneAdapter()
         slideAdapter.setOnItemClickListener(object : SceneAdapter.OnItemClickListener {
             override fun onItemClick(index: Int, item: SceneItem) {
-                room?.setSceneIndex(index, null)
+                boardRoom.setSceneIndex(index)
             }
         })
-        scenePreviewBinding.sceneRecyclerView.adapter = slideAdapter
-        scenePreviewBinding.sceneRecyclerView.layoutManager =
-            LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
-        scenePreviewBinding.sceneRecyclerView.addItemDecoration(PaddingItemDecoration(horizontal = activity.dp2px(8)))
+        with(scenePreviewBinding) {
+            sceneRecyclerView.adapter = slideAdapter
+            sceneRecyclerView.layoutManager = LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
+            sceneRecyclerView.addItemDecoration(PaddingItemDecoration(horizontal = activity.dp2px(8)))
+        }
 
         slideAnimator = SimpleAnimator(
             onUpdate = ::updateSlide,
@@ -192,20 +143,33 @@ class WhiteboardComponent(
             }
         )
 
-        setViewWritable(false)
+        updateRoomWritable(false)
     }
 
-    private fun onSelectAppliance(appliance: ApplianceItem) {
-        setAppliance(appliance.type)
-        binding.appliancesLayout.isVisible = false
-        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
-        updateAppliance(viewModel.state.value.isWritable, appliance.type)
-    }
+    private fun onApplianceItemSelected(item: ApplianceItem) {
+        when (item) {
+            ApplianceItem.OTHER_CLEAR -> {
+                binding.appliancesLayout.isVisible = false
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
 
-    private fun setAppliance(type: String) {
-        room?.memberState = MemberState().apply {
-            currentApplianceName = type
+                boardRoom.cleanScene()
+            }
+            else -> {
+                binding.appliancesLayout.isVisible = false
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_APPLIANCE, false)
+
+                boardRoom.setAppliance(item.type)
+                updateAppliance(viewModel.state.value.isWritable, item.type)
+            }
         }
+    }
+
+    private fun onColorSelected(item: ColorItem) {
+        binding.toolsSubLayout.isVisible = false
+        binding.toolsSubPaint.setImageResource(item.drawableRes)
+
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_PAINT, false)
+        boardRoom.setStrokeColor(item.color)
     }
 
     private fun updateAppliance(isWritable: Boolean, appliance: String) {
@@ -241,75 +205,17 @@ class WhiteboardComponent(
 
     private fun previewSlide() {
         slideAnimator.show()
-
-        room?.getSceneState(object : Promise<SceneState> {
-            override fun then(sceneState: SceneState) {
-                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
-                val list = sceneState.scenes.filterNotNull().map {
-                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
-                }
-                slideAdapter.setDataSetAndIndex(list, sceneState.index)
-            }
-
-            override fun catchEx(t: SDKError?) {
-            }
-        })
-    }
-
-    private var targetIndex: Int = 0
-
-    private fun addSlideToNext() {
-        room?.getSceneState(object : Promise<SceneState> {
-            override fun then(sceneState: SceneState) {
-                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
-                targetIndex = sceneState.index + 1
-
-                val scene = Scene(UUID.randomUUID().toString())
-                room?.putScenes(sceneDir, arrayOf(scene), targetIndex)
-                room?.setSceneIndex(targetIndex, null)
-
-                val sceneList = sceneState.scenes.toMutableList()
-                sceneList.add(targetIndex, scene)
-                val list = sceneList.filterNotNull().map {
-                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
-                }
-                slideAdapter.setDataSetAndIndex(list, targetIndex)
-            }
-
-            override fun catchEx(t: SDKError?) {
-
-            }
-        })
-    }
-
-    private fun deleteCurrentSlide() {
-        room?.getSceneState(object : Promise<SceneState> {
-            override fun then(sceneState: SceneState) {
-                val sceneList = sceneState.scenes.toMutableList()
-                val sceneDir = sceneState.scenePath.substringBeforeLast('/')
-
-                room?.removeScenes(sceneState.scenePath)
-                sceneList.removeAt(sceneState.index)
-
-                val list = sceneList.filterNotNull().map {
-                    SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
-                }
-                slideAdapter.setDataSetAndIndex(list, sceneState.index)
-            }
-
-            override fun catchEx(t: SDKError?) {
-            }
-        })
+        boardRoom.refreshSceneState()
     }
 
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             viewModel.roomPlayInfo.filterNotNull().collect {
-                join(it.whiteboardRoomUUID, it.whiteboardRoomToken, viewModel.state.value.userUUID)
+                boardRoom.join(it.whiteboardRoomUUID, it.whiteboardRoomToken, viewModel.state.value.userUUID)
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.roomEvent.collect {
                 when (it) {
                     is ClassRoomEvent.NoOptPermission -> activity.showToast(R.string.class_room_no_operate_permission)
@@ -321,7 +227,7 @@ class WhiteboardComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
                 if (areaId != RoomOverlayManager.AREA_ID_APPLIANCE) {
                     binding.appliancesLayout.isVisible = false
@@ -337,62 +243,54 @@ class WhiteboardComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
-                setRoomWritable(it.isWritable)
-                setViewMode(it.viewMode)
+                onRoomWritableChange(it.isWritable)
 
                 binding.handup.isVisible = it.showRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
             }
         }
-    }
 
-    private fun setViewMode(viewMode: ViewMode) {
-        room?.setViewMode(viewMode)
+        lifecycleScope.launchWhenResumed {
+            boardRoom.observerSceneState().collect { sceneState ->
+                slideAdapter.setDataSetAndIndex(sceneState.scenes, sceneState.index)
+                updatePageIndicate(sceneState)
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            boardRoom.observerMemberState().collect { memberState ->
+                updateMemberState(memberState)
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            boardRoom.observerUndoRedoState().collect {
+                binding.undo.isEnabled = it.undoCount != 0L
+                binding.redo.isEnabled = it.redoCount != 0L
+            }
+        }
     }
 
     private fun insertImage(imageUrl: String, w: Int, h: Int) {
-        val uuid = UUID.randomUUID().toString()
-        room?.insertImage(ImageInformation().apply {
-            this.uuid = uuid
-            width = w.toDouble()
-            height = h.toDouble()
-            centerX = 0.0
-            centerY = 0.0
-        })
-        room?.completeImageUpload(uuid, imageUrl)
+        boardRoom.insertImage(imageUrl, w, h)
     }
 
     private fun insertPpt(dir: String, convertedFiles: ConvertedFiles, title: String) {
-        val param = WindowAppParam.createSlideApp(dir, convertedFiles.scenes, title)
-        room?.addApp(param, null)
+        boardRoom.insertPpt(dir, convertedFiles, title)
     }
 
     private fun insertVideo(videoUrl: String, title: String) {
-        val param = WindowAppParam.createMediaPlayerApp(videoUrl, title)
-        room?.addApp(param, null)
+        boardRoom.insertVideo(videoUrl, title)
     }
 
-    private fun setRoomWritable(writable: Boolean) {
-        if (room == null) {
-            return
-        }
-        room?.setWritable(writable, object : Promise<Boolean> {
-            override fun then(result: Boolean) {
-                if (result) {
-                    room?.disableSerialization(false)
-                }
-            }
-
-            override fun catchEx(error: SDKError) {
-                Log.e(TAG, "")
-            }
-        })
-        setViewWritable(writable)
+    private fun onRoomWritableChange(writable: Boolean) {
+        boardRoom.setWritable(writable)
+        updateRoomWritable(writable)
     }
 
-    private fun setViewWritable(writable: Boolean) {
+    private fun updateRoomWritable(writable: Boolean) {
         binding.boardToolsLayout.isVisible = writable
         // binding.showScenes.isVisible = writable
         // binding.pageIndicateLy.isVisible = writable
@@ -400,130 +298,23 @@ class WhiteboardComponent(
     }
 
     private fun initWhiteboard() {
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-
-        val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
-        configuration.isUserCursor = true
-        configuration.useMultiViews = true
-
-        whiteSdk = WhiteSdk(binding.whiteboardView, activity, configuration)
-        whiteSdk.setCommonCallbacks(object : CommonCallbacks {
-            override fun urlInterrupter(sourceUrl: String): String {
-                return sourceUrl
-            }
-
-            override fun onMessage(message: JSONObject) {
-                Log.d(TAG, message.toString())
-            }
-
-            override fun sdkSetupFail(error: SDKError) {
-                Log.e(TAG, "sdkSetupFail $error")
-            }
-
-            override fun throwError(args: Any) {
-                Log.e(TAG, "throwError $args")
-            }
-
-            override fun onPPTMediaPlay() {
-                Log.d(TAG, "onPPTMediaPlay")
-            }
-
-            override fun onPPTMediaPause() {
-                Log.d(TAG, "onPPTMediaPause")
-            }
-        })
+        boardRoom.initSdk(binding.whiteboardView)
     }
 
-    private var roomListener = object : RoomListener {
-        override fun onPhaseChanged(phase: RoomPhase) {
-            Log.d(TAG, "onPhaseChanged:${phase.name}")
-            when (phase) {
-                RoomPhase.connecting -> {
-                }
-                RoomPhase.connected -> {
-                }
-                RoomPhase.reconnecting -> {
-                }
-                RoomPhase.disconnecting -> {
-                }
-                RoomPhase.disconnected -> {
-                }
-            }
-        }
-
-        override fun onDisconnectWithError(e: Exception?) {
-            Log.d(TAG, "onDisconnectWithError:${e?.message}")
-        }
-
-        override fun onKickedWithReason(reason: String?) {
-            Log.d(TAG, "onKickedWithReason:${reason}")
-        }
-
-        override fun onRoomStateChanged(modifyState: RoomState) {
-            Log.d(TAG, "onRoomStateChanged:${modifyState}")
-            modifyState.sceneState?.let(::onSceneStateChanged)
-            modifyState.memberState?.let(::onMemberStateChanged)
-            modifyState.broadcastState?.let(::onBroadcastStateChanged)
-        }
-
-        override fun onCanUndoStepsUpdate(canUndoSteps: Long) {
-            Log.d(TAG, "onCanUndoStepsUpdate:${canUndoSteps}")
-            onUndoStepsChanged(canUndoSteps)
-        }
-
-        override fun onCanRedoStepsUpdate(canRedoSteps: Long) {
-            Log.d(TAG, "onCanRedoStepsUpdate:${canRedoSteps}")
-            onRedoStepsChanged(canRedoSteps)
-        }
-
-        override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
-            Log.w(TAG, "onCatchErrorWhenAppendFrame:${error}")
-        }
-    }
-
-    @UiThread
-    private fun onUndoStepsChanged(canUndoSteps: Long) {
-        binding.undo.isEnabled = canUndoSteps != 0L
-    }
-
-    @UiThread
-    private fun onRedoStepsChanged(canRedoSteps: Long) {
-        binding.redo.isEnabled = canRedoSteps != 0L
-    }
-
-    private var joinRoomCallback = object : Promise<Room> {
-        override fun then(room: Room) {
-            Log.i(TAG, "join room success")
-            this@WhiteboardComponent.room = room
-            onInitRoomState(room.roomState)
-            setRoomWritable(viewModel.state.value.isWritable)
-        }
-
-        override fun catchEx(t: SDKError) {
-            // showError Dialog & restart activity
-            Log.e(TAG, "join room error $t")
-        }
-    }
-
-    private fun onInitRoomState(roomState: RoomState) {
-        roomState.memberState?.let(::onMemberStateChanged)
-        roomState.sceneState?.let(::onSceneStateChanged)
-    }
-
-    private fun onMemberStateChanged(memberState: MemberState) {
+    private fun updateMemberState(memberState: MemberState) {
         with(memberState) {
             updateAppliance(viewModel.state.value.isWritable, currentApplianceName)
             applianceAdapter.setCurrentAppliance(ApplianceItem.of(currentApplianceName))
 
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
-            val item = ColorItem.of(strokeColor)
+            binding.toolsSubPaint.setImageResource(ColorItem.of(strokeColor).drawableRes)
+
             colorAdapter.setCurrentColor(ColorItem.of(strokeColor).color)
-            binding.toolsSubPaint.setImageResource(item.drawableRes)
         }
     }
 
-    private fun onSceneStateChanged(sceneState: SceneState) {
-        sceneState.apply {
+    private fun updatePageIndicate(sceneState: BoardSceneState) {
+        sceneState.run {
             val currentDisplay = index + 1
             val lastDisplay = scenes.size
             binding.pageIndicate.text = "${currentDisplay}/${lastDisplay}"
@@ -534,25 +325,8 @@ class WhiteboardComponent(
         }
     }
 
-    private fun onBroadcastStateChanged(broadcastState: BroadcastState) {
-        viewModel.updateViewMode(broadcastState.mode)
-    }
-
-    private fun join(roomUUID: String, roomToken: String, userId: String) {
-        val roomParams = RoomParams(roomUUID, roomToken, userId).apply {
-            val styleMap = HashMap<String, String>()
-            styleMap["bottom"] = "30px"
-            styleMap["right"] = "44px"
-            styleMap["position"] = "fixed"
-
-            windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)
-        }
-        whiteSdk.joinRoom(roomParams, roomListener, joinRoomCallback)
-    }
-
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        whiteSdk.releaseRoom()
-        room?.disconnect()
+        boardRoom.release()
     }
 }

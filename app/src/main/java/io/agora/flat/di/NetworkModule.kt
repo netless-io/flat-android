@@ -30,7 +30,7 @@ object NetworkModule {
     @NormalOkHttpClient
     @Provides
     fun provideOkHttpClient(headerProviders: Set<@JvmSuppressWildcards HeaderProvider>): OkHttpClient {
-        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 
         return OkHttpClient.Builder()
             .addInterceptor(HeaderInterceptor(headerProviders))
@@ -41,7 +41,7 @@ object NetworkModule {
     @AgoraMessageOkHttpClient
     @Provides
     fun provideAgoraMessageOkHttpClient(): OkHttpClient {
-        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 
         return OkHttpClient.Builder()
             .addInterceptor(AgoraMessageInterceptor())

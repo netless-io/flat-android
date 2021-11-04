@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import io.agora.flat.R
+import io.agora.flat.common.board.SceneItem
 
 class SceneAdapter : RecyclerView.Adapter<SceneAdapter.ViewHolder>() {
     private val dataSet: MutableList<SceneItem> = ArrayList()
