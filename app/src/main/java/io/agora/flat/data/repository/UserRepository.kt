@@ -27,8 +27,8 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(result.data)
                 Success(true)
             }
-            is ErrorResult -> {
-                ErrorResult(result.throwable, result.error)
+            is Failure -> {
+                Failure(result.throwable, result.error)
             }
         }
     }
@@ -69,8 +69,8 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(result.data.mapToUserInfo())
                 Success(true)
             }
-            is ErrorResult -> {
-                ErrorResult(result.throwable, result.error)
+            is Failure -> {
+                Failure(result.throwable, result.error)
             }
         }
     }
@@ -86,7 +86,7 @@ class UserRepository @Inject constructor(
                 }
                 delay(2000)
             }
-            return@withContext ErrorResult(RuntimeException("process timeout"))
+            return@withContext Failure(RuntimeException("process timeout"))
         }
     }
 

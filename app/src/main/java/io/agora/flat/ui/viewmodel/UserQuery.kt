@@ -2,7 +2,7 @@ package io.agora.flat.ui.viewmodel
 
 import android.util.Log
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import io.agora.flat.data.ErrorResult
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomRepository
@@ -30,7 +30,7 @@ class UserQuery @Inject constructor(
                     }
                     userMap.putAll(result.data)
                 }
-                is ErrorResult -> return emptyMap()
+                is Failure -> return emptyMap()
             }
         }
         return userMap.filter { uuids.contains(it.key) }

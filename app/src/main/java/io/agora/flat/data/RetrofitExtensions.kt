@@ -35,7 +35,7 @@ inline fun <T> Response<T>.toException() = HttpException(this)
 suspend inline fun <T> Call<BaseResp<T>>.toResult(): Result<T> = try {
     executeWithRetry(maxAttempts = 1).toResult()
 } catch (e: Exception) {
-    ErrorResult(e)
+    Failure(e)
 }
 
 suspend inline fun <T> Call<BaseResp<T>>.toResultWithRetry(
@@ -49,7 +49,7 @@ suspend inline fun <T> Call<BaseResp<T>>.toResultWithRetry(
         shouldRetry = shouldRetry,
     ).toResult()
 } catch (e: Exception) {
-    ErrorResult(e)
+    Failure(e)
 }
 
 suspend inline fun <T> Call<T>.executeOnce(): Response<T> {
@@ -108,11 +108,11 @@ inline fun <T> Response<BaseResp<T>>.toResult(): Result<T> = try {
         if (resp.status == 0) {
             Success(resp.data)
         } else {
-            ErrorResult(toException(), Error(resp.status, resp.code ?: -1))
+            Failure(toException(), Error(resp.status, resp.code ?: -1))
         }
     } else {
-        ErrorResult(toException())
+        Failure(toException())
     }
 } catch (e: Exception) {
-    ErrorResult(e)
+    Failure(e)
 }

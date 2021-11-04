@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.data.ErrorResult
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
@@ -104,7 +104,7 @@ class HomeViewModel @Inject constructor(
                     val list = ArrayList(response.data)
                     roomList.value = addShowDayHeadFlag(list)
                 }
-                is ErrorResult -> {
+                is Failure -> {
                     when (response.error.status) {
                         // handle error
                     }
@@ -128,7 +128,7 @@ class HomeViewModel @Inject constructor(
                     val list = ArrayList(response.data)
                     historyList.value = addShowDayHeadFlag(list)
                 }
-                is ErrorResult -> {
+                is Failure -> {
                     when (response.error.status) {
                         // handle error
                     }

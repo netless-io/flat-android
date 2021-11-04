@@ -18,7 +18,7 @@ import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
-import io.agora.flat.data.ErrorResult
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
@@ -117,7 +117,7 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> {
                     _roomPlayInfo.value = result.data
                 }
-                is ErrorResult -> {
+                is Failure -> {
                     _errorMessage.value = when (result.error.code) {
                         FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
                         FlatErrorCode.Web_RoomIsEnded -> stringFetcher.roomIsEnded()

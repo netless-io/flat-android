@@ -49,11 +49,12 @@ class MessageRepository @Inject constructor(
                         rtmToken = tokenResult.data.token
                     }
                 } catch (e: Exception) {
-                    return@withContext ErrorResult(e)
+                    return@withContext Failure(e)
                 }
             }
 
-            val result = messageService.queryHistory(Constants.AGORA_APP_ID,
+            val result = messageService.queryHistory(
+                Constants.AGORA_APP_ID,
                 MessageQueryHistoryReq(
                     filter = MessageQueryFilter(destination = channel, start_time = start, end_time = end),
                     limit = limit,
@@ -70,10 +71,10 @@ class MessageRepository @Inject constructor(
                     val handle = location.replace(Regex("^.*/query/"), "")
                     Success(data = handle)
                 } else {
-                    ErrorResult(FlatException(0, ""))
+                    Failure(FlatException(0, ""))
                 }
             } catch (e: Exception) {
-                ErrorResult(e)
+                Failure(e)
             }
         }
     }
@@ -92,10 +93,10 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
                 } else {
-                    ErrorResult(FlatException(0, ""))
+                    Failure(FlatException(0, ""))
                 }
             } catch (e: Exception) {
-                ErrorResult(e)
+                Failure(e)
             }
         }
     }
@@ -112,7 +113,7 @@ class MessageRepository @Inject constructor(
                         rtmToken = tokenResult.data.token
                     }
                 } catch (e: Exception) {
-                    return@withContext ErrorResult(e)
+                    return@withContext Failure(e)
                 }
             }
 
@@ -131,10 +132,10 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().count)
                 } else {
-                    ErrorResult(FlatException(0, ""))
+                    Failure(FlatException(0, ""))
                 }
             } catch (e: Exception) {
-                ErrorResult(e)
+                Failure(e)
             }
         }
     }

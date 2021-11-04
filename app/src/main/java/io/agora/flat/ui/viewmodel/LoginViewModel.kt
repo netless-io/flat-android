@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.data.ErrorResult
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.AppModule
@@ -34,7 +34,7 @@ class LoginViewModel @Inject constructor(
                 is Success -> {
                     cont.resume(true)
                 }
-                is ErrorResult -> {
+                is Failure -> {
                     cont.resume(false)
                 }
             }
@@ -52,7 +52,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             when (userRepository.loginProcess(appKVCenter.getAuthUUID())) {
                 is Success -> cont.resume(true)
-                is ErrorResult -> cont.resume(false)
+                is Failure -> cont.resume(false)
             }
         }
     }
@@ -61,7 +61,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             when (val resp = userRepository.loginWeChatCallback(appKVCenter.getAuthUUID(), code)) {
                 is Success -> cont.resume(true)
-                is ErrorResult -> cont.resume(false)
+                is Failure -> cont.resume(false)
             }
         }
     }
