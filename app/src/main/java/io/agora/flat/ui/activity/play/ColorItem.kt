@@ -20,10 +20,10 @@ data class ColorItem(val color: IntArray, @DrawableRes val drawableRes: Int) {
             ColorItem(arrayOf(0xFF, 0xFF, 0xFF).toIntArray(), R.drawable.ic_toolbox_color_white)
         )
 
-        fun of(strokeColor: IntArray): ColorItem {
+        fun of(strokeColor: IntArray): ColorItem? {
             return colors.find {
                 it.color.contentEquals(strokeColor)
-            } ?: colors[0]
+            } ?: null
         }
     }
 

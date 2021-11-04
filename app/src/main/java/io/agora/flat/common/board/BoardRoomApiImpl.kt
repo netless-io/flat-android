@@ -52,11 +52,11 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
             }
         }
 
-        override fun onDisconnectWithError(e: Exception?) {
-            Log.e(TAG, "onDisconnectWithError:${e?.message}")
+        override fun onDisconnectWithError(e: Exception) {
+            Log.e(TAG, "onDisconnectWithError:${e.message}")
         }
 
-        override fun onKickedWithReason(reason: String?) {
+        override fun onKickedWithReason(reason: String) {
             Log.e(TAG, "onKickedWithReason:${reason}")
         }
 
@@ -81,7 +81,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
         }
 
         override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
-            Log.w(TAG, "onCatchErrorWhenAppendFrame:${error}")
+            Log.w(TAG, "onCatchErrorWhenAppendFrame${error}")
         }
     }
 
@@ -108,7 +108,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
         })
     }
 
-    override fun join(roomUUID: String, roomToken: String, userId: String) {
+    override fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean) {
         val roomParams = RoomParams(roomUUID, roomToken, userId).apply {
             val styleMap = HashMap<String, String>()
             styleMap["bottom"] = "30px"
@@ -116,6 +116,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
             styleMap["position"] = "fixed"
 
             windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)
+            isWritable = writable
         }
         whiteSdk.joinRoom(roomParams, roomListener, joinRoomCallback)
     }
@@ -220,13 +221,13 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
                 val sceneDir = sceneState.scenePath.substringBeforeLast('/')
                 val targetIndex = sceneState.index + 1
 
-                val scene = Scene(UUID.randomUUID().toString())
-                room?.putScenes(sceneDir, arrayOf(scene), targetIndex)
+                val s = Scene(UUID.randomUUID().toString())
+                room?.putScenes(sceneDir, arrayOf(s), targetIndex)
                 room?.setSceneIndex(targetIndex, null)
 
-                val sceneList = sceneState.scenes.toMutableList()
-                sceneList.add(targetIndex, scene)
-                val list = sceneList.filterNotNull().map {
+                val scenes = sceneState.scenes.toMutableList()
+                scenes.add(targetIndex, s)
+                val list = scenes.filterNotNull().map {
                     SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
                 }
 

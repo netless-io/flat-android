@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface BoardRoomApi {
     fun initSdk(whiteboardView: WhiteboardView)
 
-    fun join(roomUUID: String, roomToken: String, userId: String)
+    fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean)
 
     fun release()
 
@@ -24,7 +24,7 @@ interface BoardRoomApi {
     // memberstate
     fun setAppliance(name: String)
     fun setStrokeColor(color: IntArray)
-    fun setStrokeWidth(toDouble: Double)
+    fun setStrokeWidth(width: Double)
     fun deleteSelection()
 
     // canvas

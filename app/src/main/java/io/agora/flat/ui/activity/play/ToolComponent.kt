@@ -140,7 +140,6 @@ class ToolComponent(
                     updateClassMode(it.classMode)
                 }
 
-                binding.viewfollow.isVisible = it.isWritable
                 binding.cloudservice.isVisible = it.isWritable
             }
         }
@@ -275,8 +274,8 @@ class ToolComponent(
             },
             binding.layoutRoomStateSettings.classModeInteraction to {
                 if (!it.isSelected) {
-                    updateClassMode(ClassModeType.Interaction)
                     viewModel.updateClassMode(ClassModeType.Interaction)
+                    updateClassMode(ClassModeType.Interaction)
                 }
             },
             binding.layoutRoomStateSettings.classModeLecture to {
@@ -285,10 +284,6 @@ class ToolComponent(
                     viewModel.updateClassMode(ClassModeType.Lecture)
                 }
             },
-            binding.viewfollow to {
-                val targetMode = if (it.isSelected) ViewMode.Freedom else ViewMode.Broadcaster
-                boardRoom.setViewMode(targetMode)
-            }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }

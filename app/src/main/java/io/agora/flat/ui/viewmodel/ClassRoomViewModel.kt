@@ -10,7 +10,6 @@ import com.herewhite.sdk.converter.ConverterV5
 import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
-import com.herewhite.sdk.domain.ViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
@@ -24,7 +23,6 @@ import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.*
 import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
-import io.agora.flat.di.interfaces.BoardRoomApi
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
@@ -110,15 +108,11 @@ class ClassRoomViewModel @Inject constructor(
                     initRoomInfo(result.data.roomInfo)
                 }
             }
-        }
 
-        viewModelScope.launch {
             if (playInfo != null) {
                 _roomPlayInfo.value = playInfo
             } else when (val result = roomRepository.joinRoom(roomUUID)) {
-                is Success -> {
-                    _roomPlayInfo.value = result.data
-                }
+                is Success -> _roomPlayInfo.value = result.data
                 is Failure -> {
                     _errorMessage.value = when (result.error.code) {
                         FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
@@ -135,6 +129,13 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun initRoomInfo(roomInfo: RoomInfo) {
+        userManager.reset(
+            roomUUID = roomUUID,
+            userUUID = userUUID,
+            ownerUUID = roomInfo.ownerUUID,
+            scope = viewModelScope,
+        )
+
         _state.value = ClassRoomState(
             roomUUID = roomUUID,
             inviteCode = roomInfo.inviteCode,
@@ -147,12 +148,6 @@ class ClassRoomViewModel @Inject constructor(
             beginTime = roomInfo.beginTime,
             endTime = roomInfo.endTime,
             roomStatus = roomInfo.roomStatus,
-        )
-        userManager.reset(
-            roomUUID = roomUUID,
-            userUUID = userUUID,
-            ownerUUID = roomInfo.ownerUUID,
-            scope = viewModelScope,
         )
         observerUserState()
     }
@@ -711,7 +706,7 @@ data class ClassRoomState(
     // 当前用户
     val userUUID: String = "",
     val userName: String = "",
-    val isSpeak: Boolean = false,
+    val isSpeak: Boolean = ownerUUID == userUUID,
     val isRaiseHand: Boolean = false,
 
     val recordState: RecordState? = null,

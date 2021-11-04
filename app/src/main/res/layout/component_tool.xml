@@ -77,13 +77,6 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_toolbox_ext_cloudservice_selector" />
 
-            <ImageView
-                android:id="@+id/viewfollow"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_toolbox_ext_viewfollow_selector" />
-
             <FrameLayout
                 android:layout_width="32dp"
                 android:layout_height="32dp">

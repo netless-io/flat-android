@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -211,7 +212,12 @@ class WhiteboardComponent(
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             viewModel.roomPlayInfo.filterNotNull().collect {
-                boardRoom.join(it.whiteboardRoomUUID, it.whiteboardRoomToken, viewModel.state.value.userUUID)
+                boardRoom.join(
+                    it.whiteboardRoomUUID,
+                    it.whiteboardRoomToken,
+                    viewModel.state.value.userUUID,
+                    viewModel.state.value.isWritable
+                )
             }
         }
 
@@ -261,7 +267,12 @@ class WhiteboardComponent(
 
         lifecycleScope.launchWhenResumed {
             boardRoom.observerMemberState().collect { memberState ->
-                updateMemberState(memberState)
+                val colorItem = ColorItem.of(memberState.strokeColor)
+                if (colorItem != null) {
+                    updateMemberState(memberState)
+                } else {
+                    boardRoom.setStrokeColor(ColorItem.colors[0].color)
+                }
             }
         }
 
@@ -291,6 +302,7 @@ class WhiteboardComponent(
     }
 
     private fun updateRoomWritable(writable: Boolean) {
+        Log.d(TAG, "updateRoomWritable $writable")
         binding.boardToolsLayout.isVisible = writable
         // binding.showScenes.isVisible = writable
         // binding.pageIndicateLy.isVisible = writable
@@ -307,9 +319,10 @@ class WhiteboardComponent(
             applianceAdapter.setCurrentAppliance(ApplianceItem.of(currentApplianceName))
 
             binding.seeker.setStrokeWidth(strokeWidth.toInt())
-            binding.toolsSubPaint.setImageResource(ColorItem.of(strokeColor).drawableRes)
 
-            colorAdapter.setCurrentColor(ColorItem.of(strokeColor).color)
+            val colorItem = ColorItem.of(strokeColor) ?: ColorItem.colors[0]
+            binding.toolsSubPaint.setImageResource(colorItem.drawableRes)
+            colorAdapter.setCurrentColor(colorItem.color)
         }
     }
 
