@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.room
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
@@ -25,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomType
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatColorBlue
 import io.agora.flat.ui.theme.FlatColorGray
@@ -33,7 +33,7 @@ import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.ui.viewmodel.ViewState
 
 @AndroidEntryPoint
-class CreateRoomActivity : ComponentActivity() {
+class CreateRoomActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

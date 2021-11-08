@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.room
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
@@ -40,6 +39,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.rememberAndroidClipboardController
 import io.agora.flat.data.model.*
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
@@ -50,7 +50,7 @@ import io.agora.flat.util.toInviteCodeDisplay
 import java.util.*
 
 @AndroidEntryPoint
-class RoomDetailActivity : ComponentActivity() {
+class RoomDetailActivity : BaseComposeActivity() {
 
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {

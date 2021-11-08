@@ -93,9 +93,8 @@ class UserVideoAdapter(
     }
 
     fun updateVideoView(uid: Int) {
-        recyclerView?.findViewHolderForItemId(uid.toLong())?.apply {
-            val viewHolder = this as ViewHolder
-            rtcVideoController.setupUserVideo(viewHolder.videoContainer, uid)
+        recyclerView?.findViewHolderForItemId(uid.toLong())?.also {
+            rtcVideoController.setupUserVideo((it as ViewHolder).videoContainer, uid)
         }
     }
 
@@ -109,9 +108,6 @@ class UserVideoAdapter(
     }
 
     var listener: Listener? = null
-        set(value) {
-            field = value
-        }
 
     interface Listener {
         fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser)

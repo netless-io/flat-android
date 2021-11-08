@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.dev
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -21,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.FlatCommonTextStyle
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 @AndroidEntryPoint
-class DevToolsActivity : ComponentActivity() {
+class DevToolsActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,8 +94,8 @@ private fun EnvSwitch() {
                                         delay(2000)
                                         // exit application
                                         context.finishAffinity()
-                                        android.os.Process.killProcess(android.os.Process.myPid());
-                                        exitProcess(1);
+                                        android.os.Process.killProcess(android.os.Process.myPid())
+                                        exitProcess(1)
                                     }
                                 }
                             },

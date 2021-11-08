@@ -99,6 +99,11 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    fun launchLanguageActivity(context: Context) {
+        val intent = Intent(context, LanguageActivity::class.java)
+        context.startActivity(intent)
+    }
+
     fun launchCallTestActivity(context: Context) {
         val intent = Intent(context, CallTestActivity::class.java)
         context.startActivity(intent)

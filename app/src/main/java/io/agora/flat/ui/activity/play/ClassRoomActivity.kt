@@ -3,16 +3,16 @@ package io.agora.flat.ui.activity.play
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.databinding.ActivityRoomPlayBinding
+import io.agora.flat.ui.activity.base.BaseActivity
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class ClassRoomActivity : AppCompatActivity() {
+class ClassRoomActivity : BaseActivity() {
     private lateinit var binding: ActivityRoomPlayBinding
     private var componentSet: MutableSet<BaseComponent> = mutableSetOf()
 

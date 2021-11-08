@@ -2,13 +2,13 @@ package io.agora.flat.ui.activity.playback
 
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.databinding.ActivityReplayBinding
+import io.agora.flat.ui.activity.base.BaseActivity
 import io.agora.flat.ui.activity.play.BaseComponent
 
 @AndroidEntryPoint
-class ReplayActivity : AppCompatActivity() {
+class ReplayActivity : BaseActivity() {
     private lateinit var binding: ActivityReplayBinding
     private var componentSet: MutableSet<BaseComponent> = mutableSetOf()
 

@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.home
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -25,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.login.LoginHelper
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.util.showToast
@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseComposeActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val loginHelper = LoginHelper(this)
 

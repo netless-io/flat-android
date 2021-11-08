@@ -6,6 +6,7 @@
     <string name="commit">提交</string>
     <string name="username">用户名</string>
     <string name="delete">删除</string>
+    <string name="save">保存</string>
     <string name="cancel">取消</string>
     <string name="confirm">确定</string>
     <string name="end">结束</string>
@@ -27,6 +28,7 @@
     <string name="title_join_room">加入房间</string>
     <string name="title_feedback">吐个槽</string>
     <string name="title_about_us">关于我们</string>
+    <string name="title_language">多语言</string>
     <string name="title_activity_compose_test">ComposeTest</string>
 
     <string name="room_type_big_class">大班课</string>
@@ -156,4 +158,6 @@
     <string name="fetcher_room_is_ended">房间已结束</string>
     <string name="fetcher_join_room_error">加入房间错误(%1$d)</string>
     <string name="fetcher_start_room_with_record">开始上课并录制…</string>
+
+    <string name="language_follow_system">跟随系统</string>
 </resources>

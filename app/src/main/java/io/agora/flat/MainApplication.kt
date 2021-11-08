@@ -2,6 +2,7 @@ package io.agora.flat
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
+import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.di.interfaces.StartupInitializer
 import javax.inject.Inject
@@ -17,5 +18,6 @@ class MainApplication : Application() {
             it.init(this)
         }
         UploadManager.init(this)
+        LanguageManager.init(this)
     }
 }

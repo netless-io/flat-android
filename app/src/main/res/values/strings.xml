@@ -4,6 +4,7 @@
     <string name="commit">Commit</string>
     <string name="username">Username</string>
     <string name="delete">Delete</string>
+    <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="end">End</string>
@@ -21,6 +22,7 @@
     <string name="title_join_room">Join Room</string>
     <string name="title_feedback">Feedback</string>
     <string name="title_about_us">About Us</string>
+    <string name="title_language">Language</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="title_call_test" translatable="false">Call Test</string>
 
@@ -139,4 +141,8 @@
     <string name="fetcher_room_is_ended">room has ended.</string>
     <string name="fetcher_join_room_error">join room error (%1$d)</string>
     <string name="fetcher_start_room_with_record">Start class and recording…</string>
+
+    <string name="language_follow_system">Auto</string>
+    <string name="language_chinese" translatable="false">简体中文</string>
+    <string name="language_english" translatable="false">English</string>
 </resources>

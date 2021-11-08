@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.setting
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -25,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatHighlightTextButton
@@ -35,7 +35,7 @@ import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
 
 @AndroidEntryPoint
-class SettingActivity : ComponentActivity() {
+class SettingActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -76,6 +76,11 @@ private fun SettingItemList() {
                 id = R.drawable.ic_user_profile_feedback,
                 tip = stringResource(R.string.title_about_us),
                 onClick = { Navigator.launchAboutUsActivity(context) })
+            Divider(SettingDividerModifier)
+            SettingItem(
+                id = R.drawable.ic_user_profile_feedback,
+                tip = stringResource(R.string.title_language),
+                onClick = { Navigator.launchLanguageActivity(context) })
             Divider(SettingDividerModifier)
             // Device Test
             // SettingItem(

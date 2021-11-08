@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.dev
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,12 +30,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.agora.flat.R
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.theme.FlatAndroidTheme
 import io.agora.flat.ui.theme.FlatColorWhite
 import kotlin.math.roundToInt
 
-class ComposeTestActivity : ComponentActivity() {
+class ComposeTestActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

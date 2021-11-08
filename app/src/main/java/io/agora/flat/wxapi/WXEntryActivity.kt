@@ -3,7 +3,6 @@ package io.agora.flat.wxapi
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
@@ -16,10 +15,11 @@ import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.activity.LoginActivity
+import io.agora.flat.ui.activity.base.BaseActivity
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
+class WXEntryActivity : BaseActivity(), IWXAPIEventHandler {
     private val TAG = WXEntryActivity::class.simpleName
 
     @Inject

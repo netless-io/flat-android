@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.room
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,6 +20,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.WindowFocusObserver
 import io.agora.flat.common.android.rememberAndroidClipboardController
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
@@ -28,7 +28,7 @@ import io.agora.flat.util.parseRoomID
 import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
-class JoinRoomActivity : ComponentActivity() {
+class JoinRoomActivity : BaseComposeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -3,7 +3,6 @@ package io.agora.flat.ui.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -31,6 +30,7 @@ import io.agora.flat.Constants.Login.AUTH_ERROR
 import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.viewmodel.LoginViewModel
@@ -39,7 +39,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class LoginActivity : ComponentActivity() {
+class LoginActivity : BaseComposeActivity() {
     companion object {
         const val LOGIN_WECHAT = 1
         const val LOGIN_GITHUB = 2
