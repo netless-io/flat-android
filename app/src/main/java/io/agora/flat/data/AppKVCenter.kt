@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.agora.flat.data.model.UserInfo
+import io.agora.flat.data.model.UserInfoWithToken
 import javax.inject.Inject
 
 /**
@@ -82,9 +83,10 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
 
     class MockData {
         companion object {
-            const val LOGGED_IN_TOKEN =
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4"
             var mockEnable = false
+            const val userInfoJson = """
+                {"name":"冯利斌","avatar":"https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKUtPsvnxiaQtoHwaFPErfOrq1uN6wQ5UoMk7y2pPXcEibbVgTWBxeRrV80b4HkuJNB8o1STgaDXicFQ/132","userUUID":"3e092001-eb7e-4da5-a715-90452fde3194","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6IjNlMDkyMDAxLWViN2UtNGRhNS1hNzE1LTkwNDUyZmRlMzE5NCIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjM2NDQ3Njg0LCJleHAiOjE2Mzg5NTMyODQsImlzcyI6ImZsYXQtc2VydmVyIn0.OvZCVBPPWDSUX8vwfTOSl81gnYRquLSVP2s5Xnslyrc"}
+            """
         }
 
         private val gson = Gson()
@@ -98,13 +100,12 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         }
 
         fun getUserInfo(): UserInfo {
-            val userInfoJson =
-                "{\"name\":\"一生何求\",\"avatar\":\"https://thirdwx.qlogo.cn/mmopen/vi_32/GDpXrJ10nia06eLjbh7BJYyRpXq2jJmNEia2CztyayjWD63eX9RkIa9iaDMOZV8VZ7bLANibm33wicFmutTomYvcicuQ/132\",\"userUUID\":\"c94270a4-2e69-4535-bec0-9a2c6548a72b\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVVVJRCI6ImM5NDI3MGE0LTJlNjktNDUzNS1iZWMwLTlhMmM2NTQ4YTcyYiIsImxvZ2luU291cmNlIjoiV2VDaGF0IiwiaWF0IjoxNjE5NjY4NTQ1LCJleHAiOjE2MjIxNzQxNDUsImlzcyI6ImZsYXQtc2VydmVyIn0.vXNn1mGP7ut-so9xafQF0vkEGUrqS2VAbbkIKo_EbV4\"}"
             return gson.fromJson(userInfoJson, UserInfo::class.java)
         }
 
         fun getToken(): String {
-            return LOGGED_IN_TOKEN
+            val withToken = gson.fromJson(userInfoJson, UserInfoWithToken::class.java)
+            return withToken.token
         }
     }
 }

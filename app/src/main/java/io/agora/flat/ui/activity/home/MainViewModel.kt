@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.StringFetcher
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
@@ -39,8 +40,11 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             if (isLoggedIn()) {
-                _state.value = _state.value.copy(loginState = LoginState.Login)
-                _state.value = _state.value.copy(loginCheck = userRepository.loginCheck() is Success)
+                if (AppKVCenter.MockData.mockEnable || userRepository.loginCheck() is Success) {
+                    _state.value = _state.value.copy(loginState = LoginState.Login)
+                } else {
+                    _state.value = _state.value.copy(loginState = LoginState.Error)
+                }
             } else {
                 _state.value = _state.value.copy(loginState = LoginState.Error)
             }
