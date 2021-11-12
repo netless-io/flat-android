@@ -1,12 +1,16 @@
 package io.agora.flat.ui.theme
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalConfiguration
+import com.google.accompanist.insets.ProvideWindowInsets
+import io.agora.flat.ui.compose.LocalPadMode
 
 
 @SuppressLint("ConflictingOnColor")
@@ -48,7 +52,8 @@ private val LightColorPalette = lightColors(
 @Composable
 fun FlatAndroidTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit,
+    isPad: Boolean = isPadMode(),
+    content: @Composable () -> Unit,
 ) {
     val colors = if (darkTheme) {
         DarkColorPalette
@@ -56,24 +61,21 @@ fun FlatAndroidTheme(
         LightColorPalette
     }
 
-//    val context = LocalContext.current
-//    val conf = context.resources.configuration.apply {
-//        if (Build.VERSION.SDK_INT >= 24) {
-//            setLocales(LocaleList(Locale.CHINESE))
-//        } else {
-//            setLocale(Locale.CHINESE)
-//        }
-//    }
-//    context.resources.updateConfiguration(conf, context.resources.displayMetrics);
 
-    CompositionLocalProvider(
-        // LocalContext provides context.createConfigurationContext(conf)
-    ) {
-        MaterialTheme(
-            colors = colors,
-            typography = Typography,
-            shapes = Shapes,
-            content = content
-        )
+    CompositionLocalProvider(LocalPadMode provides isPad) {
+        ProvideWindowInsets {
+            MaterialTheme(
+                colors = colors,
+                typography = Typography,
+                shapes = Shapes,
+                content = content
+            )
+        }
     }
+}
+
+@Composable
+fun isPadMode(): Boolean {
+    val configuration = LocalConfiguration.current
+    return configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
 }

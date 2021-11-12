@@ -58,7 +58,7 @@ android {
             signingConfig signingConfigs.release
 
             ndk {
-                abiFilters "arm64-v8a", "armeabi-v7a"
+                abiFilters "arm64-v8a", "armeabi-v7a", "x86"
             }
 
             buildConfigField "String", "CHANNEL", "\"release\""
@@ -159,6 +159,7 @@ dependencies {
 
     // Google Accompanist
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.12.0'
+    implementation "com.google.accompanist:accompanist-insets:0.16.1"
     implementation "com.google.accompanist:accompanist-pager:0.16.1"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.16.1"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.16.1"
@@ -168,8 +169,8 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
-    // implementation 'com.github.netless-io:whiteboard-android:2.15.0'
-    implementation 'com.github.netless-io:whiteboard-android:8c3767296b51d94fc3c7bfc5a0df2e6acd545cc4'
+    implementation 'com.github.netless-io:whiteboard-android:2.15.1'
+    // implementation 'com.github.netless-io:whiteboard-android:8c3767296b51d94fc3c7bfc5a0df2e6acd545cc4'
     implementation 'io.agora.rtc:full-sdk:3.4.8'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
 

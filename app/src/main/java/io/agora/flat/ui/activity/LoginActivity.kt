@@ -13,14 +13,20 @@ import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -32,6 +38,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.LocalPadMode
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
@@ -52,9 +59,10 @@ class LoginActivity : BaseComposeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            LoginContent { action ->
+            val actioner: (LoginUIAction) -> Unit = { action ->
                 when (action) {
                     LoginUIAction.WeChatLogin -> {
                         currentLogin = LOGIN_WECHAT
@@ -66,6 +74,7 @@ class LoginActivity : BaseComposeActivity() {
                     }
                 }
             }
+            LoginPage(actioner = actioner)
         }
 
         api = WXAPIFactory.createWXAPI(this, Constants.WX_APP_ID, false)
@@ -171,16 +180,78 @@ class LoginActivity : BaseComposeActivity() {
 }
 
 @Composable
-private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
-    val typography = MaterialTheme.typography
+internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = MaterialTheme.colors.isLight
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Transparent,
+            darkIcons = useDarkIcons
+        )
+    }
 
     FlatPage {
-        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(Modifier.height(120.dp))
+        val isPad = LocalPadMode.current
+        if (isPad) {
+            LoginMainPad(actioner)
+        } else {
+            LoginMain(actioner)
+        }
+    }
+}
+
+@Composable
+internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(120.dp))
+        Image(painterResource(R.drawable.img_login_logo), null)
+        Spacer(Modifier.height(2.dp))
+        Text("Flat", style = MaterialTheme.typography.h5)
+        Spacer(Modifier.height(4.dp))
+        Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+        Spacer(Modifier.weight(1f))
+        Row {
+            LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
+                Image(painterResource(R.drawable.ic_wechat_login), "")
+            }
+            Spacer(Modifier.width(48.dp))
+            LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
+                Image(painterResource(R.drawable.ic_github_login), "")
+            }
+        }
+        Spacer(modifier = Modifier.height(100.dp))
+        Box(Modifier.padding(vertical = 24.dp)) {
+            Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
+        }
+    }
+}
+
+@Composable
+fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
+    Row {
+        Image(
+            painterResource(R.drawable.img_pad_login),
+            contentDescription = null,
+            Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            contentScale = ContentScale.Crop,
+        )
+
+        Column(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
             Image(painterResource(R.drawable.img_login_logo), null)
-            Text("Flat", Modifier.offset(y = (-16).dp), style = typography.h5)
+            Spacer(Modifier.height(2.dp))
+            Text("Flat", style = MaterialTheme.typography.h5)
+            Spacer(Modifier.height(4.dp))
             Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(48.dp))
             Row {
                 LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
                     Image(painterResource(R.drawable.ic_wechat_login), "")
@@ -190,8 +261,8 @@ private fun LoginContent(actioner: (LoginUIAction) -> Unit) {
                     Image(painterResource(R.drawable.ic_github_login), "")
                 }
             }
-            Spacer(modifier = Modifier.height(100.dp))
-            Box(Modifier.padding(vertical = 24.dp)) {
+            Spacer(modifier = Modifier.weight(1f))
+            Box(Modifier.padding(vertical = 40.dp)) {
                 Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
             }
         }
@@ -219,9 +290,18 @@ private fun LoginImageButton(
 @Preview
 private fun LoginPagePreview() {
     FlatPage {
-        LoginContent { }
+        LoginPage { }
     }
 }
+
+@Composable
+@Preview(device = PIXEL_C)
+private fun LoginPagePreviewPad() {
+    FlatPage {
+        LoginPage { }
+    }
+}
+
 
 sealed class LoginUIAction {
     object WeChatLogin : LoginUIAction()
