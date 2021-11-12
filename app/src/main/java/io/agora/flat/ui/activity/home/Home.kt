@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.gson.Gson
 import io.agora.flat.R
@@ -34,18 +35,47 @@ import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
 @Composable
-fun Home() {
+fun Home(navController: NavHostController? = null) {
     val context = LocalContext.current
     val viewModel = viewModel(HomeViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 
-    Home(viewState) { action ->
+    val actioner: (HomeViewAction) -> Unit = { action ->
         when (action) {
             HomeViewAction.Reload -> viewModel.reloadRoomList()
             is HomeViewAction.SelectCategory -> viewModel.onRoomCategorySelected(action.category)
             HomeViewAction.SetNetwork -> Navigator.gotoNetworkSetting(context)
+            HomeViewAction.RoomCreate -> {
+                if (navController != null) {
+                    navController.navigate("room_create") {
+                        popUpTo("init")
+                    }
+                } else {
+                    Navigator.launchCreateRoomActivity(context)
+                }
+            }
+            HomeViewAction.RoomJoin -> {
+                if (navController != null) {
+                    navController.navigate("room_join") {
+                        popUpTo("init")
+                    }
+                } else {
+                    Navigator.launchJoinRoomActivity(context)
+                }
+            }
+            is HomeViewAction.GotoRoomDetail -> {
+                if (navController != null) {
+                    navController.navigate("room_detail?room_uuid=${action.roomUUID}") {
+                        popUpTo("init")
+                    }
+                } else {
+                    Navigator.launchRoomDetailActivity(context, action.roomUUID, action.periodicUUID)
+                }
+            }
         }
     }
+
+    Home(viewState, actioner)
 }
 
 @Composable
@@ -57,7 +87,7 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
             actioner(HomeViewAction.SetNetwork)
         }
         // 操作区
-        TopOperations()
+        TopOperations(actioner)
         // 房间列表区
         FlatSwipeRefresh(refreshing = viewState.refreshing, onRefresh = { actioner(HomeViewAction.Reload) }) {
             HomeRoomContent(
@@ -65,7 +95,10 @@ private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
                 selectedHomeCategory = viewState.category,
                 onCategorySelected = { actioner(HomeViewAction.SelectCategory(it)) },
                 roomList = viewState.roomList,
-                roomHistory = viewState.historyList
+                roomHistory = viewState.historyList,
+                onGotoRoom = { rUUID, pUUID ->
+                    actioner(HomeViewAction.GotoRoomDetail(rUUID, pUUID))
+                }
             )
         }
     }
@@ -86,15 +119,13 @@ fun FlatNetworkError(onClick: () -> Unit) {
 }
 
 @Composable
-private fun TopOperations() {
-    val context = LocalContext.current
-
+private fun TopOperations(actioner: (HomeViewAction) -> Unit) {
     Row(Modifier.fillMaxWidth()) {
         OperationItem(R.drawable.ic_home_create_room, R.string.create_room) {
-            Navigator.launchCreateRoomActivity(context)
+            actioner(HomeViewAction.RoomCreate)
         }
         OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {
-            Navigator.launchJoinRoomActivity(context)
+            actioner(HomeViewAction.RoomJoin)
         }
         // Perhaps, the future will support
         // OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
@@ -152,17 +183,13 @@ fun FlatHomeTopBar(userAvatar: String) {
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                 ) {
-                    DropdownMenuItem(onClick = {
-                        Navigator.launchSettingActivity(context)
-                        // expanded = false
-                    }) {
+                    DropdownMenuItem(onClick = { Navigator.launchSettingActivity(context) }) {
                         Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.title_my_profile), Modifier.width(100.dp))
                     }
                     DropdownMenuItem(onClick = {
                         Navigator.launchMyProfileActivity(context)
-                        // expanded = false
                     }) {
                         Image(painterResource(R.drawable.ic_user_profile_aboutus), contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -181,6 +208,7 @@ private fun HomeRoomContent(
     onCategorySelected: (RoomCategory) -> Unit,
     roomList: List<RoomInfo>,
     roomHistory: List<RoomInfo>,
+    onGotoRoom: (String, String?) -> Unit,
 ) {
     Column(modifier) {
         HomeRoomTabs(
@@ -192,10 +220,10 @@ private fun HomeRoomContent(
 
         when (selectedHomeCategory) {
             RoomCategory.Current -> {
-                HomeRoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current)
+                HomeRoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current, onGotoRoom)
             }
             RoomCategory.History -> {
-                HomeRoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History)
+                HomeRoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History, onGotoRoom)
             }
         }
     }
@@ -247,7 +275,12 @@ private fun HomeTabIndicator(
 }
 
 @Composable
-private fun HomeRoomList(modifier: Modifier, roomList: List<RoomInfo>, category: RoomCategory) {
+private fun HomeRoomList(
+    modifier: Modifier,
+    roomList: List<RoomInfo>,
+    category: RoomCategory,
+    onGotoRoom: (String, String?) -> Unit,
+) {
     val context = LocalContext.current
 
     if (roomList.isEmpty()) {
@@ -270,11 +303,7 @@ private fun HomeRoomList(modifier: Modifier, roomList: List<RoomInfo>, category:
                     Modifier.clickable(
                         indication = LocalIndication.current,
                         interactionSource = remember { CustomInteractionSource() }) {
-                        Navigator.launchRoomDetailActivity(
-                            context,
-                            roomList[it].roomUUID,
-                            roomList[it].periodicUUID
-                        )
+                        onGotoRoom(roomList[it].roomUUID, roomList[it].periodicUUID)
                     })
             }
             item {

@@ -18,12 +18,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.activity.home.mainext.MainExtPage
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.LocalPadMode
 import io.agora.flat.ui.theme.FillMaxSize
@@ -101,8 +103,7 @@ fun MainPage(viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
     }
 
     FlatPage {
-        val isPad = LocalPadMode.current
-        if (isPad) {
+        if (LocalPadMode.current) {
             MainContentPad(viewState, onTabSelected)
         } else {
             MainContent(viewState, onTabSelected)
@@ -127,6 +128,8 @@ internal fun MainContent(viewState: MainViewState, onTabSelected: (MainTab) -> U
 
 @Composable
 internal fun MainContentPad(viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
+    val navController = rememberNavController()
+
     Row {
         Box(Modifier.width(60.dp)) {
             MainContentPadSwitch(selectedTab = viewState.mainTab, onTabSelected = onTabSelected)
@@ -136,7 +139,7 @@ internal fun MainContentPad(viewState: MainViewState, onTabSelected: (MainTab) -
             .fillMaxHeight(), Alignment.Center) {
             if (viewState.loginState == LoginState.Login) {
                 when (viewState.mainTab) {
-                    MainTab.Home -> Home()
+                    MainTab.Home -> Home(navController)
                     MainTab.CloudStorage -> CloudStorage()
                 }
             }
@@ -148,7 +151,7 @@ internal fun MainContentPad(viewState: MainViewState, onTabSelected: (MainTab) -
                 .background(FlatColorDivider),
         )
         Box(Modifier.weight(1f)) {
-            MainExtPage()
+            MainExtPage(navController)
         }
     }
 }
@@ -183,17 +186,6 @@ internal fun MainContentPadSwitch(selectedTab: MainTab, onTabSelected: (MainTab)
 }
 
 @Composable
-internal fun MainExtPage() {
-    Box(Modifier.fillMaxSize()) {
-        Image(
-            painterResource(R.drawable.img_pad_home_ext_empty),
-            contentDescription = null,
-            Modifier.align(Alignment.Center)
-        )
-    }
-}
-
-@Composable
 private fun FlatHomeBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
@@ -224,9 +216,7 @@ private fun FlatHomeBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> 
 private fun MainPagePreview() {
     FlatPage {
         val mainViewState = MainViewState(loginState = LoginState.Login)
-        MainPage(mainViewState) {
-
-        }
+        MainPage(mainViewState) { }
     }
 }
 

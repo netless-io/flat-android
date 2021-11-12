@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
             refreshing.addLoader()
             reloadRooms()
             reloadHistoryRooms()
-            delay(2000)
+            delay(1000)
             refreshing.removeLoader()
         }
     }
@@ -177,4 +177,7 @@ sealed class HomeViewAction {
     object Reload : HomeViewAction()
     data class SelectCategory(val category: RoomCategory) : HomeViewAction()
     object SetNetwork : HomeViewAction()
+    object RoomCreate : HomeViewAction()
+    object RoomJoin : HomeViewAction()
+    data class GotoRoomDetail(val roomUUID: String, val periodicUUID: String?) : HomeViewAction()
 }

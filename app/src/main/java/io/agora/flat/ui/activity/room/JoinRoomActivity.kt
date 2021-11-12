@@ -14,7 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
@@ -33,31 +34,50 @@ class JoinRoomActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel = viewModel<JoinRoomViewModel>()
-            val error by viewModel.error.collectAsState()
-            val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+            FlatPage { JoinRoomPage() }
+        }
+    }
+}
 
-            LaunchedEffect(error) {
-                error?.message?.let { showToast(it) }
-            }
+@Composable
+fun JoinRoomPage(
+    navController: NavController? = null,
+    viewModel: JoinRoomViewModel = hiltViewModel(),
+) {
+    val activity = LocalContext.current as BaseComposeActivity
+    val error by viewModel.error.collectAsState()
+    val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
 
-            LaunchedEffect(roomPlayInfo) {
-                if (roomPlayInfo != null) {
-                    Navigator.launchRoomPlayActivity(this@JoinRoomActivity, roomPlayInfo!!)
-                    finish()
-                }
-            }
+    LaunchedEffect(error) {
+        error?.message?.let { activity.showToast(it) }
+    }
 
-            JoinRoomPage { action ->
-                when (action) {
-                    JoinRoomAction.Close -> finish()
-                    is JoinRoomAction.JoinRoom -> {
-                        viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
-                    }
-                }
+    LaunchedEffect(roomPlayInfo) {
+        if (roomPlayInfo != null) {
+            Navigator.launchRoomPlayActivity(activity, roomPlayInfo!!)
+            if (navController != null) {
+                navController.popBackStack()
+            } else {
+                activity.finish()
             }
         }
     }
+
+    val actioner: (JoinRoomAction) -> Unit = { action ->
+        when (action) {
+            JoinRoomAction.Close -> {
+                if (navController != null) {
+                    navController.popBackStack()
+                } else {
+                    activity.finish()
+                }
+            }
+            is JoinRoomAction.JoinRoom -> {
+                viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
+            }
+        }
+    }
+    JoinRoomPage(actioner = actioner)
 }
 
 @Composable
@@ -78,7 +98,7 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
         }
     }
 
-    FlatColumnPage {
+    Column {
         CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
         Column(Modifier
             .weight(1f)
@@ -125,5 +145,5 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
 @Composable
 @Preview
 private fun PagePreview() {
-    JoinRoomPage({})
+    JoinRoomPage {}
 }

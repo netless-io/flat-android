@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
@@ -28,6 +28,7 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatHighlightTextButton
+import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.viewmodel.UserViewModel
@@ -39,18 +40,23 @@ class SettingActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel = viewModel(UserViewModel::class.java)
+            FlatPage { SettingPage() }
+        }
+    }
+}
 
-            FlatColumnPage {
-                BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { finish() })
-                Box(Modifier.weight(1f)) {
-                    SettingItemList()
-                    BottomOptArea(onLogoutClick = {
-                        viewModel.logout()
-                        Navigator.launchHomeActivity(this@SettingActivity)
-                    })
-                }
-            }
+@Composable
+fun SettingPage(viewModel: UserViewModel = hiltViewModel()) {
+    val activity = LocalContext.current as BaseComposeActivity
+
+    Column {
+        BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { activity.finish() })
+        Box(Modifier.weight(1f)) {
+            SettingItemList()
+            BottomOptArea(onLogoutClick = {
+                viewModel.logout()
+                Navigator.launchHomeActivity(activity)
+            })
         }
     }
 }
@@ -140,7 +146,7 @@ private val BoxScope.BottomOptBoxModifier
 @Preview(showSystemUi = false)
 @Composable
 fun UserSettingActivityPreview() {
-    FlatColumnPage() {
+    FlatColumnPage {
         BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { })
         Box(Modifier.weight(1f)) {
             SettingItemList()

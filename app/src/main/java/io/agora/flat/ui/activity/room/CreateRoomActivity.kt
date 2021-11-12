@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.room
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
@@ -19,7 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
@@ -37,38 +39,51 @@ class CreateRoomActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel: CreateRoomViewModel = viewModel()
-            val viewState by viewModel.state.collectAsState()
-
-            CreateRoomContent(viewState) { action ->
-                when (action) {
-                    CreateRoomAction.Close -> finish()
-                    is CreateRoomAction.JoinRoom -> {
-                        viewModel.enableVideo(action.openVideo)
-                        Navigator.launchRoomPlayActivity(this, viewState.roomUUID)
-                        finish()
-                    }
-                    is CreateRoomAction.CreateRoom -> viewModel.createRoom(
-                        action.title,
-                        action.roomType,
-                    )
-                }
+            FlatPage {
+                CreateRoomPage()
             }
         }
     }
 }
 
 @Composable
-private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
-    val context = LocalContext.current
-    var theme by remember {
-        mutableStateOf(
-            context.getString(
-                R.string.join_room_default_time_format,
-                viewState.username
-            )
-        )
+fun CreateRoomPage(
+    navController: NavController? = null,
+    viewModel: CreateRoomViewModel = hiltViewModel(),
+) {
+    val activity = LocalContext.current as Activity
+    val viewState by viewModel.state.collectAsState()
+
+    val actioner: (CreateRoomAction) -> Unit = { action ->
+        when (action) {
+            CreateRoomAction.Close -> {
+                if (navController != null) {
+                    navController.popBackStack()
+                } else {
+                    activity.finish()
+                }
+            }
+            is CreateRoomAction.JoinRoom -> {
+                viewModel.enableVideo(action.openVideo)
+                Navigator.launchRoomPlayActivity(activity, viewState.roomUUID)
+                activity.finish()
+            }
+            is CreateRoomAction.CreateRoom -> {
+                viewModel.createRoom(action.title, action.roomType)
+            }
+        }
     }
+
+    CreateRoomContent(viewState, actioner)
+}
+
+@Composable
+private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
+    val defaultTheme = LocalContext.current.getString(
+        R.string.join_room_default_time_format,
+        viewState.username
+    )
+    var theme by remember { mutableStateOf(defaultTheme) }
     var type by remember { mutableStateOf(RoomType.BigClass) }
     var openVideo by remember { mutableStateOf(false) }
 
@@ -78,15 +93,11 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
         }
     }
 
-    FlatColumnPage {
-        CloseTopAppBar(
-            title = stringResource(R.string.create_room),
-            onClose = { actioner(CreateRoomAction.Close) })
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp)
-        ) {
+    Column {
+        CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })
+        Column(Modifier
+            .weight(1f)
+            .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
             Text(stringResource(R.string.room_theme))
             FlatSmallVerticalSpacer()
@@ -103,18 +114,12 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
             Text(stringResource(R.string.join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = openVideo,
-                    onCheckedChange = { openVideo = it }
-                )
+                Checkbox(checked = openVideo, onCheckedChange = { openVideo = it })
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(id = R.string.turn_on_camera))
             }
             Spacer(Modifier.height(32.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 FlatPrimaryTextButton(stringResource(R.string.create), enabled = !viewState.loading) {
                     actioner(CreateRoomAction.CreateRoom(theme, type))
                 }
