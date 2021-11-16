@@ -37,3 +37,6 @@ val BoxScope.MaxWidth
 
 val FillMaxSize
     get() = Modifier.fillMaxSize()
+
+val MaxHeight
+    get() = Modifier.fillMaxHeight()

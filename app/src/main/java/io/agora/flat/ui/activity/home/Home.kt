@@ -22,9 +22,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.gson.Gson
 import io.agora.flat.R
@@ -35,9 +35,30 @@ import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
 @Composable
-fun Home(navController: NavHostController? = null) {
+fun Home(
+    navController: NavController,
+    onOpenRoomCreate: () -> Unit,
+    onOpenRoomJoin: () -> Unit,
+    onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,
+) {
+    Home(
+        navController = navController,
+        viewModel = hiltViewModel(),
+        onOpenRoomCreate = onOpenRoomCreate,
+        onOpenRoomJoin = onOpenRoomJoin,
+        onOpenRoomDetail = onOpenRoomDetail,
+    )
+}
+
+@Composable
+internal fun Home(
+    navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel(),
+    onOpenRoomCreate: () -> Unit,
+    onOpenRoomJoin: () -> Unit,
+    onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,
+) {
     val context = LocalContext.current
-    val viewModel = viewModel(HomeViewModel::class.java)
     val viewState by viewModel.state.collectAsState()
 
     val actioner: (HomeViewAction) -> Unit = { action ->
@@ -45,33 +66,9 @@ fun Home(navController: NavHostController? = null) {
             HomeViewAction.Reload -> viewModel.reloadRoomList()
             is HomeViewAction.SelectCategory -> viewModel.onRoomCategorySelected(action.category)
             HomeViewAction.SetNetwork -> Navigator.gotoNetworkSetting(context)
-            HomeViewAction.RoomCreate -> {
-                if (navController != null) {
-                    navController.navigate("room_create") {
-                        popUpTo("init")
-                    }
-                } else {
-                    Navigator.launchCreateRoomActivity(context)
-                }
-            }
-            HomeViewAction.RoomJoin -> {
-                if (navController != null) {
-                    navController.navigate("room_join") {
-                        popUpTo("init")
-                    }
-                } else {
-                    Navigator.launchJoinRoomActivity(context)
-                }
-            }
-            is HomeViewAction.GotoRoomDetail -> {
-                if (navController != null) {
-                    navController.navigate("room_detail?room_uuid=${action.roomUUID}") {
-                        popUpTo("init")
-                    }
-                } else {
-                    Navigator.launchRoomDetailActivity(context, action.roomUUID, action.periodicUUID)
-                }
-            }
+            HomeViewAction.RoomCreate -> onOpenRoomCreate()
+            HomeViewAction.RoomJoin -> onOpenRoomJoin()
+            is HomeViewAction.GotoRoomDetail -> onOpenRoomDetail(action.roomUUID, action.periodicUUID)
         }
     }
 

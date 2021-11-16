@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -17,8 +18,15 @@ fun FlatPage(
     statusBarColor: Color = MaterialTheme.colors.background,
     content: @Composable() () -> Unit,
 ) {
-    val controller = rememberSystemUiController()
-    controller.setStatusBarColor(statusBarColor)
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = MaterialTheme.colors.isLight
+
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = statusBarColor,
+            darkIcons = useDarkIcons
+        )
+    }
 
     FlatAndroidTheme {
         Surface(color = MaterialTheme.colors.background) {

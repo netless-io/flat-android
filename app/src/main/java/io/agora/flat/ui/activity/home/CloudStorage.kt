@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.home
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -24,12 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import io.agora.flat.R
+import io.agora.flat.common.LeafScreen
+import io.agora.flat.common.Screen
 import io.agora.flat.data.model.FileConvertStep
-import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.FlatSwipeRefresh
-import io.agora.flat.ui.compose.FlatTopAppBar
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.contentFileInfo
@@ -37,8 +39,10 @@ import io.agora.flat.util.fileSuffix
 import java.util.*
 
 @Composable
-fun CloudStorage() {
-    val viewModel = viewModel(CloudStorageViewModel::class.java)
+fun CloudStorage(
+    navController: NavController,
+    viewModel: CloudStorageViewModel = hiltViewModel(),
+) {
     val viewState by viewModel.state.collectAsState()
 
     CloudStorage(viewState) { action ->
@@ -47,6 +51,13 @@ fun CloudStorage() {
             is CloudStorageUIAction.Delete -> viewModel.deleteChecked()
             is CloudStorageUIAction.Reload -> viewModel.reloadFileList()
             is CloudStorageUIAction.UploadFile -> viewModel.uploadFile(action)
+
+            CloudStorageUIAction.OpenItemPick -> {
+                navController.navigate(LeafScreen.CloudUploadPick.createRoute(Screen.CloudExt))
+            }
+            CloudStorageUIAction.CloseItemPick -> {
+                navController.popBackStack()
+            }
             else -> {; }
         }
     }
@@ -62,7 +73,12 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
             FlatSwipeRefresh(viewState.refreshing, onRefresh = { actioner(CloudStorageUIAction.Reload) }) {
                 Box(Modifier.fillMaxSize()) {
                     CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
-                    CloudStorageAddFile(actioner)
+
+                    if (LocalIsPadMode.current) {
+                        AddFileLayoutPad(actioner)
+                    } else {
+                        AddFileLayout(actioner)
+                    }
                 }
             }
         }
@@ -73,7 +89,7 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
 }
 
 @Composable
-private fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Unit) {
+private fun BoxScope.AddFileLayout(actioner: (CloudStorageUIAction) -> Unit) {
     var showPick by remember { mutableStateOf(false) }
 
     FloatingActionButton(
@@ -93,6 +109,18 @@ private fun BoxScope.CloudStorageAddFile(actioner: (CloudStorageUIAction) -> Uni
         }) {
             showPick = false
         }
+    }
+}
+
+@Composable
+private fun BoxScope.AddFileLayoutPad(actioner: (CloudStorageUIAction) -> Unit) {
+    FloatingActionButton(
+        onClick = { actioner(CloudStorageUIAction.OpenItemPick) },
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp)
+    ) {
+        Icon(Icons.Outlined.Add, contentDescription = null, tint = FlatColorWhite)
     }
 }
 
@@ -142,6 +170,37 @@ private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -
                 UpdatePickItem(R.drawable.ic_cloud_storage_doc, R.string.cloud_storage_upload_doc) {
                     launcher.launch("*/*")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun CloudUpdatePick(onPickFile: (filename: String, size: Long, uri: Uri) -> Unit, onPickClose: () -> Unit) {
+    val viewModel: CloudStorageViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        it?.run {
+            val info = context.contentFileInfo(this) ?: return@run
+            // onPickFile(info.filename, info.size, this)
+            viewModel.uploadFile(CloudStorageUIAction.UploadFile(info.filename, info.size, this))
+        }
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        CloseTopAppBar(stringResource(id = R.string.title_cloud_storage), onClose = onPickClose)
+        Row(Modifier.align(Alignment.CenterHorizontally)) {
+            UpdatePickItem(R.drawable.ic_cloud_storage_image, R.string.cloud_storage_upload_image) {
+                launcher.launch("image/*")
+            }
+            UpdatePickItem(R.drawable.ic_cloud_storage_video, R.string.cloud_storage_upload_video) {
+                launcher.launch("video/*")
+            }
+            UpdatePickItem(R.drawable.ic_cloud_storage_music, R.string.cloud_storage_upload_music) {
+                launcher.launch("audio/*")
+            }
+            UpdatePickItem(R.drawable.ic_cloud_storage_doc, R.string.cloud_storage_upload_doc) {
+                launcher.launch("*/*")
             }
         }
     }

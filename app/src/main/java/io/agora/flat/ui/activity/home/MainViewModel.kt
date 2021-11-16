@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
@@ -55,10 +55,6 @@ class MainViewModel @Inject constructor(
                 joinRoom(roomUUID, false, openAudio = false)
             }
         }
-    }
-
-    private fun updateState(loginState: LoginState = LoginState.Init, mainTab: MainTab = MainTab.Home) {
-        _state.value = _state.value.copy(loginState = loginState, mainTab = mainTab)
     }
 
     fun onMainTabSelected(selectedTab: MainTab) {
@@ -95,7 +91,6 @@ enum class MainTab {
 
 data class MainViewState(
     val loginState: LoginState = LoginState.Init,
-    val loginCheck: Boolean = false,
     val mainTab: MainTab = MainTab.Home,
 )
 

@@ -311,6 +311,9 @@ sealed class CloudStorageUIAction {
     data class CheckItem(val index: Int, val checked: Boolean) : CloudStorageUIAction()
     data class ClickItem(val index: Int) : CloudStorageUIAction()
 
+    object OpenItemPick : CloudStorageUIAction()
+    object CloseItemPick : CloudStorageUIAction()
+
     data class UploadFile(val filename: String, val size: Long, val uri: Uri) : CloudStorageUIAction()
     data class UploadRetry(val fileUUID: String) : CloudStorageUIAction()
     data class UploadDelete(val fileUUID: String) : CloudStorageUIAction()

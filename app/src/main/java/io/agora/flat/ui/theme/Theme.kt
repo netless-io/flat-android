@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
 import com.google.accompanist.insets.ProvideWindowInsets
-import io.agora.flat.ui.compose.LocalPadMode
+import io.agora.flat.ui.compose.LocalIsPadMode
 
 
 @SuppressLint("ConflictingOnColor")
@@ -61,8 +61,7 @@ fun FlatAndroidTheme(
         LightColorPalette
     }
 
-
-    CompositionLocalProvider(LocalPadMode provides isPad) {
+    CompositionLocalProvider(LocalIsPadMode provides isPad) {
         ProvideWindowInsets {
             MaterialTheme(
                 colors = colors,

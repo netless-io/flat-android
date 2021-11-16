@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.accompanist.insets.navigationBarsPadding
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -38,7 +37,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.LocalPadMode
+import io.agora.flat.ui.compose.LocalIsPadMode
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
@@ -59,6 +58,7 @@ class LoginActivity : BaseComposeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -139,7 +139,6 @@ class LoginActivity : BaseComposeActivity() {
         }
     }
 
-
     private fun loginSuccess() {
         lifecycleScope.launch {
             showToast(R.string.login_success_and_jump)
@@ -181,18 +180,8 @@ class LoginActivity : BaseComposeActivity() {
 
 @Composable
 internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = MaterialTheme.colors.isLight
-
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = Transparent,
-            darkIcons = useDarkIcons
-        )
-    }
-
-    FlatPage {
-        val isPad = LocalPadMode.current
+    FlatPage(statusBarColor = Transparent) {
+        val isPad = LocalIsPadMode.current
         if (isPad) {
             LoginMainPad(actioner)
         } else {
@@ -203,7 +192,7 @@ internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
 
 @Composable
 internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.fillMaxSize().navigationBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(120.dp))
         Image(painterResource(R.drawable.img_login_logo), null)
         Spacer(Modifier.height(2.dp))
@@ -228,7 +217,7 @@ internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
 }
 
 @Composable
-fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
+internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
     Row {
         Image(
             painterResource(R.drawable.img_pad_login),
@@ -262,7 +251,7 @@ fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            Box(Modifier.padding(vertical = 40.dp)) {
+            Box(Modifier.padding(vertical = 40.dp).navigationBarsPadding()) {
                 Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
             }
         }

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.upload.UploadState
 import io.agora.flat.ui.compose.CloseTopAppBar
@@ -28,8 +28,7 @@ import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.*
 
 @Composable
-internal fun UploadList() {
-    val viewModel = viewModel(CloudStorageViewModel::class.java)
+internal fun UploadList(viewModel: CloudStorageViewModel = hiltViewModel()) {
     val viewState by viewModel.state.collectAsState()
 
     UploadList(viewState) { action ->
@@ -61,9 +60,11 @@ internal fun UploadList(viewState: CloudStorageViewState, actioner: (CloudStorag
                 .align(Alignment.TopEnd)
                 .padding(4.dp)) {
                 IconButton(onClick = { showList = true }) {
-                    FlatCircularProgressIndicator(progress = progress,
+                    FlatCircularProgressIndicator(
+                        progress = progress,
                         color = progressColor,
-                        modifier = Modifier.size(20.dp))
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
         }
@@ -85,9 +86,12 @@ internal fun UploadList(viewState: CloudStorageViewState, actioner: (CloudStorag
 @Composable
 fun UploadListContent(uploadFiles: List<UploadFile>, actioner: (CloudStorageUIAction) -> Unit) {
     LazyColumn {
-        items(count = uploadFiles.size, key = { index: Int ->
-            uploadFiles[index].fileUUID
-        }) { index ->
+        items(
+            count = uploadFiles.size,
+            key = { index: Int ->
+                uploadFiles[index].fileUUID
+            }
+        ) { index ->
             UploadListItem(uploadFiles[index], actioner)
         }
     }
@@ -174,9 +178,7 @@ internal fun UploadListPreview() {
 @Preview(heightDp = 100)
 internal fun UploadListItemPreview() {
     val file = UploadFile("444", "444.jpg", UploadState.Failure, progress = 0.6f)
-    FlatAndroidTheme {
-        UploadListItem(file) {
+    UploadListItem(file) {
 
-        }
     }
 }
