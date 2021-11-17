@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -33,10 +32,10 @@ import io.agora.flat.common.Screen
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.LocalIsPadMode
 import io.agora.flat.ui.theme.FillMaxSize
 import io.agora.flat.ui.theme.MaxHeight
 import io.agora.flat.ui.theme.MaxWidthSpread
+import io.agora.flat.ui.theme.isPadMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
@@ -50,11 +49,12 @@ class MainActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
-            val viewModel: MainViewModel = viewModel()
+            val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
 
-            MainPage(viewState, viewModel::onMainTabSelected)
+            MainPage(viewState)
         }
         loginHelper.register()
         observerState()
@@ -92,7 +92,7 @@ class MainActivity : BaseComposeActivity() {
 }
 
 @Composable
-fun MainPage(viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
+fun MainPage(viewState: MainViewState) {
     if (viewState.loginState == LoginState.Error) {
         val context = LocalContext.current
         LaunchedEffect(true) {
@@ -100,28 +100,32 @@ fun MainPage(viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
         }
     }
 
-    val navController = rememberNavController()
-
     FlatPage(statusBarColor = Color.Transparent) {
+        val navController = rememberNavController()
+        var mainTab by remember { mutableStateOf(MainTab.Home) }
+
         if (viewState.loginState == LoginState.Login) {
-            if (LocalIsPadMode.current) {
-                MainPad(navController, viewState, onTabSelected)
+            if (isPadMode()) {
+                MainPad(navController, mainTab) {
+                    mainTab = it
+                }
             } else {
-                Main(navController, viewState, onTabSelected)
+                Main(navController, mainTab) {
+                    mainTab = it
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun Main(navController: NavHostController, viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
+internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     Column(Modifier
         .statusBarsPadding()
         .navigationBarsPadding()) {
 
         AppNavigation(navController = navController, modifier = MaxWidthSpread)
-
-        MainBottomBar(viewState.mainTab) { selectedTab ->
+        MainBottomBar(mainTab) { selectedTab ->
             val route = when (selectedTab) {
                 MainTab.Home -> Screen.Home.route
                 MainTab.CloudStorage -> Screen.Cloud.route
@@ -141,12 +145,10 @@ internal fun Main(navController: NavHostController, viewState: MainViewState, on
 }
 
 @Composable
-internal fun MainPad(navController: NavHostController, viewState: MainViewState, onTabSelected: (MainTab) -> Unit) {
-    Row(Modifier
-        .statusBarsPadding()
-        .navigationBarsPadding()) {
+internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+    Row {
         Box(Modifier.width(60.dp)) {
-            MainPadRail(selectedTab = viewState.mainTab) { selectedTab ->
+            MainPadRail(selectedTab = mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.HomeExt.route
                     MainTab.CloudStorage -> Screen.CloudExt.route
@@ -164,35 +166,54 @@ internal fun MainPad(navController: NavHostController, viewState: MainViewState,
                 onTabSelected(selectedTab)
             }
         }
-        Box(Modifier.width(375.dp), Alignment.Center) {
-            when (viewState.mainTab) {
-                MainTab.Home -> {
-                    Home(
-                        navController,
-                        onOpenRoomCreate = {
-                            navController.navigate(LeafScreen.RoomCreate.createRoute(Screen.HomeExt)) {
-                                popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
-                            }
-                        },
-                        onOpenRoomJoin = {
-                            navController.navigate(LeafScreen.RoomJoin.createRoute(Screen.HomeExt)) {
-                                popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
-                            }
-                        },
-                        onOpenRoomDetail = { rUUID, pUUID ->
-                            navController.navigate(LeafScreen.RoomDetail.createRoute(Screen.HomeExt,
-                                rUUID,
-                                pUUID)) {
-                                popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
-                            }
+        Box(
+            Modifier
+                .width(375.dp)
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            Alignment.Center
+        ) {
+            when (mainTab) {
+                MainTab.Home -> Home(
+                    navController,
+                    onOpenRoomCreate = {
+                        navController.navigate(LeafScreen.RoomCreate.createRoute(Screen.HomeExt)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
-                    )
-                }
-                MainTab.CloudStorage -> CloudStorage(navController)
+                    },
+                    onOpenRoomJoin = {
+                        navController.navigate(LeafScreen.RoomJoin.createRoute(Screen.HomeExt)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+                        }
+                    },
+                    onOpenRoomDetail = { rUUID, pUUID ->
+                        navController.navigate(LeafScreen.RoomDetail.createRoute(Screen.HomeExt,
+                            rUUID,
+                            pUUID)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+                        }
+                    }
+                )
+                MainTab.CloudStorage -> CloudStorage(
+                    onOpenUploading = {
+                        navController.navigate(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenItemPick = {
+                        navController.navigate(LeafScreen.CloudUploadPick.createRoute(Screen.CloudExt)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
         }
         Divider(MaxHeight.width(1.dp))
-        AppNavigation(navController, startDestination = Screen.HomeExt.route, Modifier.weight(1f))
+        AppNavigation(navController, startDestination = Screen.HomeExt.route,
+            Modifier
+                .weight(1f)
+                .statusBarsPadding()
+                .navigationBarsPadding())
     }
 }
 
@@ -259,12 +280,12 @@ private fun MainBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit
 @Preview
 private fun MainPagePreview() {
     val mainViewState = MainViewState(loginState = LoginState.Login)
-    MainPage(mainViewState) { }
+    MainPage(mainViewState)
 }
 
 @Composable
 @Preview(device = Devices.PIXEL_C)
 private fun MainPagePadPreview() {
     val mainViewState = MainViewState(loginState = LoginState.Login)
-    MainPage(mainViewState) {}
+    MainPage(mainViewState)
 }

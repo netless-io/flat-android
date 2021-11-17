@@ -12,7 +12,6 @@ import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
 import io.agora.flat.ui.activity.room.CreateRoomActivity
 import io.agora.flat.ui.activity.room.JoinRoomActivity
-import io.agora.flat.ui.activity.room.RoomDetailActivity
 import io.agora.flat.ui.activity.room.SubscribeRoomActivity
 import io.agora.flat.ui.activity.setting.*
 
@@ -38,13 +37,13 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchRoomDetailActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
-        val intent = Intent(context, RoomDetailActivity::class.java).apply {
-            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
-            putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
-        }
-        context.startActivity(intent)
-    }
+    // fun launchRoomDetailActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
+    //     val intent = Intent(context, RoomDetailActivity::class.java).apply {
+    //         putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
+    //         putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
+    //     }
+    //     context.startActivity(intent)
+    // }
 
     fun launchPlaybackActivity(context: Context, roomUUID: String) {
         val intent = Intent(context, ReplayActivity::class.java).apply {

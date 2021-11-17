@@ -62,7 +62,7 @@ fun FlatAndroidTheme(
     }
 
     CompositionLocalProvider(LocalIsPadMode provides isPad) {
-        ProvideWindowInsets {
+        ProvideWindowInsets(consumeWindowInsets = false) {
             MaterialTheme(
                 colors = colors,
                 typography = Typography,

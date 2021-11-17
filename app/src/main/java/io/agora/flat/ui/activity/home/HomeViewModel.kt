@@ -8,7 +8,6 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
-import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.NetworkObserver
@@ -28,7 +27,6 @@ class HomeViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val eventBus: EventBus,
     private val appKVCenter: AppKVCenter,
-    private val cloudStorageRepository: CloudStorageRepository,
     private val networkObserver: NetworkObserver,
 ) : ViewModel() {
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))

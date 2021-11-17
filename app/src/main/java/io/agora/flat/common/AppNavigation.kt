@@ -6,10 +6,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
-import io.agora.flat.ui.activity.home.CloudStorage
-import io.agora.flat.ui.activity.home.CloudUpdatePick
-import io.agora.flat.ui.activity.home.ExtInitPage
-import io.agora.flat.ui.activity.home.Home
+import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomPage
 import io.agora.flat.ui.activity.room.JoinRoomPage
 import io.agora.flat.ui.activity.room.RoomDetailPage
@@ -34,11 +31,10 @@ sealed class LeafScreen(val route: String) {
     }
 
     object CloudStorage : LeafScreen("cloudstorage")
-
-    object HomeExtInit : LeafScreen("homeinit")
-    object CloudExtInit : LeafScreen("cloudinit")
+    object HomeExtInit : LeafScreen("home_ext_init")
+    object CloudExtInit : LeafScreen("cloud_ext_init")
     object CloudUploadPick : LeafScreen("uploadpick")
-    object Login : LeafScreen("login")
+    object CloudUploading : LeafScreen("uploading")
     object RoomJoin : LeafScreen("roomjoin")
     object RoomCreate : LeafScreen("roomcreate")
 
@@ -85,7 +81,6 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
             })) {
-
             RoomDetailPage(navController)
         }
         composable(LeafScreen.Setting.createRoute(screenRoot)) {
@@ -101,22 +96,33 @@ fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
             ExtInitPage()
         }
         composable(LeafScreen.CloudUploadPick.createRoute(Screen.CloudExt)) {
-            CloudUpdatePick(
-                onPickFile = { _, _, _ ->
-
-                },
-                onPickClose = {
-                    navController.popBackStack()
-                }
+            CloudUploadPick(
+                onPickClose = navController::popBackStack,
+            )
+        }
+        composable(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
+            UploadList(
+                onCloseUploading = navController::popBackStack
             )
         }
     }
 }
 
 fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
-    navigation(route = Screen.Cloud.route, startDestination = LeafScreen.CloudStorage.createRoute(Screen.Cloud)) {
-        composable(LeafScreen.CloudStorage.createRoute(Screen.Cloud)) {
-            CloudStorage(navController = navController)
+    val screenRoot = Screen.Cloud;
+    navigation(route = screenRoot.route, startDestination = LeafScreen.CloudStorage.createRoute(screenRoot)) {
+        composable(LeafScreen.CloudStorage.createRoute(screenRoot)) {
+            CloudStorage(
+                onOpenUploading = {
+                    navController.navigate(LeafScreen.CloudUploading.createRoute(screenRoot)) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(LeafScreen.CloudUploading.createRoute(screenRoot)) {
+            UploadList(onCloseUploading = { navController.popBackStack() })
         }
     }
 }

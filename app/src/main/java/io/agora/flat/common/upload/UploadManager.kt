@@ -5,7 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import io.agora.flat.Constants
-import io.agora.flat.util.contentFileInfo
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,21 +38,22 @@ object UploadManager {
         UploadManager.application = application
     }
 
-    fun upload(request: UploadRequest, eventListener: UploadEventListener) {
-        val task = UploadTask(application, client, request, { event ->
-            if (event is UploadStateEvent && event.uploadState == UploadState.Success) {
-                taskMap.remove(event.fileUUID)
-            }
-            eventListener.onEvent(event)
-        })
-        taskMap[request.fileUUID] = task
+    fun upload(request: UploadRequest) {
+        val task = UploadTask(application, client, request, localEventListener)
+        taskMap[request.uuid] = task
         executorService.submit(task)
+
+        uploadFiles.value = uploadFiles.value.toMutableList().apply {
+            add(0, UploadFile(fileUUID = request.uuid, filename = request.filename))
+        }
     }
 
     fun cancel(fileUUID: String) {
         taskMap[fileUUID]?.also {
             it.cancel()
         }
+
+        uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
     }
 
     fun retry(fileUUID: String) {
@@ -60,17 +61,48 @@ object UploadManager {
             executorService.submit(it)
         }
     }
+
+    val uploadFiles = MutableStateFlow(listOf<UploadFile>())
+    var uploadSuccess = MutableStateFlow<UploadRequest?>(null)
+
+    private val localEventListener = UploadEventListener { event ->
+        updateUploadFiles(event)
+        if (event is UploadStateEvent && event.uploadState == UploadState.Success) {
+            uploadSuccess.value = taskMap[event.fileUUID]?.request
+            taskMap.remove(event.fileUUID)
+        }
+    }
+
+    private fun updateUploadFiles(event: UploadEvent) = when (event) {
+        is UploadProgressEvent -> {
+            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
+                if (index < 0) return
+                val changed = uploadFiles.value[index].copy(progress = event.currentSize * 1f / event.totalSize)
+                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
+            }
+        }
+        is UploadStateEvent -> {
+            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
+                if (index < 0) return
+                val changed = uploadFiles.value[index].copy(uploadState = event.uploadState)
+                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
+            }
+        }
+    }
 }
 
 data class UploadRequest constructor(
     // remote info
-    val fileUUID: String,
-    val filePath: String,
+    val uuid: String,
     val policy: String,
     val policyURL: String,
     val signature: String,
 
     // local info
+    val filename: String,
+    val filepath: String,
+    val size: Long,
+    val mediaType: String,
     val uri: Uri,
 )
 
@@ -93,23 +125,22 @@ private class UploadTask(
     }
 
     override fun call() {
-        val info = context.contentFileInfo(request.uri)
-            ?: throw RuntimeException("get file info error")
-
-        val (filename, size, mediaType) = info
+        val filename = request.filename
+        val mediaType = request.mediaType
+        val size = request.size
         val inputStream = contentResolver.openInputStream(request.uri)
 
         val fileBody = ProgressRequestBody(
             mediaType.toMediaType(),
             inputStream,
             size,
-            LocalProgressListener(request.fileUUID, eventListener)
+            LocalProgressListener(request.uuid, eventListener)
         )
 
         val encodeFileName = Uri.encode(filename)
         val requestBody = MultipartBody.Builder().apply {
             setType(MultipartBody.FORM)
-            addFormDataPart("key", request.filePath)
+            addFormDataPart("key", request.filepath)
             addFormDataPart("name", filename)
             addFormDataPart("policy", request.policy)
             addFormDataPart("OSSAccessKeyId", Constants.OSS_ACCESS_KEY_ID)
@@ -126,18 +157,18 @@ private class UploadTask(
             .post(requestBody)
             .build()
 
-        eventListener.onEvent(UploadStateEvent(request.fileUUID, UploadState.Uploading))
+        eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Uploading))
         try {
             val call = client.newCall(httpRequest)
             callRef = call
             val response = call.execute()
             if (response.isSuccessful) {
-                eventListener.onEvent(UploadStateEvent(request.fileUUID, UploadState.Success))
+                eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Success))
             } else {
-                eventListener.onEvent(UploadStateEvent(request.fileUUID, UploadState.Failure))
+                eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Failure))
             }
         } catch (e: Exception) {
-            eventListener.onEvent(UploadStateEvent(request.fileUUID, UploadState.Failure))
+            eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Failure))
         }
     }
 
@@ -190,6 +221,13 @@ internal interface OnProgressListener {
 fun interface UploadEventListener {
     fun onEvent(event: UploadEvent)
 }
+
+data class UploadFile(
+    val fileUUID: String,
+    val filename: String,
+    val uploadState: UploadState = UploadState.Init,
+    val progress: Float = 0.0F,
+)
 
 enum class UploadState {
     Init,

@@ -20,6 +20,7 @@
     <!-- title -->
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">云盘</string>
+    <string name="title_cloud_pick">上传</string>
     <string name="title_user_info">个人信息</string>
     <string name="title_setting">个人设置</string>
     <string name="title_my_profile">我的资料</string>

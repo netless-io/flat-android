@@ -50,6 +50,19 @@ fun FlatTopAppBar(
 }
 
 @Composable
+fun FlatTopAppBar(
+    title: String,
+    actions: @Composable RowScope.() -> Unit = {},
+) {
+    FlatTopAppBar(
+        title = {
+            Text(text = title, style = FlatTitleTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        },
+        actions = actions
+    )
+}
+
+@Composable
 fun BackTopAppBar(
     title: String,
     onBackPressed: () -> Unit,

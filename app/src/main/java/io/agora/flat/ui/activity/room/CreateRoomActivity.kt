@@ -40,7 +40,7 @@ class CreateRoomActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatPage {
-                CreateRoomPage()
+                // CreateRoomPage()
             }
         }
     }
@@ -48,7 +48,7 @@ class CreateRoomActivity : BaseComposeActivity() {
 
 @Composable
 fun CreateRoomPage(
-    navController: NavController? = null,
+    navController: NavController,
     viewModel: CreateRoomViewModel = hiltViewModel(),
 ) {
     val activity = LocalContext.current as Activity
@@ -57,16 +57,12 @@ fun CreateRoomPage(
     val actioner: (CreateRoomAction) -> Unit = { action ->
         when (action) {
             CreateRoomAction.Close -> {
-                if (navController != null) {
-                    navController.popBackStack()
-                } else {
-                    activity.finish()
-                }
+                navController.popBackStack()
             }
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.openVideo)
                 Navigator.launchRoomPlayActivity(activity, viewState.roomUUID)
-                activity.finish()
+                navController.popBackStack()
             }
             is CreateRoomAction.CreateRoom -> {
                 viewModel.createRoom(action.title, action.roomType)

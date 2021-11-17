@@ -14,6 +14,7 @@
     <string name="relative_time_dd">%d d</string>
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">Cloud Storage</string>
+    <string name="title_cloud_pick">Upload</string>
     <string name="title_user_info">Personal</string>
     <string name="title_setting">Settings</string>
     <string name="title_my_profile">My Profile</string>

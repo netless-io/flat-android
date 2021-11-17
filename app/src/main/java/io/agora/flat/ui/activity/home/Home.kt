@@ -77,7 +77,7 @@ internal fun Home(
 
 @Composable
 private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
-    FlatColumnPage {
+    Column {
         // 顶部栏
         FlatHomeTopBar(userAvatar = viewState.userInfo.avatar)
         if (!viewState.networkActive) FlatNetworkError {
