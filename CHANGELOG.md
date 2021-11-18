@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - November 18, 2021
+- Fix Wechat login
+- Support language switch in app
+
 ## [1.0.2] - October 21, 2021
 - Accept ShareScreen
 - Support Short-InviteCode
