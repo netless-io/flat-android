@@ -68,10 +68,10 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchSettingActivity(context: Context) {
-        val intent = Intent(context, SettingActivity::class.java)
-        context.startActivity(intent)
-    }
+    // fun launchSettingActivity(context: Context) {
+    //     val intent = Intent(context, SettingActivity::class.java)
+    //     context.startActivity(intent)
+    // }
 
     fun launchDevToolsActivity(context: Context) {
         val intent = Intent(context, DevToolsActivity::class.java)
@@ -88,10 +88,10 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchMyProfileActivity(context: Context) {
-        val intent = Intent(context, MyProfileActivity::class.java)
-        context.startActivity(intent)
-    }
+    // fun launchMyProfileActivity(context: Context) {
+    //     val intent = Intent(context, MyProfileActivity::class.java)
+    //     context.startActivity(intent)
+    // }
 
     fun launchAboutUsActivity(context: Context) {
         val intent = Intent(context, AboutUsActivity::class.java)

@@ -45,7 +45,6 @@
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
         <activity android:name=".ui.activity.room.RoomDetailActivity" />
-        <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity android:name=".ui.activity.setting.FeedbackActivity" />
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
         <activity android:name=".ui.activity.setting.LanguageActivity" />
@@ -77,7 +76,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.setting.UserInfoActivity" />
-        <activity android:name=".ui.activity.setting.MyProfileActivity" />
         <activity
             android:name="${applicationId}.wxapi.WXEntryActivity"
             android:exported="true"

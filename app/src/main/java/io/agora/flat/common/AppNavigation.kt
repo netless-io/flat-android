@@ -1,16 +1,19 @@
 package io.agora.flat.common
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navArgument
 import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomPage
 import io.agora.flat.ui.activity.room.JoinRoomPage
 import io.agora.flat.ui.activity.room.RoomDetailPage
-import io.agora.flat.ui.activity.setting.SettingPage
+import io.agora.flat.ui.activity.setting.Settings
+import io.agora.flat.ui.activity.setting.UserProfile
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -46,15 +49,16 @@ sealed class LeafScreen(val route: String) {
         }
     }
 
-    object Setting : LeafScreen("setting")
+    object UserProfile : LeafScreen("user_profile")
+    object Settings : LeafScreen("settings")
 }
 
 
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    startDestination: String = Screen.Home.route,
     modifier: Modifier = Modifier,
+    startDestination: String = Screen.Home.route,
 ) {
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         addHomeGraph(navController)
@@ -83,8 +87,11 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             })) {
             RoomDetailPage(navController)
         }
-        composable(LeafScreen.Setting.createRoute(screenRoot)) {
-            SettingPage()
+        composable(LeafScreen.Settings.createRoute(screenRoot)) {
+            Settings(navController)
+        }
+        composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
+            UserProfile(navController)
         }
     }
 }
@@ -109,7 +116,7 @@ fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
 }
 
 fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
-    val screenRoot = Screen.Cloud;
+    val screenRoot = Screen.Cloud
     navigation(route = screenRoot.route, startDestination = LeafScreen.CloudStorage.createRoute(screenRoot)) {
         composable(LeafScreen.CloudStorage.createRoute(screenRoot)) {
             CloudStorage(
@@ -128,7 +135,7 @@ fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
 }
 
 fun NavGraphBuilder.addHomeGraph(navController: NavController) {
-    val screenRoot = Screen.Home;
+    val screenRoot = Screen.Home
     navigation(route = Screen.Home.route, startDestination = LeafScreen.Home.createRoute(screenRoot)) {
         composable(LeafScreen.Home.createRoute(screenRoot)) {
             Home(
@@ -142,6 +149,12 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
                 onOpenRoomDetail = { roomUUID, periodicUUID ->
                     navController.navigate(LeafScreen.RoomDetail.createRoute(screenRoot, roomUUID, periodicUUID))
                 },
+                onOpenUserProfile = {
+                    navController.navigate(LeafScreen.UserProfile.createRoute(screenRoot))
+                },
+                onOpenSetting = {
+                    navController.navigate(LeafScreen.Settings.createRoute(screenRoot))
+                },
             )
         }
         composable(LeafScreen.RoomCreate.createRoute(screenRoot)) {
@@ -154,12 +167,23 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
             })) {
-
             RoomDetailPage(navController)
         }
-        composable(LeafScreen.Setting.createRoute(Screen.Home)) {
-            SettingPage()
+        composable(LeafScreen.Settings.createRoute(screenRoot)) {
+            Settings(navController)
+        }
+        composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
+            UserProfile(navController)
         }
     }
 }
 
+@Composable
+internal fun needShowBottomBar(navController: NavHostController): Boolean {
+    val showRoutes = setOf(
+        LeafScreen.Home.createRoute(Screen.Home),
+        LeafScreen.CloudStorage.createRoute(Screen.Cloud)
+    )
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return showRoutes.contains(navBackStackEntry?.destination?.route)
+}

@@ -3,11 +3,11 @@ package io.agora.flat.common.rtm
 import io.agora.rtm.*
 
 interface EmptyRtmClientListener : RtmClientListener {
-    override fun onConnectionStateChanged(p0: Int, p1: Int) {
+    override fun onConnectionStateChanged(state: Int, reason: Int) {
 
     }
 
-    override fun onMessageReceived(p0: RtmMessage, p1: String) {
+    override fun onMessageReceived(message: RtmMessage, peerId: String) {
 
     }
 

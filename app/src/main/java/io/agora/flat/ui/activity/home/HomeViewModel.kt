@@ -174,8 +174,11 @@ data class HomeViewState(
 sealed class HomeViewAction {
     object Reload : HomeViewAction()
     data class SelectCategory(val category: RoomCategory) : HomeViewAction()
-    object SetNetwork : HomeViewAction()
-    object RoomCreate : HomeViewAction()
-    object RoomJoin : HomeViewAction()
+
+    object GotoSetNetwork : HomeViewAction()
+    object GotoRoomCreate : HomeViewAction()
+    object GotoRoomJoin : HomeViewAction()
     data class GotoRoomDetail(val roomUUID: String, val periodicUUID: String?) : HomeViewAction()
+    object GotoUserProfile : HomeViewAction()
+    object GotoSetting : HomeViewAction()
 }

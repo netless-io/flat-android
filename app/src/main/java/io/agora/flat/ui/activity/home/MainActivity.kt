@@ -25,17 +25,11 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
-import io.agora.flat.common.AppNavigation
-import io.agora.flat.common.LeafScreen
-import io.agora.flat.common.Navigator
-import io.agora.flat.common.Screen
+import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.theme.FillMaxSize
-import io.agora.flat.ui.theme.MaxHeight
-import io.agora.flat.ui.theme.MaxWidthSpread
-import io.agora.flat.ui.theme.isPadMode
+import io.agora.flat.ui.theme.*
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
@@ -106,13 +100,9 @@ fun MainPage(viewState: MainViewState) {
 
         if (viewState.loginState == LoginState.Login) {
             if (isPadMode()) {
-                MainPad(navController, mainTab) {
-                    mainTab = it
-                }
+                MainPad(navController, mainTab) { mainTab = it }
             } else {
-                Main(navController, mainTab) {
-                    mainTab = it
-                }
+                Main(navController, mainTab) { mainTab = it }
             }
         }
     }
@@ -123,23 +113,25 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
     Column(Modifier
         .statusBarsPadding()
         .navigationBarsPadding()) {
-
         AppNavigation(navController = navController, modifier = MaxWidthSpread)
-        MainBottomBar(mainTab) { selectedTab ->
-            val route = when (selectedTab) {
-                MainTab.Home -> Screen.Home.route
-                MainTab.CloudStorage -> Screen.Cloud.route
-            }
 
-            navController.navigate(route) {
-                launchSingleTop = true
-                restoreState = true
-
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
+        if (needShowBottomBar(navController)) {
+            MainBottomBar(mainTab) { selectedTab ->
+                val route = when (selectedTab) {
+                    MainTab.Home -> Screen.Home.route
+                    MainTab.CloudStorage -> Screen.Cloud.route
                 }
+
+                navController.navigate(route) {
+                    launchSingleTop = true
+                    restoreState = true
+
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                }
+                onTabSelected(selectedTab)
             }
-            onTabSelected(selectedTab)
         }
     }
 }
@@ -192,7 +184,17 @@ internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSe
                             pUUID)) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
-                    }
+                    },
+                    onOpenUserProfile = {
+                        navController.navigate(LeafScreen.UserProfile.createRoute(Screen.HomeExt)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+                        }
+                    },
+                    onOpenSetting = {
+                        navController.navigate(LeafScreen.Settings.createRoute(Screen.HomeExt)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+                        }
+                    },
                 )
                 MainTab.CloudStorage -> CloudStorage(
                     onOpenUploading = {
@@ -209,11 +211,14 @@ internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSe
             }
         }
         Divider(MaxHeight.width(1.dp))
-        AppNavigation(navController, startDestination = Screen.HomeExt.route,
-            Modifier
+        AppNavigation(
+            navController,
+            modifier = Modifier
                 .weight(1f)
                 .statusBarsPadding()
-                .navigationBarsPadding())
+                .navigationBarsPadding(),
+            startDestination = Screen.HomeExt.route,
+        )
     }
 }
 

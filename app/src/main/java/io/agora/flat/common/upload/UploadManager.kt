@@ -62,7 +62,8 @@ object UploadManager {
         }
     }
 
-    val uploadFiles = MutableStateFlow(listOf<UploadFile>())
+
+    var uploadFiles = MutableStateFlow(listOf<UploadFile>())
     var uploadSuccess = MutableStateFlow<UploadRequest?>(null)
 
     private val localEventListener = UploadEventListener { event ->

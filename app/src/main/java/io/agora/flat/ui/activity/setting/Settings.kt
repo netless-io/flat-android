@@ -1,7 +1,5 @@
 package io.agora.flat.ui.activity.setting
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -21,41 +19,32 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.navigation.NavController
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatHighlightTextButton
-import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.FlatCommonTipTextStyle
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
 
-@AndroidEntryPoint
-class SettingActivity : BaseComposeActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FlatPage { SettingPage() }
-        }
-    }
-}
-
 @Composable
-fun SettingPage(viewModel: UserViewModel = hiltViewModel()) {
-    val activity = LocalContext.current as BaseComposeActivity
+fun Settings(navController: NavController, viewModel: UserViewModel = hiltViewModel()) {
+    val context = LocalContext.current
 
     Column {
-        BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { activity.finish() })
+        BackTopAppBar(
+            title = stringResource(R.string.title_setting),
+            onBackPressed = { navController.popBackStack() }
+        )
         Box(Modifier.weight(1f)) {
             SettingItemList()
             BottomOptArea(onLogoutClick = {
                 viewModel.logout()
-                Navigator.launchHomeActivity(activity)
+                Navigator.launchHomeActivity(context)
             })
         }
     }
@@ -72,28 +61,28 @@ private fun SettingItemList() {
                 tip = stringResource(R.string.setting_check_update),
                 desc = context.getAppVersion()
             )
-            Divider(SettingDividerModifier)
+            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_user_profile_aboutus,
                 tip = stringResource(R.string.title_feedback),
                 onClick = { Navigator.launchFeedbackActivity(context) })
-            Divider(SettingDividerModifier)
+            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_user_profile_feedback,
                 tip = stringResource(R.string.title_about_us),
                 onClick = { Navigator.launchAboutUsActivity(context) })
-            Divider(SettingDividerModifier)
+            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_user_profile_feedback,
                 tip = stringResource(R.string.title_language),
                 onClick = { Navigator.launchLanguageActivity(context) })
-            Divider(SettingDividerModifier)
+            SettingItemDivider()
             // Device Test
             // SettingItem(
             //     id = R.drawable.ic_user_profile_feedback,
             //     tip = stringResource(R.string.title_call_test),
             //     onClick = { Navigator.launchCallTestActivity(context) })
-            // Divider(SettingDividerModifier)
+            // SettingItemDivider()
             if (context.isApkInDebug()) {
                 SettingItem(
                     id = R.drawable.ic_user_profile_feedback,
@@ -106,7 +95,9 @@ private fun SettingItemList() {
 
 @Composable
 private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
-    Box(BottomOptBoxModifier) {
+    Box(Modifier
+        .align(Alignment.BottomCenter)
+        .padding(horizontal = 16.dp, vertical = 32.dp)) {
         FlatHighlightTextButton(
             stringResource(R.string.login_exit),
             icon = R.drawable.ic_login_out,
@@ -118,7 +109,7 @@ private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
 @Composable
 internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", onClick: () -> Unit = {}) {
     Row(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .height(48.dp)
             .clickable(onClick = onClick),
@@ -136,12 +127,10 @@ internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", o
     }
 }
 
-internal val SettingDividerModifier = Modifier.padding(start = 44.dp, end = 16.dp)
-
-private val BoxScope.BottomOptBoxModifier
-    get() = Modifier
-        .align(Alignment.BottomCenter)
-        .padding(horizontal = 16.dp, vertical = 32.dp)
+@Composable
+internal fun SettingItemDivider() {
+    Divider(Modifier.padding(start = 44.dp, end = 16.dp))
+}
 
 @Preview(showSystemUi = false)
 @Composable
