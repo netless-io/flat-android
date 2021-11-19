@@ -2,7 +2,6 @@ package io.agora.flat.util
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
-import android.content.res.Resources
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
@@ -51,11 +50,11 @@ fun Context.showToast(message: String) {
 }
 
 fun Context.dp2px(dp: Int): Int {
-    return (dp * Resources.getSystem().displayMetrics.density).toInt()
+    return (dp * resources.displayMetrics.density).toInt()
 }
 
 fun Context.px2dp(px: Int): Int {
-    return (px.toFloat() / Resources.getSystem().displayMetrics.density + 0.5).toInt()
+    return (px.toFloat() / resources.displayMetrics.density + 0.5).toInt()
 }
 
 fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = "") {

@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.room
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,9 +60,9 @@ class RoomDetailActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlatPage {
-                RoomDetailPage()
-            }
+//            FlatPage {
+//                RoomDetailPage()
+//            }
         }
     }
 }
@@ -67,46 +70,31 @@ class RoomDetailActivity : BaseComposeActivity() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RoomDetailPage(
-    navController: NavController? = null,
+    navController: NavController,
     viewModel: RoomDetailViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as BaseComposeActivity
+    val activity = LocalContext.current as Activity
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
+    var popBackStack by remember { mutableStateOf(false) }
 
     val actioner: (DetailUiAction) -> Unit = { action ->
         when (action) {
-            DetailUiAction.Back -> {
-                if (navController != null) {
-                    navController.popBackStack()
-                } else {
-                    activity.finish()
-                }
-            }
+            DetailUiAction.Back -> navController.popBackStack()
             is DetailUiAction.EnterRoom -> {
-                Navigator.launchRoomPlayActivity(
-                    activity,
-                    action.roomUUID,
-                    action.periodicUUID
-                )
-                activity.finish()
+                Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
+                popBackStack = true
             }
             DetailUiAction.Invite -> {
                 // Show Dialog
             }
             is DetailUiAction.Playback -> {
                 Navigator.launchPlaybackActivity(activity, action.roomUUID)
-                activity.finish()
+                popBackStack = true
             }
-            DetailUiAction.ShowAllRooms -> {
-                visible = true
-            }
-            DetailUiAction.AllRoomBack -> {
-                visible = false
-            }
-            DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> {
-                viewModel.cancelRoom()
-            }
+            DetailUiAction.ShowAllRooms -> visible = true
+            DetailUiAction.AllRoomBack -> visible = false
+            DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> viewModel.cancelRoom()
             DetailUiAction.ModifyRoom -> {
 
             }
@@ -127,6 +115,19 @@ fun RoomDetailPage(
             exit = fadeOut(animationSpec = tween())
         ) {
             AllRoomDetail(actioner = actioner)
+        }
+        if (popBackStack) {
+            PopBackOnPaused(navController)
+        }
+    }
+}
+
+@Composable
+private fun PopBackOnPaused(navController: NavController) {
+    val state by LocalLifecycleOwner.current.lifecycle.observeAsSate()
+    LaunchedEffect(state) {
+        if (state == Lifecycle.Event.ON_PAUSE) {
+            navController.popBackStack()
         }
     }
 }

@@ -40,6 +40,7 @@ class RoomDetailViewModel @Inject constructor(
     val state: StateFlow<RoomDetailViewState>
         get() = _state
 
+    // TODO find a way to handle once request
     private var _cancelSuccess: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val cancelSuccess: StateFlow<Boolean>
         get() = _cancelSuccess
