@@ -34,7 +34,7 @@ class RoomDetailViewModel @Inject constructor(
     private val loading = MutableStateFlow(true)
     private val loadingCount = AtomicInteger(0)
 
-    private var userUUID: String = userRepository.getUserInfo()!!.uuid;
+    private var userUUID: String = userRepository.getUserInfo()!!.uuid
 
     private val _state = MutableStateFlow(RoomDetailViewState(userUUID = userUUID))
     val state: StateFlow<RoomDetailViewState>

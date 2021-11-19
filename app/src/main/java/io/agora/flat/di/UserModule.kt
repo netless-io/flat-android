@@ -1,4 +1,4 @@
-package io.agora.flat.di;
+package io.agora.flat.di
 
 import dagger.Module
 import dagger.Provides

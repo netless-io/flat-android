@@ -28,6 +28,6 @@ class ReplayActivity : BaseActivity() {
 
     private fun initSystemUI() {
         supportActionBar?.hide()
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }

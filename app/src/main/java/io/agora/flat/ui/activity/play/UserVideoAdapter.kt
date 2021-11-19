@@ -24,7 +24,7 @@ class UserVideoAdapter(
 ) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
     init {
-        setHasStableIds(true);
+        setHasStableIds(true)
     }
 
     private var context: Context? = null

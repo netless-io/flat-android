@@ -29,6 +29,6 @@ class WeekTest : TestCase() {
                 Week.Friday,
                 Week.Saturday
             ), data.weeks.toTypedArray()
-        );
+        )
     }
 }

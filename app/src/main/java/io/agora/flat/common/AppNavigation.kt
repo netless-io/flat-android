@@ -22,21 +22,21 @@ sealed class Screen(val route: String) {
     object CloudExt : Screen("cloud_ext")
 }
 
-sealed class LeafScreen(val route: String) {
+sealed class LeafScreen(private val route: String) {
     fun createRoute(root: Screen) = "${root.route}/$route"
 
     object Home : LeafScreen("home?roomUUID={room_uuid}") {
-        fun createRoute(root: Screen, roomUUID: String? = null): String {
-            return "${root.route}/home".let {
-                if (roomUUID != null) "$it?roomUUID=$roomUUID" else it
-            }
-        }
+        // fun createRoute(root: Screen, roomUUID: String? = null): String {
+        //     return "${root.route}/home".let {
+        //         if (roomUUID != null) "$it?roomUUID=$roomUUID" else it
+        //     }
+        // }
     }
 
     object CloudStorage : LeafScreen("cloudstorage")
     object HomeExtInit : LeafScreen("home_ext_init")
     object CloudExtInit : LeafScreen("cloud_ext_init")
-    object CloudUploadPick : LeafScreen("uploadpick")
+    object CloudUploadPick : LeafScreen("upload_pick")
     object CloudUploading : LeafScreen("uploading")
     object RoomJoin : LeafScreen("roomjoin")
     object RoomCreate : LeafScreen("roomcreate")

@@ -47,7 +47,7 @@ class CallTestActivity : BaseComposeActivity() {
 @Composable
 private fun CallTestContent(state: CallTestState, actioner: (CallTestUIAction) -> Unit) {
     FlatColumnPage {
-        BackTopAppBar(stringResource(R.string.title_call_test), { actioner(CallTestUIAction.Back) });
+        BackTopAppBar(stringResource(R.string.title_call_test), { actioner(CallTestUIAction.Back) })
         Box(MaxWidthSpread.padding(16.dp)) {
             Column {
                 Text(text = "quality: ${state.quality}")

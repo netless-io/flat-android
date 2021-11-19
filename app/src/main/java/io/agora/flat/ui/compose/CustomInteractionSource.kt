@@ -13,7 +13,7 @@ class CustomInteractionSource : MutableInteractionSource {
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    private lateinit var pendingPress: PressInteraction.Press;
+    private lateinit var pendingPress: PressInteraction.Press
 
     override suspend fun emit(interaction: Interaction) {
         if (interaction is PressInteraction.Press) {

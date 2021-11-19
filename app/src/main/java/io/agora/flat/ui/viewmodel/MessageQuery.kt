@@ -38,7 +38,7 @@ class MessageQuery @Inject constructor(
     }
 
     suspend fun query(timeOffset: Long): List<Message> {
-        val targetTime = startTime + timeOffset;
+        val targetTime = startTime + timeOffset
         if (querying) {
             return messages
         }
@@ -99,6 +99,6 @@ class MessageQuery @Inject constructor(
             }
             querying = false
         }
-        return result;
+        return result
     }
 }

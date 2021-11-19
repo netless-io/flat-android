@@ -87,7 +87,7 @@ class SimpleVideoPlayer(
     override var playbackSpeed = 1.0f
         set(value) {
             field = value
-            exoPlayer.setPlaybackParameters(PlaybackParameters(value))
+            exoPlayer.playbackParameters = PlaybackParameters(value)
         }
 
     override fun play() {

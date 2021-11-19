@@ -122,7 +122,7 @@ class ReplayWhiteboardComponent(
     }
 
     private fun initWhiteboard() {
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true

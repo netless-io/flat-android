@@ -53,7 +53,7 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
     val version = context.getAppVersion()
 
     FlatColumnPage {
-        BackTopAppBar(stringResource(R.string.title_about_us), { actioner(AboutUiAction.Back) });
+        BackTopAppBar(stringResource(R.string.title_about_us), { actioner(AboutUiAction.Back) })
         Box(MaxWidthSpread, contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(painterResource(R.drawable.ic_flat_logo), null)

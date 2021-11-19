@@ -86,7 +86,7 @@ fun GreetingCompose() {
                 overflow = TextOverflow.Ellipsis
             )
 
-            Row() {
+            Row {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     onClick = { }) {

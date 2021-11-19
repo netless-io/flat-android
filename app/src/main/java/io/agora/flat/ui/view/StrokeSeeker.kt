@@ -27,7 +27,7 @@ class StrokeSeeker @JvmOverloads constructor(
 
     private var rightBarHeight = 12.dp2px()
     private var rightRect = RectF()
-    private var rightPaint = Paint();
+    private var rightPaint = Paint()
 
     private var seekerPath = Path()
 
@@ -107,7 +107,7 @@ class StrokeSeeker @JvmOverloads constructor(
         var wa = width - offsetLeftX - offsetRightX
         var wp = currentX - offsetLeftX
 
-        return (rightBarHeight - leftBarHeight) * wp / wa + leftBarHeight;
+        return (rightBarHeight - leftBarHeight) * wp / wa + leftBarHeight
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

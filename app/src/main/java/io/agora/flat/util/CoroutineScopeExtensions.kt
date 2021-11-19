@@ -13,5 +13,5 @@ suspend fun <T> CoroutineScope.runAtLeast(time: Long = 2000, block: suspend () -
     if (System.currentTimeMillis() - start < time) {
         delay(time - (System.currentTimeMillis() - start))
     }
-    return result;
+    return result
 }

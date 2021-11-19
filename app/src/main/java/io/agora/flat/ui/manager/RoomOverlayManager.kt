@@ -24,7 +24,7 @@ object RoomOverlayManager {
     }
 
     fun getShowId(): Int {
-        return showId.value;
+        return showId.value
     }
 
     fun setShown(id: Int, shown: Boolean = true) {

@@ -29,14 +29,14 @@ class Constants {
     }
 
     object Login {
-        const val AUTH_SUCCESS = 0;
-        const val AUTH_DENIED = 1;
-        const val AUTH_CANCEL = 2;
-        const val AUTH_ERROR = 3;
+        const val AUTH_SUCCESS = 0
+        const val AUTH_DENIED = 1
+        const val AUTH_CANCEL = 2
+        const val AUTH_ERROR = 3
 
-        const val KEY_LOGIN_STATE = "login_state";
-        const val KEY_LOGIN_RESP = "login_resp";
-        const val KEY_ERROR_CODE = "error_code";
-        const val KEY_ERROR_MESSAGE = "error_message";
+        const val KEY_LOGIN_STATE = "login_state"
+        const val KEY_LOGIN_RESP = "login_resp"
+        const val KEY_ERROR_CODE = "error_code"
+        const val KEY_ERROR_MESSAGE = "error_message"
     }
 }
