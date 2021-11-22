@@ -123,16 +123,6 @@ fun RoomDetailPage(
 }
 
 @Composable
-private fun PopBackOnPaused(navController: NavController) {
-    val state by LocalLifecycleOwner.current.lifecycle.observeAsSate()
-    LaunchedEffect(state) {
-        if (state == Lifecycle.Event.ON_PAUSE) {
-            navController.popBackStack()
-        }
-    }
-}
-
-@Composable
 private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
     Column {
         val viewModel: RoomDetailViewModel = viewModel()

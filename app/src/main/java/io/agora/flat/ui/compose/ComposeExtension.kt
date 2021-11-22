@@ -1,8 +1,10 @@
 package io.agora.flat.ui.compose
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 
 @Composable
 fun Lifecycle.observeAsSate(): State<Lifecycle.Event> {
@@ -17,4 +19,15 @@ fun Lifecycle.observeAsSate(): State<Lifecycle.Event> {
         }
     }
     return state
+}
+
+
+@Composable
+fun PopBackOnPaused(navController: NavController) {
+    val state by LocalLifecycleOwner.current.lifecycle.observeAsSate()
+    LaunchedEffect(state) {
+        if (state == Lifecycle.Event.ON_PAUSE) {
+            navController.popBackStack()
+        }
+    }
 }

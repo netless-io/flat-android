@@ -1,13 +1,16 @@
 package io.agora.flat.common
 
+import androidx.compose.animation.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.NavDestination.Companion.hierarchy
+//import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomPage
 import io.agora.flat.ui.activity.room.JoinRoomPage
@@ -54,13 +57,22 @@ sealed class LeafScreen(private val route: String) {
 }
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: String = Screen.Home.route,
 ) {
-    NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = startDestination,
+        enterTransition = { initial, target -> defaultEnterTransition(initial, target) },
+        exitTransition = { initial, target -> defaultExitTransition(initial, target) },
+        popEnterTransition = { _, _ -> defaultPopEnterTransition() },
+        popExitTransition = { _, _ -> defaultPopExitTransition() },
+        modifier = modifier,
+    ) {
         addHomeGraph(navController)
         addCloudGraph(navController)
         addHomeExtGraph(navController)
@@ -68,6 +80,7 @@ fun AppNavigation(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
     val screenRoot = Screen.HomeExt
     navigation(route = Screen.HomeExt.route,
@@ -96,6 +109,8 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
     }
 }
 
+
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
     navigation(route = Screen.CloudExt.route,
         startDestination = LeafScreen.CloudExtInit.createRoute(Screen.CloudExt)) {
@@ -115,6 +130,7 @@ fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
     val screenRoot = Screen.Cloud
     navigation(route = screenRoot.route, startDestination = LeafScreen.CloudStorage.createRoute(screenRoot)) {
@@ -134,6 +150,7 @@ fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.addHomeGraph(navController: NavController) {
     val screenRoot = Screen.Home
     navigation(route = Screen.Home.route, startDestination = LeafScreen.Home.createRoute(screenRoot)) {
@@ -186,4 +203,47 @@ internal fun needShowBottomBar(navController: NavHostController): Boolean {
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return showRoutes.contains(navBackStackEntry?.destination?.route)
+}
+
+@ExperimentalAnimationApi
+private fun AnimatedContentScope<*>.defaultEnterTransition(
+    initial: NavBackStackEntry,
+    target: NavBackStackEntry,
+): EnterTransition {
+    val initialNavGraph = initial.destination.hostNavGraph
+    val targetNavGraph = target.destination.hostNavGraph
+    // If we're crossing nav graphs (bottom navigation graphs), we crossfade
+    if (initialNavGraph.id != targetNavGraph.id) {
+        return fadeIn()
+    }
+    // Otherwise we're in the same nav graph, we can imply a direction
+    return fadeIn() + slideIntoContainer(AnimatedContentScope.SlideDirection.Start)
+}
+
+@ExperimentalAnimationApi
+private fun AnimatedContentScope<*>.defaultExitTransition(
+    initial: NavBackStackEntry,
+    target: NavBackStackEntry,
+): ExitTransition {
+    val initialNavGraph = initial.destination.hostNavGraph
+    val targetNavGraph = target.destination.hostNavGraph
+    // If we're crossing nav graphs (bottom navigation graphs), we crossfade
+    if (initialNavGraph.id != targetNavGraph.id) {
+        return fadeOut()
+    }
+    // Otherwise we're in the same nav graph, we can imply a direction
+    return fadeOut() + slideOutOfContainer(AnimatedContentScope.SlideDirection.Start)
+}
+
+private val NavDestination.hostNavGraph: NavGraph
+    get() = hierarchy.first { it is NavGraph } as NavGraph
+
+@ExperimentalAnimationApi
+private fun AnimatedContentScope<*>.defaultPopEnterTransition(): EnterTransition {
+    return fadeIn() + slideIntoContainer(AnimatedContentScope.SlideDirection.End)
+}
+
+@ExperimentalAnimationApi
+private fun AnimatedContentScope<*>.defaultPopExitTransition(): ExitTransition {
+    return fadeOut() + slideOutOfContainer(AnimatedContentScope.SlideDirection.End)
 }

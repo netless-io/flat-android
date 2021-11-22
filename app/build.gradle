@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 31
+    buildToolsVersion "31.0.0"
 
     defaultConfig {
         applicationId "io.agora.flat"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 4
         versionName "1.0.3"
         // multiDexEnabled true
@@ -166,6 +166,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:0.16.1"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.16.1"
     implementation "com.google.accompanist:accompanist-coil:0.12.0"
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.17.0"
 
     // Tencent
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'

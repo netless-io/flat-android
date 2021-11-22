@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.home
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
@@ -85,6 +87,7 @@ class MainActivity : BaseComposeActivity() {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainPage(viewState: MainViewState) {
     if (viewState.loginState == LoginState.Error) {
@@ -95,7 +98,7 @@ fun MainPage(viewState: MainViewState) {
     }
 
     FlatPage(statusBarColor = Color.Transparent) {
-        val navController = rememberNavController()
+        val navController = rememberAnimatedNavController()
         var mainTab by remember { mutableStateOf(MainTab.Home) }
 
         if (viewState.loginState == LoginState.Login) {
@@ -111,9 +114,12 @@ fun MainPage(viewState: MainViewState) {
 @Composable
 internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     Column(Modifier
+        .fillMaxSize()
         .statusBarsPadding()
         .navigationBarsPadding()) {
-        AppNavigation(navController = navController, modifier = MaxWidthSpread)
+        Box(MaxWidthSpread) {
+            AppNavigation(navController = navController, modifier = Modifier.fillMaxSize())
+        }
 
         if (needShowBottomBar(navController)) {
             MainBottomBar(mainTab) { selectedTab ->
@@ -215,6 +221,7 @@ internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSe
             navController,
             modifier = Modifier
                 .weight(1f)
+                .fillMaxHeight()
                 .statusBarsPadding()
                 .navigationBarsPadding(),
             startDestination = Screen.HomeExt.route,

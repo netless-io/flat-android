@@ -34,19 +34,20 @@ class JoinRoomActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlatPage { JoinRoomPage() }
+            // FlatPage { JoinRoomPage() }
         }
     }
 }
 
 @Composable
 fun JoinRoomPage(
-    navController: NavController? = null,
+    navController: NavController,
     viewModel: JoinRoomViewModel = hiltViewModel(),
 ) {
     val activity = LocalContext.current as BaseComposeActivity
     val error by viewModel.error.collectAsState()
     val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+    var popBackStack by remember { mutableStateOf(false) }
 
     LaunchedEffect(error) {
         error?.message?.let { activity.showToast(it) }
@@ -55,27 +56,23 @@ fun JoinRoomPage(
     LaunchedEffect(roomPlayInfo) {
         if (roomPlayInfo != null) {
             Navigator.launchRoomPlayActivity(activity, roomPlayInfo!!)
-            if (navController != null) {
-                navController.popBackStack()
-            } else {
-                activity.finish()
-            }
+            popBackStack = true
         }
     }
 
     val actioner: (JoinRoomAction) -> Unit = { action ->
         when (action) {
             JoinRoomAction.Close -> {
-                if (navController != null) {
-                    navController.popBackStack()
-                } else {
-                    activity.finish()
-                }
+                navController.popBackStack()
             }
             is JoinRoomAction.JoinRoom -> {
                 viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
             }
         }
+    }
+
+    if (popBackStack) {
+        PopBackOnPaused(navController)
     }
     JoinRoomPage(actioner = actioner)
 }
