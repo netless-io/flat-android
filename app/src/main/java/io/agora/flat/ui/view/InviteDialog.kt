@@ -4,6 +4,9 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.DialogFragment
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogInviteBinding
@@ -39,8 +42,14 @@ class InviteDialog : DialogFragment(R.layout.dialog_invite) {
         binding.roomTime.text = arguments?.getString(ROOM_TIME, "")
     }
 
+    override fun onStart() {
+        markNotFocusable()
+        super.onStart()
+        unmarkNotFocusable()
+        hideBars()
+    }
+
     override fun onDismiss(dialog: DialogInterface) {
-        // super.onDismiss(dialog)
         listener?.onHide()
     }
 
@@ -51,5 +60,23 @@ class InviteDialog : DialogFragment(R.layout.dialog_invite) {
 
     fun setListener(listener: Listener) {
         this.listener = listener
+    }
+
+    private fun markNotFocusable() {
+        dialog?.window?.setFlags(FLAG_NOT_FOCUSABLE, FLAG_NOT_FOCUSABLE)
+    }
+
+    private fun unmarkNotFocusable() {
+        dialog?.window?.clearFlags(FLAG_NOT_FOCUSABLE)
+    }
+
+    private fun hideBars() {
+        val window = dialog?.window
+        if (window != null) {
+            val controller = WindowInsetsControllerCompat(window, window.decorView)
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
 }

@@ -64,6 +64,7 @@
     </FrameLayout>
 
     <FrameLayout
+        android:id="@+id/sendLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -85,17 +86,20 @@
                 android:background="@null"
                 android:gravity="center|start"
                 android:hint="@string/say_something"
+                android:imeOptions="actionDone"
+                android:inputType="text"
                 android:maxHeight="100dp"
+                android:maxLines="1"
                 android:textColor="@color/flat_black"
                 android:textSize="14sp"
                 tools:ignore="TouchTargetSizeCheck" />
 
             <ImageView
                 android:id="@+id/send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
                 android:layout_gravity="center_vertical"
-                android:padding="4dp"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_message_send" />
         </LinearLayout>
     </FrameLayout>

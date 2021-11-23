@@ -20,6 +20,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
+import io.agora.flat.R
 import io.agora.flat.common.rtc.RTCEventListener
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.UserRepository
@@ -139,7 +140,7 @@ class RtcComponent(
         }
     }
 
-    private val expandWidth = activity.dp2px(120)
+    private val expandWidth = activity.resources.getDimensionPixelSize(R.dimen.room_class_video_area_width)
 
     private fun updateVideoContainer(value: Float) {
         val layoutParams = videoListBinding.root.layoutParams
@@ -193,12 +194,12 @@ class RtcComponent(
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
         adapter.listener = object : UserVideoAdapter.Listener {
-            override fun onFullScreen(position: Int, view: ViewGroup, user: RtcUser) {
+            override fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser) {
                 start.set(getViewRect(view, fullScreenLayout))
                 end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
 
-                if (userCallOut == null || userCallOut != user) {
-                    userCallOut = user
+                if (userCallOut == null || userCallOut != rtcUser) {
+                    userCallOut = rtcUser
                     showVideoListOptArea(start)
                     RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
                 } else {
@@ -249,7 +250,8 @@ class RtcComponent(
                 userCallOut?.run {
                     adapter.updateVideoView(rtcUID)
                 }
-                userCallOut = null
+                // userCallOut = null
+                clearCallOutAndNotify()
             }
         )
     }
@@ -285,7 +287,7 @@ class RtcComponent(
     }
 
     private fun maxTopMargin(): Int {
-        return videoListBinding.videoList.height - activity.dp2px(32)
+        return videoListBinding.videoList.height - activity.resources.getDimensionPixelSize(R.dimen.room_class_button_size)
     }
 
     // 更新显示浮窗及全屏按钮状态
@@ -339,11 +341,13 @@ class RtcComponent(
             layoutParams = lp
         }
 
-        // 40dp -> 160dp
         fullScreenBinding.fullScreenAvatar.run {
+            val sizeFrom = activity.resources.getDimensionPixelSize(R.dimen.room_class_video_user_avatar_size_normal)
+            val sizeTo = activity.resources.getDimensionPixelSize(R.dimen.room_class_video_user_avatar_size_fullscreen)
+
             val lp = layoutParams as ViewGroup.MarginLayoutParams
-            lp.width = ((activity.dp2px(40)) + activity.dp2px(120) * value).toInt()
-            lp.height = ((activity.dp2px(40)) + activity.dp2px(120) * value).toInt()
+            lp.width = (sizeFrom + sizeTo * value).toInt()
+            lp.height = (sizeFrom + sizeTo * value).toInt()
             layoutParams = lp
         }
     }

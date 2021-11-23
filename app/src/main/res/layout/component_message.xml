@@ -7,10 +7,10 @@
 
     <io.agora.flat.ui.view.MessageListView
         android:id="@+id/message_lv"
-        android:layout_width="240dp"
+        android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:layout_marginBottom="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

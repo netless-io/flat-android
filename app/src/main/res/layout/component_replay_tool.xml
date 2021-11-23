@@ -7,17 +7,17 @@
 
     <ImageView
         android:id="@+id/exit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/room_class_button_size"
+        android:layout_height="@dimen/room_class_button_size"
         android:layout_margin="12dp"
         android:background="@drawable/shape_black_solid_round_16_bg"
-        android:padding="4dp"
+        android:padding="@dimen/room_class_button_padding_size"
         android:src="@drawable/ic_playback_exit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:layout_width="32dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp"
@@ -28,26 +28,26 @@
 
         <LinearLayout
             android:id="@+id/extTools"
-            android:layout_width="32dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/message"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_message_selector" />
         </LinearLayout>
     </LinearLayout>
 
     <io.agora.flat.ui.view.MessageListView
         android:id="@+id/message_lv"
-        android:layout_width="240dp"
+        android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="52dp"
+        android:layout_marginEnd="@dimen/room_replay_sub_tools_margin"
+        android:layout_marginBottom="56dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

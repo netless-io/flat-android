@@ -32,14 +32,12 @@
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen"
-            android:windowSoftInputMode="stateHidden|adjustPan" />
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
 
         <activity
             android:name=".ui.activity.playback.ReplayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
 
         <activity android:name=".ui.activity.room.CreateRoomActivity" />

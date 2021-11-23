@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.NavDestination.Companion.hierarchy
-//import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost

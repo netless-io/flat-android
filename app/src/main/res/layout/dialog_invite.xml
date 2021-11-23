@@ -32,7 +32,7 @@
 
         <TextView
             android:id="@+id/room_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
             android:layout_marginStart="8dp"
@@ -61,7 +61,7 @@
 
         <TextView
             android:id="@+id/room_number"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
             android:layout_marginStart="8dp"

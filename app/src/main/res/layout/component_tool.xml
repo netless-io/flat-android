@@ -14,7 +14,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <LinearLayout
-        android:layout_width="32dp"
+        android:layout_width="@dimen/room_class_button_size"
         android:layout_height="wrap_content"
         android:background="@drawable/shape_gray_border_left_round_12_bg"
         android:orientation="vertical"
@@ -24,91 +24,91 @@
 
         <LinearLayout
             android:id="@+id/extTools"
-            android:layout_width="32dp"
+            android:layout_width="@dimen/room_class_button_size"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <FrameLayout
                 android:id="@+id/roomCtrlTool"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
                 android:visibility="visible">
 
                 <ImageView
                     android:id="@+id/roomStart"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_toolbox_ext_state_idle_normal" />
 
                 <ImageView
                     android:id="@+id/roomStateSetting"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_toolbox_ext_state_selector"
                     android:visibility="gone" />
             </FrameLayout>
 
             <FrameLayout
-                android:layout_width="32dp"
-                android:layout_height="32dp">
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size">
 
                 <ImageView
                     android:id="@+id/message"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_toolbox_ext_message_selector" />
 
                 <ImageView
                     android:id="@+id/messageDot"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_float_red_dot"
                     android:visibility="invisible" />
             </FrameLayout>
 
             <ImageView
                 android:id="@+id/cloudservice"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_cloudservice_selector" />
 
             <FrameLayout
-                android:layout_width="32dp"
-                android:layout_height="32dp">
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size">
 
                 <ImageView
                     android:id="@+id/userlist"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_toolbox_ext_userlist_selector" />
 
                 <ImageView
                     android:id="@+id/userlistDot"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:padding="4dp"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_float_red_dot"
                     android:visibility="invisible" />
             </FrameLayout>
 
             <ImageView
                 android:id="@+id/invite"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_invite_selector" />
 
             <ImageView
                 android:id="@+id/setting"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_setting_selector" />
         </LinearLayout>
 
@@ -118,16 +118,16 @@
 
             <ImageView
                 android:id="@+id/collapse"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_expanded" />
 
             <ImageView
                 android:id="@+id/expand"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_collapsed"
                 android:visibility="gone" />
         </FrameLayout>
@@ -138,8 +138,8 @@
         layout="@layout/layout_room_state_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="44dp"
-        android:minWidth="170dp"
+        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
+        android:minWidth="@dimen/room_class_overlay_width"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
@@ -149,9 +149,9 @@
     <include
         android:id="@+id/layout_settings"
         layout="@layout/layout_room_settings"
-        android:layout_width="170dp"
+        android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
@@ -161,10 +161,10 @@
     <include
         android:id="@+id/layout_cloud_storage"
         layout="@layout/layout_room_cloud_storage"
-        android:layout_width="240dp"
+        android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:layout_marginBottom="30dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -174,10 +174,10 @@
     <include
         android:id="@+id/layout_user_list"
         layout="@layout/layout_room_user_list"
-        android:layout_width="240dp"
+        android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:layout_marginBottom="30dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

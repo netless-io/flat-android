@@ -24,6 +24,8 @@ class ClassRoomActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+
         binding = ActivityRoomPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initSystemUI()

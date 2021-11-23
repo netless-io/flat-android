@@ -166,7 +166,7 @@ internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSe
         }
         Box(
             Modifier
-                .width(375.dp)
+                .width(360.dp)
                 .statusBarsPadding()
                 .navigationBarsPadding(),
             Alignment.Center
