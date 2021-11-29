@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="io.agora.flat">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -31,21 +32,18 @@
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen"
-            android:windowSoftInputMode="stateHidden|adjustPan" />
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
 
         <activity
             android:name=".ui.activity.playback.ReplayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
 
         <activity android:name=".ui.activity.room.CreateRoomActivity" />
         <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
         <activity android:name=".ui.activity.room.RoomDetailActivity" />
-        <activity android:name=".ui.activity.setting.SettingActivity" />
         <activity android:name=".ui.activity.setting.FeedbackActivity" />
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
         <activity android:name=".ui.activity.setting.LanguageActivity" />
@@ -54,6 +52,7 @@
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"
+            android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
                 <data android:scheme="x-agora-flat-client" />
@@ -65,10 +64,10 @@
         </activity>
         <activity
             android:name=".ui.activity.dev.ComposeTestActivity"
-            android:exported="true"
             android:label="@string/title_activity_compose_test" />
         <activity
             android:name=".ui.activity.home.MainActivity"
+            android:exported="true"
             android:theme="@style/Theme.FlatAndroid.Launch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -77,13 +76,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.setting.UserInfoActivity" />
-        <activity android:name=".ui.activity.setting.MyProfileActivity" />
         <activity
             android:name="${applicationId}.wxapi.WXEntryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:taskAffinity="${applicationId}"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:node="merge" />
     </application>
 </manifest>

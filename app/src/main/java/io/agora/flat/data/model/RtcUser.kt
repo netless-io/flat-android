@@ -13,7 +13,7 @@ data class RtcUser(
 ) {
 
     companion object {
-        const val NOT_JOIN_RTC_UID = 0;
+        const val NOT_JOIN_RTC_UID = 0
     }
 
     val isNotJoin: Boolean

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
@@ -14,6 +15,7 @@ import io.agora.flat.R
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.databinding.LayoutMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
+
 
 class MessageListView @JvmOverloads constructor(
     context: Context,
@@ -49,10 +51,16 @@ class MessageListView @JvmOverloads constructor(
         })
 
         binding.messageEdit.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
                 hideKeyboard()
             }
             true
+        }
+
+        binding.messageEdit.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                hideKeyboard(v)
+            }
         }
 
         binding.send.setOnClickListener {
@@ -61,8 +69,12 @@ class MessageListView @JvmOverloads constructor(
                 binding.messageEdit.setText("")
                 binding.messageEdit.clearFocus()
                 listener?.onSendMessage(msg)
+                hideKeyboard(binding.messageEdit)
             }
         }
+
+        // Consume events to prevent edittext focus loss
+        binding.sendLayout.setOnClickListener {}
     }
 
     fun setBan(ban: Boolean) {
@@ -76,12 +88,11 @@ class MessageListView @JvmOverloads constructor(
         binding.messageEdit.isEnabled = enable
     }
 
-    private fun hideKeyboard() {
-        if (context is Activity) {
-            (context as Activity).currentFocus?.let { view ->
-                val imm = (context as Activity).getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                imm?.hideSoftInputFromWindow(view.windowToken, 0)
-            }
+    private fun hideKeyboard(view: View? = null) {
+        val viewTarget = view ?: (context as? Activity)?.currentFocus
+        viewTarget?.let { v ->
+            val imm = (context as Activity).getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(v.windowToken, 0)
         }
     }
 

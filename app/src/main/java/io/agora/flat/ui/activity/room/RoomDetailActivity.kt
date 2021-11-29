@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.room
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -32,7 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
@@ -52,73 +55,69 @@ import java.util.*
 @AndroidEntryPoint
 class RoomDetailActivity : BaseComposeActivity() {
 
-    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel: RoomDetailViewModel = viewModel()
-            val cancelSuccess = viewModel.cancelSuccess.collectAsState()
-            var visible by remember { mutableStateOf(false) }
+//            FlatPage {
+//                RoomDetailPage()
+//            }
+        }
+    }
+}
 
-            val actioner: (DetailUiAction) -> Unit = { action ->
-                when (action) {
-                    DetailUiAction.Back -> finish()
-                    is DetailUiAction.EnterRoom -> {
-                        Navigator.launchRoomPlayActivity(
-                            this@RoomDetailActivity,
-                            action.roomUUID,
-                            action.periodicUUID
-                        )
-                        finish()
-                    }
-                    DetailUiAction.Invite -> {
-                        // Show Dialog
-                    }
-                    is DetailUiAction.Playback -> {
-                        Navigator.launchPlaybackActivity(
-                            this@RoomDetailActivity,
-                            action.roomUUID
-                        )
-                        finish()
-                    }
-                    DetailUiAction.ShowAllRooms -> {
-                        visible = true
-                    }
-                    DetailUiAction.AllRoomBack -> {
-                        visible = false
-                    }
-                    DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> {
-                        viewModel.cancelRoom()
-                    }
-                    DetailUiAction.ModifyRoom -> {
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun RoomDetailPage(
+    navController: NavController,
+    viewModel: RoomDetailViewModel = hiltViewModel(),
+) {
+    val activity = LocalContext.current as Activity
+    val cancelSuccess = viewModel.cancelSuccess.collectAsState()
+    var visible by remember { mutableStateOf(false) }
 
-                    }
-                }
+    val actioner: (DetailUiAction) -> Unit = { action ->
+        when (action) {
+            DetailUiAction.Back -> navController.popBackStack()
+            is DetailUiAction.EnterRoom -> {
+                Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
+                navController.popBackStack()
             }
-
-            if (cancelSuccess.value) {
-                Navigator.launchHomeActivity(LocalContext.current)
-                finish()
-                return@setContent
+            DetailUiAction.Invite -> {
+                // Show Dialog
             }
-
-            Box(Modifier.fillMaxSize()) {
-                RoomDetailPage(actioner = actioner)
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
-                    exit = fadeOut(animationSpec = tween())
-                ) {
-                    AllRoomDetail(actioner = actioner)
-                }
+            is DetailUiAction.Playback -> {
+                Navigator.launchPlaybackActivity(activity, action.roomUUID)
+                navController.popBackStack()
             }
+            DetailUiAction.ShowAllRooms -> visible = true
+            DetailUiAction.AllRoomBack -> visible = false
+            DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> viewModel.cancelRoom()
+            DetailUiAction.ModifyRoom -> {
+
+            }
+        }
+    }
+
+    if (cancelSuccess.value) {
+        navController.popBackStack()
+        return
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        RoomDetailPage(actioner = actioner)
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
+            exit = fadeOut(animationSpec = tween())
+        ) {
+            AllRoomDetail(actioner = actioner)
         }
     }
 }
 
 @Composable
 private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
-    FlatColumnPage {
+    Column {
         val viewModel: RoomDetailViewModel = viewModel()
         val viewState by viewModel.state.collectAsState()
 

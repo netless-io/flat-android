@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="120dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/room_class_video_area_width"
     android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/videoList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_class_rtc_video" />
 
     <io.agora.flat.ui.view.room.ClickHandleView
         android:id="@+id/clickHandleView"
@@ -19,27 +21,27 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/shape_gray_border_round_4_bg"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <ImageView
             android:id="@+id/videoOpt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_video_state_gray_selector" />
 
         <ImageView
             android:id="@+id/audioOpt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_audio_state_gray_selector" />
 
         <ImageView
             android:id="@+id/enterFullScreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_video_to_expand" />
     </LinearLayout>
 

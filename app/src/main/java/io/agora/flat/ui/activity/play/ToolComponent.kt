@@ -29,7 +29,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.flow.collect
@@ -419,11 +418,13 @@ class ToolComponent(
         RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_INVITE_DIALOG, true)
     }
 
-    private val collapseHeight = activity.dp2px(32)
+    private val itemSize = activity.resources.getDimensionPixelSize(R.dimen.room_class_button_size)
+
+    private val collapseHeight = itemSize
     private val expandHeight: Int
         get() {
             val visibleCount = binding.extTools.children.count { it.isVisible }
-            return activity.dp2px(32 * visibleCount)
+            return itemSize * visibleCount
         }
 
     private fun onUpdateTool(value: Float) {

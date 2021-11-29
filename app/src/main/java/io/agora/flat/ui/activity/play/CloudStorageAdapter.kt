@@ -15,7 +15,7 @@ class CloudStorageAdapter(
     private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val inflate = LayoutInflater.from(viewGroup.context);
+        val inflate = LayoutInflater.from(viewGroup.context)
         val view = inflate.inflate(R.layout.item_room_cloud_storage, viewGroup, false)
         return ViewHolder(view)
     }

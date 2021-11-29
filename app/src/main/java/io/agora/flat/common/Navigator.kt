@@ -10,10 +10,6 @@ import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
-import io.agora.flat.ui.activity.room.CreateRoomActivity
-import io.agora.flat.ui.activity.room.JoinRoomActivity
-import io.agora.flat.ui.activity.room.RoomDetailActivity
-import io.agora.flat.ui.activity.room.SubscribeRoomActivity
 import io.agora.flat.ui.activity.setting.*
 
 object Navigator {
@@ -35,14 +31,6 @@ object Navigator {
 
     fun launchLoginActivity(context: Context) {
         val intent = Intent(context, LoginActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchRoomDetailActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
-        val intent = Intent(context, RoomDetailActivity::class.java).apply {
-            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
-            putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
-        }
         context.startActivity(intent)
     }
 
@@ -69,11 +57,6 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchSettingActivity(context: Context) {
-        val intent = Intent(context, SettingActivity::class.java)
-        context.startActivity(intent)
-    }
-
     fun launchDevToolsActivity(context: Context) {
         val intent = Intent(context, DevToolsActivity::class.java)
         context.startActivity(intent)
@@ -89,11 +72,6 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchMyProfileActivity(context: Context) {
-        val intent = Intent(context, MyProfileActivity::class.java)
-        context.startActivity(intent)
-    }
-
     fun launchAboutUsActivity(context: Context) {
         val intent = Intent(context, AboutUsActivity::class.java)
         context.startActivity(intent)
@@ -101,26 +79,6 @@ object Navigator {
 
     fun launchLanguageActivity(context: Context) {
         val intent = Intent(context, LanguageActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchCallTestActivity(context: Context) {
-        val intent = Intent(context, CallTestActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchJoinRoomActivity(context: Context) {
-        val intent = Intent(context, JoinRoomActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchCreateRoomActivity(context: Context) {
-        val intent = Intent(context, CreateRoomActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchSubscribeRoomActivity(context: Context) {
-        val intent = Intent(context, SubscribeRoomActivity::class.java)
         context.startActivity(intent)
     }
 

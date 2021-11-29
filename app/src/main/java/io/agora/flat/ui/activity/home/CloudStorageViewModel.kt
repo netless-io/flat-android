@@ -18,13 +18,10 @@ import io.agora.flat.data.model.CloudStorageUploadStartResp
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
+import io.agora.flat.util.ContentFileInfo
 import io.agora.flat.util.fileSuffix
 import io.agora.flat.util.runAtLeast
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,9 +37,7 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private val files = MutableStateFlow(listOf<CloudStorageUIFile>())
-    private val uploadFiles = MutableStateFlow(listOf<UploadFile>())
     private val totalUsage = MutableStateFlow(0L)
-    private val pageLoading = ObservableLoadingCounter()
     private val refreshing = ObservableLoadingCounter()
 
     private val _state = MutableStateFlow(CloudStorageViewState())
@@ -55,7 +50,7 @@ class CloudStorageViewModel @Inject constructor(
                 refreshing.observable,
                 totalUsage,
                 files,
-                uploadFiles,
+                UploadManager.uploadFiles,
             ) { refreshing, totalUsage, files, uploadFiles ->
                 CloudStorageViewState(
                     refreshing = refreshing,
@@ -66,6 +61,12 @@ class CloudStorageViewModel @Inject constructor(
                 )
             }.collect {
                 _state.value = it
+            }
+        }
+
+        viewModelScope.launch {
+            UploadManager.uploadSuccess.filterNotNull().collect {
+                handleUploadSuccess(fileUUID = it.uuid, filename = it.filename, size = it.size)
             }
         }
 
@@ -110,7 +111,7 @@ class CloudStorageViewModel @Inject constructor(
 
     fun deleteChecked() {
         viewModelScope.launch {
-            pageLoading.addLoader()
+            refreshing.addLoader()
             val checked = files.value.filter { it.checked }
             val result = cloudStorageRepository.remove(checked.map { it.fileUUID })
             if (result is Success) {
@@ -119,21 +120,21 @@ class CloudStorageViewModel @Inject constructor(
                 val size = checked.sumOf { it.fileSize }
                 totalUsage.value = totalUsage.value - size
             }
-            pageLoading.removeLoader()
+            refreshing.removeLoader()
         }
     }
 
     fun uploadFile(action: CloudStorageUIAction.UploadFile) {
         viewModelScope.launch {
             var result: CloudStorageUploadStartResp? = null
-            var resp = cloudStorageRepository.updateStart(action.filename, action.size)
+            var resp = cloudStorageRepository.updateStart(action.info.filename, action.info.size)
             when (resp) {
                 is Success -> result = resp.data
                 is Failure -> {
                     if (resp.error.code == FlatErrorCode.Web_UploadConcurrentLimit) {
                         cloudStorageRepository.cancel()
                         // retry
-                        resp = cloudStorageRepository.updateStart(action.filename, action.size)
+                        resp = cloudStorageRepository.updateStart(action.info.filename, action.info.size)
                         if (resp is Success) {
                             result = resp.data
                         }
@@ -146,40 +147,18 @@ class CloudStorageViewModel @Inject constructor(
             }
 
             val request = UploadRequest(
-                fileUUID = result.fileUUID,
-                filePath = result.filePath,
+                uuid = result.fileUUID,
+                filepath = result.filePath,
                 policy = result.policy,
                 policyURL = result.policyURL,
                 signature = result.signature,
+
+                filename = action.info.filename,
+                size = action.info.size,
+                mediaType = action.info.mediaType,
                 uri = action.uri
             )
-            UploadManager.upload(request) {
-                updateUploadFiles(it)
-                if (it is UploadStateEvent && it.uploadState == UploadState.Success) {
-                    handleUploadSuccess(request.fileUUID, action.filename, action.size)
-                }
-            }
-
-            uploadFiles.value = uploadFiles.value.toMutableList().apply {
-                add(0, UploadFile(fileUUID = result.fileUUID, fileName = action.filename))
-            }
-        }
-    }
-
-    private fun updateUploadFiles(event: UploadEvent) = when (event) {
-        is UploadProgressEvent -> {
-            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
-                if (index < 0) return
-                val changed = uploadFiles.value[index].copy(progress = event.currentSize * 1f / event.totalSize)
-                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
-            }
-        }
-        is UploadStateEvent -> {
-            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
-                if (index < 0) return
-                val changed = uploadFiles.value[index].copy(uploadState = event.uploadState)
-                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
-            }
+            UploadManager.upload(request)
         }
     }
 
@@ -187,7 +166,7 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             val resp = cloudStorageRepository.updateFinish(fileUUID)
             if (resp is Success) {
-                delayRemoveSuccess(fileUUID)
+                // delayRemoveSuccess(fileUUID)
                 when (filename.fileSuffix()) {
                     "ppt", "pptx" -> startConvert(fileUUID, true)
                     "pdf" -> startConvert(fileUUID, false)
@@ -256,25 +235,12 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
-    private fun delayRemoveSuccess(fileUUID: String) {
-        viewModelScope.launch {
-            delay(3000)
-            uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
-        }
-    }
-
-    fun retryUpload(fileUUID: String) {
-        viewModelScope.launch {
-            UploadManager.retry(fileUUID)
-        }
-    }
-
-    fun deleteUpload(fileUUID: String) {
-        viewModelScope.launch {
-            UploadManager.cancel(fileUUID)
-            uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
-        }
-    }
+//    private fun delayRemoveSuccess(fileUUID: String) {
+//        viewModelScope.launch {
+//            delay(3000)
+//            uploadFiles.value = uploadFiles.value.toMutableList().filter { it.fileUUID != fileUUID }
+//        }
+//    }
 }
 
 data class CloudStorageUIFile(
@@ -289,19 +255,11 @@ data class CloudStorageUIFile(
     val checked: Boolean = false,
 )
 
-data class UploadFile(
-    val fileUUID: String,
-    val fileName: String,
-    val uploadState: UploadState = UploadState.Init,
-    val progress: Float = 0.0F,
-)
-
 data class CloudStorageViewState(
     val refreshing: Boolean = false,
     val totalUsage: Long = 0,
     val files: List<CloudStorageUIFile> = emptyList(),
     val uploadFiles: List<UploadFile> = emptyList(),
-    val pageLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -309,9 +267,9 @@ sealed class CloudStorageUIAction {
     object Delete : CloudStorageUIAction()
     object Reload : CloudStorageUIAction()
     data class CheckItem(val index: Int, val checked: Boolean) : CloudStorageUIAction()
-    data class ClickItem(val index: Int) : CloudStorageUIAction()
 
-    data class UploadFile(val filename: String, val size: Long, val uri: Uri) : CloudStorageUIAction()
-    data class UploadRetry(val fileUUID: String) : CloudStorageUIAction()
-    data class UploadDelete(val fileUUID: String) : CloudStorageUIAction()
+    object OpenItemPick : CloudStorageUIAction()
+    object OpenUploading : CloudStorageUIAction()
+
+    data class UploadFile(val uri: Uri, val info: ContentFileInfo) : CloudStorageUIAction()
 }

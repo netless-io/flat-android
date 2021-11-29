@@ -10,10 +10,10 @@
     </item>
 
     <item
-        android:width="128dp"
-        android:height="128dp"
+        android:width="96dp"
+        android:height="96dp"
         android:gravity="center_horizontal"
         android:top="120dp">
-        <bitmap android:src="@drawable/img_login_logo" />
+        <bitmap android:src="@drawable/ic_flat_logo" />
     </item>
 </layer-list>

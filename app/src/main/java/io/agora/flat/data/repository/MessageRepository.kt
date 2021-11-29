@@ -66,7 +66,7 @@ class MessageRepository @Inject constructor(
             ).executeOnce()
 
             try {
-                val location = result.bodyOrThrow().location;
+                val location = result.bodyOrThrow().location
                 if (!location.isNullOrEmpty()) {
                     val handle = location.replace(Regex("^.*/query/"), "")
                     Success(data = handle)
@@ -89,7 +89,7 @@ class MessageRepository @Inject constructor(
             ).executeOnce()
 
             try {
-                val code = result.bodyOrThrow().code;
+                val code = result.bodyOrThrow().code
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
                 } else {
@@ -128,7 +128,7 @@ class MessageRepository @Inject constructor(
             ).executeOnce()
 
             try {
-                val code = result.bodyOrThrow().code;
+                val code = result.bodyOrThrow().code
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().count)
                 } else {

@@ -14,6 +14,7 @@
     <string name="relative_time_dd">%d d</string>
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">Cloud Storage</string>
+    <string name="title_cloud_pick">Upload</string>
     <string name="title_user_info">Personal</string>
     <string name="title_setting">Settings</string>
     <string name="title_my_profile">My Profile</string>
@@ -29,6 +30,10 @@
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
     <string name="room_type_one_to_one">One to One</string>
+
+    <string name="room_type_desc_big_class">large number of students</string>
+    <string name="room_type_desc_small_class">Up to 16 students</string>
+    <string name="room_type_desc_one_to_one">For 1 student</string>
 
     <string name="create_room">Create Room</string>
     <string name="room_theme">Theme</string>

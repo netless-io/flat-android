@@ -20,6 +20,7 @@
     <!-- title -->
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">云盘</string>
+    <string name="title_cloud_pick">上传</string>
     <string name="title_user_info">个人信息</string>
     <string name="title_setting">个人设置</string>
     <string name="title_my_profile">我的资料</string>
@@ -34,6 +35,10 @@
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
     <string name="room_type_one_to_one">一对一</string>
+
+    <string name="room_type_desc_big_class">面向大量学生</string>
+    <string name="room_type_desc_small_class">最多16位学生</string>
+    <string name="room_type_desc_one_to_one">面向1位学生</string>
 
     <string name="create_room">创建房间</string>
     <string name="room_theme">主题</string>

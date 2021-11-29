@@ -3,7 +3,7 @@ package io.agora.flat.util
 import java.util.*
 
 fun String.fileSuffix(): String {
-    return substringAfterLast('.').toLowerCase(Locale.getDefault())
+    return substringAfterLast('.').lowercase(Locale.getDefault())
 }
 
 fun String.toInviteCodeDisplay() = if (length == 10) {

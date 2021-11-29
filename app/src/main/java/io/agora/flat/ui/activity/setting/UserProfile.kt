@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.setting
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -9,21 +8,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 
-class MyProfileActivity : BaseComposeActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FlatColumnPage {
-                BackTopAppBar(title = stringResource(R.string.title_my_profile), onBackPressed = { finish() })
-                SettingItemList()
-            }
-        }
+@Composable
+fun UserProfile(navController: NavController) {
+    Column {
+        BackTopAppBar(
+            title = stringResource(R.string.title_my_profile),
+            onBackPressed = { navController.popBackStack() },
+        )
+        SettingItemList()
     }
 }
 

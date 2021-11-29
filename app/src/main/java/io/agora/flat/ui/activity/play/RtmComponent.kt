@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +26,7 @@ import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
+import io.agora.flat.util.KeyboardHeightProvider
 import io.agora.flat.util.delayAndFinish
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
@@ -75,6 +77,22 @@ class RtmComponent(
                 messageViewModel.loadHistoryMessage()
             }
         })
+
+        KeyboardHeightProvider(activity).setHeightListener(object : KeyboardHeightProvider.HeightListener {
+            private var originBottomMargin: Int? = null
+            override fun onHeightChanged(height: Int) {
+                if (originBottomMargin == null && binding.messageLv.isVisible) {
+                    originBottomMargin = (binding.messageLv.layoutParams as ConstraintLayout.LayoutParams).bottomMargin
+                }
+                if (originBottomMargin != null) {
+                    val lp = binding.messageLv.layoutParams as ConstraintLayout.LayoutParams
+                    lp.bottomMargin = height + originBottomMargin!!
+                    binding.messageLv.postDelayed({
+                        binding.messageLv.layoutParams = lp
+                    }, 100)
+                }
+            }
+        }).start()
     }
 
     private fun loadData() {

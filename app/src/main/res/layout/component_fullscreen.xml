@@ -58,7 +58,7 @@
         android:id="@+id/fullVideoOptArea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
+        android:layout_gravity="center_horizontal|bottom"
         android:layout_margin="12dp"
         android:background="@drawable/shape_black50_round_16_bg"
         android:orientation="horizontal"
@@ -67,23 +67,23 @@
 
         <ImageView
             android:id="@+id/fullVideoOpt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_video_state_selector" />
 
         <ImageView
             android:id="@+id/fullAudioOpt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_audio_state_selector" />
 
         <ImageView
             android:id="@+id/exitFullScreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_video_to_collapse" />
     </LinearLayout>
 </FrameLayout>

@@ -34,3 +34,9 @@ val ColumnScope.MaxWidth
 
 val BoxScope.MaxWidth
     get() = Modifier.fillMaxWidth()
+
+val FillMaxSize
+    get() = Modifier.fillMaxSize()
+
+val MaxHeight
+    get() = Modifier.fillMaxHeight()

@@ -49,7 +49,6 @@ class ClassRoomViewModel @Inject constructor(
     private val messageState: MessageState,
     private val rtmApi: RtmApi,
     private val rtcApi: RtcApi,
-    // private val boardRoomApi: BoardRoomApi,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,

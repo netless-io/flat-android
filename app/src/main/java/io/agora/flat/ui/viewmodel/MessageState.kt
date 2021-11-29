@@ -22,13 +22,13 @@ class MessageState @Inject constructor() {
         val list = _messages.value.toMutableList().apply {
             addAll(msgs)
         }
-        _messages.value = list;
+        _messages.value = list
     }
 
     fun prependMessages(msgs: List<Message>) {
         val list = _messages.value.toMutableList().apply {
             addAll(0, msgs)
         }
-        _messages.value = list;
+        _messages.value = list
     }
 }

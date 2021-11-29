@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:layout_constraintRight_toRightOf="parent"
-        tools:layout_width="120dp" />
+        tools:layout_width="@dimen/room_class_video_area_width" />
 
     <FrameLayout
         android:id="@+id/whiteboardContainer"

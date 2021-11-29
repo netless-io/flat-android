@@ -29,7 +29,7 @@ class CreateRoomViewModel @Inject constructor(
     private val eventBus: EventBus,
 ) : ViewModel() {
     private val roomUUID = MutableStateFlow("")
-    private val loadingCounter = ObservableLoadingCounter();
+    private val loadingCounter = ObservableLoadingCounter()
 
     private val _state = MutableStateFlow(ViewState())
     val state: StateFlow<ViewState>
@@ -73,9 +73,9 @@ data class ViewState(
     val username: String = "",
 ) {
     companion object {
-        const val STATE_IDLE = 0;
-        const val STATE_LOADING = 1;
-        const val STATE_CREATE_SUCCESS = 1;
-        const val STATE_CREATE_FAIL = 1;
+        const val STATE_IDLE = 0
+        const val STATE_LOADING = 1
+        const val STATE_CREATE_SUCCESS = 1
+        const val STATE_CREATE_FAIL = 1
     }
 }

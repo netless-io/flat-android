@@ -8,7 +8,6 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
-import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.NetworkObserver
@@ -28,7 +27,6 @@ class HomeViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val eventBus: EventBus,
     private val appKVCenter: AppKVCenter,
-    private val cloudStorageRepository: CloudStorageRepository,
     private val networkObserver: NetworkObserver,
 ) : ViewModel() {
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
@@ -92,7 +90,7 @@ class HomeViewModel @Inject constructor(
             refreshing.addLoader()
             reloadRooms()
             reloadHistoryRooms()
-            delay(2000)
+            delay(1000)
             refreshing.removeLoader()
         }
     }
@@ -176,5 +174,11 @@ data class HomeViewState(
 sealed class HomeViewAction {
     object Reload : HomeViewAction()
     data class SelectCategory(val category: RoomCategory) : HomeViewAction()
-    object SetNetwork : HomeViewAction()
+
+    object GotoSetNetwork : HomeViewAction()
+    object GotoRoomCreate : HomeViewAction()
+    object GotoRoomJoin : HomeViewAction()
+    data class GotoRoomDetail(val roomUUID: String, val periodicUUID: String?) : HomeViewAction()
+    object GotoUserProfile : HomeViewAction()
+    object GotoSetting : HomeViewAction()
 }

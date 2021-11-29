@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:layout_width="120dp">
+    tools:layout_width="@dimen/room_class_video_area_width">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -51,8 +51,8 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/room_class_video_user_avatar_size_normal"
+                android:layout_height="@dimen/room_class_video_user_avatar_size_normal"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:visibility="visible" />
@@ -60,10 +60,11 @@
 
         <ImageView
             android:id="@+id/mic_closed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
             android:layout_gravity="end|bottom"
-            android:padding="4dp"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:scaleType="centerCrop"
             android:src="@drawable/ic_room_mic_closed"
             android:visibility="invisible" />
 

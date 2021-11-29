@@ -1,15 +1,15 @@
 package io.agora.flat.ui.activity.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -19,88 +19,63 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
+import io.agora.flat.common.upload.UploadFile
 import io.agora.flat.common.upload.UploadState
 import io.agora.flat.ui.compose.CloseTopAppBar
-import io.agora.flat.ui.compose.FlatCircularProgressIndicator
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.*
 
 @Composable
-internal fun UploadList() {
-    val viewModel = viewModel(CloudStorageViewModel::class.java)
+internal fun UploadList(onCloseUploading: () -> Unit, viewModel: UploadingViewModel = hiltViewModel()) {
     val viewState by viewModel.state.collectAsState()
 
     UploadList(viewState) { action ->
         when (action) {
-            is CloudStorageUIAction.UploadRetry -> viewModel.retryUpload(action.fileUUID)
-            is CloudStorageUIAction.UploadDelete -> viewModel.deleteUpload(action.fileUUID)
-            else -> {; }
+            is UploadingUIAction.UploadRetry -> viewModel.retryUpload(action.fileUUID)
+            is UploadingUIAction.UploadDelete -> viewModel.deleteUpload(action.fileUUID)
+            is UploadingUIAction.CloseUploading -> onCloseUploading()
         }
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-internal fun UploadList(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
-    var showList by remember { mutableStateOf(false) }
-
-    val progress = (viewState.uploadFiles.sumOf {
-        it.progress.toDouble()
-    } / viewState.uploadFiles.size).toFloat()
-
-    val progressColor = if (viewState.uploadFiles.find { it.uploadState == UploadState.Failure } != null)
-        FlatColorRed
-    else
-        FlatColorBlue
-
+internal fun UploadList(viewState: UploadingUIState, actioner: (UploadingUIAction) -> Unit) {
     Box(Modifier.fillMaxWidth()) {
-        if (viewState.uploadFiles.isNotEmpty()) {
-            Box(Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)) {
-                IconButton(onClick = { showList = true }) {
-                    FlatCircularProgressIndicator(progress = progress,
-                        color = progressColor,
-                        modifier = Modifier.size(20.dp))
-                }
-            }
-        }
-        AnimatedVisibility(
-            visible = showList,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Surface(color = MaterialTheme.colors.background) {
-                Column(Modifier.fillMaxSize()) {
-                    CloseTopAppBar(stringResource(R.string.cloud_storage_upload_list_title), { showList = false })
-                    UploadListContent(viewState.uploadFiles, actioner)
-                }
-            }
+        Column(Modifier.fillMaxSize()) {
+            CloseTopAppBar(
+                title = stringResource(R.string.cloud_storage_upload_list_title),
+                onClose = { actioner(UploadingUIAction.CloseUploading) },
+            )
+            UploadListContent(viewState.uploadFiles, actioner)
         }
     }
 }
 
 @Composable
-fun UploadListContent(uploadFiles: List<UploadFile>, actioner: (CloudStorageUIAction) -> Unit) {
+fun UploadListContent(uploadFiles: List<UploadFile>, actioner: (UploadingUIAction) -> Unit) {
     LazyColumn {
-        items(count = uploadFiles.size, key = { index: Int ->
-            uploadFiles[index].fileUUID
-        }) { index ->
+        items(
+            count = uploadFiles.size,
+            key = { index: Int ->
+                uploadFiles[index].fileUUID
+            }
+        ) { index ->
             UploadListItem(uploadFiles[index], actioner)
         }
     }
 }
 
 @Composable
-private fun UploadListItem(uploadFile: UploadFile, actioner: (CloudStorageUIAction) -> Unit) {
+private fun UploadListItem(uploadFile: UploadFile, actioner: (UploadingUIAction) -> Unit) {
     val context = LocalContext.current
     val info = when (uploadFile.uploadState) {
         UploadState.Success -> context.getString(R.string.upload_success)
         UploadState.Failure -> context.getString(R.string.upload_failure)
         else -> "${(uploadFile.progress * 100).toInt()}%"
-    }.toString()
+    }
 
     val infoColor = when (uploadFile.uploadState) {
         UploadState.Success -> FlatColorLightGreen
@@ -116,7 +91,7 @@ private fun UploadListItem(uploadFile: UploadFile, actioner: (CloudStorageUIActi
             .align(Alignment.Center)
             .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                uploadFile.fileName,
+                uploadFile.filename,
                 Modifier.weight(1f),
                 style = FlatCommonTextStyle,
                 fontSize = 14.sp,
@@ -132,13 +107,13 @@ private fun UploadListItem(uploadFile: UploadFile, actioner: (CloudStorageUIActi
             Spacer(Modifier.width(4.dp))
             if (UploadState.Failure == uploadFile.uploadState) {
                 Image(painterResource(R.drawable.ic_upload_retry), "",
-                    Modifier.clickable { actioner(CloudStorageUIAction.UploadRetry(uploadFile.fileUUID)) })
+                    Modifier.clickable { actioner(UploadingUIAction.UploadRetry(uploadFile.fileUUID)) })
                 Spacer(Modifier.width(4.dp))
             }
             when (uploadFile.uploadState) {
                 UploadState.Success -> Image(painterResource(R.drawable.ic_upload_success), contentDescription = "")
                 else -> Image(painterResource(R.drawable.ic_upload_cancel), "",
-                    Modifier.clickable { actioner(CloudStorageUIAction.UploadDelete(uploadFile.fileUUID)) })
+                    Modifier.clickable { actioner(UploadingUIAction.UploadDelete(uploadFile.fileUUID)) })
             }
         }
         LinearProgressIndicator(
@@ -162,7 +137,7 @@ internal fun UploadListPreview() {
         UploadFile("333", "333.jpg", UploadState.Success, 1f),
         UploadFile("444", "444.jpg", UploadState.Failure, progress = 0.6f),
     )
-    val viewState = CloudStorageViewState(uploadFiles = uploadFiles)
+    val viewState = UploadingUIState(uploadFiles = uploadFiles)
     FlatPage {
         UploadList(viewState) {
 
@@ -174,9 +149,7 @@ internal fun UploadListPreview() {
 @Preview(heightDp = 100)
 internal fun UploadListItemPreview() {
     val file = UploadFile("444", "444.jpg", UploadState.Failure, progress = 0.6f)
-    FlatAndroidTheme {
-        UploadListItem(file) {
+    UploadListItem(file) {
 
-        }
     }
 }

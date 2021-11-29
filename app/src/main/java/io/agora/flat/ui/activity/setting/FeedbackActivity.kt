@@ -30,7 +30,7 @@ class FeedbackActivity : BaseComposeActivity() {
             val viewModel: FeedbackViewModel = viewModel()
 
             FlatColumnPage {
-                BackTopAppBar(title = stringResource(R.string.title_feedback), { finish() });
+                BackTopAppBar(title = stringResource(R.string.title_feedback), { finish() })
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },

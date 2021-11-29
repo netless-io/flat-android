@@ -24,7 +24,7 @@ class UserVideoAdapter(
 ) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
     init {
-        setHasStableIds(true);
+        setHasStableIds(true)
     }
 
     private var context: Context? = null
@@ -77,7 +77,7 @@ class UserVideoAdapter(
             rtcVideoController.enterFullScreen(itemData.rtcUID)
             listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
         }
-        viewHolder.videoClosedLayout.isVisible = !itemData.videoOpen
+        viewHolder.videoClosedLayout.isVisible = !itemData.isNotJoin && !itemData.videoOpen
     }
 
     override fun getItemId(position: Int): Long {
