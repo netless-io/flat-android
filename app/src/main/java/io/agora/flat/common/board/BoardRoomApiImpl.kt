@@ -117,6 +117,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
 
             windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)
             isWritable = writable
+            isDisableNewPencil = false
         }
         whiteSdk.joinRoom(roomParams, roomListener, joinRoomCallback)
     }
