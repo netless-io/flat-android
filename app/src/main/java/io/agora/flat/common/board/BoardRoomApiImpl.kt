@@ -33,6 +33,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
             this@BoardRoomApiImpl.room = room
             memberState.value = room.roomState.memberState
             sceneState.value = room.roomState.sceneState.toBoardSceneState()
+            updateSerialization(room.writable)
         }
 
         override fun catchEx(t: SDKError) {
@@ -135,9 +136,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
         room?.setWritable(writable, object : Promise<Boolean> {
             override fun then(isWritable: Boolean) {
                 Log.i(TAG, "set writable result $isWritable")
-                if (isWritable) {
-                    room?.disableSerialization(false)
-                }
+                updateSerialization(isWritable)
             }
 
             override fun catchEx(error: SDKError) {
@@ -315,6 +314,12 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
 
     override fun observerUndoRedoState(): Flow<UndoRedoState> {
         return undoRedoState.asStateFlow()
+    }
+
+    private fun updateSerialization(writable: Boolean) {
+        if (writable) {
+            room?.disableSerialization(false)
+        }
     }
 
     private fun SceneState.toBoardSceneState(): BoardSceneState {
