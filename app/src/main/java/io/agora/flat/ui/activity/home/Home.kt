@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -188,18 +189,18 @@ fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
                             actioner(HomeViewAction.GotoUserProfile)
                             expanded = false
                         }) {
-                        Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.title_my_profile), Modifier.width(100.dp))
+                        Image(painterResource(R.drawable.ic_user_profile_head), null, Modifier.size(24.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.title_my_profile), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     DropdownMenuItem(
                         onClick = {
                             actioner(HomeViewAction.GotoSetting)
                             expanded = false
                         }) {
-                        Image(painterResource(R.drawable.ic_user_profile_aboutus), contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.title_setting), Modifier.width(100.dp))
+                        Image(painterResource(R.drawable.ic_user_profile_aboutus), null, Modifier.size(24.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.title_setting), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }

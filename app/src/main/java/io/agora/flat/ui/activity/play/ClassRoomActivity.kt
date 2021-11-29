@@ -24,11 +24,9 @@ class ClassRoomActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
-
         binding = ActivityRoomPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initSystemUI()
+        enableFullScreen()
 
         componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer, binding.scenePreviewContainer))
         componentSet.add(RtcComponent(this,
@@ -51,10 +49,11 @@ class ClassRoomActivity : BaseActivity() {
         }
     }
 
-    private fun initSystemUI() {
+    private fun enableFullScreen() {
         val controller = WindowInsetsControllerCompat(window, window.decorView)
         controller.hide(WindowInsetsCompat.Type.navigationBars())
         controller.hide(WindowInsetsCompat.Type.statusBars())
+        // Some oneplus, huawei devices rely on this line of code for full screen
         controller.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
 

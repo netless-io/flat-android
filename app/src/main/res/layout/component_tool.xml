@@ -149,7 +149,7 @@
     <include
         android:id="@+id/layout_settings"
         layout="@layout/layout_room_settings"
-        android:layout_width="@dimen/room_class_overlay_width"
+        android:layout_width="@dimen/room_class_overlay_width_small"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:visibility="gone"

@@ -21,7 +21,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController

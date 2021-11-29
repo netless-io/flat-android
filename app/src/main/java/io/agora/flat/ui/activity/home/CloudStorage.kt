@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,10 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import io.agora.flat.R
-import io.agora.flat.common.LeafScreen
-import io.agora.flat.common.Screen
 import io.agora.flat.common.upload.UploadState
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.*
@@ -97,7 +95,8 @@ private fun UploadIcon(viewState: CloudStorageViewState, onClick: () -> Unit) {
 
     if (showUploadList) {
         IconButton(onClick = onClick) {
-            FlatCircularProgressIndicator(
+            if (progress == 1.0f) Icon(Icons.Outlined.CheckCircleOutline, "", tint = MaterialTheme.colors.primary)
+            else FlatCircularProgressIndicator(
                 progress = progress,
                 color = progressColor,
                 modifier = Modifier.size(20.dp),

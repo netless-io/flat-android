@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.agora.flat.common.board.BoardRoomApiImpl
 import io.agora.flat.di.impl.RtcApiImpl
 import io.agora.flat.di.impl.RtmApiImpl
 import io.agora.flat.di.interfaces.*
