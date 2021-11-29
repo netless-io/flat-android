@@ -8,6 +8,7 @@ import com.herewhite.sdk.domain.*
 import dagger.hilt.android.scopes.ActivityScoped
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.BoardRoomApi
 import kotlinx.coroutines.flow.*
 import org.json.JSONObject
@@ -16,7 +17,7 @@ import javax.inject.Inject
 import kotlin.collections.HashMap
 
 @ActivityScoped
-class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomApi {
+class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepository: UserRepository) : BoardRoomApi {
     companion object {
         const val TAG = "BoardRoomImpl"
     }
@@ -119,6 +120,11 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
             windowParams = WindowParams().setChessboard(false).setDebug(true).setCollectorStyles(styleMap)
             isWritable = writable
             isDisableNewPencil = false
+            userPayload = UserPayload(
+                userId = userRepository.getUserUUID(),
+                nickName = userRepository.getUsername(),
+                cursorName = userRepository.getUsername()
+            )
         }
         whiteSdk.joinRoom(roomParams, roomListener, joinRoomCallback)
     }
@@ -329,4 +335,15 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity) : BoardRoomAp
         }
         return BoardSceneState(list, this.index)
     }
+
+    /**
+     * payload example
+     * {
+     *  "uid":"3e092001-eb7e-4da5-a715-90452fde3194",
+     *  "nickName":"aderan",
+     *  "userId":"3e092001-eb7e-4da5-a715-90452fde3194",
+     *  "cursorName":"aderan"
+     * }
+     */
+    private data class UserPayload(val userId: String, val nickName: String, val cursorName: String)
 }
