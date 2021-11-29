@@ -2,6 +2,7 @@ package io.agora.flat.util
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.res.Configuration
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
@@ -55,6 +56,15 @@ fun Context.dp2px(dp: Int): Int {
 
 fun Context.px2dp(px: Int): Int {
     return (px.toFloat() / resources.displayMetrics.density + 0.5).toInt()
+}
+
+fun Context.isTabletMode(): Boolean {
+    val configuration = this.resources.configuration
+    return configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
+}
+
+fun Context.isPhoneMode(): Boolean {
+    return !isTabletMode()
 }
 
 fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = "") {

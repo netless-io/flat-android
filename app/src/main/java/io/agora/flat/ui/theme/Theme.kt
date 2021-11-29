@@ -1,16 +1,16 @@
 package io.agora.flat.ui.theme
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.insets.ProvideWindowInsets
 import io.agora.flat.ui.compose.LocalIsPadMode
+import io.agora.flat.util.isTabletMode
 
 
 @SuppressLint("ConflictingOnColor")
@@ -75,6 +75,5 @@ fun FlatAndroidTheme(
 
 @Composable
 fun isPadMode(): Boolean {
-    val configuration = LocalConfiguration.current
-    return configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    return LocalContext.current.isTabletMode()
 }
