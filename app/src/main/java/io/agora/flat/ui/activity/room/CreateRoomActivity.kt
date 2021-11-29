@@ -53,7 +53,6 @@ fun CreateRoomPage(
 ) {
     val activity = LocalContext.current as Activity
     val viewState by viewModel.state.collectAsState()
-    var popBackStack by remember { mutableStateOf(false) }
 
     val actioner: (CreateRoomAction) -> Unit = { action ->
         when (action) {
@@ -63,7 +62,7 @@ fun CreateRoomPage(
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.openVideo)
                 Navigator.launchRoomPlayActivity(activity, viewState.roomUUID)
-                popBackStack = true
+                navController.popBackStack()
             }
             is CreateRoomAction.CreateRoom -> {
                 viewModel.createRoom(action.title, action.roomType)
@@ -71,9 +70,6 @@ fun CreateRoomPage(
         }
     }
 
-    if (popBackStack) {
-        PopBackOnPaused(navController)
-    }
     CreateRoomContent(viewState, actioner)
 }
 

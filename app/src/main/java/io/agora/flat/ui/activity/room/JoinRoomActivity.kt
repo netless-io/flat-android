@@ -47,7 +47,6 @@ fun JoinRoomPage(
     val activity = LocalContext.current as BaseComposeActivity
     val error by viewModel.error.collectAsState()
     val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
-    var popBackStack by remember { mutableStateOf(false) }
 
     LaunchedEffect(error) {
         error?.message?.let { activity.showToast(it) }
@@ -56,7 +55,7 @@ fun JoinRoomPage(
     LaunchedEffect(roomPlayInfo) {
         if (roomPlayInfo != null) {
             Navigator.launchRoomPlayActivity(activity, roomPlayInfo!!)
-            popBackStack = true
+            navController.popBackStack()
         }
     }
 
@@ -69,10 +68,6 @@ fun JoinRoomPage(
                 viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
             }
         }
-    }
-
-    if (popBackStack) {
-        PopBackOnPaused(navController)
     }
     JoinRoomPage(actioner = actioner)
 }

@@ -20,14 +20,3 @@ fun Lifecycle.observeAsSate(): State<Lifecycle.Event> {
     }
     return state
 }
-
-
-@Composable
-fun PopBackOnPaused(navController: NavController) {
-    val state by LocalLifecycleOwner.current.lifecycle.observeAsSate()
-    LaunchedEffect(state) {
-        if (state == Lifecycle.Event.ON_PAUSE) {
-            navController.popBackStack()
-        }
-    }
-}

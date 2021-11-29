@@ -76,21 +76,20 @@ fun RoomDetailPage(
     val activity = LocalContext.current as Activity
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
-    var popBackStack by remember { mutableStateOf(false) }
 
     val actioner: (DetailUiAction) -> Unit = { action ->
         when (action) {
             DetailUiAction.Back -> navController.popBackStack()
             is DetailUiAction.EnterRoom -> {
                 Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
-                popBackStack = true
+                navController.popBackStack()
             }
             DetailUiAction.Invite -> {
                 // Show Dialog
             }
             is DetailUiAction.Playback -> {
                 Navigator.launchPlaybackActivity(activity, action.roomUUID)
-                popBackStack = true
+                navController.popBackStack()
             }
             DetailUiAction.ShowAllRooms -> visible = true
             DetailUiAction.AllRoomBack -> visible = false
@@ -102,8 +101,7 @@ fun RoomDetailPage(
     }
 
     if (cancelSuccess.value) {
-        Navigator.launchHomeActivity(activity)
-        activity.finish()
+        navController.popBackStack()
         return
     }
 
@@ -115,9 +113,6 @@ fun RoomDetailPage(
             exit = fadeOut(animationSpec = tween())
         ) {
             AllRoomDetail(actioner = actioner)
-        }
-        if (popBackStack) {
-            PopBackOnPaused(navController)
         }
     }
 }
