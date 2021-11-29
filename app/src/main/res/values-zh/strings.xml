@@ -36,6 +36,10 @@
     <string name="room_type_small_class">小班课</string>
     <string name="room_type_one_to_one">一对一</string>
 
+    <string name="room_type_desc_big_class">面向大量学生</string>
+    <string name="room_type_desc_small_class">最多16位学生</string>
+    <string name="room_type_desc_one_to_one">面向1位学生</string>
+
     <string name="create_room">创建房间</string>
     <string name="room_theme">主题</string>
     <string name="create_room_type">类型</string>

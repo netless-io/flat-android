@@ -31,6 +31,10 @@
     <string name="room_type_small_class">Small Class</string>
     <string name="room_type_one_to_one">One to One</string>
 
+    <string name="room_type_desc_big_class">large number of students</string>
+    <string name="room_type_desc_small_class">Up to 16 students</string>
+    <string name="room_type_desc_one_to_one">For 1 student</string>
+
     <string name="create_room">Create Room</string>
     <string name="room_theme">Theme</string>
     <string name="create_room_type">Type</string>

@@ -18,6 +18,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,8 +33,10 @@ import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatColorBlue
 import io.agora.flat.ui.theme.FlatColorGray
 import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.FlatSmallTipTextStyle
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.ui.viewmodel.ViewState
+import io.agora.flat.util.isTabletMode
 
 @AndroidEntryPoint
 class CreateRoomActivity : BaseComposeActivity() {
@@ -129,40 +133,80 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
 
 @Composable
 private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
-    Row(Modifier.fillMaxWidth()) {
+    Row {
         TypeItem(
             checked = type == RoomType.BigClass,
             text = stringResource(id = R.string.room_type_big_class),
+            desc = stringResource(id = R.string.room_type_desc_big_class),
             id = R.drawable.img_big_class,
             modifier = Modifier
-                .weight(7f)
+                .weight(1f)
                 .clickable { onTypeChange(RoomType.BigClass) })
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(16.dp))
         TypeItem(
             checked = type == RoomType.SmallClass,
             text = stringResource(id = R.string.room_type_small_class),
+            desc = stringResource(id = R.string.room_type_desc_small_class),
             id = R.drawable.img_small_class,
             modifier = Modifier
-                .weight(7f)
+                .weight(1f)
                 .clickable { onTypeChange(RoomType.SmallClass) })
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(16.dp))
         TypeItem(
             checked = type == RoomType.OneToOne,
             text = stringResource(id = R.string.room_type_one_to_one),
+            desc = stringResource(id = R.string.room_type_desc_one_to_one),
             id = R.drawable.img_one_to_one,
             modifier = Modifier
-                .weight(7f)
+                .weight(1f)
                 .clickable { onTypeChange(RoomType.OneToOne) })
     }
 }
 
 @Composable
-private fun TypeItem(
-    checked: Boolean,
-    text: String,
-    @DrawableRes id: Int,
-    modifier: Modifier,
-) {
+private fun TypeItem(checked: Boolean, text: String, desc: String, @DrawableRes id: Int, modifier: Modifier) {
+    val isTablet = LocalContext.current.isTabletMode()
+
+    if (isTablet) {
+        TypeItemTablet(checked, text, desc, id, modifier)
+    } else {
+        TypeItemPhone(checked, text, id, modifier)
+    }
+}
+
+@Composable
+private fun TypeItemTablet(checked: Boolean, text: String, desc: String, @DrawableRes id: Int, modifier: Modifier) {
+    val border = BorderStroke(1.dp, if (checked) FlatColorBlue else FlatColorGray)
+    val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
+
+    Row(modifier = modifier.border(border, shape = MaterialTheme.shapes.small)) {
+        Image(
+            painter = painterResource(id),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .padding(12.dp)
+                .size(72.dp)
+        )
+        Column(Modifier.weight(1f)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text, style = FlatCommonTextStyle)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(desc, style = FlatSmallTipTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Icon(
+                painterResource(icon),
+                null,
+                Modifier
+                    .align(Alignment.End)
+                    .padding(12.dp),
+                Color.Unspecified
+            )
+        }
+    }
+}
+
+@Composable
+private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, modifier: Modifier) {
     val border = BorderStroke(1.dp, if (checked) FlatColorBlue else FlatColorGray)
     val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
 
@@ -187,6 +231,12 @@ private fun TypeItem(
         Spacer(modifier = Modifier.height(8.dp))
         Icon(painter = painterResource(icon), contentDescription = null, tint = Color.Unspecified)
     }
+}
+
+@Composable
+@Preview(device = PIXEL_C)
+private fun CreateRoomPageTabletPreview() {
+    CreateRoomContent(ViewState()) {}
 }
 
 @Composable
