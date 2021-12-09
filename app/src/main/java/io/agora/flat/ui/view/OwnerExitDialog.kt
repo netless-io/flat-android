@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogOwnerExitBinding
 
-class OwnerExitDialog : DialogFragment(R.layout.dialog_owner_exit) {
+class OwnerExitDialog : ClassDialogFragment(R.layout.dialog_owner_exit) {
     private lateinit var binding: DialogOwnerExitBinding
     private var listener: Listener? = null
 

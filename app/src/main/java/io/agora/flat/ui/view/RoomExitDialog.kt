@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-class RoomExitDialog : DialogFragment(R.layout.dialog_room_exit) {
+class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
     private lateinit var binding: DialogRoomExitBinding
     private var listener: Listener? = null
 

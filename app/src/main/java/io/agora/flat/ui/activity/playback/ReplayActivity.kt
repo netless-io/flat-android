@@ -16,7 +16,6 @@ class ReplayActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityReplayBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         initSystemUI()
 
         componentSet.add(ReplayWhiteboardComponent(this, binding.whiteboardContainer, binding.videoListContainer))
@@ -24,6 +23,11 @@ class ReplayActivity : BaseActivity() {
         // componentSet.add(ReplayVideoComponent(this, binding.videoListContainer))
 
         componentSet.forEach { lifecycle.addObserver(it) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableFullScreen()
     }
 
     private fun initSystemUI() {

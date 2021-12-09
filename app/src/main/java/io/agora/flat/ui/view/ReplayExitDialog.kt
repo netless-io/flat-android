@@ -7,7 +7,7 @@ import androidx.fragment.app.DialogFragment
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogReplayExitBinding
 
-class ReplayExitDialog : DialogFragment(R.layout.dialog_replay_exit) {
+class ReplayExitDialog : ClassDialogFragment(R.layout.dialog_replay_exit) {
     private lateinit var binding: DialogReplayExitBinding
     private var listener: Listener? = null
 
