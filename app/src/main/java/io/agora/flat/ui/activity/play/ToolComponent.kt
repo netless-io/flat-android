@@ -16,6 +16,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
@@ -47,6 +48,7 @@ class ToolComponent(
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {
         fun boardRoom(): BoardRoomApi
+        fun appEnv(): AppEnv
     }
 
     private lateinit var binding: ComponentToolBinding
@@ -54,6 +56,7 @@ class ToolComponent(
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var boardRoom: BoardRoomApi
+    private lateinit var appEnv: AppEnv
 
     private lateinit var cloudStorageAdapter: CloudStorageAdapter
     private lateinit var userListAdapter: UserListAdapter
@@ -68,6 +71,7 @@ class ToolComponent(
     private fun injectApi() {
         val entryPoint = EntryPointAccessors.fromActivity(activity, ToolComponentEntryPoint::class.java)
         boardRoom = entryPoint.boardRoom()
+        appEnv = entryPoint.appEnv()
     }
 
     private fun observeState() {
@@ -383,7 +387,7 @@ class ToolComponent(
         val inviteTitle = activity.getString(R.string.invite_title_format, state.userName)
         val roomTime =
             "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
-        val inviteLink = Constants.BASE_INVITE_URL + "/join/" + state.roomUUID
+        val inviteLink = appEnv.baseInviteUrl + "/join/" + state.roomUUID
 
         val copyText = """
             |${activity.getString(R.string.invite_title_format, state.userName)}

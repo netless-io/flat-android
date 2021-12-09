@@ -194,7 +194,7 @@ class RtcComponent(
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
         adapter.listener = object : UserVideoAdapter.Listener {
-            override fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser) {
+            override fun onItemClick(position: Int, view: ViewGroup, rtcUser: RtcUser) {
                 start.set(getViewRect(view, fullScreenLayout))
                 end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
 
@@ -228,6 +228,8 @@ class RtcComponent(
                 fullScreenBinding.root.isVisible = true
                 fullScreenBinding.fullVideoView.isVisible = true
                 userCallOut?.run {
+                    rtcVideoController.enterFullScreen(rtcUID)
+
                     fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
                     rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
                     fullScreenBinding.fullScreenAvatar.load(avatarURL) {

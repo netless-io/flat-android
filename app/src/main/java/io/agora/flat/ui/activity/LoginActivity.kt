@@ -132,6 +132,7 @@ class LoginActivity : BaseComposeActivity() {
                         val roomUUID = intent.data?.getQueryParameter("roomUUID")
                         if (viewModel.isLoggedIn() && roomUUID != null) {
                             Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
+                            finish()
                         }
                     }
                 }
@@ -192,7 +193,9 @@ internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
 
 @Composable
 internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
-    Column(Modifier.fillMaxSize().navigationBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier
+        .fillMaxSize()
+        .navigationBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(120.dp))
         Image(painterResource(R.drawable.img_login_logo), null)
         Spacer(Modifier.height(2.dp))
@@ -251,7 +254,9 @@ internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            Box(Modifier.padding(vertical = 40.dp).navigationBarsPadding()) {
+            Box(Modifier
+                .padding(vertical = 40.dp)
+                .navigationBarsPadding()) {
                 Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
             }
         }

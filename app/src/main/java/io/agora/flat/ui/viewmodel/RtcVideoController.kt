@@ -14,7 +14,7 @@ import kotlin.collections.set
 @ActivityRetainedScoped
 class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     private var textureMap = HashMap<Int, TextureView>()
-    private var fullScreenUid: Int = 0
+    var fullScreenUid: Int = 0
 
     var shareScreenContainer: FrameLayout? = null
     var localUid: Int = 0

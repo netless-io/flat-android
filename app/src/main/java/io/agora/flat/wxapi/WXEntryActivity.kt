@@ -3,6 +3,7 @@ package io.agora.flat.wxapi
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
@@ -15,12 +16,14 @@ import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.activity.LoginActivity
-import io.agora.flat.ui.activity.base.BaseActivity
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class WXEntryActivity : BaseActivity(), IWXAPIEventHandler {
-    private val TAG = WXEntryActivity::class.simpleName
+class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
+    companion object {
+        @JvmStatic
+        private val TAG = WXEntryActivity::class.simpleName
+    }
 
     @Inject
     lateinit var userRepository: UserRepository
@@ -33,25 +36,30 @@ class WXEntryActivity : BaseActivity(), IWXAPIEventHandler {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         api = WXAPIFactory.createWXAPI(this, Constants.WX_APP_ID, false)
-        api.handleIntent(intent, this)
+        wxApiHandleIntent()
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        api.handleIntent(intent, this)
+        wxApiHandleIntent()
+    }
+
+    private fun wxApiHandleIntent() {
+        if (!api.handleIntent(intent, this)) {
+            finish()
+        }
     }
 
     override fun onReq(baseReq: BaseReq?) {
-
+        Log.d(TAG, "wx login onReq call $baseReq")
     }
 
     override fun onResp(baseResp: BaseResp) {
+        Log.d(TAG, "wx login onResp call $baseResp")
         when (baseResp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
                 val code = (baseResp as SendAuth.Resp).code
-                Log.d(TAG, "Login Code $code")
-
                 onAuthSuccess(code)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {

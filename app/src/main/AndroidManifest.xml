@@ -17,6 +17,11 @@
 
     <queries>
         <package android:name="com.tencent.mm" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
     </queries>
 
     <application
@@ -74,6 +79,28 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- need more test -->
+            <!--<intent-filter android:autoVerify="true">-->
+            <!--    <action android:name="android.intent.action.VIEW" />-->
+
+            <!--    <category android:name="android.intent.category.DEFAULT" />-->
+            <!--    <category android:name="android.intent.category.BROWSABLE" />-->
+
+            <!--    <data-->
+            <!--        android:host="flat-web-dev.whiteboard.agora.io"-->
+            <!--        android:scheme="https" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+            <!--    <action android:name="android.intent.action.VIEW" />-->
+
+            <!--    <category android:name="android.intent.category.DEFAULT" />-->
+            <!--    <category android:name="android.intent.category.BROWSABLE" />-->
+
+            <!--    <data-->
+            <!--        android:host="flat-web.whiteboard.agora.io"-->
+            <!--        android:scheme="https" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity android:name=".ui.activity.setting.UserInfoActivity" />
         <activity

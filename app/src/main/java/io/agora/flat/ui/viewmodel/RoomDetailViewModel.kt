@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomDetailPeriodic
 import io.agora.flat.data.model.RoomInfo
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class RoomDetailViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
+    private val appEnv: AppEnv,
     private val eventBus: EventBus,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -84,7 +86,8 @@ class RoomDetailViewModel @Inject constructor(
                 resp.data.roomInfo.map(
                     intentValue(Constants.IntentKey.ROOM_UUID),
                     intentValueNullable(Constants.IntentKey.PERIODIC_UUID),
-                    userRepository.getUsername()
+                    userRepository.getUsername(),
+                    appEnv.baseInviteUrl,
                 ).also { roomInfo.value = it }
             }
             decLoadingCount()
@@ -156,9 +159,15 @@ data class UIRoomInfo(
     val isPeriodic: Boolean = false,
     val hasRecord: Boolean = false,
     val inviteCode: String,
+    val baseInviteUrl: String,
 )
 
-private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?, inUsername: String): UIRoomInfo {
+private fun RoomInfo.map(
+    inRoomUUID: String,
+    inPeriodicUUID: String?,
+    inUsername: String,
+    baseInviteUrl: String,
+): UIRoomInfo {
     return UIRoomInfo(
         roomUUID = inRoomUUID,
         periodicUUID = inPeriodicUUID,
@@ -171,5 +180,6 @@ private fun RoomInfo.map(inRoomUUID: String, inPeriodicUUID: String?, inUsername
         roomStatus = roomStatus,
         hasRecord = hasRecord,
         inviteCode = inviteCode,
+        baseInviteUrl = baseInviteUrl,
     )
 }

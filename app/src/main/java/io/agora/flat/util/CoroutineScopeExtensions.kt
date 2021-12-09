@@ -2,6 +2,7 @@ package io.agora.flat.util
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * 存在动画的交互请求，有助于视觉体验的提升
@@ -14,4 +15,11 @@ suspend fun <T> CoroutineScope.runAtLeast(time: Long = 2000, block: suspend () -
         delay(time - (System.currentTimeMillis() - start))
     }
     return result
+}
+
+fun CoroutineScope.delayLaunch(time: Long = 200, block: () -> Unit) {
+    this.launch {
+        delay(time)
+        block()
+    }
 }

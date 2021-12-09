@@ -48,8 +48,11 @@ import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
 @AndroidEntryPoint
@@ -74,20 +77,27 @@ fun RoomDetailPage(
     val activity = LocalContext.current as Activity
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val actioner: (DetailUiAction) -> Unit = { action ->
         when (action) {
-            DetailUiAction.Back -> navController.popBackStack()
+            DetailUiAction.Back -> {
+                navController.popBackStack()
+            }
             is DetailUiAction.EnterRoom -> {
                 Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
-                navController.popBackStack()
+                scope.delayLaunch {
+                    navController.popBackStack()
+                }
             }
             DetailUiAction.Invite -> {
                 // Show Dialog
             }
             is DetailUiAction.Playback -> {
                 Navigator.launchPlaybackActivity(activity, action.roomUUID)
-                navController.popBackStack()
+                scope.delayLaunch {
+                    navController.popBackStack()
+                }
             }
             DetailUiAction.ShowAllRooms -> visible = true
             DetailUiAction.AllRoomBack -> visible = false
@@ -99,8 +109,11 @@ fun RoomDetailPage(
     }
 
     if (cancelSuccess.value) {
-        navController.popBackStack()
-        return
+        LaunchedEffect(cancelSuccess) {
+            if (cancelSuccess.value) {
+                navController.popBackStack()
+            }
+        }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -108,8 +121,7 @@ fun RoomDetailPage(
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
-            exit = fadeOut(animationSpec = tween())
-        ) {
+            exit = fadeOut(animationSpec = tween())) {
             AllRoomDetail(actioner = actioner)
         }
     }
@@ -436,7 +448,7 @@ private fun Operations(
 private fun InviteDialog(state: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
     val timeDuring =
         "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
-    val inviteLink = Constants.BASE_INVITE_URL + "/join/" + state.roomUUID
+    val inviteLink = state.baseInviteUrl + "/join/" + state.roomUUID
 
     val context = LocalContext.current
     val copyText = """
@@ -687,7 +699,8 @@ private fun InviteDialogPreview() {
         title = "Long Long Room Theme Title Long Long Room Theme Title",
         roomType = RoomType.SmallClass,
         inviteCode = "1111111111-1111111111-1111111111-1111111111",
-        username = "UserXXX"
+        username = "UserXXX",
+        baseInviteUrl = "",
     ), {}, {})
 }
 

@@ -23,8 +23,16 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     val envMap = mutableMapOf<String, EnvItem>()
 
     init {
-        EnvItem("https://flat-api-dev.whiteboard.agora.io/", "9821657775fbc74773f1").also { envMap[ENV_DEV] = it }
-        EnvItem("https://flat-api.whiteboard.agora.io/", "71a29285a437998bdfe0").also { envMap[ENV_PROD] = it }
+        envMap[ENV_DEV] = EnvItem(
+            "https://flat-api-dev.whiteboard.agora.io",
+            "9821657775fbc74773f1",
+            "https://flat-web-dev.whiteboard.agora.io"
+        )
+        envMap[ENV_PROD] = EnvItem(
+            "https://flat-api.whiteboard.agora.io",
+            "71a29285a437998bdfe0",
+            "https://flat-web.whiteboard.agora.io",
+        )
         // EnvItem("https://api-flat-local.netless.group/", "d07230378ca29cef90ee").also { envMap[ENV_LOCAL] = it }
     }
 
@@ -52,5 +60,14 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val githubCallback get() = "${flatServiceUrl}v1/login/github/callback"
 
-    data class EnvItem(val serviceUrl: String, val githubClientId: String)
+    val baseInviteUrl = run {
+        val env = store.getString(STORE_KEY_ENV, ENV_PROD)
+        envMap[env]!!.baseInviteUrl
+    }
+
+    data class EnvItem(
+        val serviceUrl: String,
+        val githubClientId: String,
+        val baseInviteUrl: String,
+    )
 }

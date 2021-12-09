@@ -1,7 +1,5 @@
 package io.agora.flat.ui.activity.play
 
-import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -14,6 +12,7 @@ import coil.transform.CircleCropTransformation
 import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.util.inflate
 
 /**
  * 用户视频区域
@@ -27,23 +26,18 @@ class UserVideoAdapter(
         setHasStableIds(true)
     }
 
-    private var context: Context? = null
     private var recyclerView: RecyclerView? = null
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        context = recyclerView.context
         this.recyclerView = recyclerView
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        context = null
         this.recyclerView = null
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.item_class_rtc_video, viewGroup, false)
+        val view = viewGroup.inflate(R.layout.item_class_rtc_video, viewGroup, false)
         return ViewHolder(view)
     }
 
@@ -67,15 +61,14 @@ class UserVideoAdapter(
         viewHolder.teacherLeaveLy.isVisible = itemData.isNotJoin
         viewHolder.micClosed.isVisible = !itemData.audioOpen
 
-        if (itemData.rtcUID != 0) {
+        if (itemData.rtcUID != 0 && itemData.rtcUID != rtcVideoController.fullScreenUid) {
             rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
         }
 
         viewHolder.itemView.setOnClickListener {
             if (itemData.isNotJoin)
                 return@setOnClickListener
-            rtcVideoController.enterFullScreen(itemData.rtcUID)
-            listener?.onFullScreen(position, viewHolder.videoContainer, itemData)
+            listener?.onItemClick(position, viewHolder.videoContainer, itemData)
         }
         viewHolder.videoClosedLayout.isVisible = !itemData.isNotJoin && !itemData.videoOpen
     }
@@ -110,7 +103,7 @@ class UserVideoAdapter(
     var listener: Listener? = null
 
     interface Listener {
-        fun onFullScreen(position: Int, view: ViewGroup, rtcUser: RtcUser)
+        fun onItemClick(position: Int, view: ViewGroup, rtcUser: RtcUser)
 
         fun onCloseSpeak(position: Int, itemData: RtcUser)
     }
