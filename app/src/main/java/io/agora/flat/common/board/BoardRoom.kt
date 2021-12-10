@@ -68,8 +68,7 @@ class BoardRoom @Inject constructor(
         }
 
         override fun onKickedWithReason(reason: String) {
-            Log.e(TAG, "onKickedWithReason:${reason}")
-            boardRoomPhase.value = BoardRoomPhase.Error(reason)
+            Log.i(TAG, "onKickedWithReason:${reason}")
         }
 
         override fun onRoomStateChanged(modifyState: RoomState) {
