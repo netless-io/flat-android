@@ -6,8 +6,11 @@ import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +52,7 @@ class MainActivity : BaseComposeActivity() {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
 
-            MainPage(viewState)
+            MainScreen(viewState)
         }
         loginHelper.register()
         observerState()
@@ -88,9 +91,10 @@ class MainActivity : BaseComposeActivity() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun MainPage(viewState: MainViewState) {
+fun MainScreen(viewState: MainViewState) {
+    val context = LocalContext.current
+
     if (viewState.loginState == LoginState.Error) {
-        val context = LocalContext.current
         LaunchedEffect(true) {
             Navigator.launchLoginActivity(context)
         }
@@ -101,8 +105,8 @@ fun MainPage(viewState: MainViewState) {
         var mainTab by remember { mutableStateOf(MainTab.Home) }
 
         if (viewState.loginState == LoginState.Login) {
-            if (isPadMode()) {
-                MainPad(navController, mainTab) { mainTab = it }
+            if (isTabletMode()) {
+                MainTablet(navController, mainTab) { mainTab = it }
             } else {
                 Main(navController, mainTab) { mainTab = it }
             }
@@ -117,7 +121,7 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
         .statusBarsPadding()
         .navigationBarsPadding()) {
         Box(MaxWidthSpread) {
-            AppNavigation(navController = navController, modifier = Modifier.fillMaxSize())
+            AppNavigation(navController, Modifier.fillMaxSize())
         }
 
         if (needShowBottomBar(navController)) {
@@ -142,7 +146,7 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
 }
 
 @Composable
-internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     Row {
         Box(Modifier.width(60.dp)) {
             MainPadRail(selectedTab = mainTab) { selectedTab ->
@@ -171,7 +175,7 @@ internal fun MainPad(navController: NavHostController, mainTab: MainTab, onTabSe
             Alignment.Center
         ) {
             when (mainTab) {
-                MainTab.Home -> Home(
+                MainTab.Home -> HomeScreen(
                     navController,
                     onOpenRoomCreate = {
                         navController.navigate(LeafScreen.RoomCreate.createRoute(Screen.HomeExt)) {
@@ -274,15 +278,23 @@ private fun MainBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit
 
     Divider()
     BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.background) {
-        Box(Modifier.weight(1f), Alignment.Center) {
-            IconButton(onClick = { onTabSelected(MainTab.Home) }) {
-                Image(painterResource(homeResId), null)
-            }
+        Box(Modifier
+            .weight(1f)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 56.dp),
+                onClick = { onTabSelected(MainTab.Home) }
+            ), Alignment.Center) {
+            Image(painterResource(homeResId), null)
         }
-        Box(Modifier.weight(1f), Alignment.Center) {
-            IconButton(onClick = { onTabSelected(MainTab.CloudStorage) }) {
-                Image(painterResource(csResId), null)
-            }
+        Box(Modifier
+            .weight(1f)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 56.dp),
+                onClick = { onTabSelected(MainTab.CloudStorage) }
+            ), Alignment.Center) {
+            Image(painterResource(csResId), null)
         }
     }
 }
@@ -291,12 +303,12 @@ private fun MainBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit
 @Preview
 private fun MainPagePreview() {
     val mainViewState = MainViewState(loginState = LoginState.Login)
-    MainPage(mainViewState)
+    MainScreen(mainViewState)
 }
 
 @Composable
 @Preview(device = Devices.PIXEL_C)
 private fun MainPagePadPreview() {
     val mainViewState = MainViewState(loginState = LoginState.Login)
-    MainPage(mainViewState)
+    MainScreen(mainViewState)
 }

@@ -37,7 +37,7 @@ import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
 @Composable
-fun Home(
+fun HomeScreen(
     navController: NavController,
     onOpenRoomCreate: () -> Unit,
     onOpenRoomJoin: () -> Unit,
@@ -45,7 +45,7 @@ fun Home(
     onOpenSetting: () -> Unit,
     onOpenUserProfile: () -> Unit,
 ) {
-    Home(
+    HomeScreen(
         viewModel = hiltViewModel(),
         onOpenRoomCreate = onOpenRoomCreate,
         onOpenRoomJoin = onOpenRoomJoin,
@@ -56,7 +56,7 @@ fun Home(
 }
 
 @Composable
-private fun Home(
+private fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenRoomCreate: () -> Unit,
     onOpenRoomJoin: () -> Unit,
@@ -81,12 +81,12 @@ private fun Home(
         }
     }
 
-    Home(viewState, actioner)
+    HomeScreen(viewState, actioner)
 }
 
 @Composable
-private fun Home(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
-    Column {
+private fun HomeScreen(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
+    Column(Modifier.fillMaxSize()) {
         // 顶部栏
         FlatHomeTopBar(userAvatar = viewState.userInfo.avatar, actioner = actioner)
         if (!viewState.networkActive) FlatNetworkError {
@@ -385,7 +385,7 @@ fun HomePreview() {
     val viewState = HomeViewState(
         networkActive = false
     )
-    Home(viewState) {
+    HomeScreen(viewState) {
 
     }
 }

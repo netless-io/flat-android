@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.agora.flat.ui.theme.FlatAndroidTheme
-import io.agora.flat.ui.theme.isPadMode
+import io.agora.flat.ui.theme.isTabletMode
 
 @Composable
 fun FlatPage(
@@ -30,7 +30,7 @@ fun FlatPage(
         )
     }
 
-    CompositionLocalProvider(LocalIsPadMode provides isPadMode()) {
+    CompositionLocalProvider(LocalIsPadMode provides isTabletMode()) {
         ProvideWindowInsets(consumeWindowInsets = false) {
             FlatAndroidTheme {
                 Surface(color = MaterialTheme.colors.background) {

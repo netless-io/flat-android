@@ -57,10 +57,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onMainTabSelected(selectedTab: MainTab) {
-        _state.value = _state.value.copy(mainTab = selectedTab)
-    }
-
     fun isLoggedIn() = userRepository.isLoggedIn()
 
     private fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {

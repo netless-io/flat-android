@@ -66,6 +66,6 @@ fun FlatAndroidTheme(
 }
 
 @Composable
-fun isPadMode(): Boolean {
+fun isTabletMode(): Boolean {
     return LocalContext.current.isTabletMode()
 }

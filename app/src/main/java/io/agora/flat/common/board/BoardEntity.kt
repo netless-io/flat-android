@@ -1,7 +1,5 @@
 package io.agora.flat.common.board
 
-import java.lang.Exception
-
 data class BoardSceneState(val scenes: List<SceneItem>, val index: Int)
 
 data class SceneItem(val scenePath: String, val preview: String?)

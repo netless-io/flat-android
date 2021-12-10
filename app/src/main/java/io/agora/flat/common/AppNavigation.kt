@@ -11,7 +11,7 @@ import androidx.navigation.compose.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import io.agora.flat.ui.activity.home.*
-import io.agora.flat.ui.activity.room.CreateRoomPage
+import io.agora.flat.ui.activity.room.CreateRoomScreen
 import io.agora.flat.ui.activity.room.JoinRoomPage
 import io.agora.flat.ui.activity.room.RoomDetailPage
 import io.agora.flat.ui.activity.setting.Settings
@@ -88,7 +88,7 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             ExtInitPage()
         }
         composable(LeafScreen.RoomCreate.createRoute(screenRoot)) {
-            CreateRoomPage(navController)
+            CreateRoomScreen(navController)
         }
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
             JoinRoomPage(navController)
@@ -154,7 +154,7 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
     val screenRoot = Screen.Home
     navigation(route = Screen.Home.route, startDestination = LeafScreen.Home.createRoute(screenRoot)) {
         composable(LeafScreen.Home.createRoute(screenRoot)) {
-            Home(
+            HomeScreen(
                 navController,
                 onOpenRoomCreate = {
                     navController.navigate(LeafScreen.RoomCreate.createRoute(screenRoot))
@@ -174,7 +174,7 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             )
         }
         composable(LeafScreen.RoomCreate.createRoute(screenRoot)) {
-            CreateRoomPage(navController)
+            CreateRoomScreen(navController)
         }
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
             JoinRoomPage(navController)

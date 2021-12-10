@@ -36,6 +36,7 @@ import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.FlatSmallTipTextStyle
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.ui.viewmodel.ViewState
+import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.isTabletMode
 
 @AndroidEntryPoint
@@ -51,12 +52,13 @@ class CreateRoomActivity : BaseComposeActivity() {
 }
 
 @Composable
-fun CreateRoomPage(
+fun CreateRoomScreen(
     navController: NavController,
     viewModel: CreateRoomViewModel = hiltViewModel(),
 ) {
     val activity = LocalContext.current as Activity
     val viewState by viewModel.state.collectAsState()
+    val scope = rememberCoroutineScope()
 
     val actioner: (CreateRoomAction) -> Unit = { action ->
         when (action) {
@@ -66,7 +68,9 @@ fun CreateRoomPage(
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.openVideo)
                 Navigator.launchRoomPlayActivity(activity, viewState.roomUUID)
-                navController.popBackStack()
+                scope.delayLaunch {
+                    navController.popBackStack()
+                }
             }
             is CreateRoomAction.CreateRoom -> {
                 viewModel.createRoom(action.title, action.roomType)
