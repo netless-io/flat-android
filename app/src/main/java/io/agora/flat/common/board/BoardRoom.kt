@@ -1,25 +1,31 @@
 package io.agora.flat.common.board
 
-import android.app.Activity
+import android.content.Context
 import android.util.Log
 import android.webkit.WebView
 import com.herewhite.sdk.*
 import com.herewhite.sdk.domain.*
-import dagger.hilt.android.scopes.ActivityScoped
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.interfaces.BoardRoomApi
+import io.agora.flat.di.interfaces.IBoardRoom
 import kotlinx.coroutines.flow.*
 import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashMap
 
-@ActivityScoped
-class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepository: UserRepository) : BoardRoomApi {
+@ActivityRetainedScoped
+class BoardRoom @Inject constructor(
+    @ApplicationContext
+    val context: Context,
+    val userRepository: UserRepository,
+) :
+    IBoardRoom {
     companion object {
-        const val TAG = "BoardRoomImpl"
+        const val TAG = "BoardRoom"
     }
 
     private lateinit var whiteSdk: WhiteSdk
@@ -27,11 +33,12 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
     private var sceneState = MutableStateFlow<BoardSceneState?>(null)
     private var memberState = MutableStateFlow<MemberState?>(null)
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
+    private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
 
     private var joinRoomCallback = object : Promise<Room> {
         override fun then(room: Room) {
             Log.i(TAG, "join room success")
-            this@BoardRoomApiImpl.room = room
+            this@BoardRoom.room = room
             memberState.value = room.roomState.memberState
             sceneState.value = room.roomState.sceneState.toBoardSceneState()
             updateSerialization(room.writable)
@@ -39,6 +46,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
 
         override fun catchEx(t: SDKError) {
             Log.e(TAG, "join room error $t")
+            boardRoomPhase.value = BoardRoomPhase.Error(t.toString())
         }
     }
 
@@ -46,20 +54,22 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
         override fun onPhaseChanged(phase: RoomPhase) {
             Log.d(TAG, "onPhaseChanged:${phase.name}")
             when (phase) {
-                RoomPhase.connecting -> {; }
-                RoomPhase.connected -> {; }
+                RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
+                RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
                 RoomPhase.reconnecting -> {; }
                 RoomPhase.disconnecting -> {; }
-                RoomPhase.disconnected -> {; }
+                RoomPhase.disconnected -> boardRoomPhase.value = BoardRoomPhase.Disconnected
             }
         }
 
         override fun onDisconnectWithError(e: Exception) {
             Log.e(TAG, "onDisconnectWithError:${e.message}")
+            boardRoomPhase.value = BoardRoomPhase.Error(e.toString())
         }
 
         override fun onKickedWithReason(reason: String) {
             Log.e(TAG, "onKickedWithReason:${reason}")
+            boardRoomPhase.value = BoardRoomPhase.Error(reason)
         }
 
         override fun onRoomStateChanged(modifyState: RoomState) {
@@ -84,6 +94,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
 
         override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
             Log.w(TAG, "onCatchErrorWhenAppendFrame${error}")
+            boardRoomPhase.value = BoardRoomPhase.Error("$userId $error")
         }
     }
 
@@ -94,7 +105,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
         configuration.isUserCursor = true
         configuration.useMultiViews = true
 
-        whiteSdk = WhiteSdk(whiteboardView, activity, configuration)
+        whiteSdk = WhiteSdk(whiteboardView, context, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallback {
             override fun onMessage(message: JSONObject) {
                 Log.i(TAG, message.toString())
@@ -102,10 +113,12 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
 
             override fun sdkSetupFail(error: SDKError) {
                 Log.e(TAG, "sdkSetupFail $error")
+                boardRoomPhase.value = BoardRoomPhase.Error(error.toString())
             }
 
             override fun throwError(args: Any) {
                 Log.e(TAG, "throwError $args")
+                boardRoomPhase.value = BoardRoomPhase.Error("throwError $args")
             }
         })
     }
@@ -237,7 +250,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
                     SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
                 }
 
-                this@BoardRoomApiImpl.sceneState.value = BoardSceneState(list, targetIndex)
+                this@BoardRoom.sceneState.value = BoardSceneState(list, targetIndex)
             }
 
             override fun catchEx(t: SDKError?) {
@@ -259,7 +272,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
                     SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
                 }
 
-                this@BoardRoomApiImpl.sceneState.value = BoardSceneState(list, sceneState.index)
+                this@BoardRoom.sceneState.value = BoardSceneState(list, sceneState.index)
             }
 
             override fun catchEx(t: SDKError?) {
@@ -271,7 +284,7 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
     override fun refreshSceneState() {
         room?.getSceneState(object : Promise<SceneState> {
             override fun then(sceneState: SceneState) {
-                this@BoardRoomApiImpl.sceneState.value = sceneState.toBoardSceneState()
+                this@BoardRoom.sceneState.value = sceneState.toBoardSceneState()
             }
 
             override fun catchEx(t: SDKError?) {
@@ -310,16 +323,20 @@ class BoardRoomApiImpl @Inject constructor(val activity: Activity, val userRepos
         room?.addApp(param, null)
     }
 
-    override fun observerSceneState(): Flow<BoardSceneState> {
+    override fun observeSceneState(): Flow<BoardSceneState> {
         return sceneState.asStateFlow().filterNotNull()
     }
 
-    override fun observerMemberState(): Flow<MemberState> {
+    override fun observeMemberState(): Flow<MemberState> {
         return memberState.asStateFlow().filterNotNull()
     }
 
-    override fun observerUndoRedoState(): Flow<UndoRedoState> {
+    override fun observeUndoRedoState(): Flow<UndoRedoState> {
         return undoRedoState.asStateFlow()
+    }
+
+    override fun observeRoomPhase(): Flow<BoardRoomPhase> {
+        return boardRoomPhase.asStateFlow()
     }
 
     private fun updateSerialization(writable: Boolean) {

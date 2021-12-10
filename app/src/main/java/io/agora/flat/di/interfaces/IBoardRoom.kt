@@ -4,11 +4,12 @@ import com.herewhite.sdk.WhiteboardView
 import com.herewhite.sdk.domain.ConvertedFiles
 import com.herewhite.sdk.domain.MemberState
 import com.herewhite.sdk.domain.ViewMode
+import io.agora.flat.common.board.BoardRoomPhase
 import io.agora.flat.common.board.BoardSceneState
 import io.agora.flat.common.board.UndoRedoState
 import kotlinx.coroutines.flow.Flow
 
-interface BoardRoomApi {
+interface IBoardRoom {
     fun initSdk(whiteboardView: WhiteboardView)
 
     fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean)
@@ -40,7 +41,7 @@ interface BoardRoomApi {
     fun deleteCurrentSlide()
     fun refreshSceneState()
     fun cleanScene(retainPpt: Boolean = true)
-    fun setSceneIndex(index:Int)
+    fun setSceneIndex(index: Int)
 
     // courseware
     fun insertImage(imageUrl: String, w: Int, h: Int)
@@ -49,7 +50,8 @@ interface BoardRoomApi {
 
     fun insertVideo(videoUrl: String, title: String)
 
-    fun observerSceneState(): Flow<BoardSceneState>
-    fun observerMemberState(): Flow<MemberState>
-    fun observerUndoRedoState(): Flow<UndoRedoState>
+    fun observeSceneState(): Flow<BoardSceneState>
+    fun observeMemberState(): Flow<MemberState>
+    fun observeUndoRedoState(): Flow<UndoRedoState>
+    fun observeRoomPhase(): Flow<BoardRoomPhase>
 }

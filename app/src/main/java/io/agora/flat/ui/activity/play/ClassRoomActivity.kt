@@ -20,7 +20,6 @@ class ClassRoomActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         binding = ActivityRoomPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -31,6 +30,7 @@ class ClassRoomActivity : BaseActivity() {
             binding.shareScreenContainer))
         componentSet.add(RtmComponent(this, binding.messageContainer))
         componentSet.add(ToolComponent(this, binding.toolContainer))
+        componentSet.add(ExtComponent(this, binding.extensionContainer))
 
         componentSet.forEach { lifecycle.addObserver(it) }
 
@@ -47,7 +47,13 @@ class ClassRoomActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         enableFullScreen()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onBackPressed() {

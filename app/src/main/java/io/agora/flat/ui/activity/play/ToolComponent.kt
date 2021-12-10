@@ -14,13 +14,12 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
-import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
-import io.agora.flat.di.interfaces.BoardRoomApi
+import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -47,7 +46,7 @@ class ToolComponent(
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {
-        fun boardRoom(): BoardRoomApi
+        fun boardRoom(): IBoardRoom
         fun appEnv(): AppEnv
     }
 
@@ -55,7 +54,7 @@ class ToolComponent(
     private lateinit var toolAnimator: SimpleAnimator
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private lateinit var boardRoom: BoardRoomApi
+    private lateinit var boardRoom: IBoardRoom
     private lateinit var appEnv: AppEnv
 
     private lateinit var cloudStorageAdapter: CloudStorageAdapter

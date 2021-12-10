@@ -22,7 +22,7 @@ import io.agora.flat.common.board.BoardSceneState
 import io.agora.flat.common.board.SceneItem
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.databinding.LayoutScenePreviewBinding
-import io.agora.flat.di.interfaces.BoardRoomApi
+import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
@@ -47,14 +47,14 @@ class WhiteboardComponent(
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface BoardComponentEntryPoint {
-        fun boardRoom(): BoardRoomApi
+        fun boardRoom(): IBoardRoom
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
     private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
-    private lateinit var boardRoom: BoardRoomApi
+    private lateinit var boardRoom: IBoardRoom
     private lateinit var colorAdapter: ColorAdapter
     private lateinit var applianceAdapter: ApplianceAdapter
     private lateinit var slideAdapter: SceneAdapter
@@ -259,14 +259,14 @@ class WhiteboardComponent(
         }
 
         lifecycleScope.launchWhenResumed {
-            boardRoom.observerSceneState().collect { sceneState ->
+            boardRoom.observeSceneState().collect { sceneState ->
                 slideAdapter.setDataSetAndIndex(sceneState.scenes, sceneState.index)
                 updatePageIndicate(sceneState)
             }
         }
 
         lifecycleScope.launchWhenResumed {
-            boardRoom.observerMemberState().collect { memberState ->
+            boardRoom.observeMemberState().collect { memberState ->
                 val colorItem = ColorItem.of(memberState.strokeColor)
                 if (colorItem != null) {
                     updateMemberState(memberState)
@@ -277,7 +277,7 @@ class WhiteboardComponent(
         }
 
         lifecycleScope.launchWhenResumed {
-            boardRoom.observerUndoRedoState().collect {
+            boardRoom.observeUndoRedoState().collect {
                 binding.undo.isEnabled = it.undoCount != 0L
                 binding.redo.isEnabled = it.redoCount != 0L
             }

@@ -755,6 +755,8 @@ data class ImageSize(val width: Int, val height: Int)
 
 sealed class ClassRoomEvent {
     data class RoomPlayInfoFetched(val info: RoomPlayInfo) : ClassRoomEvent()
+    data class Loading(val show: Boolean) : ClassRoomEvent()
+
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 

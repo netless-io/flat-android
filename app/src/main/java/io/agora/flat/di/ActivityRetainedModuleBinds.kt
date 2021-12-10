@@ -10,6 +10,7 @@ import io.agora.flat.di.interfaces.IBoardRoom
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-abstract class ActivityModuleBinds {
-
+abstract class ActivityRetainedModuleBinds {
+    @Binds
+    abstract fun providerBoardRoom(bind: BoardRoom): IBoardRoom
 }
