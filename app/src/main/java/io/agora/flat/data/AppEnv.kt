@@ -7,7 +7,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
- *  应用内切换配置
+ * 应用内切换配置
  */
 class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences = context.getSharedPreferences("flat_env", Context.MODE_PRIVATE)
@@ -15,7 +15,6 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     companion object {
         const val ENV_PROD = "prod"
         const val ENV_DEV = "dev"
-        const val ENV_LOCAL = "local"
 
         const val STORE_KEY_ENV = "key_env"
     }
@@ -33,7 +32,6 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             "71a29285a437998bdfe0",
             "https://flat-web.whiteboard.agora.io",
         )
-        // EnvItem("https://api-flat-local.netless.group/", "d07230378ca29cef90ee").also { envMap[ENV_LOCAL] = it }
     }
 
     fun setEnv(env: String) {
@@ -46,23 +44,20 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         return store.getString(STORE_KEY_ENV, ENV_PROD)!!
     }
 
-    val flatServiceUrl
-        get() = run {
-            val env = store.getString(STORE_KEY_ENV, ENV_PROD)
-            envMap[env]!!.serviceUrl
-        }
+    private val currentEnvItem = envMap[getEnv()]!!
 
-    val githubClientID
-        get() = run {
-            val env = store.getString(STORE_KEY_ENV, ENV_PROD)
-            envMap[env]!!.githubClientId
-        }
+    val flatServiceUrl = run {
+        currentEnvItem.serviceUrl
+    }
+
+    val githubClientID = run {
+        currentEnvItem.githubClientId
+    }
 
     val githubCallback get() = "${flatServiceUrl}v1/login/github/callback"
 
     val baseInviteUrl = run {
-        val env = store.getString(STORE_KEY_ENV, ENV_PROD)
-        envMap[env]!!.baseInviteUrl
+        currentEnvItem.baseInviteUrl
     }
 
     data class EnvItem(
