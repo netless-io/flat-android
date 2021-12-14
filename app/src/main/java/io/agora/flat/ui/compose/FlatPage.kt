@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.agora.flat.ui.theme.FlatAndroidTheme
-import io.agora.flat.ui.theme.isTabletMode
 
 @Composable
 fun FlatPage(
@@ -30,12 +28,11 @@ fun FlatPage(
         )
     }
 
-    CompositionLocalProvider(LocalIsPadMode provides isTabletMode()) {
+
+    FlatAndroidTheme {
         ProvideWindowInsets(consumeWindowInsets = false) {
-            FlatAndroidTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    content()
-                }
+            Surface(color = MaterialTheme.colors.background) {
+                content()
             }
         }
     }

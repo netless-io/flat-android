@@ -39,7 +39,7 @@ import java.util.*
 @Composable
 fun CloudStorage(
     onOpenUploading: () -> Unit,
-    onOpenItemPick: (() -> Unit) ?= null,
+    onOpenItemPick: (() -> Unit)? = null,
     viewModel: CloudStorageViewModel = hiltViewModel(),
 ) {
     val viewState by viewModel.state.collectAsState()
@@ -70,7 +70,7 @@ internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStor
                 Box(Modifier.fillMaxSize()) {
                     CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
 
-                    if (LocalIsPadMode.current) {
+                    if (isTabletMode()) {
                         AddFileLayoutPad(actioner)
                     } else {
                         AddFileLayout(actioner)

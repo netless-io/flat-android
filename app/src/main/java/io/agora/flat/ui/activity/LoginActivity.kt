@@ -37,8 +37,8 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.LocalIsPadMode
 import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
@@ -182,8 +182,7 @@ class LoginActivity : BaseComposeActivity() {
 @Composable
 internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
     FlatPage(statusBarColor = Transparent) {
-        val isPad = LocalIsPadMode.current
-        if (isPad) {
+        if (isTabletMode()) {
             LoginMainPad(actioner)
         } else {
             LoginMain(actioner)

@@ -20,12 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
@@ -45,8 +42,6 @@ class MainActivity : BaseComposeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             val viewModel: MainViewModel by viewModels()
@@ -116,13 +111,11 @@ fun MainScreen(viewState: MainViewState) {
 
 @Composable
 internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
-    Column(Modifier
-        .fillMaxSize()
-        .statusBarsPadding()
-        .navigationBarsPadding()) {
-        Box(MaxWidthSpread) {
-            AppNavigation(navController, Modifier.fillMaxSize())
-        }
+    Column(Modifier) {
+        AppNavigation(navController,
+            Modifier
+                .weight(1f)
+                .fillMaxWidth())
 
         if (needShowBottomBar(navController)) {
             MainBottomBar(mainTab) { selectedTab ->
@@ -148,7 +141,7 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
 @Composable
 internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     Row {
-        Box(Modifier.width(60.dp)) {
+        Box(Modifier.width(56.dp)) {
             MainPadRail(selectedTab = mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.HomeExt.route
@@ -167,11 +160,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                 onTabSelected(selectedTab)
             }
         }
-        Box(
-            Modifier
-                .width(360.dp)
-                .statusBarsPadding()
-                .navigationBarsPadding(),
+        Box(Modifier.weight(1f),
             Alignment.Center
         ) {
             when (mainTab) {
@@ -223,10 +212,8 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
         AppNavigation(
             navController,
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .statusBarsPadding()
-                .navigationBarsPadding(),
+                .weight(2f)
+                .fillMaxHeight(),
             startDestination = Screen.HomeExt.route,
         )
     }
@@ -266,7 +253,7 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
 }
 
 @Composable
-private fun MainBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
         MainTab.CloudStorage -> R.drawable.ic_home_main_normal
@@ -276,25 +263,27 @@ private fun MainBottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit
         MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
     }
 
-    Divider()
-    BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.background) {
-        Box(Modifier
-            .weight(1f)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false, radius = 56.dp),
-                onClick = { onTabSelected(MainTab.Home) }
-            ), Alignment.Center) {
-            Image(painterResource(homeResId), null)
-        }
-        Box(Modifier
-            .weight(1f)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false, radius = 56.dp),
-                onClick = { onTabSelected(MainTab.CloudStorage) }
-            ), Alignment.Center) {
-            Image(painterResource(csResId), null)
+    Column(modifier) {
+        Divider()
+        BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.background) {
+            Box(Modifier
+                .weight(1f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(bounded = false, radius = 56.dp),
+                    onClick = { onTabSelected(MainTab.Home) }
+                ), Alignment.Center) {
+                Image(painterResource(homeResId), null)
+            }
+            Box(Modifier
+                .weight(1f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(bounded = false, radius = 56.dp),
+                    onClick = { onTabSelected(MainTab.CloudStorage) }
+                ), Alignment.Center) {
+                Image(painterResource(csResId), null)
+            }
         }
     }
 }
