@@ -54,7 +54,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         currentEnvItem.githubClientId
     }
 
-    val githubCallback get() = "${flatServiceUrl}v1/login/github/callback"
+    val githubCallback get() = "${flatServiceUrl}/v1/login/github/callback"
 
     val baseInviteUrl = run {
         currentEnvItem.baseInviteUrl
