@@ -13,7 +13,7 @@ import com.google.accompanist.navigation.animation.composable
 import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomScreen
 import io.agora.flat.ui.activity.room.JoinRoomPage
-import io.agora.flat.ui.activity.room.RoomDetailPage
+import io.agora.flat.ui.activity.room.RoomDetailScreen
 import io.agora.flat.ui.activity.setting.Settings
 import io.agora.flat.ui.activity.setting.UserProfile
 
@@ -97,7 +97,7 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
             })) {
-            RoomDetailPage(navController)
+            RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {
             Settings(navController)
@@ -183,7 +183,7 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
             })) {
-            RoomDetailPage(navController)
+            RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {
             Settings(navController)

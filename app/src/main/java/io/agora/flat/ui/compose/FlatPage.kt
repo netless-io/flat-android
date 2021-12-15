@@ -27,8 +27,7 @@ fun FlatPage(
             darkIcons = useDarkIcons
         )
     }
-
-
+    
     FlatAndroidTheme {
         ProvideWindowInsets(consumeWindowInsets = false) {
             Surface(color = MaterialTheme.colors.background) {

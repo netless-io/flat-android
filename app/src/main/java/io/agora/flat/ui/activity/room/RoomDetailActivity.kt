@@ -29,15 +29,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
-import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.rememberAndroidClipboardController
@@ -46,13 +45,12 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.RoomDetailViewModel
+import io.agora.flat.ui.viewmodel.RoomDetailViewState
 import io.agora.flat.ui.viewmodel.UIRoomInfo
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.*
 
 @AndroidEntryPoint
@@ -70,14 +68,18 @@ class RoomDetailActivity : BaseComposeActivity() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun RoomDetailPage(
+fun RoomDetailScreen(
     navController: NavController,
     viewModel: RoomDetailViewModel = hiltViewModel(),
 ) {
     val activity = LocalContext.current as Activity
+    val viewState by viewModel.state.collectAsState()
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    var showInvite by remember { mutableStateOf(false) }
+    val clipboard = rememberAndroidClipboardController()
 
     val actioner: (DetailUiAction) -> Unit = { action ->
         when (action) {
@@ -91,7 +93,7 @@ fun RoomDetailPage(
                 }
             }
             DetailUiAction.Invite -> {
-                // Show Dialog
+                showInvite = true
             }
             is DetailUiAction.Playback -> {
                 Navigator.launchPlaybackActivity(activity, action.roomUUID)
@@ -117,22 +119,27 @@ fun RoomDetailPage(
     }
 
     Box(Modifier.fillMaxSize()) {
-        RoomDetailPage(actioner = actioner)
+        RoomDetailScreen(viewState, actioner = actioner)
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
             exit = fadeOut(animationSpec = tween())) {
-            AllRoomDetail(actioner = actioner)
+            PeriodicDetailScreen(viewState, actioner = actioner)
+        }
+
+        if (showInvite) {
+            InviteDialog(viewState.roomInfo!!, { showInvite = false }) {
+                clipboard.putText(it)
+                showInvite = false
+                activity.showToast(R.string.copy_success)
+            }
         }
     }
 }
 
 @Composable
-private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
+private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUiAction) -> Unit) {
     Column {
-        val viewModel: RoomDetailViewModel = viewModel()
-        val viewState by viewModel.state.collectAsState()
-
         BackTopAppBar(
             stringResource(R.string.title_room_detail),
             onBackPressed = { actioner(DetailUiAction.Back) }) {
@@ -143,14 +150,10 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
 
         Box(MaxWidthSpread, Alignment.Center) {
             if (viewState.roomInfo != null) {
-                val roomInfo = viewState.roomInfo!!
+                val roomInfo = viewState.roomInfo
                 Column(MaxWidth) {
-                    TimeDisplay(
-                        begin = roomInfo.beginTime,
-                        end = roomInfo.endTime,
-                        state = roomInfo.roomStatus
-                    )
-                    if (viewModel.isPeriodicRoom() && viewState.periodicRoomInfo != null) {
+                    TimeDisplay(begin = roomInfo.beginTime, end = roomInfo.endTime, state = roomInfo.roomStatus)
+                    if (viewState.isPeriodicRoom) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
                         Column(MaxWidth.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
@@ -162,15 +165,9 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
                             FlatNormalVerticalSpacer()
                         }
                     }
-                    MoreRomeInfoDisplay(roomInfo.inviteCode, roomInfo.roomType, viewModel.isPeriodicRoom())
-                    Spacer(modifier = Modifier.weight(1f))
-                    Operations(
-                        roomInfo,
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 32.dp, horizontal = 16.dp),
-                        actioner = actioner
-                    )
+                    MoreRomeInfoDisplay(roomInfo.inviteCode, roomInfo.roomType, viewState.isPeriodicRoom)
+
+                    BottomOperations(MaxWidthSpread, roomInfo, actioner)
                 }
             }
             if (viewState.loading) {
@@ -182,10 +179,7 @@ private fun RoomDetailPage(actioner: (DetailUiAction) -> Unit) {
 
 @ExperimentalAnimationApi
 @Composable
-private fun AllRoomDetail(actioner: (DetailUiAction) -> Unit) {
-    val viewModel: RoomDetailViewModel = viewModel()
-    val viewState by viewModel.state.collectAsState()
-
+private fun PeriodicDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUiAction) -> Unit) {
     FlatColumnPage {
         BackHandler(onBack = { actioner(DetailUiAction.AllRoomBack) })
         BackTopAppBar(stringResource(R.string.title_room_all),
@@ -196,13 +190,9 @@ private fun AllRoomDetail(actioner: (DetailUiAction) -> Unit) {
         }
         viewState.periodicRoomInfo?.run {
             LazyColumn {
-                item {
-                    PeriodicInfoDisplay(periodic, rooms.size)
-                }
+                item { PeriodicInfoDisplay(periodic, rooms.size) }
 
-                item {
-                    PeriodicSubRoomsDisplay(rooms)
-                }
+                item { PeriodicSubRoomsDisplay(rooms) }
             }
         }
     }
@@ -411,6 +401,59 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
 }
 
 @Composable
+private fun BottomOperations(
+    modifier: Modifier,
+    roomInfo: UIRoomInfo,
+    actioner: (DetailUiAction) -> Unit,
+) {
+    Box(modifier) {
+        if (isTabletMode()) {
+            TabletOperations(
+                roomInfo,
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                actioner = actioner)
+        } else {
+            Operations(
+                roomInfo,
+                MaxWidth
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp, 32.dp),
+                actioner = actioner
+            )
+        }
+    }
+}
+
+@Composable
+private fun TabletOperations(
+    roomInfo: UIRoomInfo,
+    modifier: Modifier,
+    actioner: (DetailUiAction) -> Unit,
+) = when (roomInfo.roomStatus) {
+    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
+        Row(modifier) {
+            FlatSmallSecondaryTextButton(
+                stringResource(R.string.copy_invite),
+                onClick = { actioner(DetailUiAction.Invite) }
+            )
+            FlatNormalHorizontalSpacer()
+            FlatSmallPrimaryTextButton(
+                stringResource(R.string.enter_room),
+                onClick = { actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID)) }
+            )
+        }
+    RoomStatus.Stopped ->
+        Row(modifier) {
+            FlatSmallPrimaryTextButton(
+                stringResource(id = R.string.replay), roomInfo.hasRecord,
+                onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) }
+            )
+        }
+}
+
+@Composable
 private fun Operations(
     roomInfo: UIRoomInfo,
     modifier: Modifier,
@@ -418,19 +461,9 @@ private fun Operations(
 ) = when (roomInfo.roomStatus) {
     RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
         Column(modifier) {
-            var openDialog by remember { mutableStateOf(false) }
-            val clipboard = rememberAndroidClipboardController()
-            val context = LocalContext.current
-
-            if (openDialog) {
-                InviteDialog(roomInfo, { openDialog = false }) {
-                    clipboard.putText(it)
-                    openDialog = false
-                    context.showToast(R.string.copy_success)
-                }
-            }
-
-            FlatSecondaryTextButton(stringResource(R.string.copy_invite), onClick = { openDialog = true })
+            FlatSecondaryTextButton(stringResource(R.string.copy_invite), onClick = {
+                actioner(DetailUiAction.Invite)
+            })
             FlatNormalVerticalSpacer()
             FlatPrimaryTextButton(stringResource(R.string.enter_room), onClick = {
                 actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
@@ -445,39 +478,39 @@ private fun Operations(
 }
 
 @Composable
-private fun InviteDialog(state: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
+private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
     val timeDuring =
-        "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
-    val inviteLink = state.baseInviteUrl + "/join/" + state.roomUUID
+        "${FlatFormatter.date(roomInfo.beginTime)} ${FlatFormatter.timeDuring(roomInfo.beginTime, roomInfo.endTime)}"
+    val inviteLink = roomInfo.baseInviteUrl + "/join/" + roomInfo.roomUUID
 
     val context = LocalContext.current
     val copyText = """
-        |${context.getString(R.string.invite_title_format, state.username)}
+        |${context.getString(R.string.invite_title_format, roomInfo.username)}
         |
-        |${context.getString(R.string.invite_room_name_format, state.title)}
+        |${context.getString(R.string.invite_room_name_format, roomInfo.title)}
         |${context.getString(R.string.invite_begin_time_format, timeDuring)}
         |
-        |${context.getString(R.string.invite_room_number_format, state.inviteCode.toInviteCodeDisplay())}
+        |${context.getString(R.string.invite_room_number_format, roomInfo.inviteCode.toInviteCodeDisplay())}
         |${context.getString(R.string.invite_join_link_format, inviteLink)}
         """.trimMargin()
 
     Dialog(onDismissRequest) {
         Surface(shape = Shapes.large) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                Text(stringResource(R.string.invite_title_format, state.username))
+                Text(stringResource(R.string.invite_title_format, roomInfo.username))
                 FlatLargeVerticalSpacer()
                 Row {
                     Text(stringResource(R.string.room_theme))
                     Spacer(Modifier.width(16.dp))
                     Spacer(Modifier.weight(1f))
-                    Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(roomInfo.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 FlatNormalVerticalSpacer()
                 Row {
                     Text(stringResource(R.string.room_id))
                     Spacer(Modifier.width(16.dp))
                     Spacer(Modifier.weight(1f))
-                    Text(state.inviteCode.toInviteCodeDisplay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(roomInfo.inviteCode.toInviteCodeDisplay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 FlatNormalVerticalSpacer()
                 Row {
@@ -694,7 +727,7 @@ private fun RoomType(roomType: RoomType, modifier: Modifier = Modifier) {
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF)
 private fun InviteDialogPreview() {
-    InviteDialog(state = UIRoomInfo(
+    InviteDialog(roomInfo = UIRoomInfo(
         roomUUID = "722f7f6d-cc0f-4e63-a543-446a3b7bd659",
         title = "Long Long Room Theme Title Long Long Room Theme Title",
         roomType = RoomType.SmallClass,
@@ -704,6 +737,24 @@ private fun InviteDialogPreview() {
     ), {}, {})
 }
 
+@Composable
+@Preview(device = Devices.PIXEL_C)
+private fun BottomOperationsPreview() {
+    FlatPage {
+        BottomOperations(
+            modifier = Modifier.size(width = 400.dp, height = 300.dp),
+            roomInfo = UIRoomInfo(
+                roomUUID = "722f7f6d-cc0f-4e63-a543-446a3b7bd659",
+                title = "Long Long Room Theme Title Long Long Room Theme Title",
+                roomType = RoomType.SmallClass,
+                inviteCode = "1111111111-1111111111-1111111111-1111111111",
+                username = "UserXXX",
+                baseInviteUrl = "",
+            ),
+        ) {
+        }
+    }
+}
 
 internal sealed class DetailUiAction {
     object Back : DetailUiAction()
@@ -716,5 +767,7 @@ internal sealed class DetailUiAction {
     object DeleteRoom : DetailUiAction()
 
     // AllRoom
-    object AllRoomBack : DetailUiAction()
+    object AllRoomBack : DetailUiAction() {
+
+    }
 }

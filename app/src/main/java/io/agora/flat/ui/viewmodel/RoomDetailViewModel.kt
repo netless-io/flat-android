@@ -29,7 +29,7 @@ class RoomDetailViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val appEnv: AppEnv,
     private val eventBus: EventBus,
-    private val savedStateHandle: SavedStateHandle,
+    val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val roomInfo = MutableStateFlow<UIRoomInfo?>(null)
     private val periodicRoomInfo = MutableStateFlow<RoomDetailPeriodic?>(null)
@@ -37,6 +37,8 @@ class RoomDetailViewModel @Inject constructor(
     private val loadingCount = AtomicInteger(0)
 
     private var userUUID: String = userRepository.getUserInfo()!!.uuid
+    private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
+    private val periodicUUID = savedStateHandle.get<String>(Constants.IntentKey.PERIODIC_UUID)
 
     private val _state = MutableStateFlow(RoomDetailViewState(userUUID = userUUID))
     val state: StateFlow<RoomDetailViewState>
@@ -62,7 +64,7 @@ class RoomDetailViewModel @Inject constructor(
 
         loadOrdinaryRoom()
 
-        if (isPeriodicRoom()) {
+        if (periodicUUID != null) {
             loadPeriodicRoomInfo()
         }
     }
@@ -81,11 +83,11 @@ class RoomDetailViewModel @Inject constructor(
     private fun loadOrdinaryRoom() {
         viewModelScope.launch {
             incLoadingCount()
-            val resp = roomRepository.getOrdinaryRoomInfo(intentValue(Constants.IntentKey.ROOM_UUID))
+            val resp = roomRepository.getOrdinaryRoomInfo(roomUUID)
             if (resp is Success) {
                 resp.data.roomInfo.map(
-                    intentValue(Constants.IntentKey.ROOM_UUID),
-                    intentValueNullable(Constants.IntentKey.PERIODIC_UUID),
+                    roomUUID,
+                    periodicUUID,
                     userRepository.getUsername(),
                     appEnv.baseInviteUrl,
                 ).also { roomInfo.value = it }
@@ -97,7 +99,7 @@ class RoomDetailViewModel @Inject constructor(
     private fun loadPeriodicRoomInfo() {
         viewModelScope.launch {
             incLoadingCount()
-            val resp = roomRepository.getPeriodicRoomInfo(intentValue(Constants.IntentKey.PERIODIC_UUID))
+            val resp = roomRepository.getPeriodicRoomInfo(periodicUUID!!)
             if (resp is Success) {
                 periodicRoomInfo.value = resp.data
             }
@@ -105,25 +107,13 @@ class RoomDetailViewModel @Inject constructor(
         }
     }
 
-    fun isPeriodicRoom(): Boolean {
-        return savedStateHandle.get<String>(Constants.IntentKey.PERIODIC_UUID) != null
-    }
-
-    private fun intentValue(key: String): String {
-        return savedStateHandle.get<String>(key)!!
-    }
-
-    private fun intentValueNullable(key: String): String? {
-        return savedStateHandle.get<String>(key)
-    }
-
     fun cancelRoom() {
         viewModelScope.launch {
             incLoadingCount()
-            val resp = if (isPeriodicRoom()) {
-                roomRepository.cancelPeriodic(intentValue(Constants.IntentKey.PERIODIC_UUID))
+            val resp = if (periodicUUID != null) {
+                roomRepository.cancelPeriodic(periodicUUID)
             } else {
-                roomRepository.cancelOrdinary(intentValue(Constants.IntentKey.ROOM_UUID))
+                roomRepository.cancelOrdinary(roomUUID)
             }
             if (resp is Success) {
                 _cancelSuccess.value = true
@@ -144,6 +134,9 @@ data class RoomDetailViewState(
 ) {
     val isOwner: Boolean
         get() = roomInfo?.ownerUUID == userUUID
+
+    val isPeriodicRoom: Boolean
+        get() = periodicRoomInfo != null
 }
 
 data class UIRoomInfo(

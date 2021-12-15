@@ -1,10 +1,7 @@
 package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -86,6 +83,47 @@ fun FlatHighlightTextButton(
 }
 
 @Composable
+fun FlatSmallPrimaryTextButton(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    val colors = if (enabled)
+        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorBlue)
+    else
+        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorGray)
+
+    TextButton(
+        modifier = Modifier.defaultMinSize(minWidth = 86.dp),
+        enabled = enabled,
+        colors = colors,
+        shape = Shapes.small,
+        onClick = onClick
+    ) {
+        Text(text, style = FlatCommonTextStyle, color = FlatColorWhite)
+    }
+}
+
+@Composable
+fun FlatSmallSecondaryTextButton(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        modifier = Modifier
+            .defaultMinSize(minWidth = 86.dp),
+        enabled = enabled,
+        shape = Shapes.small,
+        border = BorderStroke(1.dp, FlatColorGray),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
+        onClick = onClick
+    ) {
+        Text(text, style = FlatCommonTextStyle)
+    }
+}
+
+@Composable
 @Preview
 private fun FlatTextButtonPreview() {
     FlatColumnPage {
@@ -101,5 +139,10 @@ private fun FlatTextButtonPreview() {
 
         FlatNormalVerticalSpacer()
         FlatHighlightTextButton("TextButton", icon = R.drawable.ic_login_out, enabled = true, onClick = {})
+
+        FlatNormalVerticalSpacer()
+        FlatSmallPrimaryTextButton("TextButton", onClick = {})
+        FlatNormalVerticalSpacer()
+        FlatSmallSecondaryTextButton("TextButton", onClick = {})
     }
 }
