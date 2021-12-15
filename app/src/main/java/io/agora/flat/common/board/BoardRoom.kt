@@ -93,7 +93,7 @@ class BoardRoom @Inject constructor(
 
         override fun onCatchErrorWhenAppendFrame(userId: Long, error: Exception?) {
             Log.w(TAG, "onCatchErrorWhenAppendFrame${error}")
-            boardRoomPhase.value = BoardRoomPhase.Error("$userId $error")
+            // boardRoomPhase.value = BoardRoomPhase.Error("$userId $error")
         }
     }
 
@@ -117,7 +117,7 @@ class BoardRoom @Inject constructor(
 
             override fun throwError(args: Any) {
                 Log.e(TAG, "throwError $args")
-                boardRoomPhase.value = BoardRoomPhase.Error("throwError $args")
+                // boardRoomPhase.value = BoardRoomPhase.Error("throwError $args")
             }
         })
     }

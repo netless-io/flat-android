@@ -22,6 +22,8 @@ open class BaseActivity : AppCompatActivity() {
     protected open fun lockOrientation() {
         if (isPhoneMode()) {
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
     }
 

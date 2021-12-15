@@ -323,10 +323,16 @@ class ToolComponent(
         }
         binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
         binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
+        binding.layoutCloudStorage.root.setOnClickListener {
+            // block event
+        }
 
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter
         binding.layoutUserList.userList.layoutManager = LinearLayoutManager(activity)
+        binding.layoutUserList.root.setOnClickListener {
+            // block event
+        }
     }
 
     private fun updateClassMode(classMode: ClassModeType) {

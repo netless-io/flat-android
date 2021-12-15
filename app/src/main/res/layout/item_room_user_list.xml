@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="@dimen/room_class_item_height">
 
     <View
         android:layout_width="0dp"
-        android:layout_height="36dp"
+        android:layout_height="@dimen/room_class_item_height"
         android:tag="LAYOUT"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,6 +21,7 @@
         android:layout_marginEnd="4dp"
         android:padding="4dp"
         android:src="@drawable/ic_room_userlist_handup_close"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
