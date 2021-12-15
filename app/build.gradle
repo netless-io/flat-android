@@ -14,8 +14,8 @@ android {
         applicationId "io.agora.flat"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.6"
         // multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

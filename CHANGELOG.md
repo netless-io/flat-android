@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.6] - December 14, 2021
+- Fix Ppt Display
+
 ## [1.0.5] - December 10, 2021
 - Support basic compatible of tablet
 
