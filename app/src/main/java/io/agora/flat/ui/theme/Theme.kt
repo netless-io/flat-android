@@ -21,6 +21,9 @@ private val DarkColorPalette = darkColors(
     background = FlatColorBlack,
     // cards, sheets, and menus
     surface = FlatColorBlack,
+
+    onBackground = FlatColorDarkOn,
+    onSurface = FlatColorDarkOn,
 )
 
 /**

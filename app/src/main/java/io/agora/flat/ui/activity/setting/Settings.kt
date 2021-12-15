@@ -5,12 +5,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +23,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatHighlightTextButton
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.FlatCommonTipTextStyle
@@ -32,7 +32,7 @@ import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
 
 @Composable
-fun Settings(navController: NavController, viewModel: UserViewModel = hiltViewModel()) {
+fun SettingsScreen(navController: NavController, viewModel: UserViewModel = hiltViewModel()) {
     val context = LocalContext.current
 
     Column {
@@ -108,28 +108,33 @@ private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
 
 @Composable
 internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", onClick: () -> Unit = {}) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
+    val color = MaterialTheme.colors.onBackground
+    CompositionLocalProvider(
+        LocalContentColor provides color.copy(alpha = 1f),
     ) {
-        Spacer(Modifier.width(16.dp))
-        Image(painterResource(id), contentDescription = null)
-        Spacer(Modifier.width(4.dp))
-        Text(text = tip, style = FlatCommonTextStyle)
-        Spacer(Modifier.weight(1f))
-        Text(text = desc, style = FlatCommonTipTextStyle)
-        Spacer(Modifier.width(8.dp))
-        Icon(Icons.Outlined.NavigateNext, contentDescription = null)
-        Spacer(Modifier.width(16.dp))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clickable(onClick = onClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(Modifier.width(16.dp))
+            Image(painterResource(id), contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text(text = tip, style = FlatCommonTextStyle)
+            Spacer(Modifier.weight(1f))
+            Text(text = desc, style = FlatCommonTipTextStyle)
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.Outlined.NavigateNext, contentDescription = null)
+            Spacer(Modifier.width(16.dp))
+        }
     }
 }
 
 @Composable
 internal fun SettingItemDivider() {
-    Divider(Modifier.padding(start = 44.dp, end = 16.dp))
+    FlatDivider(startIndent = 44.dp, endIndent = 16.dp)
 }
 
 @Preview(showSystemUi = false)

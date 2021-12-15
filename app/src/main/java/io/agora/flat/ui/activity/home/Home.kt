@@ -29,10 +29,7 @@ import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
-import io.agora.flat.ui.compose.CustomInteractionSource
-import io.agora.flat.ui.compose.FlatRoomStatusText
-import io.agora.flat.ui.compose.FlatSwipeRefresh
-import io.agora.flat.ui.compose.FlatTopAppBar
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
@@ -288,8 +285,6 @@ private fun HomeRoomList(
     category: RoomCategory,
     onGotoRoom: (String, String?) -> Unit,
 ) {
-    val context = LocalContext.current
-
     if (roomList.isEmpty()) {
         val imgRes = when (category) {
             RoomCategory.Current -> R.drawable.img_home_no_room
@@ -349,13 +344,7 @@ private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
             Spacer(Modifier.width(12.dp))
             FlatRoomStatusText(roomInfo.roomStatus, Modifier.align(Alignment.Bottom))
         }
-        Spacer(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(0.5.dp)
-                .background(FlatColorDivider),
-        )
+        FlatDivider(startIndent = 16.dp, endIndent = 16.dp)
     }
 }
 

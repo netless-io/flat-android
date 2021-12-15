@@ -13,7 +13,7 @@
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
     <string name="title_home">Home</string>
-    <string name="title_cloud_storage">Cloud Storage</string>
+    <string name="title_cloud_storage">Cloud</string>
     <string name="title_cloud_pick">Upload</string>
     <string name="title_user_info">Personal</string>
     <string name="title_setting">Settings</string>
@@ -25,7 +25,7 @@
     <string name="title_about_us">About Us</string>
     <string name="title_language">Language</string>
     <string name="title_activity_compose_test">ComposeTest</string>
-    <string name="title_call_test" translatable="false">Call Test</string>
+    <string name="title_call_test" translatable="false">CallTest</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
@@ -54,8 +54,8 @@
     <string name="turn_on_camera">Turn on camera</string>
     <string name="turn_on_mic">Turn on microphone</string>
     <string name="join_room_default_time_format">Room created by %1$s</string>
-    <string name="home_room_list">Room List</string>
-    <string name="home_room_history">History Record</string>
+    <string name="home_room_list">Room</string>
+    <string name="home_room_history">History</string>
 
     <string name="home_room_state_idle">Upcoming</string>
     <string name="home_room_state_started">Running</string>

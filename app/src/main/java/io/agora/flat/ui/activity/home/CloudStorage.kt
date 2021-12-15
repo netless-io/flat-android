@@ -37,14 +37,14 @@ import io.agora.flat.util.fileSuffix
 import java.util.*
 
 @Composable
-fun CloudStorage(
+fun CloudScreen(
     onOpenUploading: () -> Unit,
     onOpenItemPick: (() -> Unit)? = null,
     viewModel: CloudStorageViewModel = hiltViewModel(),
 ) {
     val viewState by viewModel.state.collectAsState()
 
-    CloudStorage(viewState) { action ->
+    CloudScreen(viewState) { action ->
         when (action) {
             is CloudStorageUIAction.CheckItem -> viewModel.checkItem(action)
             is CloudStorageUIAction.Delete -> viewModel.deleteChecked()
@@ -58,23 +58,21 @@ fun CloudStorage(
 }
 
 @Composable
-internal fun CloudStorage(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
-    FlatPage {
-        Column {
-            FlatTopAppBar(title = stringResource(R.string.title_cloud_storage)) {
-                UploadIcon(viewState = viewState) {
-                    actioner(CloudStorageUIAction.OpenUploading)
-                }
+internal fun CloudScreen(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
+    Column {
+        FlatTopAppBar(title = stringResource(R.string.title_cloud_storage)) {
+            UploadIcon(viewState = viewState) {
+                actioner(CloudStorageUIAction.OpenUploading)
             }
-            FlatSwipeRefresh(viewState.refreshing, onRefresh = { actioner(CloudStorageUIAction.Reload) }) {
-                Box(Modifier.fillMaxSize()) {
-                    CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
+        }
+        FlatSwipeRefresh(viewState.refreshing, onRefresh = { actioner(CloudStorageUIAction.Reload) }) {
+            Box(Modifier.fillMaxSize()) {
+                CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
 
-                    if (isTabletMode()) {
-                        AddFileLayoutPad(actioner)
-                    } else {
-                        AddFileLayout(actioner)
-                    }
+                if (isTabletMode()) {
+                    AddFileLayoutPad(actioner)
+                } else {
+                    AddFileLayout(actioner)
                 }
             }
         }
@@ -251,9 +249,7 @@ internal fun CloudStorageContent(
                 MaxWidthSpread.verticalScroll(rememberScrollState()),
             )
         } else {
-            Row(Modifier
-                .fillMaxWidth()
-                .background(FlatColorBackground), verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
                     Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -322,7 +318,7 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
             Checkbox(checked = file.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
             Spacer(Modifier.width(12.dp))
         }
-        Divider(modifier = Modifier.padding(start = 52.dp, end = 12.dp), thickness = 1.dp, color = FlatColorDivider)
+        FlatDivider(startIndent = 52.dp, endIndent = 12.dp)
     }
 }
 
@@ -376,7 +372,7 @@ private fun CloudStoragePreview() {
     val viewState = CloudStorageViewState(
         files = files
     )
-    CloudStorage(viewState) {
+    CloudScreen(viewState) {
 
     }
 }

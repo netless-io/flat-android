@@ -12,26 +12,65 @@ sealed class RTMEvent(type: RTMessageType = RTMessageType.ChannelMessage) {
     @SerializedName("r")
     var r = ""
 
-    data class ChannelMessage(@SerializedName("v") val text: String) : RTMEvent()
+    data class ChannelMessage(
+        @SerializedName("v")
+        val text: String,
+    ) : RTMEvent()
 
-    data class Notice(@SerializedName("v") val text: String) : RTMEvent(RTMessageType.Notice)
-    data class RaiseHand(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.RaiseHand)
-    data class AcceptRaiseHand(@SerializedName("v") val value: AcceptRaiseHandValue) :
-        RTMEvent(RTMessageType.AcceptRaiseHand)
+    data class Notice(
+        @SerializedName("v")
+        val text: String,
+    ) : RTMEvent(RTMessageType.Notice)
 
-    data class CancelHandRaising(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.CancelHandRaising)
-    data class BanText(@SerializedName("v") val v: Boolean) : RTMEvent(RTMessageType.BanText)
-    data class Speak(@SerializedName("v") val v: List<SpeakItem>) : RTMEvent(RTMessageType.Speak)
-    data class DeviceState(@SerializedName("v") val value: DeviceStateValue) : RTMEvent(RTMessageType.DeviceState)
-    data class ClassMode(@SerializedName("v") val classModeType: ClassModeType) : RTMEvent(RTMessageType.ClassMode)
-    data class RoomStatus(@SerializedName("v") val roomStatus: io.agora.flat.data.model.RoomStatus) :
-        RTMEvent(RTMessageType.RoomStatus)
+    data class RaiseHand(
+        @SerializedName("v")
+        val v: Boolean,
+    ) : RTMEvent(RTMessageType.RaiseHand)
 
-    data class RequestChannelStatus(@SerializedName("v") val value: RequestChannelStatusValue) :
-        RTMEvent(RTMessageType.RequestChannelStatus)
+    data class AcceptRaiseHand(
+        @SerializedName("v")
+        val value: AcceptRaiseHandValue,
+    ) : RTMEvent(RTMessageType.AcceptRaiseHand)
 
-    data class ChannelStatus(@SerializedName("v") val value: ChannelStatusValue) :
-        RTMEvent(RTMessageType.ChannelStatus)
+    data class CancelHandRaising(
+        @SerializedName("v")
+        val v: Boolean,
+    ) : RTMEvent(RTMessageType.CancelHandRaising)
+
+    data class BanText(
+        @SerializedName("v")
+        val v: Boolean,
+    ) : RTMEvent(RTMessageType.BanText)
+
+    data class Speak(
+        @SerializedName("v")
+        val v: List<SpeakItem>,
+    ) : RTMEvent(RTMessageType.Speak)
+
+    data class DeviceState(
+        @SerializedName("v")
+        val value: DeviceStateValue,
+    ) : RTMEvent(RTMessageType.DeviceState)
+
+    data class ClassMode(
+        @SerializedName("v")
+        val classModeType: ClassModeType,
+    ) : RTMEvent(RTMessageType.ClassMode)
+
+    data class RoomStatus(
+        @SerializedName("v")
+        val roomStatus: io.agora.flat.data.model.RoomStatus,
+    ) : RTMEvent(RTMessageType.RoomStatus)
+
+    data class RequestChannelStatus(
+        @SerializedName("v")
+        val value: RequestChannelStatusValue,
+    ) : RTMEvent(RTMessageType.RequestChannelStatus)
+
+    data class ChannelStatus(
+        @SerializedName("v") val value:
+        ChannelStatusValue,
+    ) : RTMEvent(RTMessageType.ChannelStatus)
 
     companion object {
         val gson = Gson()

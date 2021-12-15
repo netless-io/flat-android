@@ -14,7 +14,7 @@ import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomScreen
 import io.agora.flat.ui.activity.room.JoinRoomPage
 import io.agora.flat.ui.activity.room.RoomDetailScreen
-import io.agora.flat.ui.activity.setting.Settings
+import io.agora.flat.ui.activity.setting.SettingsScreen
 import io.agora.flat.ui.activity.setting.UserProfile
 
 sealed class Screen(val route: String) {
@@ -100,7 +100,7 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {
-            Settings(navController)
+            SettingsScreen(navController)
         }
         composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
             UserProfile(navController)
@@ -134,7 +134,7 @@ fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
     val screenRoot = Screen.Cloud
     navigation(route = screenRoot.route, startDestination = LeafScreen.CloudStorage.createRoute(screenRoot)) {
         composable(LeafScreen.CloudStorage.createRoute(screenRoot)) {
-            CloudStorage(
+            CloudScreen(
                 onOpenUploading = {
                     navController.navigate(LeafScreen.CloudUploading.createRoute(screenRoot)) {
                         launchSingleTop = true
@@ -186,7 +186,7 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {
-            Settings(navController)
+            SettingsScreen(navController)
         }
         composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
             UserProfile(navController)

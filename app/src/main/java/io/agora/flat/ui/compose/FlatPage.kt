@@ -15,20 +15,21 @@ import io.agora.flat.ui.theme.FlatAndroidTheme
 
 @Composable
 fun FlatPage(
-    statusBarColor: Color = MaterialTheme.colors.background,
-    content: @Composable() () -> Unit,
+    statusBarColor: Color? = null,
+    content: @Composable () -> Unit,
 ) {
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = MaterialTheme.colors.isLight
-
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = statusBarColor,
-            darkIcons = useDarkIcons
-        )
-    }
-    
     FlatAndroidTheme {
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colors.isLight
+        val background = MaterialTheme.colors.background
+
+        SideEffect {
+            systemUiController.setSystemBarsColor(
+                color = statusBarColor ?: background,
+                darkIcons = useDarkIcons
+            )
+        }
+
         ProvideWindowInsets(consumeWindowInsets = false) {
             Surface(color = MaterialTheme.colors.background) {
                 content()
@@ -39,13 +40,21 @@ fun FlatPage(
 
 @Composable
 fun FlatColumnPage(
-    statusBarColor: Color = MaterialTheme.colors.background,
-    content: @Composable() ColumnScope.() -> Unit,
+    statusBarColor: Color? = null,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    val controller = rememberSystemUiController()
-    controller.setStatusBarColor(statusBarColor)
-
     FlatAndroidTheme {
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colors.isLight
+        val background = MaterialTheme.colors.background
+
+        SideEffect {
+            systemUiController.setSystemBarsColor(
+                color = statusBarColor ?: background,
+                darkIcons = useDarkIcons
+            )
+        }
+
         Surface(color = MaterialTheme.colors.background) {
             Column(Modifier.fillMaxSize()) {
                 content()

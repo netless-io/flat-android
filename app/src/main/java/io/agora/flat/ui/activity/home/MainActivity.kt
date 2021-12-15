@@ -14,7 +14,6 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -24,11 +23,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.showToast
@@ -95,7 +96,7 @@ fun MainScreen(viewState: MainViewState) {
         }
     }
 
-    FlatPage(statusBarColor = Color.Transparent) {
+    FlatPage {
         val navController = rememberAnimatedNavController()
         var mainTab by remember { mutableStateOf(MainTab.Home) }
 
@@ -194,7 +195,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         }
                     },
                 )
-                MainTab.CloudStorage -> CloudStorage(
+                MainTab.CloudStorage -> CloudScreen(
                     onOpenUploading = {
                         navController.navigate(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
                             launchSingleTop = true
@@ -264,7 +265,7 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
     }
 
     Column(modifier) {
-        Divider()
+        FlatDivider()
         BottomAppBar(elevation = 0.dp, backgroundColor = MaterialTheme.colors.background) {
             Box(Modifier
                 .weight(1f)

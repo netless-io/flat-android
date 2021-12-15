@@ -20,6 +20,7 @@ val FlatColorBackground = Color(0xFFF3F6F9)
 val FlatColorWhite = Color(0xFFFFFFFF)
 val FlatColorBlack = Color(0xFF000000)
 val FlatColorGray = Color(0xFFCCCCCC)
+val FlatColorDarkOn = Color(0xFF494F59)
 
 // For Test
 val FlatColorBlueAlpha50 = Color(0x7F3381FF)
