@@ -29,6 +29,11 @@ val ColumnScope.MaxWidthSpread
         .fillMaxWidth()
         .weight(1f)
 
+val RowScope.MaxHeightSpread
+    get() = Modifier
+        .fillMaxHeight()
+        .weight(1f)
+
 val ColumnScope.MaxWidth
     get() = Modifier.fillMaxWidth()
 

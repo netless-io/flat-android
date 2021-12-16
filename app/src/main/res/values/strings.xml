@@ -71,6 +71,13 @@
     <string name="login_page_label_2">Powered by Agora</string>
     <string name="login_success_and_jump">Successful login, jump…</string>
     <string name="login_fail">Login failed</string>
+
+    <string name="login_agreement_part_1">Have read and agree</string>
+    <string name="login_agreement_part_2">Privacy Policy</string>
+    <string name="login_agreement_part_3">and</string>
+    <string name="login_agreement_part_4">Term of Service</string>
+    <string name="login_agreement_unchecked_hint">Please agree to the terms of service first</string>
+
     <string name="room_class_start_class_success">Start the room successfully</string>
     <string name="room_class_start_class_fail">Failed to start the room</string>
     <string name="room_class_stop_class_fail">Failed to end the room</string>

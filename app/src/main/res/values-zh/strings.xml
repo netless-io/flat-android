@@ -74,13 +74,19 @@
     <string name="setting_check_update">检查更新</string>
 
     <string name="login_github_no_browser">链接错误或无浏览器</string>
-    <string name="login_github_browser_choose_title">Choose Browser</string>
-    <string name="login_set_auth_uuid_error">set auth uuid error</string>
+    <string name="login_github_browser_choose_title">选择浏览器</string>
+    <string name="login_set_auth_uuid_error">设置认证码失败</string>
     <string name="login_page_label_1">在线互动，让想法同步</string>
     <string name="login_page_label_2">powered by Agora</string>
-    <string name="login_success_and_jump">登录成功，跳转…</string>
+    <string name="login_success_and_jump">登录成功，跳转中…</string>
     <string name="login_fail">登录失败</string>
     <string name="login_exit">退出登录</string>
+
+    <string name="login_agreement_part_1">已阅读并同意</string>
+    <string name="login_agreement_part_2">隐私政策</string>
+    <string name="login_agreement_part_3">和</string>
+    <string name="login_agreement_part_4">服务协议</string>
+    <string name="login_agreement_unchecked_hint">请先同意服务条款</string>
 
     <string name="room_class_start_class_success">开始房间成功</string>
     <string name="room_class_start_class_fail">开始房间失败</string>

@@ -86,6 +86,8 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
             val id = clipboard.getText().toString().parseRoomID()
             if (!id.isNullOrBlank()) {
                 uuid = id
+                // clear clipboard when fetched
+                clipboard.putText("")
             }
         }
     }

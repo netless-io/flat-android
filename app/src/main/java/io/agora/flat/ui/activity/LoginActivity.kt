@@ -11,18 +11,19 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.insets.navigationBarsPadding
@@ -37,7 +38,9 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.theme.FlatColorBlue
 import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
@@ -72,6 +75,15 @@ class LoginActivity : BaseComposeActivity() {
                         currentLogin = LOGIN_GITHUB
                         loginAfterSetAuthUUID(::callGithubLogin)
                     }
+                    LoginUIAction.OpenServiceProtocol -> {
+                        Navigator.launchWebViewActivity(this, Constants.URL.Service)
+                    }
+                    LoginUIAction.OpenPrivacyProtocol -> {
+                        Navigator.launchWebViewActivity(this, Constants.URL.Privacy)
+                    }
+                    LoginUIAction.AgreementHint -> {
+                        this.showToast(R.string.login_agreement_unchecked_hint)
+                    }
                 }
             }
             LoginPage(actioner = actioner)
@@ -82,7 +94,6 @@ class LoginActivity : BaseComposeActivity() {
 
     override fun onResume() {
         super.onResume()
-
         handleLoginResult()
     }
 
@@ -192,26 +203,20 @@ internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
 
 @Composable
 internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
-    Column(Modifier
-        .fillMaxSize()
-        .navigationBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
+    var agreementChecked by remember { mutableStateOf(false) }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Spacer(Modifier.height(120.dp))
-        Image(painterResource(R.drawable.img_login_logo), null)
-        Spacer(Modifier.height(2.dp))
-        Text("Flat", style = MaterialTheme.typography.h5)
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+        LoginLogoDisplay()
         Spacer(Modifier.weight(1f))
-        Row {
-            LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
-                Image(painterResource(R.drawable.ic_wechat_login), "")
-            }
-            Spacer(Modifier.width(48.dp))
-            LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
-                Image(painterResource(R.drawable.ic_github_login), "")
-            }
-        }
+        LoginButtonsArea(agreementChecked, actioner)
         Spacer(modifier = Modifier.height(100.dp))
+        LoginAgreement(checked = agreementChecked, onCheckedChange = { agreementChecked = it }, actioner = actioner)
         Box(Modifier.padding(vertical = 24.dp)) {
             Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
         }
@@ -220,45 +225,112 @@ internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
 
 @Composable
 internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
+    var agreementEnable by remember { mutableStateOf(false) }
+
     Row {
         Image(
             painterResource(R.drawable.img_pad_login),
             contentDescription = null,
-            Modifier
-                .weight(1f)
-                .fillMaxHeight(),
+            MaxHeightSpread,
             contentScale = ContentScale.Crop,
         )
 
-        Column(
-            Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        Column(MaxHeightSpread, horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.weight(1f))
-            Image(painterResource(R.drawable.img_login_logo), null)
-            Spacer(Modifier.height(2.dp))
-            Text("Flat", style = MaterialTheme.typography.h5)
-            Spacer(Modifier.height(4.dp))
-            Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+            LoginLogoDisplay()
             Spacer(Modifier.height(48.dp))
-            Row {
-                LoginImageButton(onClick = { actioner(LoginUIAction.WeChatLogin) }) {
-                    Image(painterResource(R.drawable.ic_wechat_login), "")
-                }
-                Spacer(Modifier.width(48.dp))
-                LoginImageButton(onClick = { actioner(LoginUIAction.GithubLogin) }) {
-                    Image(painterResource(R.drawable.ic_github_login), "")
-                }
-            }
+            LoginButtonsArea(agreementEnable, actioner)
             Spacer(modifier = Modifier.weight(1f))
+            LoginAgreement(checked = agreementEnable, onCheckedChange = { agreementEnable = it }, actioner = actioner)
             Box(Modifier
-                .padding(vertical = 40.dp)
+                .padding(vertical = 24.dp)
                 .navigationBarsPadding()) {
                 Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
             }
         }
+    }
+}
+
+@Composable
+private fun LoginButtonsArea(
+    agreementEnable: Boolean,
+    actioner: (LoginUIAction) -> Unit,
+) {
+    Row {
+        LoginImageButton(onClick = {
+            if (agreementEnable) {
+                actioner(LoginUIAction.WeChatLogin)
+            } else {
+                actioner(LoginUIAction.AgreementHint)
+            }
+        }) {
+            Image(painterResource(R.drawable.ic_wechat_login), "")
+        }
+        Spacer(Modifier.width(48.dp))
+        LoginImageButton(onClick = {
+            if (agreementEnable) {
+                actioner(LoginUIAction.GithubLogin)
+            } else {
+                actioner(LoginUIAction.AgreementHint)
+            }
+        }) {
+            Image(painterResource(R.drawable.ic_github_login), "")
+        }
+    }
+}
+
+@Composable
+private fun LoginLogoDisplay() {
+    Image(painterResource(R.drawable.img_login_logo), null)
+    Spacer(Modifier.height(2.dp))
+    Text("Flat", style = MaterialTheme.typography.h5)
+    Spacer(Modifier.height(4.dp))
+    Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+}
+
+@Composable
+private fun LoginAgreement(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    actioner: (LoginUIAction) -> Unit,
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        Spacer(Modifier.width(4.dp))
+        Text(stringResource(id = R.string.login_agreement_part_1))
+        Text(
+            stringResource(id = R.string.login_agreement_part_2),
+            Modifier
+                .padding(horizontal = 2.dp)
+                .clickable {
+                    actioner(LoginUIAction.OpenPrivacyProtocol)
+                },
+            style = ProtocolTextStyle,
+        )
+        Text(stringResource(id = R.string.login_agreement_part_3))
+        Text(
+            stringResource(id = R.string.login_agreement_part_4),
+            Modifier
+                .padding(horizontal = 2.dp)
+                .clickable {
+                    actioner(LoginUIAction.OpenServiceProtocol)
+                },
+            style = ProtocolTextStyle,
+        )
+    }
+}
+
+private val ProtocolTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 14.sp,
+    color = FlatColorBlue,
+)
+
+@Composable
+private fun LoginAgreementPreview() {
+    FlatPage {
+        LoginAgreement(Modifier, true, {}) { }
     }
 }
 
@@ -269,34 +341,36 @@ private fun LoginImageButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    Box(modifier.clickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = rememberRipple(bounded = false, radius = 48.dp),
-        onClick = onClick,
-    ), Alignment.Center) {
+    Box(
+        modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = rememberRipple(bounded = false, radius = 48.dp),
+            onClick = onClick,
+        ),
+        Alignment.Center,
+    ) {
         val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
-        CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
-    }
-}
-
-@Composable
-@Preview
-private fun LoginPagePreview() {
-    FlatPage {
-        LoginPage { }
+        CompositionLocalProvider(
+            LocalContentAlpha provides contentAlpha,
+            content = content,
+        )
     }
 }
 
 @Composable
 @Preview(device = PIXEL_C)
+@Preview
 private fun LoginPagePreviewPad() {
     FlatPage {
         LoginPage { }
     }
 }
 
-
 sealed class LoginUIAction {
     object WeChatLogin : LoginUIAction()
     object GithubLogin : LoginUIAction()
+    object AgreementHint : LoginUIAction()
+
+    object OpenServiceProtocol : LoginUIAction()
+    object OpenPrivacyProtocol : LoginUIAction()
 }
