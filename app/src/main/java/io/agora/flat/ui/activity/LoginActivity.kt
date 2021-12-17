@@ -328,13 +328,6 @@ private val ProtocolTextStyle = TextStyle(
 )
 
 @Composable
-private fun LoginAgreementPreview() {
-    FlatPage {
-        LoginAgreement(Modifier, true, {}) { }
-    }
-}
-
-@Composable
 private fun LoginImageButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -354,6 +347,15 @@ private fun LoginImageButton(
             LocalContentAlpha provides contentAlpha,
             content = content,
         )
+    }
+}
+
+@Composable
+@Preview(device = PIXEL_C)
+@Preview
+private fun LoginAgreementPreview() {
+    FlatPage {
+        LoginAgreement(Modifier, true, {}) { }
     }
 }
 

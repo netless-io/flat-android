@@ -11,11 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,9 +26,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.gson.Gson
 import io.agora.flat.R
+import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BackTopAppBar
+import io.agora.flat.ui.compose.ComposeVideoPlayer
+import io.agora.flat.ui.compose.MediaPlayback
 import io.agora.flat.ui.theme.FlatAndroidTheme
 import io.agora.flat.ui.theme.FlatColorWhite
 import kotlin.math.roundToInt
@@ -62,7 +62,9 @@ fun GreetingCompose() {
 
     LazyColumn(Modifier.fillMaxHeight()) {
         item {
-            BackTopAppBar("测试", {})
+            ComposeVideoPlayerTest(modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp))
             Box(modifier = Modifier.padding(16.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.img_home_no_history),
@@ -100,6 +102,47 @@ fun GreetingCompose() {
             }
             HelloInput()
         }
+    }
+}
+
+@Composable
+fun ComposeVideoPlayerTest(modifier: Modifier) {
+    val fileStr = """
+        {"convertStep":"None","createAt":1639021269495,"fileName":"1601363746034307.mp4","fileSize":1737449,"fileURL":"https://flat-storage.oss-accelerate.aliyuncs.com/cloud-storage/2021-12/09/f0073464-9aef-480c-9bca-a2117ef97fe3/f0073464-9aef-480c-9bca-a2117ef97fe3.mp4","fileUUID":"f0073464-9aef-480c-9bca-a2117ef97fe3","region":"cn-hz","taskToken":"","taskUUID":""}
+    """.trimIndent()
+    val file: CloudStorageFile = Gson().fromJson(fileStr, CloudStorageFile::class.java)
+
+    var playerControl by remember {
+        mutableStateOf<MediaPlayback?>(null)
+    }
+
+    var urlString by remember {
+        mutableStateOf(file.fileURL)
+    }
+
+    Box(modifier, contentAlignment = Alignment.Center) {
+        ComposeVideoPlayer(
+            uriString = urlString,
+            onPlayEvent = {},
+            onPlayerControl = { playerControl = it },
+            Modifier.fillMaxSize()
+        )
+
+        Row(Modifier.align(Alignment.TopCenter)) {
+            Button(onClick = {
+                playerControl?.playPause()
+            }) {
+                Text(text = "Pause & Resume")
+            }
+            Button(
+                onClick = {
+                    urlString = "https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4"
+                },
+            ) {
+                Text(text = "Switch url")
+            }
+        }
+
     }
 }
 

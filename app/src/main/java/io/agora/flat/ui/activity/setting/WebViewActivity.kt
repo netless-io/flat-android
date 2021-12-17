@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.*
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -47,7 +48,7 @@ internal fun WebViewContent(url: String, title: String?, onPageBack: () -> Unit)
     FlatColumnPage {
         BackTopAppBar(title = titleLocal, onBackPressed = onPageBack)
         Box {
-            CustomWebView(
+            ComposeWebView(
                 modifier = Modifier.fillMaxSize(),
                 url = url,
                 onProgressChange = { progress ->
@@ -87,7 +88,7 @@ internal fun WebViewContent(url: String, title: String?, onPageBack: () -> Unit)
 }
 
 @Composable
-fun CustomWebView(
+fun ComposeWebView(
     modifier: Modifier = Modifier,
     url: String,
     onBack: (webView: WebView?) -> Unit,
@@ -107,6 +108,7 @@ fun CustomWebView(
             onTitleChange(title)
         }
     }
+
     val webViewClient = object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
@@ -141,21 +143,37 @@ fun CustomWebView(
         }
     }
 
-    var webView: WebView? = null
-    val coroutineScope = rememberCoroutineScope()
+    var webView by remember { mutableStateOf<WebView?>(null) }
 
-    AndroidView(modifier = modifier, factory = { ctx ->
-        WebView(ctx).apply {
-            this.webViewClient = webViewClient
-            this.webChromeClient = webChromeClient
-            initSettings(this.settings)
-            webView = this
-            loadUrl(url)
-        }
-    })
+    val scope = rememberCoroutineScope()
     BackHandler {
-        coroutineScope.launch {
-            onBack(webView)
+        scope.launch { onBack(webView) }
+    }
+
+    // Due to limited knowledge,information and time, more input is needed here to verify the correctness
+    DisposableEffect(
+        AndroidView(
+            modifier = modifier,
+            factory = { ctx ->
+                WebView(ctx).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    this.webViewClient = webViewClient
+                    this.webChromeClient = webChromeClient
+                    initSettings(this.settings)
+                    webView = this
+                    loadUrl(url)
+                }
+            })
+    ) {
+        onDispose {
+            webView?.run {
+                removeAllViews()
+                destroy()
+                webView = null
+            }
         }
     }
 }

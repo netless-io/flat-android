@@ -15,6 +15,7 @@
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">Cloud</string>
     <string name="title_cloud_pick">Upload</string>
+    <string name="title_cloud_preview">Preview</string>
     <string name="title_user_info">Personal</string>
     <string name="title_setting">Settings</string>
     <string name="title_my_profile">My Profile</string>
@@ -119,6 +120,8 @@
     <string name="cloud_storage_upload_doc">Files</string>
     <string name="cloud_storage_upload_list_title">Upload List</string>
     <string name="cloud_storage_no_files">No data available</string>
+    <string name="cloud_preview_transcoding_hint">Courseware is being transcoded, please wait...</string>
+
     <string name="upload_success">Upload successfully</string>
     <string name="upload_failure">Upload failed</string>
     <string name="service_agreement">Service Agreement</string>

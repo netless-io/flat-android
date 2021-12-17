@@ -29,6 +29,7 @@ class BoardRoom @Inject constructor(
     }
 
     private lateinit var whiteSdk: WhiteSdk
+    private var whiteboardView: WhiteboardView? = null
     private var room: Room? = null
     private var sceneState = MutableStateFlow<BoardSceneState?>(null)
     private var memberState = MutableStateFlow<MemberState?>(null)
@@ -98,8 +99,7 @@ class BoardRoom @Inject constructor(
     }
 
     override fun initSdk(whiteboardView: WhiteboardView) {
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-
+        this.whiteboardView = whiteboardView
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
         configuration.isUserCursor = true
         configuration.useMultiViews = true
@@ -144,6 +144,12 @@ class BoardRoom @Inject constructor(
     override fun release() {
         whiteSdk.releaseRoom()
         room?.disconnect()
+        // clear webview
+        whiteboardView?.run {
+            removeAllViews()
+            destroy()
+            whiteboardView = null
+        }
     }
 
     override fun deleteSelection() {

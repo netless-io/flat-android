@@ -27,13 +27,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
+import io.agora.flat.common.Navigator
 import io.agora.flat.common.upload.UploadState
+import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.contentFileInfo
 import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.showToast
 import java.util.*
 
 @Composable
@@ -42,6 +45,7 @@ fun CloudScreen(
     onOpenItemPick: (() -> Unit)? = null,
     viewModel: CloudStorageViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
 
     CloudScreen(viewState) { action ->
@@ -50,9 +54,15 @@ fun CloudScreen(
             is CloudStorageUIAction.Delete -> viewModel.deleteChecked()
             is CloudStorageUIAction.Reload -> viewModel.reloadFileList()
             is CloudStorageUIAction.UploadFile -> viewModel.uploadFile(action)
+            is CloudStorageUIAction.PreviewRestrict -> {
+                context.showToast(R.string.cloud_preview_transcoding_hint)
+            }
 
             is CloudStorageUIAction.OpenUploading -> onOpenUploading()
             is CloudStorageUIAction.OpenItemPick -> onOpenItemPick?.invoke()
+            is CloudStorageUIAction.ClickItem -> {
+                Navigator.launchPreviewActivity(context, action.file)
+            }
         }
     }
 }
@@ -249,7 +259,7 @@ internal fun CloudStorageContent(
                 MaxWidthSpread.verticalScroll(rememberScrollState()),
             )
         } else {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier, verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
                     Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -266,12 +276,22 @@ internal fun CloudStorageContent(
             }
             LazyColumn(Modifier.weight(1f)) {
                 items(count = files.size, key = { index: Int ->
-                    files[index].fileUUID
+                    files[index].file.fileUUID
                 }) { index ->
-                    CloudStorageItem(files[index]) { checked ->
-                        actioner(CloudStorageUIAction.CheckItem(index,
-                            checked))
-                    }
+                    val item = files[index]
+                    CloudStorageItem(
+                        item,
+                        onCheckedChange = { checked ->
+                            actioner(CloudStorageUIAction.CheckItem(index, checked))
+                        },
+                        onClick = {
+                            when (item.file.convertStep) {
+                                FileConvertStep.Done, FileConvertStep.None -> actioner(CloudStorageUIAction.ClickItem(
+                                    item.file))
+                                else -> actioner(CloudStorageUIAction.PreviewRestrict)
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -279,7 +299,12 @@ internal fun CloudStorageContent(
 }
 
 @Composable
-private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolean) -> Unit)) {
+private fun CloudStorageItem(
+    item: CloudStorageUIFile,
+    onCheckedChange: ((Boolean) -> Unit),
+    onClick: () -> Unit,
+) {
+    val file = item.file
     // "jpg", "jpeg", "png", "webp","doc", "docx", "ppt", "pptx", "pdf"
     val imageId = when (file.fileURL.fileSuffix()) {
         "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_storage_image
@@ -289,12 +314,14 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
         "mp3", "aac" -> R.drawable.ic_cloud_storage_music
         else -> R.drawable.ic_cloud_storage_doc
     }
-    Column(Modifier.height(68.dp)) {
+    Column(Modifier
+        .height(68.dp)
+        .clickable(onClick = onClick)) {
         Row(MaxWidthSpread, verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(12.dp))
             Box {
                 Image(painterResource(imageId), contentDescription = "")
-                when (file.convertStep) {
+                when (item.file.convertStep) {
                     FileConvertStep.Converting -> ConvertingImage(Modifier.align(Alignment.BottomEnd))
                     FileConvertStep.Failed -> Icon(
                         painterResource(R.drawable.ic_cloud_storage_convert_failure),
@@ -307,7 +334,7 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
             }
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
-                Text(file.filename, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Row {
                     Text(FlatFormatter.dateDash(file.createAt))
@@ -315,7 +342,7 @@ private fun CloudStorageItem(file: CloudStorageUIFile, onCheckedChange: ((Boolea
                     Text(FlatFormatter.size(file.fileSize))
                 }
             }
-            Checkbox(checked = file.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
+            Checkbox(checked = item.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
             Spacer(Modifier.width(12.dp))
         }
         FlatDivider(startIndent = 52.dp, endIndent = 12.dp)
@@ -344,37 +371,43 @@ fun ConvertingImage(modifier: Modifier = Modifier) {
 @Preview
 private fun CloudStoragePreview() {
     val files = listOf(
-        CloudStorageUIFile("1",
-            "long long long long long long name file.jpg",
-            1111024,
-            createAt = 1627898586449,
-            fileURL = "",
-            convertStep = FileConvertStep.Done,
-            taskUUID = "",
-            taskToken = ""),
-        CloudStorageUIFile("2",
-            "2.doc",
-            111024,
-            createAt = 1627818586449,
-            fileURL = "",
-            convertStep = FileConvertStep.Done,
-            taskUUID = "",
-            taskToken = ""),
-        CloudStorageUIFile("3",
-            "3.mp4",
-            111111024,
-            createAt = 1617898586449,
-            fileURL = "",
-            convertStep = FileConvertStep.Done,
-            taskUUID = "",
-            taskToken = ""),
+        CloudStorageUIFile(
+            CloudStorageFile(
+                "1",
+                "long long long long long long name file.jpg",
+                1111024,
+                createAt = 1627898586449,
+                fileURL = "",
+                convertStep = FileConvertStep.Done,
+                taskUUID = "",
+                taskToken = ""
+            ),
+        ),
+        CloudStorageUIFile(
+            CloudStorageFile("2",
+                "2.doc",
+                111024,
+                createAt = 1627818586449,
+                fileURL = "",
+                convertStep = FileConvertStep.Done,
+                taskUUID = "",
+                taskToken = ""),
+        ),
+        CloudStorageUIFile(
+            CloudStorageFile("3",
+                "3.mp4",
+                111111024,
+                createAt = 1617898586449,
+                fileURL = "",
+                convertStep = FileConvertStep.Done,
+                taskUUID = "",
+                taskToken = ""),
+        ),
     )
     val viewState = CloudStorageViewState(
         files = files
     )
-    CloudScreen(viewState) {
-
-    }
+    CloudScreen(viewState) {}
 }
 
 @Composable

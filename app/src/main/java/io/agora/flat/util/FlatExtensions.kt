@@ -1,9 +1,33 @@
 package io.agora.flat.util
 
+import io.agora.flat.data.model.CoursewareType
 import java.util.*
 
 fun String.fileSuffix(): String {
     return substringAfterLast('.').lowercase(Locale.getDefault())
+}
+
+fun String.coursewareType(): CoursewareType {
+    return when (fileSuffix()) {
+        "jpg", "jpeg", "png", "webp" -> {
+            CoursewareType.Image
+        }
+        "doc", "docx", "ppt", "pdf" -> {
+            CoursewareType.DocStatic
+        }
+        "pptx" -> {
+            CoursewareType.DocDynamic
+        }
+        "mp3" -> {
+            CoursewareType.Audio
+        }
+        "mp4" -> {
+            CoursewareType.Video
+        }
+        else -> {
+            CoursewareType.Unknown
+        }
+    }
 }
 
 fun String.toInviteCodeDisplay() = if (length == 10) {

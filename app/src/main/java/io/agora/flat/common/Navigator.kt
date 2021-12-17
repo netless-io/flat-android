@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import io.agora.flat.Constants
+import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.LoginActivity
+import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
@@ -85,6 +87,13 @@ object Navigator {
     fun launchWebViewActivity(context: Context, url: String) {
         val intent = Intent(context, WebViewActivity::class.java).apply {
             putExtra(Constants.IntentKey.URL, url)
+        }
+        context.startActivity(intent)
+    }
+
+    fun launchPreviewActivity(context: Context, file: CloudStorageFile) {
+        val intent = Intent(context, PreviewActivity::class.java).apply {
+            putExtra(Constants.IntentKey.CLOUD_FILE, file)
         }
         context.startActivity(intent)
     }

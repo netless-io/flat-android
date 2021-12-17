@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.agora.flat.BuildConfig
 import io.agora.flat.data.AppEnv
 import io.agora.flat.http.HeaderProvider
 import io.agora.flat.http.api.*
@@ -30,7 +31,14 @@ object NetworkModule {
     @NormalOkHttpClient
     @Provides
     fun provideOkHttpClient(headerProviders: Set<@JvmSuppressWildcards HeaderProvider>): OkHttpClient {
-        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
+        val logger =
+            HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BASIC
+                } else {
+                    HttpLoggingInterceptor.Level.BODY
+                }
+            }
 
         return OkHttpClient.Builder()
             .addInterceptor(HeaderInterceptor(headerProviders))

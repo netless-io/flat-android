@@ -21,6 +21,7 @@
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">云盘</string>
     <string name="title_cloud_pick">上传</string>
+    <string name="title_cloud_preview">预览</string>
     <string name="title_user_info">个人信息</string>
     <string name="title_setting">个人设置</string>
     <string name="title_my_profile">我的资料</string>
@@ -132,6 +133,7 @@
     <string name="cloud_storage_upload_doc">上传文件</string>
     <string name="cloud_storage_upload_list_title">传输列表</string>
     <string name="cloud_storage_no_files">暂无数据</string>
+    <string name="cloud_preview_transcoding_hint">课件转换中，请稍后...</string>
 
     <string name="upload_success">上传成功</string>
     <string name="upload_failure">上传失败</string>

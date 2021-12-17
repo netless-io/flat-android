@@ -14,6 +14,7 @@ import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.upload.*
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
+import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.CloudStorageUploadStartResp
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.repository.CloudStorageRepository
@@ -81,17 +82,7 @@ class CloudStorageViewModel @Inject constructor(
                 if (resp is Success) {
                     totalUsage.value = resp.data.totalUsage
                     files.value = resp.data.files.reversed().map {
-                        CloudStorageUIFile(
-                            fileUUID = it.fileUUID,
-                            filename = it.fileName,
-                            fileSize = it.fileSize,
-                            fileURL = it.fileURL,
-                            convertStep = it.convertStep,
-                            taskUUID = it.taskUUID,
-                            taskToken = it.taskToken,
-                            createAt = it.createAt,
-                            checked = false
-                        )
+                        CloudStorageUIFile(file = it, checked = false)
                     }
                 } else {
                     // do nothing
@@ -113,11 +104,11 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             refreshing.addLoader()
             val checked = files.value.filter { it.checked }
-            val result = cloudStorageRepository.remove(checked.map { it.fileUUID })
+            val result = cloudStorageRepository.remove(checked.map { it.file.fileUUID })
             if (result is Success) {
                 files.value = files.value.filterNot { it.checked }
 
-                val size = checked.sumOf { it.fileSize }
+                val size = checked.sumOf { it.file.fileSize }
                 totalUsage.value = totalUsage.value - size
             }
             refreshing.removeLoader()
@@ -175,11 +166,16 @@ class CloudStorageViewModel @Inject constructor(
 
                 files.value = files.value.toMutableList().apply {
                     add(0, CloudStorageUIFile(
-                        fileUUID = fileUUID,
-                        filename = filename,
-                        fileSize = size,
-                        fileURL = filename,
-                        createAt = System.currentTimeMillis()
+                        CloudStorageFile(
+                            fileUUID = fileUUID,
+                            fileName = filename,
+                            fileSize = size,
+                            fileURL = filename,
+                            convertStep = FileConvertStep.None,
+                            taskUUID = "",
+                            taskToken = "",
+                            createAt = System.currentTimeMillis()
+                        )
                     ))
                 }
                 totalUsage.value = totalUsage.value + size
@@ -228,9 +224,13 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun updateConvertStep(fileUUID: String, convertStep: FileConvertStep) {
-        files.value.indexOfFirst { fileUUID == it.fileUUID }.let { index ->
+        files.value.indexOfFirst { fileUUID == it.file.fileUUID }.let { index ->
             if (index < 0) return
-            val changed = files.value[index].copy(convertStep = convertStep)
+            val curFile = files.value[index]
+
+            val changed = curFile.copy(
+                file = curFile.file.copy(convertStep = convertStep)
+            )
             files.value = files.value.toMutableList().apply { set(index, changed) }
         }
     }
@@ -244,14 +244,7 @@ class CloudStorageViewModel @Inject constructor(
 }
 
 data class CloudStorageUIFile(
-    val fileUUID: String,
-    val filename: String,
-    val fileSize: Long = 0,
-    val fileURL: String = "",
-    val convertStep: FileConvertStep = FileConvertStep.None,
-    val taskUUID: String? = null,
-    val taskToken: String? = null,
-    val createAt: Long = 0,
+    val file: CloudStorageFile,
     val checked: Boolean = false,
 )
 
@@ -267,6 +260,8 @@ sealed class CloudStorageUIAction {
     object Delete : CloudStorageUIAction()
     object Reload : CloudStorageUIAction()
     data class CheckItem(val index: Int, val checked: Boolean) : CloudStorageUIAction()
+    data class ClickItem(val file: CloudStorageFile) : CloudStorageUIAction()
+    object PreviewRestrict : CloudStorageUIAction()
 
     object OpenItemPick : CloudStorageUIAction()
     object OpenUploading : CloudStorageUIAction()

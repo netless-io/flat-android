@@ -1,20 +1,50 @@
 package io.agora.flat.ui.compose
 
-import androidx.compose.runtime.*
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 
 @Composable
-fun Lifecycle.observeAsSate(): State<Lifecycle.Event> {
-    val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
-    DisposableEffect(this) {
-        val observer = LifecycleEventObserver { _, event ->
-            state.value = event
+fun LifecycleHandler(
+    onCreate: () -> Unit = {},
+    onStart: () -> Unit = {},
+    onResume: () -> Unit = {},
+    onPause: () -> Unit = {},
+    onStop: () -> Unit = {},
+    onDestroy: () -> Unit = {},
+) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val lifecycleObserver = object : DefaultLifecycleObserver {
+            override fun onCreate(owner: LifecycleOwner) {
+                onCreate()
+            }
+
+            override fun onStart(owner: LifecycleOwner) {
+                onStart()
+            }
+
+            override fun onResume(owner: LifecycleOwner) {
+                onResume()
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                onPause()
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                onStop()
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                onDestroy()
+            }
         }
-        this@observeAsSate.addObserver(observer)
+        lifecycle.addObserver(lifecycleObserver)
         onDispose {
-            this@observeAsSate.removeObserver(observer)
+            lifecycle.removeObserver(lifecycleObserver)
         }
     }
-    return state
 }

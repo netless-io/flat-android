@@ -53,6 +53,7 @@
         <activity android:name=".ui.activity.setting.AboutUsActivity" />
         <activity android:name=".ui.activity.setting.LanguageActivity" />
         <activity android:name=".ui.activity.setting.CallTestActivity" />
+        <activity android:name=".ui.activity.cloud.preview.PreviewActivity" />
         <activity android:name=".ui.activity.setting.WebViewActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
