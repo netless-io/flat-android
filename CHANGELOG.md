@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0] - December 29, 2021
+- Support cloud files preview
+- Add login agreement
+
 ## [1.0.6] - December 14, 2021
 - Fix Ppt Display
 
