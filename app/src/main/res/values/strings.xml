@@ -7,6 +7,8 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
+    <string name="agree">Agree</string>
+    <string name="refuse">Refuse</string>
     <string name="end">End</string>
     <string name="create">Create</string>
     <string name="relative_time_mm">%d m</string>
@@ -27,6 +29,8 @@
     <string name="title_language">Language</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="title_call_test" translatable="false">CallTest</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="term_of_service">Term of Service</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
@@ -74,10 +78,12 @@
     <string name="login_fail">Login failed</string>
 
     <string name="login_agreement_part_1">Have read and agree</string>
-    <string name="login_agreement_part_2">Privacy Policy</string>
     <string name="login_agreement_part_3">and</string>
-    <string name="login_agreement_part_4">Term of Service</string>
     <string name="login_agreement_unchecked_hint">Please agree to the terms of service first</string>
+    <string name="login_agreement_dialog_title">Service Agreement and Privacy Protection</string>
+    <string name="login_agreement_dialog_message_part_1">In order to better ensure your legal rights and interests, please read and agree to the following agreement</string>
+    <string name="privacy_policy_with_quotes">《Privacy Policy》</string>
+    <string name="term_of_service_with_quotes">《Term of Service》</string>
 
     <string name="room_class_start_class_success">Start the room successfully</string>
     <string name="room_class_start_class_fail">Failed to start the room</string>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
@@ -24,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.insets.navigationBarsPadding
@@ -37,11 +40,8 @@ import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.MaxHeightSpread
-import io.agora.flat.ui.theme.isTabletMode
+import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
@@ -214,7 +214,7 @@ internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
         Spacer(Modifier.height(120.dp))
         LoginLogoDisplay()
         Spacer(Modifier.weight(1f))
-        LoginButtonsArea(agreementChecked, actioner)
+        LoginButtonsArea(agreementChecked, onAgree = { agreementChecked = true }, actioner)
         Spacer(modifier = Modifier.height(100.dp))
         LoginAgreement(checked = agreementChecked, onCheckedChange = { agreementChecked = it }, actioner = actioner)
         Box(Modifier.padding(vertical = 24.dp)) {
@@ -239,7 +239,7 @@ internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
             LoginLogoDisplay()
             Spacer(Modifier.height(48.dp))
-            LoginButtonsArea(agreementEnable, actioner)
+            LoginButtonsArea(agreementEnable, onAgree = { agreementEnable = true }, actioner)
             Spacer(modifier = Modifier.weight(1f))
             LoginAgreement(checked = agreementEnable, onCheckedChange = { agreementEnable = it }, actioner = actioner)
             Box(Modifier
@@ -254,14 +254,17 @@ internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
 @Composable
 private fun LoginButtonsArea(
     agreementEnable: Boolean,
+    onAgree: () -> Unit,
     actioner: (LoginUIAction) -> Unit,
 ) {
+    var showAgreement by remember { mutableStateOf(false) }
+
     Row {
         LoginImageButton(onClick = {
             if (agreementEnable) {
                 actioner(LoginUIAction.WeChatLogin)
             } else {
-                actioner(LoginUIAction.AgreementHint)
+                showAgreement = true
             }
         }) {
             Image(painterResource(R.drawable.ic_wechat_login), "")
@@ -271,12 +274,72 @@ private fun LoginButtonsArea(
             if (agreementEnable) {
                 actioner(LoginUIAction.GithubLogin)
             } else {
-                actioner(LoginUIAction.AgreementHint)
+                showAgreement = true
             }
         }) {
             Image(painterResource(R.drawable.ic_github_login), "")
         }
     }
+    if (showAgreement) {
+        AgreementDialog(
+            onAgree = {
+                onAgree()
+                showAgreement = false
+            },
+            onRefuse = { showAgreement = false },
+        )
+    }
+}
+
+@Composable
+private fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
+    Dialog(onDismissRequest = onRefuse) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                Text(stringResource(R.string.login_agreement_dialog_title), style = FlatTitleTextStyle)
+                FlatNormalVerticalSpacer()
+                ClickableDialogMessage()
+                FlatNormalVerticalSpacer()
+                Row {
+                    FlatSmallSecondaryTextButton(stringResource(R.string.refuse), Modifier.weight(1f)) { onRefuse() }
+                    FlatLargeHorizontalSpacer()
+                    FlatSmallPrimaryTextButton(stringResource(R.string.agree), Modifier.weight(1f)) { onAgree() }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClickableDialogMessage() {
+    val context = LocalContext.current
+
+    val annotatedText = buildAnnotatedString {
+        append(stringResource(id = R.string.login_agreement_dialog_message_part_1))
+        pushStringAnnotation(tag = "privacy", annotation = Constants.URL.Privacy)
+        withStyle(style = SpanStyle(color = FlatColorBlue)) {
+            append(stringResource(id = R.string.privacy_policy_with_quotes))
+        }
+        pop()
+        append("、")
+
+        pushStringAnnotation(tag = "service", annotation = Constants.URL.Service)
+        withStyle(style = SpanStyle(color = FlatColorBlue)) {
+            append(stringResource(id = R.string.term_of_service_with_quotes))
+        }
+        pop()
+    }
+
+    ClickableText(text = annotatedText, onClick = { offset ->
+        annotatedText.getStringAnnotations(tag = "privacy", start = offset, end = offset)
+            .firstOrNull()?.let { annotation ->
+                Navigator.launchWebViewActivity(context, annotation.item)
+            }
+        annotatedText.getStringAnnotations(tag = "service", start = offset, end = offset)
+            .firstOrNull()?.let { annotation ->
+                Navigator.launchWebViewActivity(context, annotation.item)
+            }
+    })
 }
 
 @Composable
@@ -300,7 +363,7 @@ private fun LoginAgreement(
         Spacer(Modifier.width(4.dp))
         Text(stringResource(id = R.string.login_agreement_part_1))
         Text(
-            stringResource(id = R.string.login_agreement_part_2),
+            stringResource(id = R.string.privacy_policy),
             Modifier
                 .padding(horizontal = 2.dp)
                 .clickable {
@@ -310,7 +373,7 @@ private fun LoginAgreement(
         )
         Text(stringResource(id = R.string.login_agreement_part_3))
         Text(
-            stringResource(id = R.string.login_agreement_part_4),
+            stringResource(id = R.string.term_of_service),
             Modifier
                 .padding(horizontal = 2.dp)
                 .clickable {
@@ -365,6 +428,16 @@ private fun LoginAgreementPreview() {
 private fun LoginPagePreviewPad() {
     FlatPage {
         LoginPage { }
+    }
+}
+
+@Composable
+@Preview
+private fun AgreementPreview() {
+    FlatPage {
+        AgreementDialog(onAgree = {}) {
+
+        }
     }
 }
 

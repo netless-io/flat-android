@@ -9,6 +9,8 @@
     <string name="save">保存</string>
     <string name="cancel">取消</string>
     <string name="confirm">确定</string>
+    <string name="agree">同意</string>
+    <string name="refuse">拒绝</string>
     <string name="end">结束</string>
     <string name="create">创建</string>
 
@@ -32,6 +34,8 @@
     <string name="title_about_us">关于我们</string>
     <string name="title_language">多语言</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="term_of_service">服务协议</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
@@ -84,10 +88,12 @@
     <string name="login_exit">退出登录</string>
 
     <string name="login_agreement_part_1">已阅读并同意</string>
-    <string name="login_agreement_part_2">隐私政策</string>
     <string name="login_agreement_part_3">和</string>
-    <string name="login_agreement_part_4">服务协议</string>
     <string name="login_agreement_unchecked_hint">请先同意服务条款</string>
+    <string name="login_agreement_dialog_title">服务协议及隐私保护</string>
+    <string name="login_agreement_dialog_message_part_1">为了更好的保证您的合法权益，请你阅读并同意以下协议</string>
+    <string name="privacy_policy_with_quotes">《隐私政策》</string>
+    <string name="term_of_service_with_quotes">《用户服务协议》</string>
 
     <string name="room_class_start_class_success">开始房间成功</string>
     <string name="room_class_start_class_fail">开始房间失败</string>

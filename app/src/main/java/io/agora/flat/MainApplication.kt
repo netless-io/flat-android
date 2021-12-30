@@ -1,7 +1,7 @@
 package io.agora.flat
 
 import android.app.Application
-import com.herewhite.sdk.WhiteboardView
+import android.webkit.WebView
 import dagger.hilt.android.HiltAndroidApp
 import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.upload.UploadManager
@@ -21,7 +21,6 @@ class MainApplication : Application() {
         }
         UploadManager.init(this)
         LanguageManager.init(this)
-
-        WhiteboardView.setWebContentsDebuggingEnabled(isApkInDebug())
+        WebView.setWebContentsDebuggingEnabled(isApkInDebug())
     }
 }

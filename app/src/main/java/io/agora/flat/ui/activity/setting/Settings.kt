@@ -5,7 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
@@ -19,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.compose.BackTopAppBar
@@ -63,19 +67,29 @@ private fun SettingItemList() {
             )
             SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_aboutus,
+                id = R.drawable.ic_user_profile_feedback,
                 tip = stringResource(R.string.title_feedback),
                 onClick = { Navigator.launchFeedbackActivity(context) })
             SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_feedback,
+                id = R.drawable.ic_user_profile_aboutus,
                 tip = stringResource(R.string.title_about_us),
                 onClick = { Navigator.launchAboutUsActivity(context) })
             SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_feedback,
+                id = R.drawable.ic_settings_language,
                 tip = stringResource(R.string.title_language),
                 onClick = { Navigator.launchLanguageActivity(context) })
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_settings_privacy_policy,
+                tip = stringResource(R.string.privacy_policy),
+                onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Privacy) })
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_settings_term_of_service,
+                tip = stringResource(R.string.term_of_service),
+                onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
             SettingItemDivider()
             // Device Test
             // SettingItem(

@@ -85,6 +85,7 @@ fun FlatHighlightTextButton(
 @Composable
 fun FlatSmallPrimaryTextButton(
     text: String,
+    modifier: Modifier = Modifier.defaultMinSize(minWidth = 86.dp),
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -94,7 +95,7 @@ fun FlatSmallPrimaryTextButton(
         ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorGray)
 
     TextButton(
-        modifier = Modifier.defaultMinSize(minWidth = 86.dp),
+        modifier = modifier,
         enabled = enabled,
         colors = colors,
         shape = Shapes.small,
@@ -107,12 +108,12 @@ fun FlatSmallPrimaryTextButton(
 @Composable
 fun FlatSmallSecondaryTextButton(
     text: String,
+    modifier: Modifier = Modifier.defaultMinSize(minWidth = 86.dp),
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     OutlinedButton(
-        modifier = Modifier
-            .defaultMinSize(minWidth = 86.dp),
+        modifier = modifier,
         enabled = enabled,
         shape = Shapes.small,
         border = BorderStroke(1.dp, FlatColorGray),
@@ -143,6 +144,6 @@ private fun FlatTextButtonPreview() {
         FlatNormalVerticalSpacer()
         FlatSmallPrimaryTextButton("TextButton", onClick = {})
         FlatNormalVerticalSpacer()
-        FlatSmallSecondaryTextButton("TextButton", onClick = {})
+        FlatSmallSecondaryTextButton("TextButton") {}
     }
 }

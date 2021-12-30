@@ -435,9 +435,8 @@ private fun TabletOperations(
     RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
         Row(modifier) {
             FlatSmallSecondaryTextButton(
-                stringResource(R.string.copy_invite),
-                onClick = { actioner(DetailUiAction.Invite) }
-            )
+                stringResource(R.string.copy_invite)
+            ) { actioner(DetailUiAction.Invite) }
             FlatNormalHorizontalSpacer()
             FlatSmallPrimaryTextButton(
                 stringResource(R.string.enter_room),
@@ -447,7 +446,7 @@ private fun TabletOperations(
     RoomStatus.Stopped ->
         Row(modifier) {
             FlatSmallPrimaryTextButton(
-                stringResource(id = R.string.replay), roomInfo.hasRecord,
+                stringResource(id = R.string.replay), enabled = roomInfo.hasRecord,
                 onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) }
             )
         }
