@@ -23,14 +23,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.FlatDivider
-import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
@@ -48,7 +46,21 @@ class MainActivity : BaseComposeActivity() {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
 
-            MainScreen(viewState)
+            if (viewState.protocolAgreed) {
+                MainScreen(viewState)
+                LifecycleHandler(
+                    onResume = {
+                        if (!viewModel.isLoggedIn()) {
+                            Navigator.launchLoginActivity(this)
+                        }
+                    },
+                )
+            } else {
+                GlobalAgreementDialog(
+                    onAgree = { viewModel.agreeProtocol() },
+                    onRefuse = { finish() },
+                )
+            }
         }
         loginHelper.register()
         observerState()
@@ -68,20 +80,9 @@ class MainActivity : BaseComposeActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        actionLoginState()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         loginHelper.unregister()
-    }
-
-    private fun actionLoginState() {
-        if (!viewModel.isLoggedIn()) {
-            Navigator.launchLoginActivity(this)
-        }
     }
 }
 
@@ -291,14 +292,8 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
 
 @Composable
 @Preview
-private fun MainPagePreview() {
-    val mainViewState = MainViewState(loginState = LoginState.Login)
-    MainScreen(mainViewState)
-}
-
-@Composable
 @Preview(device = Devices.PIXEL_C)
-private fun MainPagePadPreview() {
-    val mainViewState = MainViewState(loginState = LoginState.Login)
+private fun MainPagePreview() {
+    val mainViewState = MainViewState(true, loginState = LoginState.Login)
     MainScreen(mainViewState)
 }

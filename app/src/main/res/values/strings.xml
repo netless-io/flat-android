@@ -77,13 +77,18 @@
     <string name="login_success_and_jump">Successful login, jump…</string>
     <string name="login_fail">Login failed</string>
 
-    <string name="login_agreement_part_1">Have read and agree</string>
-    <string name="login_agreement_part_3">and</string>
+    <string name="login_agreement_message">Have read and agree Privacy Policy and Term of Service</string>
     <string name="login_agreement_unchecked_hint">Please agree to the terms of service first</string>
     <string name="login_agreement_dialog_title">Service Agreement and Privacy Protection</string>
-    <string name="login_agreement_dialog_message_part_1">In order to better ensure your legal rights and interests, please read and agree to the following agreement</string>
-    <string name="privacy_policy_with_quotes">《Privacy Policy》</string>
-    <string name="term_of_service_with_quotes">《Term of Service》</string>
+    <string name="login_agreement_dialog_message">In order to better ensure your legal rights and interests, please read and agree to the following agreement Flat Privacy Policy, Flat User Agreement</string>
+
+    <string name="agreement_global_dialog_message">Thank you for trusting and using Flat.\n\nWe rely on the Flat User Agreement and Flat Privacy Policy to help you understand how we collect,use,and store your personal information and what rights you have with respect to it.\n\nWhen you use Flat, we collect information about your device, logs and browsing history, and to ensure a positive experience in class, you may grant Flat access to your device\'s camera, microphone, and other information.\n\nYou can read the full Flat User Agreement and Flat Privacy Policy for more information.</string>
+    <string name="agreement_global_recheck_dialog_message">You need to agree to the User Agreement and Privacy Policy before you can use Flat.\n\nIf you do not agree, we regret that we cannot provide you with the Services.\n\nYou can find out more by reading the full Flat User Agreement and Flat Privacy Policy.</string>
+    <string name="agreement_global_privacy">Flat Privacy Policy</string>
+    <string name="agreement_global_service">Flat User Agreement</string>
+    <string name="agreement_global_agree">Agree and continue</string>
+    <string name="agreement_global_disagree">Disagree</string>
+    <string name="agreement_global_disagree_and_exit">Disagree and exit</string>
 
     <string name="room_class_start_class_success">Start the room successfully</string>
     <string name="room_class_start_class_fail">Failed to start the room</string>
@@ -126,7 +131,7 @@
     <string name="cloud_storage_upload_doc">Files</string>
     <string name="cloud_storage_upload_list_title">Upload List</string>
     <string name="cloud_storage_no_files">No data available</string>
-    <string name="cloud_preview_transcoding_hint">Courseware is being transcoded, please wait...</string>
+    <string name="cloud_preview_transcoding_hint">Courseware is being transcoded, please wait…</string>
 
     <string name="upload_success">Upload successfully</string>
     <string name="upload_failure">Upload failed</string>

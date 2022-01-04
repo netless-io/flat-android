@@ -73,12 +73,24 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         return store.getString(KEY_AUTH_UUID, "") ?: ""
     }
 
+    fun setProtocolAgreed(agreed: Boolean) {
+        store.edit().apply {
+            putBoolean(KEY_AGREEMENT_GLOBAL_AGREED, agreed)
+        }.apply()
+    }
+
+    fun isProtocolAgreed(): Boolean {
+        return store.getBoolean(KEY_AGREEMENT_GLOBAL_AGREED, false)
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
         const val KEY_LOGIN_USER_INFO = "key_login_user_info"
 
         const val KEY_AUTH_UUID = "key_auth_uuid"
+
+        const val KEY_AGREEMENT_GLOBAL_AGREED = "key_agreement_global_agreed"
     }
 
     class MockData {

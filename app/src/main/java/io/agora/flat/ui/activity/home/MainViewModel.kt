@@ -28,8 +28,9 @@ class MainViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
     private val stringFetcher: StringFetcher,
+    private val appKVCenter: AppKVCenter,
 ) : ViewModel() {
-    private var _state = MutableStateFlow(MainViewState())
+    private var _state = MutableStateFlow(MainViewState(appKVCenter.isProtocolAgreed()))
     val state = _state.asStateFlow()
 
     val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
@@ -75,6 +76,11 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    fun agreeProtocol() {
+        appKVCenter.setProtocolAgreed(true)
+        _state.value = _state.value.copy(protocolAgreed = true)
+    }
 }
 
 enum class MainTab {
@@ -86,6 +92,7 @@ enum class MainTab {
 }
 
 data class MainViewState(
+    val protocolAgreed: Boolean,
     val loginState: LoginState = LoginState.Init,
     val mainTab: MainTab = MainTab.Home,
 )
