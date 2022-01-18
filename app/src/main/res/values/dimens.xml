@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="flat_gap_1_0">4dp</dimen>
+    <dimen name="flat_gap_2_0">8dp</dimen>
+    <dimen name="flat_gap_3_0">12dp</dimen>
+    <dimen name="flat_gap_4_0">16dp</dimen>
+
     <dimen name="room_class_button_size">32dp</dimen>
     <dimen name="room_class_button_content_size">24dp</dimen>
     <dimen name="room_class_button_padding_size">4dp</dimen>
     <dimen name="room_class_video_area_width">120dp</dimen>
+    <dimen name="room_class_layout_gap">12dp</dimen>
 
     <dimen name="room_class_sub_tools_margin">40dp</dimen>
     <dimen name="room_class_stroke_seeker">24dp</dimen>

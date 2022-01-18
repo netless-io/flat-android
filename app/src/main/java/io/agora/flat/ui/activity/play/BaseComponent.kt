@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.content.res.Configuration
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -13,6 +14,11 @@ abstract class BaseComponent(
 
     override fun getLifecycle(): Lifecycle {
         return activity.lifecycle
+    }
+
+
+    open fun onConfigurationChanged(newConfig: Configuration) {
+
     }
 
     open fun handleBackPressed(): Boolean {

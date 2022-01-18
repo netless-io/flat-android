@@ -14,9 +14,10 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <LinearLayout
+        android:id="@+id/tools_layout"
         android:layout_width="@dimen/room_class_button_size"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_gray_border_left_round_12_bg"
+        android:background="@drawable/shape_gray_border_left_round_bg"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -132,6 +133,23 @@
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
+
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/room_class_layout_gap"
+        android:background="@drawable/shape_gray_border_left_round_bg"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tools_layout">
+
+        <ImageView
+            android:id="@+id/handup"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:src="@drawable/ic_room_hand_up_selector" />
+    </FrameLayout>
 
     <include
         android:id="@+id/layout_room_state_settings"

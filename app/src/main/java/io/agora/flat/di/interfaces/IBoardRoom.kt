@@ -1,16 +1,17 @@
 package io.agora.flat.di.interfaces
 
-import com.herewhite.sdk.WhiteboardView
 import com.herewhite.sdk.domain.ConvertedFiles
 import com.herewhite.sdk.domain.MemberState
-import com.herewhite.sdk.domain.ViewMode
+import io.agora.board.fast.FastboardView
 import io.agora.flat.common.board.BoardRoomPhase
 import io.agora.flat.common.board.BoardSceneState
 import io.agora.flat.common.board.UndoRedoState
 import kotlinx.coroutines.flow.Flow
 
 interface IBoardRoom {
-    fun initSdk(whiteboardView: WhiteboardView)
+    fun initSdk(fastboardView: FastboardView)
+
+    fun setDarkMode(dark: Boolean)
 
     fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean)
 
@@ -18,30 +19,9 @@ interface IBoardRoom {
 
     fun setWritable(writable: Boolean)
 
-    fun setViewMode(viewMode: ViewMode)
+    fun setDeviceInputEnable(enable: Boolean)
 
-    fun resetView()
-
-    // memberstate
-    fun setAppliance(name: String)
-    fun setStrokeColor(color: IntArray)
-    fun setStrokeWidth(width: Double)
-    fun deleteSelection()
-
-    // canvas
-    fun undo()
-    fun redo()
-
-    // slide
-    fun startPage()
-    fun finalPage()
-    fun prevPage()
-    fun nextPage()
-    fun addSlideToNext()
-    fun deleteCurrentSlide()
-    fun refreshSceneState()
-    fun cleanScene(retainPpt: Boolean = true)
-    fun setSceneIndex(index: Int)
+    fun hideAllOverlay()
 
     // courseware
     fun insertImage(imageUrl: String, w: Int, h: Int)

@@ -142,6 +142,9 @@ class ToolComponent(
                 }
 
                 binding.cloudservice.isVisible = it.isWritable
+
+                binding.handup.isVisible = it.showRaiseHand
+                binding.handup.isSelected = it.isRaiseHand
             }
         }
 
@@ -285,6 +288,9 @@ class ToolComponent(
                     viewModel.updateClassMode(ClassModeType.Lecture)
                 }
             },
+            binding.handup to {
+                viewModel.sendRaiseHand()
+            }
         )
 
         map.forEach { (view, action) -> view.setOnClickListener { action(it) } }

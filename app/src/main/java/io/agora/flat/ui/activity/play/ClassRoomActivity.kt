@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.viewModels
@@ -49,6 +50,11 @@ class ClassRoomActivity : BaseActivity() {
         super.onResume()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         enableFullScreen()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        componentSet.forEach { it.onConfigurationChanged(newConfig) }
     }
 
     override fun onPause() {

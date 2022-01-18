@@ -731,7 +731,7 @@ data class ClassRoomState(
         get() = roomType == RoomType.SmallClass
 
     val showRaiseHand: Boolean
-        get() = when (roomType) {
+        get() = !isWritable and when (roomType) {
             RoomType.OneToOne -> false
             RoomType.BigClass -> !isOwner
             RoomType.SmallClass -> !isOwner && classMode == ClassModeType.Lecture
