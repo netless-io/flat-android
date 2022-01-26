@@ -293,6 +293,14 @@ internal fun CloudStorageContent(
                         },
                     )
                 }
+
+                item {
+                    Box(Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter) {
+                        Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
+                    }
+                }
             }
         }
     }

@@ -124,7 +124,7 @@ fun FlatNetworkError(onClick: () -> Unit) {
 @Composable
 private fun TopOperations(actioner: (HomeViewAction) -> Unit) {
     Row(Modifier.fillMaxWidth()) {
-        OperationItem(R.drawable.ic_home_create_room, R.string.create_room) {
+        OperationItem(R.drawable.ic_home_create_room, R.string.quick_start_room) {
             actioner(HomeViewAction.GotoRoomCreate)
         }
         OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {

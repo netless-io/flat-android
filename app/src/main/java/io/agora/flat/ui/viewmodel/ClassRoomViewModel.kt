@@ -27,6 +27,7 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
+import io.agora.flat.util.Ticker
 import io.agora.flat.util.fileSuffix
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -83,6 +84,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
     private val playInfo = savedStateHandle.get<RoomPlayInfo?>(Constants.IntentKey.ROOM_PLAY_INFO)
+    private val quickStart = savedStateHandle.get<Boolean?>(Constants.IntentKey.ROOM_QUICK_START)
     private val userUUID = userRepository.getUserUUID()
     private val userName = userRepository.getUsername()
 
@@ -92,14 +94,6 @@ class ClassRoomViewModel @Inject constructor(
     private var _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow().filterNotNull()
 
-    private fun tickerFlow(period: Long, initialDelay: Long = 0) = flow {
-        delay(initialDelay)
-        while (true) {
-            emit(Unit)
-            delay(period)
-        }
-    }
-
     init {
         viewModelScope.launch {
             when (val result = roomRepository.getOrdinaryRoomInfo(roomUUID)) {
@@ -107,7 +101,9 @@ class ClassRoomViewModel @Inject constructor(
                     initRoomInfo(result.data.roomInfo)
                 }
             }
-
+            if (quickStart == true) {
+                startClass()
+            }
             if (playInfo != null) {
                 _roomPlayInfo.value = playInfo
             } else when (val result = roomRepository.joinRoom(roomUUID)) {
@@ -447,8 +443,6 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> {
                     rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
                     _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
-                    _errorMessage.value = stringFetcher.startRoomWithRecord()
-                    startRecord()
                 }
                 else -> {; }
             }
@@ -458,7 +452,21 @@ class ClassRoomViewModel @Inject constructor(
     val width = 120 * 3
     val height = 360 * 3
 
+    private var startRecordJob: Job? = null
+
     fun startRecord() {
+        if (videoUsers.value.isEmpty()) {
+            startRecordJob = viewModelScope.launch {
+                videoUsers.collect {
+                    if (videoUsers.value.isNotEmpty()) {
+                        startRecord()
+                    }
+                }
+            }
+            return
+        }
+        startRecordJob?.cancel()
+
         viewModelScope.launch {
             val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
             if (acquireResp is Success) {
@@ -519,7 +527,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun startTimer() {
         timer = viewModelScope.launch {
-            tickerFlow(1000, 1000).collect {
+            Ticker.tickerFlow(1000, 1000).collect {
                 val recordState = _state.value.recordState
                 _state.value =
                     _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
@@ -664,6 +672,15 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             if (isRoomOwner()) {
                 rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, true))))
+                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
+            }
+        }
+    }
+
+    fun acceptRaiseHand(userUUID: String) {
+        viewModelScope.launch {
+            if (isRoomOwner()) {
+                rtmApi.sendChannelCommand(RTMEvent.AcceptRaiseHand(AcceptRaiseHandValue(userUUID, true)))
                 userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
             }
         }

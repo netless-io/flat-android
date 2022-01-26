@@ -13,6 +13,8 @@
     <string name="refuse">拒绝</string>
     <string name="end">结束</string>
     <string name="create">创建</string>
+    <string name="start">开始</string>
+    <string name="enter">加入</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -52,6 +54,7 @@
     <string name="class_room_no_operate_permission">无法操作</string>
 
     <string name="schedule_room">预约房间</string>
+    <string name="quick_start_room">快速开始</string>
 
     <string name="join_room">加入房间</string>
     <string name="enter_room">进入房间</string>

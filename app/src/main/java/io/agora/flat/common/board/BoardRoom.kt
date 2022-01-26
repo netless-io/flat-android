@@ -12,6 +12,7 @@ import io.agora.board.fast.FastSdk
 import io.agora.board.fast.FastboardView
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.model.FastSdkOptions
+import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
@@ -54,6 +55,10 @@ class BoardRoom @Inject constructor(
         fastSdk = fastboardView.getFastSdk(options)
     }
 
+    override fun setRoomController(rootRoomController: RoomControllerGroup) {
+        this.fastboardView?.rootRoomController = rootRoomController
+    }
+
     override fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean) {
         val roomParams = RoomParams(roomUUID, roomToken, userId).apply {
             val styleMap = hashMapOf(
@@ -65,7 +70,7 @@ class BoardRoom @Inject constructor(
                 .setChessboard(false)
                 .setDebug(true)
                 .setCollectorStyles(styleMap)
-                .setContainerSizeRatio(10.0f / 16)
+                .setContainerSizeRatio(9.0f / 16)
             windowParams.setPrefersColorScheme(if (darkMode) WindowPrefersColorScheme.Dark else WindowPrefersColorScheme.Light)
 
             isWritable = writable

@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.graphics.Rect
 import android.os.Build
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -16,11 +17,13 @@ import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 
 /**
- * display common loading, toast, dialog
+ * display common loading, toast, dialog, global layout change.
  */
 class ExtComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
+    whiteboardContainer: FrameLayout,
+    videoListContainer: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = ExtComponent::class.simpleName
@@ -39,6 +42,11 @@ class ExtComponent(
 
     private fun initView() {
         extensionBinding = ComponentExtensionBinding.inflate(activity.layoutInflater, rootView, true)
+
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+        }
     }
 
     private fun observeState() {

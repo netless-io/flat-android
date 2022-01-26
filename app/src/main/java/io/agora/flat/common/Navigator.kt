@@ -43,10 +43,16 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchRoomPlayActivity(context: Context, roomUUID: String, periodicUUID: String? = null) {
+    fun launchRoomPlayActivity(
+        context: Context,
+        roomUUID: String,
+        periodicUUID: String? = null,
+        quickStart: Boolean = false,
+    ) {
         val intent = Intent(context, ClassRoomActivity::class.java).apply {
             putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
             putExtra(Constants.IntentKey.PERIODIC_UUID, periodicUUID)
+            putExtra(Constants.IntentKey.ROOM_QUICK_START, quickStart)
         }
         context.startActivity(intent)
     }

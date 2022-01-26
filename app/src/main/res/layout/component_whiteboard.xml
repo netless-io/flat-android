@@ -15,18 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-<!--    <FrameLayout-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="end|bottom"-->
-<!--        android:layout_marginBottom="@dimen/room_class_layout_gap"-->
-<!--        android:background="@drawable/shape_gray_border_left_round_bg">-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/handup"-->
-<!--            android:layout_width="@dimen/room_class_button_size"-->
-<!--            android:layout_height="@dimen/room_class_button_size"-->
-<!--            android:padding="@dimen/room_class_button_padding_size"-->
-<!--            android:src="@drawable/ic_room_hand_up_selector" />-->
-<!--    </FrameLayout>-->
+    <FrameLayout
+        android:id="@+id/flat_controller_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>

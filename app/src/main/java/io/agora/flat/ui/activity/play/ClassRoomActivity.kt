@@ -24,15 +24,20 @@ class ClassRoomActivity : BaseActivity() {
         binding = ActivityRoomPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer, binding.scenePreviewContainer))
-        componentSet.add(RtcComponent(this,
+        componentSet.add(WhiteboardComponent(this, binding.whiteboardContainer))
+        componentSet.add(RtcComponent(
+            this,
             binding.videoListContainer,
             binding.fullVideoContainer,
             binding.shareScreenContainer))
         componentSet.add(RtmComponent(this, binding.messageContainer))
         componentSet.add(ToolComponent(this, binding.toolContainer))
-        componentSet.add(ExtComponent(this, binding.extensionContainer))
-
+        componentSet.add(ExtComponent(
+            this,
+            binding.extensionContainer,
+            binding.whiteboardContainer,
+            binding.videoListContainer,
+        ))
         componentSet.forEach { lifecycle.addObserver(it) }
 
         observeData()

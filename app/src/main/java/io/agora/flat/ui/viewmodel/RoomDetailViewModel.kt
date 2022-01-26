@@ -85,11 +85,13 @@ class RoomDetailViewModel @Inject constructor(
             incLoadingCount()
             val resp = roomRepository.getOrdinaryRoomInfo(roomUUID)
             if (resp is Success) {
-                resp.data.roomInfo.map(
+                val info = resp.data.roomInfo
+                info.map(
                     roomUUID,
                     periodicUUID,
                     userRepository.getUsername(),
                     appEnv.baseInviteUrl,
+                    userRepository.getUserUUID() == info.ownerUUID,
                 ).also { roomInfo.value = it }
             }
             decLoadingCount()
@@ -153,6 +155,7 @@ data class UIRoomInfo(
     val hasRecord: Boolean = false,
     val inviteCode: String,
     val baseInviteUrl: String,
+    val isOwner: Boolean = false,
 )
 
 private fun RoomInfo.map(
@@ -160,6 +163,7 @@ private fun RoomInfo.map(
     inPeriodicUUID: String?,
     inUsername: String,
     baseInviteUrl: String,
+    isOwner: Boolean,
 ): UIRoomInfo {
     return UIRoomInfo(
         roomUUID = inRoomUUID,
@@ -174,5 +178,6 @@ private fun RoomInfo.map(
         hasRecord = hasRecord,
         inviteCode = inviteCode,
         baseInviteUrl = baseInviteUrl,
+        isOwner = isOwner,
     )
 }

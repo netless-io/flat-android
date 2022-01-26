@@ -11,7 +11,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
-import io.agora.flat.databinding.LayoutScenePreviewBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.filterNotNull
 class WhiteboardComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    private val scenePreview: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = WhiteboardComponent::class.simpleName
@@ -38,7 +36,6 @@ class WhiteboardComponent(
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
-    private lateinit var scenePreviewBinding: LayoutScenePreviewBinding
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
     private lateinit var boardRoom: IBoardRoom
@@ -58,7 +55,6 @@ class WhiteboardComponent(
 
     private fun initView() {
         binding = ComponentWhiteboardBinding.inflate(activity.layoutInflater, rootView, true)
-        scenePreviewBinding = LayoutScenePreviewBinding.inflate(activity.layoutInflater, scenePreview, true)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -135,6 +131,7 @@ class WhiteboardComponent(
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)
+        boardRoom.setRoomController(FlatControllerGroup(binding.flatControllerLayout))
     }
 
     override fun onDestroy(owner: LifecycleOwner) {

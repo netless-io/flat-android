@@ -434,13 +434,15 @@ private fun TabletOperations(
 ) = when (roomInfo.roomStatus) {
     RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
         Row(modifier) {
-            FlatSmallSecondaryTextButton(
-                stringResource(R.string.copy_invite)
-            ) { actioner(DetailUiAction.Invite) }
+            FlatSmallSecondaryTextButton(stringResource(R.string.copy_invite)) {
+                actioner(DetailUiAction.Invite)
+            }
             FlatNormalHorizontalSpacer()
             FlatSmallPrimaryTextButton(
-                stringResource(R.string.enter_room),
-                onClick = { actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID)) }
+                enterRoomString(roomInfo.isOwner, roomInfo.roomStatus),
+                onClick = {
+                    actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
+                }
             )
         }
     RoomStatus.Stopped ->
@@ -464,7 +466,7 @@ private fun Operations(
                 actioner(DetailUiAction.Invite)
             })
             FlatNormalVerticalSpacer()
-            FlatPrimaryTextButton(stringResource(R.string.enter_room), onClick = {
+            FlatPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
                 actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
             })
         }
@@ -475,6 +477,14 @@ private fun Operations(
             })
         }
 }
+
+@Composable
+private fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
+    if (isOwner && roomStatus == RoomStatus.Idle) {
+        stringResource(id = R.string.start)
+    } else {
+        stringResource(R.string.enter)
+    }
 
 @Composable
 private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {

@@ -124,7 +124,7 @@ dependencies {
 
     // Paging
     def paging_version = "3.0.0"
-    implementation "androidx.paging:paging-runtime:$paging_version"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
 
     // Room
     def room_version = "2.4.0-alpha03"
@@ -173,10 +173,9 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
-    // implementation 'com.github.netless-io:whiteboard-android:33e0db11c196fa579be3f5fc5ac22965cdedcd8a'
+    implementation 'com.github.netless-io:fastboard-android:a7128300a0c9817cf6463a766ea9106325b06e43'
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
-    implementation project(':fastboard')
 
     // Exoplayer
     def exoplayer_version = "2.14.1"

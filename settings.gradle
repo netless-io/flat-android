@@ -1,5 +1,2 @@
 include ':app'
 rootProject.name = "FlatAndroid"
-
-include ':fastboard'
-project(':fastboard').projectDir = new File("/Users/flb/Agora/fastboard-android/library")

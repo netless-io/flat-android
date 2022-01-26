@@ -11,6 +11,8 @@
     <string name="refuse">Refuse</string>
     <string name="end">End</string>
     <string name="create">Create</string>
+    <string name="start">Start</string>
+    <string name="enter">Enter</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
@@ -46,6 +48,8 @@
     <string name="create_room_input_theme">Please enter the room theme.</string>
     <string name="class_room_no_operate_permission">No permission</string>
     <string name="schedule_room">Subscribe Room</string>
+    <string name="quick_start_room">Quick Start</string>
+
     <string name="join_room">Join Room</string>
     <string name="enter_room">Enter Room</string>
     <string name="join_room_toast_empty">room uuid should not be empty</string>

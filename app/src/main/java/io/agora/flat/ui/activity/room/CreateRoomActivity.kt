@@ -67,7 +67,7 @@ fun CreateRoomScreen(
             }
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.openVideo)
-                Navigator.launchRoomPlayActivity(activity, viewState.roomUUID)
+                Navigator.launchRoomPlayActivity(activity, viewState.roomUUID, quickStart = true)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
@@ -124,7 +124,7 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
             }
             Spacer(Modifier.height(32.dp))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                FlatPrimaryTextButton(stringResource(R.string.create), enabled = !viewState.loading) {
+                FlatPrimaryTextButton(stringResource(R.string.start), enabled = !viewState.loading) {
                     actioner(CreateRoomAction.CreateRoom(theme, type))
                 }
                 if (viewState.loading) {
