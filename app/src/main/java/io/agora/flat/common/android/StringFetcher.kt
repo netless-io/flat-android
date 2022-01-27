@@ -4,6 +4,9 @@ import android.content.Context
 import io.agora.flat.R
 import javax.inject.Inject
 
+/**
+ * a class for VM get string resource
+ */
 class StringFetcher @Inject constructor(val context: Context) {
     fun roomNotFound(): String = context.getString(R.string.fetcher_room_not_found)
 

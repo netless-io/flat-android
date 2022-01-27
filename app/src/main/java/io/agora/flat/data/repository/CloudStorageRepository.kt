@@ -13,9 +13,13 @@ import javax.inject.Singleton
 class CloudStorageRepository @Inject constructor(
     private val cloudStorageService: CloudStorageService,
 ) {
-    suspend fun getFileList(page: Int): Result<CloudStorageFileListResp> {
+    suspend fun getFileList(
+        page: Int = 1,
+        size: Int = 50,
+        order: String = "DESC",
+    ): Result<CloudStorageFileListResp> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.getFileList(page).toResult()
+            cloudStorageService.getFileList(page, size, order).toResult()
         }
     }
 

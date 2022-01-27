@@ -176,6 +176,7 @@ dependencies {
     implementation 'com.github.netless-io:fastboard-android:a7128300a0c9817cf6463a766ea9106325b06e43'
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
+    implementation 'com.github.netless-io:whiteboard-android:c92382b3ab6b83dadfd6c571994611c6f745495a'
 
     // Exoplayer
     def exoplayer_version = "2.14.1"

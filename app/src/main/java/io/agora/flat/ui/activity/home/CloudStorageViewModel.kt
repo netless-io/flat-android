@@ -16,10 +16,12 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.CloudStorageUploadStartResp
+import io.agora.flat.data.model.CoursewareType
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.ContentFileInfo
+import io.agora.flat.util.coursewareType
 import io.agora.flat.util.fileSuffix
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.flow.*
@@ -81,14 +83,34 @@ class CloudStorageViewModel @Inject constructor(
                 val resp = cloudStorageRepository.getFileList(1)
                 if (resp is Success) {
                     totalUsage.value = resp.data.totalUsage
-                    files.value = resp.data.files.reversed().map {
+                    files.value = resp.data.files.map {
                         CloudStorageUIFile(file = it, checked = false)
                     }
+                    resp.data.files.forEach(::checkConvertState)
                 } else {
                     // do nothing
                 }
             }
             refreshing.removeLoader()
+        }
+    }
+
+    private fun checkConvertState(file: CloudStorageFile) {
+        when (file.convertStep) {
+            FileConvertStep.None -> {
+                checkAndStartConvert(file.fileURL, file.fileUUID)
+            }
+            FileConvertStep.Converting -> {
+                val type = file.fileURL.coursewareType()
+                if (type in listOf(CoursewareType.DocDynamic, CoursewareType.DocStatic)) {
+                    startConvertQuery(
+                        type == CoursewareType.DocDynamic,
+                        file.taskToken,
+                        file.taskUUID,
+                        file.fileUUID,
+                    )
+                }
+            }
         }
     }
 
@@ -158,12 +180,7 @@ class CloudStorageViewModel @Inject constructor(
             val resp = cloudStorageRepository.updateFinish(fileUUID)
             if (resp is Success) {
                 // delayRemoveSuccess(fileUUID)
-                when (filename.fileSuffix()) {
-                    "ppt", "pptx" -> startConvert(fileUUID, true)
-                    "pdf" -> startConvert(fileUUID, false)
-                    else -> {; }
-                }
-
+                totalUsage.value = totalUsage.value + size
                 files.value = files.value.toMutableList().apply {
                     add(0, CloudStorageUIFile(
                         CloudStorageFile(
@@ -178,8 +195,16 @@ class CloudStorageViewModel @Inject constructor(
                         )
                     ))
                 }
-                totalUsage.value = totalUsage.value + size
+                checkAndStartConvert(filename, fileUUID)
             }
+        }
+    }
+
+    private fun checkAndStartConvert(filename: String, fileUUID: String) {
+        when (filename.fileSuffix()) {
+            "ppt", "pptx" -> startConvert(fileUUID, true)
+            "pdf" -> startConvert(fileUUID, false)
+            else -> {; }
         }
     }
 
@@ -187,29 +212,37 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             val resp = cloudStorageRepository.convertStart(fileUUID)
             if (resp is Success) {
-                val converterV5 = ConverterV5.Builder().apply {
-                    setResource("")
-                    setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
-                    setTaskToken(resp.data.taskToken)
-                    setTaskUuid(resp.data.taskUUID)
-                    setCallback(object : ConverterCallbacks {
-                        override fun onProgress(progress: Double, convertInfo: ConversionInfo) {
-                        }
-
-                        override fun onFinish(ppt: ConvertedFiles?, convertInfo: ConversionInfo) {
-                            finishConvert(fileUUID, true)
-                        }
-
-                        override fun onFailure(e: ConvertException) {
-                            finishConvert(fileUUID, false)
-                        }
-                    })
-                }.build()
-                converterV5.startConvertTask()
-
                 updateConvertStep(fileUUID, FileConvertStep.Converting)
+                startConvertQuery(dynamic, resp.data.taskToken, resp.data.taskUUID, fileUUID)
             }
         }
+    }
+
+    private fun startConvertQuery(
+        dynamic: Boolean,
+        taskToken: String,
+        taskUUID: String,
+        fileUUID: String,
+    ) {
+        val converterV5 = ConverterV5.Builder().apply {
+            setResource("")
+            setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
+            setTaskToken(taskToken)
+            setTaskUuid(taskUUID)
+            setCallback(object : ConverterCallbacks {
+                override fun onProgress(progress: Double, convertInfo: ConversionInfo) {
+                }
+
+                override fun onFinish(ppt: ConvertedFiles?, convertInfo: ConversionInfo) {
+                    finishConvert(fileUUID, true)
+                }
+
+                override fun onFailure(e: ConvertException) {
+                    finishConvert(fileUUID, false)
+                }
+            })
+        }.build()
+        converterV5.startConvertTask()
     }
 
     private fun finishConvert(fileUUID: String, success: Boolean) {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -33,10 +34,7 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.contentFileInfo
-import io.agora.flat.util.fileSuffix
-import io.agora.flat.util.showToast
+import io.agora.flat.util.*
 import java.util.*
 
 @Composable
@@ -77,7 +75,7 @@ internal fun CloudScreen(viewState: CloudStorageViewState, actioner: (CloudStora
         }
         FlatSwipeRefresh(viewState.refreshing, onRefresh = { actioner(CloudStorageUIAction.Reload) }) {
             Box(Modifier.fillMaxSize()) {
-                CloudStorageContent(viewState.totalUsage, viewState.files, actioner)
+                CloudContent(viewState.totalUsage, viewState.files, actioner)
 
                 if (isTabletMode()) {
                     AddFileLayoutPad(actioner)
@@ -244,7 +242,7 @@ private fun RowScope.UpdatePickItem(@DrawableRes id: Int, @StringRes text: Int, 
 }
 
 @Composable
-internal fun CloudStorageContent(
+internal fun CloudContent(
     totalUsage: Long,
     files: List<CloudStorageUIFile>,
     actioner: (CloudStorageUIAction) -> Unit,
@@ -270,37 +268,56 @@ internal fun CloudStorageContent(
                     enabled = checked,
                     onClick = { actioner(CloudStorageUIAction.Delete) },
                 ) {
-                    Text(stringResource(R.string.delete),
-                        color = if (checked) FlatColorRed else FlatColorRed.copy(alpha = ContentAlpha.disabled))
-                }
-            }
-            LazyColumn(Modifier.weight(1f)) {
-                items(count = files.size, key = { index: Int ->
-                    files[index].file.fileUUID
-                }) { index ->
-                    val item = files[index]
-                    CloudStorageItem(
-                        item,
-                        onCheckedChange = { checked ->
-                            actioner(CloudStorageUIAction.CheckItem(index, checked))
-                        },
-                        onClick = {
-                            when (item.file.convertStep) {
-                                FileConvertStep.Done, FileConvertStep.None -> actioner(CloudStorageUIAction.ClickItem(
-                                    item.file))
-                                else -> actioner(CloudStorageUIAction.PreviewRestrict)
-                            }
-                        },
+                    Text(
+                        stringResource(R.string.delete),
+                        color = if (checked) FlatColorRed else FlatColorRed.copy(alpha = ContentAlpha.disabled),
                     )
                 }
+            }
+            CloudFileList(Modifier.weight(1f), files, actioner)
+        }
+    }
+}
 
-                item {
-                    Box(Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter) {
-                        Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
+@Composable
+private fun CloudFileList(
+    modifier: Modifier,
+    files: List<CloudStorageUIFile>,
+    actioner: (CloudStorageUIAction) -> Unit,
+) {
+    val scrollState = rememberLazyListState()
+
+    LaunchedEffect(files.firstOrNull()) {
+        scrollState.animateScrollToItem(0)
+    }
+
+    LazyColumn(modifier, state = scrollState) {
+        items(
+            count = files.size,
+            key = { index: Int -> files[index].file.fileUUID },
+        ) { index ->
+            val item = files[index]
+            CloudStorageItem(
+                item,
+                onCheckedChange = { checked ->
+                    actioner(CloudStorageUIAction.CheckItem(index, checked))
+                },
+                onClick = {
+                    when (item.file.convertStep) {
+                        FileConvertStep.Done, FileConvertStep.None -> {
+                            actioner(CloudStorageUIAction.ClickItem(item.file))
+                        }
+                        else -> actioner(CloudStorageUIAction.PreviewRestrict)
                     }
-                }
+                },
+            )
+        }
+
+        item {
+            Box(Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter) {
+                Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
             }
         }
     }

@@ -587,7 +587,7 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> {
                     _cloudStorageFiles.value = res.data.files.filter {
                         it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
-                    }.asReversed()
+                    }
                 }
             }
         }
