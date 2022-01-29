@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.0] - January 29, 2022
+- Replace whiteboard-sdk with fastboard-sdk
+- Update global agreement
+- Fix the bugs of uploading and displaying in cloud module
+
 ## [1.1.0] - December 29, 2021
 - Support cloud files preview
 - Add login agreement
