@@ -72,6 +72,9 @@ Flat 试图使用最新 Android 开发库和工具开发应用程序。主要使
 | FLAT_SERVER_DOMAIN                   | Flat Server 部署的域名地址                         | 如: `flat-api.whiteboard.agora.io`                               |
 |                                                                  |
 
+## 免责声明
+你可以将 Flat 用于商业用途但请注意我们不接受商业化需求定制与部署支持以及其它客户服务。如有相关需求请前往[灵动课堂](https://www.agora.io/cn/agora-flexible-classroom)。
+
 [flat-homepage]: https://flat.whiteboard.agora.io/
 [flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server

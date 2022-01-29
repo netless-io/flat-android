@@ -78,6 +78,9 @@ Flat require the latest Android Studio Arctic Fox release to be able to build th
 | FLAT_SERVER_DOMAIN                   | Flat Server deployed address                             | e.g. `flat-api.whiteboard.agora.io`                                                 |
 |                                                                                     |
 
+## Disclaimers
+You may use Flat for commercial purposes but please note that we do not accept customizational commercial requirements and deployment supports. Nor do we offer customer supports for commercial usage. Please head to [agora-flexible-classroom](https://www.agora.io/en/products/flexible-classroom) for such requirements.
+
 [flat-homepage]: https://flat.whiteboard.agora.io/en/#download
 [flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
