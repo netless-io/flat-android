@@ -7,6 +7,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.util.isTabletMode
 
 
@@ -21,9 +22,13 @@ private val DarkColorPalette = darkColors(
     background = FlatColorBlack,
     // cards, sheets, and menus
     surface = FlatColorBlack,
+    error = FlatColorRed,
 
-    onBackground = FlatColorDarkOn,
-    onSurface = FlatColorDarkOn,
+    onPrimary = FlatColorTextPrimaryDark,
+    onSecondary = FlatColorTextPrimaryDark,
+    onBackground = FlatColorTextPrimaryDark,
+    onSurface = FlatColorTextPrimaryDark,
+    onError = FlatColorBlack
 )
 
 /**
@@ -42,8 +47,8 @@ private val LightColorPalette = lightColors(
     surface = FlatColorWhite,
     error = FlatColorRed,
 
-    onPrimary = FlatColorTextPrimary,
-    onSecondary = FlatColorTextSecondary,
+    onPrimary = FlatColorBlack,
+    onSecondary = FlatColorBlack,
     onBackground = FlatColorBlack,
     onSurface = FlatColorBlack,
     onError = FlatColorWhite
@@ -51,7 +56,7 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun FlatAndroidTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val colors = if (darkTheme) {
@@ -71,4 +76,11 @@ fun FlatAndroidTheme(
 @Composable
 fun isTabletMode(): Boolean {
     return LocalContext.current.isTabletMode()
+}
+
+@Composable
+fun isDarkTheme(): Boolean = when (DarkModeManager.current()) {
+    DarkModeManager.Mode.Auto -> isSystemInDarkTheme()
+    DarkModeManager.Mode.Light -> false
+    DarkModeManager.Mode.Dark -> true
 }

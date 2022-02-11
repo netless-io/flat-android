@@ -29,6 +29,7 @@
     <string name="title_feedback">Feedback</string>
     <string name="title_about_us">About Us</string>
     <string name="title_language">Language</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="title_call_test" translatable="false">CallTest</string>
     <string name="privacy_policy">Privacy Policy</string>
@@ -175,4 +176,8 @@
     <string name="language_follow_system">Auto</string>
     <string name="language_chinese" translatable="false">简体中文</string>
     <string name="language_english" translatable="false">English</string>
+
+    <string name="dark_mode_auto">Auto</string>
+    <string name="dark_mode_light">Normal Mode</string>
+    <string name="dark_mode_dark">Dark Mode</string>
 </resources>

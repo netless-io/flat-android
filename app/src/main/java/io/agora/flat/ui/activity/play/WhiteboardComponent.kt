@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
+import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -62,15 +63,18 @@ class WhiteboardComponent(
         boardRoom.setDarkMode(isDarkMode())
     }
 
-    private fun isDarkMode(): Boolean {
-        val nightMode: Int = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightMode == Configuration.UI_MODE_NIGHT_YES
+    private fun isDarkMode(): Boolean = when (DarkModeManager.current()) {
+        DarkModeManager.Mode.Auto -> {
+            val nightMode: Int = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            nightMode == Configuration.UI_MODE_NIGHT_YES
+        }
+        DarkModeManager.Mode.Light -> false
+        DarkModeManager.Mode.Dark -> true
     }
 
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             viewModel.roomPlayInfo.filterNotNull().collect {
-                boardRoom.setDarkMode(isDarkMode())
                 boardRoom.join(
                     it.whiteboardRoomUUID,
                     it.whiteboardRoomToken,
@@ -131,6 +135,7 @@ class WhiteboardComponent(
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)
+        boardRoom.setDarkMode(isDarkMode())
         boardRoom.setRoomController(FlatControllerGroup(binding.flatControllerLayout))
     }
 

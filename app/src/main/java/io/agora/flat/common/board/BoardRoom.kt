@@ -102,11 +102,14 @@ class BoardRoom @Inject constructor(
     }
 
     override fun setDarkMode(dark: Boolean) {
-        this.darkMode = dark;
-        val fastStyle = fastSdk.fastStyle.apply {
-            isDarkMode = dark
+        this.darkMode = dark
+
+        if (::fastSdk.isInitialized) {
+            val fastStyle = fastSdk.fastStyle.apply {
+                isDarkMode = dark
+            }
+            fastSdk.fastStyle = fastStyle
         }
-        fastSdk.fastStyle = fastStyle
     }
 
     override fun release() {
@@ -163,14 +166,6 @@ class BoardRoom @Inject constructor(
 
     override fun observeRoomPhase(): Flow<BoardRoomPhase> {
         return boardRoomPhase.asStateFlow()
-    }
-
-    private fun SceneState.toBoardSceneState(): BoardSceneState {
-        val sceneDir = this.scenePath.substringBeforeLast('/')
-        val list = this.scenes.filterNotNull().map {
-            SceneItem(sceneDir + "/" + it.name, it.ppt?.preview)
-        }
-        return BoardSceneState(list, this.index)
     }
 
     /**

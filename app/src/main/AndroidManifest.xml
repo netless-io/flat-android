@@ -55,6 +55,7 @@
         <activity android:name=".ui.activity.setting.CallTestActivity" />
         <activity android:name=".ui.activity.cloud.preview.PreviewActivity" />
         <activity android:name=".ui.activity.setting.WebViewActivity" />
+        <activity android:name=".ui.activity.setting.DarkModeActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"

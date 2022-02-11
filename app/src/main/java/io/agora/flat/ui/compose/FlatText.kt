@@ -40,3 +40,13 @@ fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier) {
             )
     }
 }
+
+@Composable
+fun FlatTextTitle() {
+
+}
+
+@Composable
+fun FlatTextSubtitle() {
+
+}

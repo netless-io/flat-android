@@ -35,6 +35,7 @@
     <string name="title_feedback">吐个槽</string>
     <string name="title_about_us">关于我们</string>
     <string name="title_language">多语言</string>
+    <string name="title_dark_mode">深色模式</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
@@ -187,4 +188,8 @@
     <string name="fetcher_start_room_with_record">开始上课并录制…</string>
 
     <string name="language_follow_system">跟随系统</string>
+
+    <string name="dark_mode_auto">跟随系统</string>
+    <string name="dark_mode_light">普通模式</string>
+    <string name="dark_mode_dark">深色模式</string>
 </resources>

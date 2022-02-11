@@ -90,6 +90,11 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    fun launchDarkModeActivity(context: Context) {
+        val intent = Intent(context, DarkModeActivity::class.java)
+        context.startActivity(intent)
+    }
+
     fun launchWebViewActivity(context: Context, url: String) {
         val intent = Intent(context, WebViewActivity::class.java).apply {
             putExtra(Constants.IntentKey.URL, url)

@@ -82,6 +82,11 @@ private fun SettingItemList() {
                 onClick = { Navigator.launchLanguageActivity(context) })
             SettingItemDivider()
             SettingItem(
+                id = R.drawable.ic_settings_dark_light,
+                tip = stringResource(R.string.title_dark_mode),
+                onClick = { Navigator.launchDarkModeActivity(context) })
+            SettingItemDivider()
+            SettingItem(
                 id = R.drawable.ic_settings_privacy_policy,
                 tip = stringResource(R.string.privacy_policy),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Privacy) })

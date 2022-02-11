@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.Flow
 interface IBoardRoom {
     fun initSdk(fastboardView: FastboardView)
 
-    fun setRoomController(rootRoomController: RoomControllerGroup)
-
     fun setDarkMode(dark: Boolean)
+
+    fun setRoomController(rootRoomController: RoomControllerGroup)
 
     fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean)
 

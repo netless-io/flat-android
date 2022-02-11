@@ -13,6 +13,9 @@ val FlatColorAmber = Color(0xFFE99434)
 val FlatColorTextPrimary = Color(0xFF444E60)
 val FlatColorTextSecondary = Color(0xFF7A7B7C)
 
+val FlatColorTextPrimaryDark = Color(0xFFB5BCC9)
+val FlatColorTextSecondaryDark = Color(0xFF7D818A)
+
 val FlatColorDivider = Color(0xFFDBE1EA)
 val FlatColorBorder = Color(0xFFDBE1EA)
 val FlatColorBackground = Color(0xFFF3F6F9)

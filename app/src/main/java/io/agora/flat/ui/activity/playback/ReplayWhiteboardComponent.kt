@@ -124,8 +124,10 @@ class ReplayWhiteboardComponent(
     private fun initWhiteboard() {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
-        val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true)
-        configuration.isUserCursor = true
+        val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true).apply {
+            isUserCursor = true
+            useMultiViews = true
+        }
 
         whiteSdk = WhiteSdk(whiteBinding.whiteboardView, activity, configuration)
         whiteSdk.setCommonCallbacks(object : CommonCallback {
@@ -179,7 +181,21 @@ class ReplayWhiteboardComponent(
     }
 
     private fun createWhitePlayer(roomUUID: String, roomToken: String) {
-        val conf = PlayerConfiguration(roomUUID, roomToken)
+        val conf = PlayerConfiguration(roomUUID, roomToken).apply {
+            val styleMap = hashMapOf(
+                "bottom" to "30px",
+                "right" to "44px",
+                "position" to "fixed",
+            )
+
+            windowParams = WindowParams()
+                .setChessboard(false)
+                .setDebug(true)
+                .setCollectorStyles(styleMap)
+                .setContainerSizeRatio(9.0f / 16)
+            windowParams.setPrefersColorScheme(WindowPrefersColorScheme.Auto)
+        }
+
         val playerListener = object : PlayerListener {
             override fun onPhaseChanged(phase: PlayerPhase) {
                 Log.d(TAG, "play phase $phase")
