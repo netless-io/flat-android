@@ -14,13 +14,13 @@ import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.model.FastSdkOptions
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import java.util.*
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -28,6 +28,7 @@ class BoardRoom @Inject constructor(
     @ApplicationContext
     val context: Context,
     val userRepository: UserRepository,
+    val appKVCenter: AppKVCenter,
 ) : IBoardRoom {
     companion object {
         const val TAG = "BoardRoom"
@@ -80,6 +81,7 @@ class BoardRoom @Inject constructor(
                 nickName = userRepository.getUsername(),
                 cursorName = userRepository.getUsername()
             )
+            isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
         }
         val options = FastRoomOptions(roomUUID, roomToken, userId, writable).apply {
             this.roomParams = roomParams
@@ -129,17 +131,7 @@ class BoardRoom @Inject constructor(
     }
 
     override fun insertImage(imageUrl: String, w: Int, h: Int) {
-        val uuid = UUID.randomUUID().toString()
-        fastRoom?.room?.run {
-            insertImage(ImageInformation().apply {
-                this.uuid = uuid
-                width = w.toDouble()
-                height = h.toDouble()
-                centerX = 0.0
-                centerY = 0.0
-            })
-            completeImageUpload(uuid, imageUrl)
-        }
+        fastRoom?.insertImage(imageUrl, w, h)
     }
 
     override fun insertPpt(dir: String, files: ConvertedFiles, title: String) {

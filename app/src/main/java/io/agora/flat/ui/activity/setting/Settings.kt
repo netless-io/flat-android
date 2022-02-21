@@ -5,14 +5,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,13 +30,15 @@ import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatHighlightTextButton
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.FlatCommonTipTextStyle
-import io.agora.flat.ui.viewmodel.UserViewModel
+import io.agora.flat.ui.viewmodel.SettingsUiState
+import io.agora.flat.ui.viewmodel.SettingsViewModel
 import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
 
 @Composable
-fun SettingsScreen(navController: NavController, viewModel: UserViewModel = hiltViewModel()) {
+fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    val state by viewModel.state.collectAsState()
 
     Column {
         BackTopAppBar(
@@ -45,7 +46,7 @@ fun SettingsScreen(navController: NavController, viewModel: UserViewModel = hilt
             onBackPressed = { navController.popBackStack() }
         )
         Box(Modifier.weight(1f)) {
-            SettingItemList()
+            SettingItemList(state, onSetNetworkAcceleration = { viewModel.setNetworkAcceleration(it) })
             BottomOptArea(onLogoutClick = {
                 viewModel.logout()
                 Navigator.launchHomeActivity(context)
@@ -55,7 +56,7 @@ fun SettingsScreen(navController: NavController, viewModel: UserViewModel = hilt
 }
 
 @Composable
-private fun SettingItemList() {
+private fun SettingItemList(state: SettingsUiState, onSetNetworkAcceleration: ((Boolean) -> Unit)?) {
     val context = LocalContext.current
 
     LazyColumn {
@@ -96,13 +97,20 @@ private fun SettingItemList() {
                 tip = stringResource(R.string.term_of_service),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
             SettingItemDivider()
-            // Device Test
-            // SettingItem(
-            //     id = R.drawable.ic_user_profile_feedback,
-            //     tip = stringResource(R.string.title_call_test),
-            //     onClick = { Navigator.launchCallTestActivity(context) })
-            // SettingItemDivider()
+            SettingItemSwitch(
+                id = R.drawable.ic_settings_network_acceleration,
+                tip = stringResource(R.string.network_acceleration),
+                checked = state.networkAcceleration,
+                onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
+            )
+            SettingItemDivider()
             if (context.isApkInDebug()) {
+                // Device Test
+                // SettingItem(
+                //     id = R.drawable.ic_user_profile_feedback,
+                //     tip = stringResource(R.string.title_call_test),
+                //     onClick = { Navigator.launchCallTestActivity(context) })
+                // SettingItemDivider()
                 SettingItem(
                     id = R.drawable.ic_user_profile_feedback,
                     tip = "Debug Tools",
@@ -152,6 +160,36 @@ internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", o
 }
 
 @Composable
+internal fun SettingItemSwitch(
+    @DrawableRes id: Int,
+    tip: String,
+    desc: String = "",
+    checked: Boolean,
+    onCheckedChange: ((Boolean) -> Unit)?,
+) {
+    CompositionLocalProvider(
+        LocalContentColor provides MaterialTheme.colors.onBackground.copy(alpha = 1f),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(Modifier.width(16.dp))
+            Image(painterResource(id), contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text(text = tip, style = FlatCommonTextStyle)
+            Spacer(Modifier.weight(1f))
+            Text(text = desc, style = FlatCommonTipTextStyle)
+            Spacer(Modifier.width(8.dp))
+            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            Spacer(Modifier.width(16.dp))
+        }
+    }
+}
+
+@Composable
 internal fun SettingItemDivider() {
     FlatDivider(startIndent = 44.dp, endIndent = 16.dp)
 }
@@ -159,10 +197,11 @@ internal fun SettingItemDivider() {
 @Preview(showSystemUi = false)
 @Composable
 fun UserSettingActivityPreview() {
+    val state = SettingsUiState()
     FlatColumnPage {
         BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { })
         Box(Modifier.weight(1f)) {
-            SettingItemList()
+            SettingItemList(state) {}
             BottomOptArea {}
         }
     }

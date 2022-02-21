@@ -83,6 +83,16 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         return store.getBoolean(KEY_AGREEMENT_GLOBAL_AGREED, false)
     }
 
+    fun setNetworkAcceleration(enable: Boolean) {
+        store.edit().apply {
+            putBoolean(KEY_NETWORK_ACCELERATION, enable)
+        }.apply()
+    }
+
+    fun isNetworkAcceleration(): Boolean {
+        return store.getBoolean(KEY_NETWORK_ACCELERATION, false)
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -91,6 +101,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_AUTH_UUID = "key_auth_uuid"
 
         const val KEY_AGREEMENT_GLOBAL_AGREED = "key_agreement_global_agreed"
+
+        const val KEY_NETWORK_ACCELERATION = "key_network_acceleration"
     }
 
     class MockData {

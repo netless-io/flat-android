@@ -34,6 +34,7 @@
     <string name="title_call_test" translatable="false">CallTest</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="term_of_service">Term of Service</string>
+    <string name="network_acceleration">Network Acceleration</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>

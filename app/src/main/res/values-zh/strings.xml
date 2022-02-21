@@ -39,6 +39,7 @@
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
+    <string name="network_acceleration">网络加速</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
