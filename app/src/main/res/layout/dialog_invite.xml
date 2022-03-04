@@ -12,7 +12,7 @@
         android:id="@+id/invite_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/flat_black"
+        android:textColor="@color/flat_day_night_text_primary"
         android:textSize="16sp"
         tools:text="XXX 邀请您参加 Flat 房间" />
 

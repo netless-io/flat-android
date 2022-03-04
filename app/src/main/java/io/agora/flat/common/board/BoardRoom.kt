@@ -17,6 +17,7 @@ import io.agora.flat.Constants
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.util.isApkInDebug
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +50,7 @@ class BoardRoom @Inject constructor(
         val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER).apply {
             isUserCursor = true
             useMultiViews = true
-            isLog = true
+            isLog = context.isApkInDebug()
         }
         val options = FastSdkOptions(Constants.NETLESS_APP_IDENTIFIER)
         options.configuration = configuration

@@ -198,7 +198,7 @@ fun HelloContent(name: String, onNameChange: (String) -> Unit) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Hello, $name",
-            modifier = Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.h5
+            modifier = Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.h6
         )
         OutlinedTextField(
             value = name,

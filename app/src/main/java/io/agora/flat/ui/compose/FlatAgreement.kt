@@ -60,7 +60,7 @@ internal fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
     Dialog(onDismissRequest = onRefuse) {
         Surface(shape = Shapes.large) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                Text(stringResource(R.string.login_agreement_dialog_title), style = FlatTitleTextStyle)
+                FlatTextTitle(stringResource(R.string.login_agreement_dialog_title))
                 FlatNormalVerticalSpacer()
                 LoginAgreementDialogMessage()
                 FlatNormalVerticalSpacer()

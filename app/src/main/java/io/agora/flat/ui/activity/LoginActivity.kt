@@ -9,7 +9,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Checkbox
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +20,6 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,8 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.MaxHeightSpread
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
@@ -220,7 +222,7 @@ internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
             actioner = actioner
         )
         Box(Modifier.padding(vertical = 24.dp)) {
-            Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
+            FlatTextBodyOne(stringResource(R.string.login_page_label_2))
         }
     }
 }
@@ -252,7 +254,7 @@ internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
             Box(Modifier
                 .padding(vertical = 24.dp)
                 .navigationBarsPadding()) {
-                Text(stringResource(R.string.login_page_label_2), style = FlatCommonTextStyle)
+                FlatTextBodyOne(stringResource(R.string.login_page_label_2))
             }
         }
     }
@@ -300,11 +302,11 @@ private fun LoginButtonsArea(
 
 @Composable
 private fun LoginLogoDisplay() {
-    Image(painterResource(R.drawable.img_login_logo), null)
+    Image(painterResource(R.drawable.ic_flat_logo), null)
     Spacer(Modifier.height(2.dp))
-    Text("Flat", style = MaterialTheme.typography.h5)
+    FlatTextTitle("Flat")
     Spacer(Modifier.height(4.dp))
-    Text(stringResource(R.string.login_page_label_1), style = FlatCommonTextStyle)
+    FlatTextBodyOne(stringResource(R.string.login_page_label_1))
 }
 
 @Composable

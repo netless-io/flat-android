@@ -98,7 +98,7 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
             .weight(1f)
             .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.room_id))
+            FlatTextBodyTwo(stringResource(R.string.room_id))
             FlatSmallVerticalSpacer()
             FlatPrimaryTextField(
                 value = uuid,
@@ -107,7 +107,7 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Ascii)
             )
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.join_option))
+            FlatTextBodyTwo(stringResource(R.string.join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
@@ -115,14 +115,14 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
                     onCheckedChange = { openAudio = it }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.turn_on_mic))
+                FlatTextBodyTwo(stringResource(R.string.turn_on_mic))
                 Spacer(Modifier.width(40.dp))
                 Checkbox(
                     checked = openVideo,
                     onCheckedChange = { openVideo = it }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.turn_on_camera))
+                FlatTextBodyTwo(stringResource(R.string.turn_on_camera))
             }
             Spacer(Modifier.height(32.dp))
             FlatPrimaryTextButton(stringResource(R.string.join)) {

@@ -2,15 +2,15 @@
     <!-- Base application theme. -->
     <style name="Theme.FlatAndroid" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/flat_white</item>
-        <item name="colorPrimaryVariant">@color/flat_gray</item>
-        <item name="colorOnPrimary">@color/flat_text_primary</item>
+        <item name="colorPrimary">@color/flat_grey_10</item>
+        <item name="colorPrimaryVariant">@color/flat_grey_10</item>
+        <item name="colorOnPrimary">@color/flat_text_primary_dark</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/flat_blue</item>
         <item name="colorSecondaryVariant">@color/flat_blue</item>
-        <item name="colorOnSecondary">@color/flat_text_secondary</item>
+        <item name="colorOnSecondary">@color/flat_text_secondary_dark</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

@@ -23,6 +23,7 @@ import io.agora.flat.data.AppKVCenter
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.theme.FlatCommonTextStyle
 import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.ui.viewmodel.UserViewModel
@@ -73,7 +74,7 @@ private fun EnvSwitch() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "current $curEnv $flatServiceUrl")
+            FlatTextBodyOne(text = "current $curEnv $flatServiceUrl")
             Spacer(modifier = Modifier.width(16.dp))
         }
         AnimatedVisibility(visible = expanded) {
@@ -102,7 +103,7 @@ private fun EnvSwitch() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(text = "$k ${v.serviceUrl}", modifier = Modifier.weight(1f))
+                        FlatTextBodyOne(text = "$k ${v.serviceUrl}", modifier = Modifier.weight(1f))
                         Spacer(modifier = Modifier.width(16.dp))
                     }
                 }
@@ -123,7 +124,7 @@ fun UserLoginFlag() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "设置User", style = FlatCommonTextStyle)
+        FlatTextBodyOne(text = "设置User")
         Spacer(modifier = Modifier.weight(1f))
         Switch(
             checked = loggedInData.value ?: false,

@@ -9,7 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +35,6 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatColorBlue
 import io.agora.flat.ui.theme.FlatColorGray
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatSmallTipTextStyle
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.ui.viewmodel.ViewState
 import io.agora.flat.util.delayLaunch
@@ -103,7 +104,7 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
             .weight(1f)
             .padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.room_theme))
+            FlatTextBodyTwo(stringResource(R.string.room_theme))
             FlatSmallVerticalSpacer()
             FlatPrimaryTextField(
                 value = theme,
@@ -111,16 +112,16 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
                 placeholderValue = stringResource(R.string.create_room_input_theme)
             )
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.create_room_type))
+            FlatTextBodyTwo(stringResource(R.string.create_room_type))
             FlatSmallVerticalSpacer()
             TypeCheckLayout(type) { type = it }
             FlatNormalVerticalSpacer()
-            Text(stringResource(R.string.join_option))
+            FlatTextBodyTwo(stringResource(R.string.join_option))
             FlatSmallVerticalSpacer()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = openVideo, onCheckedChange = { openVideo = it })
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(id = R.string.turn_on_camera))
+                FlatTextCaption(stringResource(id = R.string.turn_on_camera))
             }
             Spacer(Modifier.height(32.dp))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -194,9 +195,9 @@ private fun TypeItemTablet(checked: Boolean, text: String, desc: String, @Drawab
         )
         Column(Modifier.weight(1f)) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text, style = FlatCommonTextStyle)
+            FlatTextBodyOne(text)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(desc, style = FlatSmallTipTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            FlatTextCaption(desc, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Icon(
                 painterResource(icon),
                 null,
@@ -229,7 +230,7 @@ private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, 
                     .aspectRatio(1f)
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text, style = FlatCommonTextStyle)
+            FlatTextBodyOne(text)
             Spacer(modifier = Modifier.height(12.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -239,8 +240,11 @@ private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, 
 
 @Composable
 @Preview(device = PIXEL_C)
+@Preview(device = PIXEL_C, uiMode = 0x20)
 private fun CreateRoomPageTabletPreview() {
-    CreateRoomContent(ViewState()) {}
+    FlatPage {
+        CreateRoomContent(ViewState()) {}
+    }
 }
 
 @Composable

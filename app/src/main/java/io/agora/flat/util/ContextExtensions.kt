@@ -8,7 +8,9 @@ import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -76,6 +78,16 @@ fun ComponentActivity.delayAndFinish(duration: Long = 2000, message: String = ""
         finish()
     }
 }
+
+fun ComponentActivity.isDarkMode(): Boolean = when (DarkModeManager.current()) {
+    DarkModeManager.Mode.Auto -> {
+        val nightMode: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        nightMode == Configuration.UI_MODE_NIGHT_YES
+    }
+    DarkModeManager.Mode.Light -> false
+    DarkModeManager.Mode.Dark -> true
+}
+
 
 fun Context.contentFileInfo(uri: Uri): ContentFileInfo? {
     val mediaType = contentResolver.getType(uri) ?: "text/plain"

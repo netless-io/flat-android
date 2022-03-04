@@ -62,8 +62,7 @@ private fun PreviewPage(
                             onClose()
                         }
                     }
-                    CoursewareType.Image,
-                    -> ImagePreview(file = viewState.file!!, actioner = actioner)
+                    CoursewareType.Image -> ImagePreview(file = viewState.file!!, actioner = actioner)
 
                     CoursewareType.Audio,
                     CoursewareType.Video,

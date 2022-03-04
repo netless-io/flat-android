@@ -9,7 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Divider
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,8 +31,13 @@ import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginHelper
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.compose.FlatDivider
+import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.GlobalAgreementDialog
+import io.agora.flat.ui.compose.LifecycleHandler
+import io.agora.flat.ui.theme.FillMaxSize
+import io.agora.flat.ui.theme.MaxHeight
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
@@ -162,9 +170,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                 onTabSelected(selectedTab)
             }
         }
-        Box(Modifier.weight(1f),
-            Alignment.Center
-        ) {
+        Box(Modifier.weight(1f), Alignment.Center) {
             when (mainTab) {
                 MainTab.Home -> HomeScreen(
                     navController,

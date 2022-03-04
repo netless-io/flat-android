@@ -56,6 +56,6 @@
         android:layout_height="1dp"
         android:layout_marginHorizontal="8dp"
         android:layout_marginTop="2dp"
-        android:background="#DBE1EA"
+        android:background="@color/flat_day_night_divider"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

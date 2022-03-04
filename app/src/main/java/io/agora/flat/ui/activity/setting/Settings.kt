@@ -5,7 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
@@ -24,12 +27,7 @@ import androidx.navigation.NavController
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.compose.BackTopAppBar
-import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.compose.FlatDivider
-import io.agora.flat.ui.compose.FlatHighlightTextButton
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatCommonTipTextStyle
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.SettingsUiState
 import io.agora.flat.ui.viewmodel.SettingsViewModel
 import io.agora.flat.util.getAppVersion
@@ -149,9 +147,9 @@ internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", o
             Spacer(Modifier.width(16.dp))
             Image(painterResource(id), contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            Text(text = tip, style = FlatCommonTextStyle)
+            FlatTextBodyOne(text = tip)
             Spacer(Modifier.weight(1f))
-            Text(text = desc, style = FlatCommonTipTextStyle)
+            FlatTextBodyOneSecondary(text = desc)
             Spacer(Modifier.width(8.dp))
             Icon(Icons.Outlined.NavigateNext, contentDescription = null)
             Spacer(Modifier.width(16.dp))
@@ -179,9 +177,9 @@ internal fun SettingItemSwitch(
             Spacer(Modifier.width(16.dp))
             Image(painterResource(id), contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            Text(text = tip, style = FlatCommonTextStyle)
+            FlatTextBodyOne(text = tip)
             Spacer(Modifier.weight(1f))
-            Text(text = desc, style = FlatCommonTipTextStyle)
+            FlatTextBodyOneSecondary(text = desc)
             Spacer(Modifier.width(8.dp))
             Switch(checked = checked, onCheckedChange = onCheckedChange)
             Spacer(Modifier.width(16.dp))

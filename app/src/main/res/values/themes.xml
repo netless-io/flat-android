@@ -3,19 +3,19 @@
     <style name="Theme.FlatAndroid" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/flat_white</item>
-        <item name="colorPrimaryVariant">@color/flat_gray</item>
+        <item name="colorPrimaryVariant">@color/flat_white</item>
         <item name="colorOnPrimary">@color/flat_text_primary</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/flat_blue</item>
         <item name="colorSecondaryVariant">@color/flat_blue</item>
-        <item name="colorOnSecondary">@color/flat_text_secondary</item>
+        <item name="colorOnSecondary">@color/flat_text_primary</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
     </style>
 
     <style name="Theme.FlatAndroid.Launch">
-        <item name="android:windowBackground">@drawable/lanuch_bg</item>
+        <item name="android:windowBackground">@drawable/launcher_bg</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:clipToPadding">true</item>
     </style>

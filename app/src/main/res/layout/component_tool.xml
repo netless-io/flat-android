@@ -13,14 +13,24 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5" />
 
+    <android.widget.Space
+        android:id="@+id/marginSpace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        app:layout_constraintBottom_toBottomOf="@id/guideline"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline" />
+
     <LinearLayout
         android:id="@+id/tools_layout"
         android:layout_width="@dimen/room_class_button_size"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="-10dp"
         android:background="@drawable/shape_gray_border_left_round_bg"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/marginSpace"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -133,7 +143,6 @@
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
-
 
     <FrameLayout
         android:layout_width="wrap_content"

@@ -24,7 +24,12 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextTitle
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorGray
+import io.agora.flat.ui.theme.MaxWidth
+import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.util.getAppVersion
 
 class AboutUsActivity : BaseComposeActivity() {
@@ -58,9 +63,9 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(painterResource(R.drawable.ic_flat_logo), null)
                 Spacer(Modifier.height(16.dp))
-                Text("Flat", style = FlatTitleTextStyle)
+                FlatTextTitle("Flat")
                 Spacer(Modifier.height(8.dp))
-                Text("Version $version", style = FlatCommonTextStyle)
+                FlatTextBodyOne("Version $version")
             }
         }
         Box(MaxWidth.padding(vertical = 32.dp), Alignment.Center) {

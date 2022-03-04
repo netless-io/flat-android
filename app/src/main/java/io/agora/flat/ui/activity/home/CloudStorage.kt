@@ -34,8 +34,10 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.*
-import java.util.*
+import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.contentFileInfo
+import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.showToast
 
 @Composable
 fun CloudScreen(
@@ -68,8 +70,8 @@ fun CloudScreen(
 @Composable
 internal fun CloudScreen(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
     Column {
-        FlatTopAppBar(title = stringResource(R.string.title_cloud_storage)) {
-            UploadIcon(viewState = viewState) {
+        FlatTopAppBar(stringResource(R.string.title_cloud_storage)) {
+            UploadIcon(viewState) {
                 actioner(CloudStorageUIAction.OpenUploading)
             }
         }
@@ -126,10 +128,13 @@ private fun BoxScope.AddFileLayout(actioner: (CloudStorageUIAction) -> Unit) {
 
     val aniValue: Float by animateFloatAsState(if (showPick) 1f else 0f)
     if (aniValue > 0) {
-        UpdatePickLayout(aniValue, actioner = {
-            actioner(it)
-            showPick = false
-        }) {
+        UpdatePickLayout(
+            aniValue,
+            actioner = {
+                actioner(it)
+                showPick = false
+            },
+        ) {
             showPick = false
         }
     }
@@ -237,7 +242,7 @@ private fun RowScope.UpdatePickItem(@DrawableRes id: Int, @StringRes text: Int, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Image(painter = painterResource(id), contentDescription = "", Modifier.size(48.dp))
-        Text(text = stringResource(text))
+        FlatTextButton(text = stringResource(text))
     }
 }
 
@@ -258,17 +263,16 @@ internal fun CloudContent(
             )
         } else {
             Row(Modifier, verticalAlignment = Alignment.CenterVertically) {
-                Text(
+                FlatTextBodyOneSecondary(
                     stringResource(R.string.cloud_storage_usage_format, FlatFormatter.size(totalUsage)),
                     Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    FlatColorTextSecondary,
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(
                     enabled = checked,
                     onClick = { actioner(CloudStorageUIAction.Delete) },
                 ) {
-                    Text(
+                    FlatTextBodyOne(
                         stringResource(R.string.delete),
                         color = if (checked) FlatColorRed else FlatColorRed.copy(alpha = ContentAlpha.disabled),
                     )
@@ -317,7 +321,7 @@ private fun CloudFileList(
             Box(Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter) {
-                Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
+                FlatTextCaption(stringResource(R.string.loaded_all))
             }
         }
     }
@@ -362,9 +366,9 @@ private fun CloudStorageItem(
                 Text(file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Row {
-                    Text(FlatFormatter.dateDash(file.createAt))
+                    FlatTextCaption(FlatFormatter.dateDash(file.createAt))
                     Spacer(Modifier.width(16.dp))
-                    Text(FlatFormatter.size(file.fileSize))
+                    FlatTextCaption(FlatFormatter.size(file.fileSize))
                 }
             }
             Checkbox(checked = item.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))

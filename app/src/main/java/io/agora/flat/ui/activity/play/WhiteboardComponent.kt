@@ -17,6 +17,7 @@ import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
@@ -60,16 +61,7 @@ class WhiteboardComponent(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        boardRoom.setDarkMode(isDarkMode())
-    }
-
-    private fun isDarkMode(): Boolean = when (DarkModeManager.current()) {
-        DarkModeManager.Mode.Auto -> {
-            val nightMode: Int = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            nightMode == Configuration.UI_MODE_NIGHT_YES
-        }
-        DarkModeManager.Mode.Light -> false
-        DarkModeManager.Mode.Dark -> true
+        boardRoom.setDarkMode(activity.isDarkMode())
     }
 
     private fun observeState() {
@@ -135,7 +127,7 @@ class WhiteboardComponent(
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)
-        boardRoom.setDarkMode(isDarkMode())
+        boardRoom.setDarkMode(activity.isDarkMode())
         boardRoom.setRoomController(FlatControllerGroup(binding.flatControllerLayout))
     }
 

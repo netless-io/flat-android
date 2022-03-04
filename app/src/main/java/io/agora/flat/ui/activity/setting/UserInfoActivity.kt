@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
@@ -22,8 +21,8 @@ import io.agora.flat.R
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.theme.FlatCommonTextStyle
-import io.agora.flat.ui.theme.FlatCommonTipTextStyle
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
 import io.agora.flat.ui.viewmodel.UserViewModel
 
 @AndroidEntryPoint
@@ -71,9 +70,9 @@ private fun Item(
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = tip, style = FlatCommonTextStyle)
+        FlatTextBodyOne(tip)
         Spacer(modifier = Modifier.weight(1f))
-        Text(text = desc, style = FlatCommonTipTextStyle)
+        FlatTextBodyOneSecondary(desc)
         if (onClickOrNull != null) {
             Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.Outlined.NavigateNext, contentDescription = null)

@@ -90,7 +90,7 @@
                 android:inputType="text"
                 android:maxHeight="100dp"
                 android:maxLines="1"
-                android:textColor="@color/flat_black"
+                android:textColor="@color/flat_day_night_text_primary"
                 android:textSize="14sp"
                 tools:ignore="TouchTargetSizeCheck" />
 

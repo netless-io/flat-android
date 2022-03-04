@@ -30,7 +30,10 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorRed
+import io.agora.flat.ui.theme.FlatColorRedLight
+import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.util.FlatFormatter
 
 @Composable
@@ -116,7 +119,7 @@ fun FlatNetworkError(onClick: () -> Unit) {
         .background(FlatColorRedLight)
         .padding(horizontal = 16.dp)
     ) {
-        Text(stringResource(R.string.network_error), Modifier.align(Alignment.CenterStart), FlatColorRed)
+        FlatTextBodyOne(stringResource(R.string.network_error), Modifier.align(Alignment.CenterStart), FlatColorRed)
         Image(painterResource(R.drawable.ic_arrow_right_red), "", Modifier.align(Alignment.CenterEnd))
     }
 }
@@ -152,7 +155,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
         ) {
             Image(painterResource(id), null)
             Spacer(Modifier.height(8.dp))
-            Text(stringResource(tip), style = FlatSmallTextStyle)
+            FlatTextBodyTwo(text = stringResource(tip))
         }
     }
 }
@@ -160,7 +163,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
 @Composable
 fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
     FlatTopAppBar(
-        title = { Text(stringResource(R.string.title_home), style = FlatTitleTextStyle) },
+        title = stringResource(R.string.title_home),
         actions = {
             Box {
                 var expanded by remember { mutableStateOf(false) }
@@ -249,7 +252,7 @@ private fun HomeRoomTabs(
         selectedTabIndex = selectedIndex,
         modifier = modifier,
         indicator = indicator,
-        backgroundColor = MaterialTheme.colors.surface) {
+        backgroundColor = MaterialTheme.colors.background) {
         categories.forEachIndexed { index, category ->
             val text = when (category) {
                 RoomCategory.Current -> stringResource(R.string.home_room_list)
@@ -260,7 +263,7 @@ private fun HomeRoomTabs(
                 selected = index == selectedIndex,
                 onClick = { onCategorySelected(category) },
                 text = {
-                    Text(text = text, style = MaterialTheme.typography.body2)
+                    FlatTextBodyTwo(text)
                 }
             )
         }
@@ -312,7 +315,7 @@ private fun HomeRoomList(
                 Box(Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp), Alignment.TopCenter) {
-                    Text(stringResource(R.string.loaded_all), style = FlatSmallTipTextStyle)
+                    FlatTextCaption(stringResource(R.string.loaded_all))
                 }
             }
         }
@@ -321,25 +324,20 @@ private fun HomeRoomList(
 
 @Composable
 private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
-    val typography = MaterialTheme.typography
-
     Column(modifier) {
         if (roomInfo.showDayHead) {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Image(painterResource(R.drawable.ic_home_calendar), contentDescription = "")
                 Spacer(modifier = Modifier.size(4.dp))
-                Text(FlatFormatter.dateMisc(roomInfo.beginTime), style = typography.body1)
+                FlatTextBodyOne(FlatFormatter.dateMisc(roomInfo.beginTime))
             }
         }
         Row(Modifier.padding(16.dp, 12.dp)) {
             Column(Modifier.weight(1f)) {
-                Text(roomInfo.title, style = typography.body1)
+                FlatTextBodyOne(roomInfo.title)
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    "${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}",
-                    style = typography.body2
-                )
+                FlatTextBodyTwo("${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}")
             }
             Spacer(Modifier.width(12.dp))
             FlatRoomStatusText(roomInfo.roomStatus, Modifier.align(Alignment.Bottom))

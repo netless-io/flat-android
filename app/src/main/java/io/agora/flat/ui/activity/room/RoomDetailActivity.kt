@@ -279,9 +279,9 @@ private fun PeriodicSubRoomsDisplay(rooms: ArrayList<RoomInfo>) {
                     .padding(horizontal = 16.dp)
             ) {
                 FlatNormalVerticalSpacer()
-                Text(monthText, Modifier.padding(vertical = 4.dp), style = typography.body1)
+                FlatTextBodyOne(monthText, Modifier.padding(vertical = 4.dp))
                 FlatNormalVerticalSpacer()
-                Divider(thickness = 1.dp, color = FlatColorDivider)
+                FlatDivider()
                 FlatSmallVerticalSpacer()
             }
             lastMonth = month
@@ -304,14 +304,13 @@ private fun PeriodicSubRoomItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(dayText,
-            Modifier
-                .padding(horizontal = 16.dp)
-                .widthIn(min = 16.dp), style = typography.body2)
+        FlatTextBodyTwo(dayText, Modifier
+            .padding(horizontal = 16.dp)
+            .widthIn(min = 16.dp))
         Spacer(modifier = Modifier.weight(1f))
-        Text(dayOfWeekText, Modifier.padding(horizontal = 8.dp), style = typography.body2)
+        FlatTextBodyTwo(dayOfWeekText, Modifier.padding(horizontal = 8.dp))
         Spacer(modifier = Modifier.weight(1f))
-        Text(timeDuring, Modifier.padding(horizontal = 16.dp), style = typography.body2)
+        FlatTextBodyTwo(timeDuring, Modifier.padding(horizontal = 16.dp))
         FlatRoomStatusText(roomStatus, Modifier.padding(horizontal = 24.dp))
         Box(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -380,8 +379,7 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
                     RoomType.BigClass -> "大班课"
                 }
             }（周期）"
-            val desc =
-                "结束于 ${FlatFormatter.longDateWithWeek(roomPeriodic.endTime)}，共 $number 场会议"
+            val desc = "结束于 ${FlatFormatter.longDateWithWeek(roomPeriodic.endTime)}，共 $number 场会议"
             Text(
                 weekInfo,
                 Modifier.padding(2.dp),
@@ -389,13 +387,9 @@ private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
                 color = colors.secondary
             )
             FlatSmallVerticalSpacer()
-            Text(type, Modifier.padding(2.dp), style = typography.body2)
+            FlatTextBodyTwo(type, Modifier.padding(2.dp))
             FlatSmallVerticalSpacer()
-            Text(
-                desc,
-                maxLines = 1,
-                style = typography.body2
-            )
+            FlatTextBodyTwo(type, Modifier.padding(2.dp), maxLines = 1)
         }
     }
 }
@@ -554,27 +548,27 @@ private fun MoreRomeInfoDisplay(uuid: String, roomType: RoomType, isPeriodic: Bo
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
     ) {
-        Divider(color = FlatColorDivider, thickness = 1.dp)
+        FlatDivider()
         FlatNormalVerticalSpacer()
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_room), contentDescription = "")
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.room_id), style = moreInfoTextStyle)
+            FlatTextBodyOneSecondary(stringResource(R.string.room_id))
             Spacer(Modifier.width(16.dp))
             Spacer(Modifier.weight(1f))
-            Text(uuid.toInviteCodeDisplay(), style = moreInfoTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            FlatTextBodyOneSecondary(uuid.toInviteCodeDisplay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         FlatLargeVerticalSpacer()
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_room_type), contentDescription = "")
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.room_type), style = moreInfoTextStyle)
+            FlatTextBodyOneSecondary(stringResource(R.string.room_type))
             Spacer(Modifier.width(16.dp))
             Spacer(Modifier.weight(1f))
             RoomType(roomType)
         }
         FlatNormalVerticalSpacer()
-        Divider(color = FlatColorDivider, thickness = 1.dp)
+        FlatDivider()
     }
 }
 
@@ -602,9 +596,9 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(horizontalAlignment = Alignment.End) {
-            Text(FlatFormatter.time(begin), style = timeTextStyle)
+            FlatTextLargeTitle(FlatFormatter.time(begin))
             FlatSmallVerticalSpacer()
-            Text(FlatFormatter.formatLongDate(begin), style = dateTextStyle)
+            FlatTextBodyOne(FlatFormatter.formatLongDate(begin))
         }
         FlatLargeHorizontalSpacer()
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -612,13 +606,12 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(Color(0xFFEEF0F6)),
+                    .background(MaterialTheme.colors.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                FlatTextBodyTwo(
                     FlatFormatter.diffTime(context, begin, end),
                     Modifier.padding(horizontal = 18.dp, vertical = 3.dp),
-                    style = FlatSmallTextStyle,
                 )
             }
             FlatSmallVerticalSpacer()
@@ -626,9 +619,9 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         }
         FlatLargeHorizontalSpacer()
         Column(horizontalAlignment = Alignment.Start) {
-            Text(FlatFormatter.time(end), style = timeTextStyle)
+            FlatTextLargeTitle(FlatFormatter.time(end))
             FlatSmallVerticalSpacer()
-            Text(FlatFormatter.formatLongDate(end), style = dateTextStyle)
+            FlatTextBodyTwo(FlatFormatter.formatLongDate(end))
         }
     }
 }

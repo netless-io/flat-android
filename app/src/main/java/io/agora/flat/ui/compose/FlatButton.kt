@@ -2,7 +2,10 @@ package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,11 +21,16 @@ fun FlatPrimaryTextButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val colors = if (enabled)
-        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorBlue)
-    else
-        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorGray)
-
+    val darkMode = isDarkTheme()
+    val colors = ButtonDefaults.textButtonColors(
+        backgroundColor = if (enabled) {
+            if (darkMode) Blue_7 else Blue_6
+        } else {
+            if (darkMode) Gray_9 else Gray_2
+        },
+        contentColor = if (darkMode) Gray_0 else Gray_0,
+        disabledContentColor = if (darkMode) Gray_7 else Gray_5
+    )
     TextButton(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,7 +40,7 @@ fun FlatPrimaryTextButton(
         shape = Shapes.small,
         onClick = onClick
     ) {
-        Text(text, style = FlatCommonTextStyle, color = FlatColorWhite)
+        FlatTextButton(text)
     }
 }
 
@@ -42,17 +50,23 @@ fun FlatSecondaryTextButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+    val darkMode = isDarkTheme()
+    val colors = ButtonDefaults.outlinedButtonColors(
+        contentColor = if (darkMode) Gray_4 else Gray_6,
+        disabledContentColor = if (darkMode) Gray_7 else Gray_5
+    )
+
     OutlinedButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp),
         enabled = enabled,
         shape = Shapes.small,
-        border = BorderStroke(1.dp, FlatColorGray),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
+        border = BorderStroke(1.dp, if (darkMode) Gray_6 else Gray_3),
+        colors = colors,
         onClick = onClick
     ) {
-        Text(text, style = FlatCommonTextStyle)
+        FlatTextButton(text)
     }
 }
 
@@ -78,7 +92,7 @@ fun FlatHighlightTextButton(
             Icon(painterResource(icon), contentDescription = null)
             Spacer(modifier = Modifier.width(4.dp))
         }
-        Text(text, style = FlatCommonTextStyle, color = color)
+        FlatTextButton(text)
     }
 }
 
@@ -89,10 +103,16 @@ fun FlatSmallPrimaryTextButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val colors = if (enabled)
-        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorBlue)
-    else
-        ButtonDefaults.textButtonColors(contentColor = FlatColorGray, backgroundColor = FlatColorGray)
+    val darkMode = isDarkTheme()
+    val colors = ButtonDefaults.textButtonColors(
+        backgroundColor = if (enabled) {
+            if (darkMode) Blue_7 else Blue_6
+        } else {
+            if (darkMode) Gray_9 else Gray_2
+        },
+        contentColor = if (darkMode) Gray_0 else Gray_0,
+        disabledContentColor = if (darkMode) Gray_7 else Gray_5
+    )
 
     TextButton(
         modifier = modifier,
@@ -101,7 +121,7 @@ fun FlatSmallPrimaryTextButton(
         shape = Shapes.small,
         onClick = onClick
     ) {
-        Text(text, style = FlatCommonTextStyle, color = FlatColorWhite)
+        FlatTextButton(text)
     }
 }
 
@@ -112,20 +132,27 @@ fun FlatSmallSecondaryTextButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+    val darkMode = isDarkTheme()
+    val colors = ButtonDefaults.outlinedButtonColors(
+        contentColor = if (darkMode) Gray_4 else Gray_6,
+        disabledContentColor = if (darkMode) Gray_7 else Gray_5
+    )
+
     OutlinedButton(
         modifier = modifier,
         enabled = enabled,
         shape = Shapes.small,
         border = BorderStroke(1.dp, FlatColorGray),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = FlatColorGray),
+        colors = colors,
         onClick = onClick
     ) {
-        Text(text, style = FlatCommonTextStyle)
+        FlatTextButton(text)
     }
 }
 
 @Composable
 @Preview
+@Preview(uiMode = 0x20)
 private fun FlatTextButtonPreview() {
     FlatColumnPage {
         FlatPrimaryTextButton("TextButton", onClick = {})

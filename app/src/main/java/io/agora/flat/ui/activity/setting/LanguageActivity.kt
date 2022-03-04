@@ -25,9 +25,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BackTopAppBar
-import io.agora.flat.ui.compose.CustomInteractionSource
-import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.LanguageViewModel
 
 class LanguageActivity : BaseComposeActivity() {
@@ -44,7 +42,7 @@ class LanguageActivity : BaseComposeActivity() {
                         viewModel.save()
                         Navigator.launchHomeActivity(this@LanguageActivity)
                     }) {
-                        Text(stringResource(R.string.save))
+                        FlatTextButton(stringResource(R.string.save))
                     }
                 }
 
@@ -77,7 +75,7 @@ class LanguageActivity : BaseComposeActivity() {
 @Composable
 private fun LanguageItem(item: LanguageManager.Item, isSelected: Boolean, modifier: Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(item.display))
+        FlatTextBodyOne(stringResource(item.display))
         Spacer(Modifier.weight(1f))
         if (isSelected) Icon(Icons.Outlined.Check, "", tint = MaterialTheme.colors.primary)
     }

@@ -3,7 +3,7 @@ package io.agora.flat.ui.compose
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
@@ -11,11 +11,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.agora.flat.ui.theme.FlatTitleTextStyle
 
 @Composable
 fun FlatTopAppBar(
@@ -23,7 +20,7 @@ fun FlatTopAppBar(
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    TopAppBar(backgroundColor = Color.Transparent, elevation = 0.dp) {
+    TopAppBar(backgroundColor = MaterialTheme.colors.background, elevation = 0.dp) {
         if (navigationIcon == null) {
             Spacer(TitleInsetWithoutIcon)
         } else {
@@ -55,9 +52,7 @@ fun FlatTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
-        title = {
-            Text(text = title, style = FlatTitleTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        title = { FlatTextTitle(text = title) },
         actions = actions
     )
 }
@@ -69,9 +64,7 @@ fun BackTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
-        title = {
-            Text(text = title, style = FlatTitleTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
                 Icon(Icons.Rounded.ArrowBackIosNew, contentDescription = null)
@@ -88,9 +81,7 @@ fun CloseTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
-        title = {
-            Text(text = title, style = FlatTitleTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onClose) {
                 Icon(Icons.Rounded.Close, contentDescription = null)
@@ -105,8 +96,8 @@ fun CloseTopAppBar(
 @Composable
 fun DefaultPreview() {
     FlatColumnPage {
-        BackTopAppBar("HelloHelloHelloHelloHelloHelloHelloHelloHelloHello", {})
-        CloseTopAppBar("Hello", {})
+        BackTopAppBar("Long Long Long Long Long Long Long Long Title", {})
+        CloseTopAppBar("Foo Title", {})
     }
 }
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="flat_day_night_text_primary">@color/flat_text_primary_dark</color>
+    <color name="flat_day_night_text_secondary">@color/flat_text_secondary_dark</color>
+    <color name="flat_day_night_background">@color/flat_background_dark</color>
+    <color name="flat_day_night_surface">@color/flat_surface_dark</color>
+    <color name="flat_day_night_divider">@color/flat_divider_dark</color>
+</resources>

@@ -25,9 +25,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BackTopAppBar
-import io.agora.flat.ui.compose.CustomInteractionSource
-import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.DarkModeViewModel
 
 class DarkModeActivity : BaseComposeActivity() {
@@ -44,7 +42,7 @@ class DarkModeActivity : BaseComposeActivity() {
                         viewModel.save()
                         Navigator.launchHomeActivity(this@DarkModeActivity)
                     }) {
-                        Text(stringResource(R.string.save))
+                        FlatTextButton(stringResource(R.string.save))
                     }
                 }
 
@@ -76,7 +74,7 @@ class DarkModeActivity : BaseComposeActivity() {
 @Composable
 private fun DarkModeItem(mode: DarkModeManager.Mode, isSelected: Boolean, modifier: Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(mode.display))
+        FlatTextBodyOne(stringResource(mode.display))
         Spacer(Modifier.weight(1f))
         if (isSelected) Icon(Icons.Outlined.Check, "", tint = MaterialTheme.colors.primary)
     }

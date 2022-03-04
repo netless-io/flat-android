@@ -5,13 +5,13 @@
         tools:height="1920px"
         tools:width="1080px">
         <shape>
-            <solid android:color="@color/flat_white" />
+            <solid android:color="@color/flat_day_night_background" />
         </shape>
     </item>
 
     <item
-        android:width="96dp"
-        android:height="96dp"
+        android:width="100dp"
+        android:height="100dp"
         android:gravity="center_horizontal"
         android:top="120dp">
         <bitmap android:src="@drawable/ic_flat_logo" />

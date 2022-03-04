@@ -13,6 +13,7 @@ import coil.decode.ImageDecoderDecoder
 import coil.load
 import io.agora.flat.R
 import io.agora.flat.databinding.ComponentExtensionBinding
+import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.collect
 
@@ -63,7 +64,10 @@ class ExtComponent(
     private fun showLoading(show: Boolean) {
         extensionBinding.loadingLayout.isVisible = show
         if (show) {
-            extensionBinding.loadingView.load(R.raw.loading, gifImageLoader) {
+            extensionBinding.loadingView.load(
+                if (activity.isDarkMode()) R.raw.loading_dark else R.raw.loading_light,
+                gifImageLoader,
+            ) {
                 crossfade(true)
             }
         }

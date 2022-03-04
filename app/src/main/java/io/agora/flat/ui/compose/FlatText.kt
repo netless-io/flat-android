@@ -4,12 +4,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatColorRed
-import io.agora.flat.ui.theme.FlatColorTextSecondary
+import io.agora.flat.ui.theme.*
 
 
 @Composable
@@ -42,11 +42,154 @@ fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier) {
 }
 
 @Composable
-fun FlatTextTitle() {
-
+fun FlatTextLargeTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.h5,
+    )
 }
 
 @Composable
-fun FlatTextSubtitle() {
+fun FlatTextTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.h6,
+    )
+}
 
+@Composable
+fun FlatTextSubtitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.subtitle1,
+    )
+}
+
+@Composable
+fun FlatTextBodyOne(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.body1,
+    )
+}
+
+@Composable
+fun FlatTextBodyOneSecondary(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = if (isDarkTheme()) FlatColorTextSecondaryDark else FlatColorTextSecondary,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.body1,
+    )
+}
+
+
+@Composable
+fun FlatTextBodyTwo(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.body2,
+    )
+}
+
+@Composable
+fun FlatTextButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.button,
+    )
+}
+
+@Composable
+fun FlatTextCaption(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = if (isDarkTheme()) FlatColorTextSecondaryDark else FlatColorTextSecondary,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        style = MaterialTheme.typography.caption,
+    )
 }

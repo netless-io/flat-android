@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,14 +17,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.upload.UploadFile
 import io.agora.flat.common.upload.UploadState
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.compose.FlatTextBodyTwo
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorLightGreen
+import io.agora.flat.ui.theme.FlatColorRed
+import io.agora.flat.ui.theme.FlatColorTextSecondary
 
 @Composable
 internal fun UploadList(onCloseUploading: () -> Unit, viewModel: UploadingViewModel = hiltViewModel()) {
@@ -90,20 +92,14 @@ private fun UploadListItem(uploadFile: UploadFile, actioner: (UploadingUIAction)
             .fillMaxWidth()
             .align(Alignment.Center)
             .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(
+            FlatTextBodyTwo(
                 uploadFile.filename,
                 Modifier.weight(1f),
-                style = FlatCommonTextStyle,
-                fontSize = 14.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.width(16.dp))
-            Text(
-                text = info,
-                color = infoColor,
-                fontSize = 14.sp
-            )
+            FlatTextBodyTwo(text = info, color = infoColor)
             Spacer(Modifier.width(4.dp))
             if (UploadState.Failure == uploadFile.uploadState) {
                 Image(painterResource(R.drawable.ic_upload_retry), "",

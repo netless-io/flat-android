@@ -48,5 +48,5 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="#DBE1EA" />
+        android:background="@color/flat_day_night_divider" />
 </FrameLayout>

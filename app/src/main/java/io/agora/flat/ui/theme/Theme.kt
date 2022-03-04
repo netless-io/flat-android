@@ -7,7 +7,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.util.isTabletMode
 
 
@@ -15,17 +14,18 @@ import io.agora.flat.util.isTabletMode
 private val DarkColorPalette = darkColors(
     primary = FlatColorBlue,
     primaryVariant = FlatColorBlue,
+
     secondary = FlatColorBlue,
     secondaryVariant = FlatColorBlue,
 
     // behind scrollable content
-    background = FlatColorBlack,
+    background = Gray_10,
     // cards, sheets, and menus
-    surface = FlatColorBlack,
+    surface = FlatColorSurfaceDark,
     error = FlatColorRed,
 
     onPrimary = FlatColorTextPrimaryDark,
-    onSecondary = FlatColorTextPrimaryDark,
+    onSecondary = FlatColorTextSecondaryDark,
     onBackground = FlatColorTextPrimaryDark,
     onSurface = FlatColorTextPrimaryDark,
     onError = FlatColorBlack
@@ -44,13 +44,13 @@ private val LightColorPalette = lightColors(
     // behind scrollable content
     background = FlatColorWhite,
     // cards, sheets, and menus
-    surface = FlatColorWhite,
+    surface = FlatColorSurface,
     error = FlatColorRed,
 
-    onPrimary = FlatColorBlack,
-    onSecondary = FlatColorBlack,
-    onBackground = FlatColorBlack,
-    onSurface = FlatColorBlack,
+    onPrimary = FlatColorTextPrimary,
+    onSecondary = FlatColorTextSecondary,
+    onBackground = FlatColorTextPrimary,
+    onSurface = FlatColorTextPrimary,
     onError = FlatColorWhite
 )
 
@@ -79,8 +79,11 @@ fun isTabletMode(): Boolean {
 }
 
 @Composable
-fun isDarkTheme(): Boolean = when (DarkModeManager.current()) {
-    DarkModeManager.Mode.Auto -> isSystemInDarkTheme()
-    DarkModeManager.Mode.Light -> false
-    DarkModeManager.Mode.Dark -> true
-}
+fun isDarkTheme(): Boolean = isSystemInDarkTheme()
+
+//@Composable
+//fun isDarkTheme(): Boolean = when (DarkModeManager.current()) {
+//    DarkModeManager.Mode.Auto -> isSystemInDarkTheme()
+//    DarkModeManager.Mode.Light -> false
+//    DarkModeManager.Mode.Dark -> true
+//}

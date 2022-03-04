@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.theme.FlatTitleTextStyle
 
 @Composable
@@ -20,7 +21,7 @@ internal fun EmptyView(imgRes: Int, message: Int, modifier: Modifier = Modifier.
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(painter = painterResource(id = imgRes), contentDescription = null)
             Spacer(Modifier.height(4.dp))
-            Text(text = stringResource(id = message), style = FlatTitleTextStyle)
+            FlatTextBodyOne(text = stringResource(id = message))
         }
     }
 }
