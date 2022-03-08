@@ -59,6 +59,7 @@
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>

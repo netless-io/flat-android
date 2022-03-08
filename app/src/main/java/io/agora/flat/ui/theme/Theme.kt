@@ -7,6 +7,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.util.isTabletMode
 
 
@@ -79,11 +80,8 @@ fun isTabletMode(): Boolean {
 }
 
 @Composable
-fun isDarkTheme(): Boolean = isSystemInDarkTheme()
-
-//@Composable
-//fun isDarkTheme(): Boolean = when (DarkModeManager.current()) {
-//    DarkModeManager.Mode.Auto -> isSystemInDarkTheme()
-//    DarkModeManager.Mode.Light -> false
-//    DarkModeManager.Mode.Dark -> true
-//}
+fun isDarkTheme(): Boolean = when (DarkModeManager.current()) {
+    DarkModeManager.Mode.Auto -> isSystemInDarkTheme()
+    DarkModeManager.Mode.Light -> false
+    DarkModeManager.Mode.Dark -> true
+}

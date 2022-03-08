@@ -14,6 +14,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
@@ -266,7 +267,7 @@ private fun LoginButtonsArea(
     onAgree: () -> Unit,
     actioner: (LoginUIAction) -> Unit,
 ) {
-    var showAgreement by remember { mutableStateOf(false) }
+    var showAgreement by rememberSaveable { mutableStateOf(false) }
 
     Row {
         LoginImageButton(onClick = {

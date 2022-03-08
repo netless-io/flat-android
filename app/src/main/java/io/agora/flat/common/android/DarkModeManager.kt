@@ -28,6 +28,7 @@ object DarkModeManager {
 
     fun init(application: Application) {
         store = application.getSharedPreferences("flat_config", Context.MODE_PRIVATE)
+        update(current())
     }
 
     fun current(): Mode {

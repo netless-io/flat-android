@@ -126,8 +126,8 @@ class WhiteboardComponent(
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)
-        boardRoom.setDarkMode(activity.isDarkMode())
         boardRoom.setRoomController(FlatControllerGroup(binding.flatControllerLayout))
+        boardRoom.setDarkMode(activity.isDarkMode())
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
