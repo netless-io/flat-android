@@ -3,7 +3,6 @@ package io.agora.flat.ui.view
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogRoomExitBinding

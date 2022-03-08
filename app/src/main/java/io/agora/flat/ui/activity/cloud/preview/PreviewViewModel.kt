@@ -8,11 +8,9 @@ import io.agora.flat.Constants
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.CoursewareType
-import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

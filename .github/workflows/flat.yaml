@@ -46,7 +46,7 @@ jobs:
 
       - name: Move artifacts
         run: cp app/build/outputs/apk/release/*.apk  flat-android.apk
-        
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:

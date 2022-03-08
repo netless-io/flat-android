@@ -11,7 +11,9 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
-import io.agora.flat.common.upload.*
+import io.agora.flat.common.upload.UploadFile
+import io.agora.flat.common.upload.UploadManager
+import io.agora.flat.common.upload.UploadRequest
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.CloudStorageFile

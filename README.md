@@ -15,37 +15,37 @@
     <p><a href="./README-zh.md">中文</a></p>
 </div>
 
-
 # Try it now
 
--   [Download artifact][flat-homepage]
--   [Start using Flat Web][flat-web]
+- [Download artifact][flat-homepage]
+- [Start using Flat Web][flat-web]
 
 # Features
--   Open sourced front-end and back-end
+
+- Open sourced front-end and back-end
     -   [x] [Flat Web][flat-web]
     -   [x] Flat Desktop ([Windows][flat-homepage] and [macOS][flat-homepage])
     -   [x] [Flat Android][flat-android]
     -   [x] [Flat Server][flat-server]
--   Optimized teaching experience
+- Optimized teaching experience
     -   [x] Big class
     -   [x] Small class
     -   [x] One on one
--   Real-time interaction
+- Real-time interaction
     -   [x] Multifunctional interactive whiteboard
     -   [x] Real-time video/audio chat(RTC)
     -   [x] Real-time messaging(RTM)
     -   [x] Participant hand raising
--   Login via
+- Login via
     -   [x] Wechat
     -   [x] GitHub
     -   [ ] Google
--   Classroom management
+- Classroom management
     -   [x] Join and create classrooms
     -   [x] Support periodic rooms
     -   [x] View room history
     -   [ ] schedule classrooms
--   Classroom recording and replaying
+- Classroom recording and replaying
     -   [x] Whiteboard replaying
     -   [x] Cloud recording for video and audio
     -   [x] Messaging replaying
@@ -56,6 +56,7 @@
 # Development
 
 ## Android Code
+
 Flat is an app that attempts to use the latest cutting edge libraries and tools. As a summary:
 
 * Entirely written in Kotlin.
@@ -65,8 +66,9 @@ Flat is an app that attempts to use the latest cutting edge libraries and tools.
 * Uses Hilt for dependency injection
 
 ## Development Tool
-Flat require the latest Android Studio Arctic Fox release to be able to build the app. This is because the project is written in Jetpack Compose (more on that below).
 
+Flat require the latest Android Studio Arctic Fox release to be able to build the app. This is
+because the project is written in Jetpack Compose (more on that below).
 
 ## Environment Variables Reference
 
@@ -79,16 +81,31 @@ Flat require the latest Android Studio Arctic Fox release to be able to build th
 |                                                                                     |
 
 ## Disclaimers
-You may use Flat for commercial purposes but please note that we do not accept customizational commercial requirements and deployment supports. Nor do we offer customer supports for commercial usage. Please head to [agora-flexible-classroom](https://www.agora.io/en/products/flexible-classroom) for such requirements.
+
+You may use Flat for commercial purposes but please note that we do not accept customizational
+commercial requirements and deployment supports. Nor do we offer customer supports for commercial
+usage. Please head
+to [agora-flexible-classroom](https://www.agora.io/en/products/flexible-classroom) for such
+requirements.
 
 [flat-homepage]: https://flat.whiteboard.agora.io/en/#download
+
 [flat-web]: https://flat-web.whiteboard.agora.io/
+
 [flat-server]: https://github.com/netless-io/flat-server
+
 [flat-android]: https://github.com/netless-io/flat-android
+
 [flat-storybook]: https://netless-io.github.io/flat/storybook/
+
 [open-wechat]: https://open.weixin.qq.com/
+
 [netless-auth]: https://docs.agora.io/en/whiteboard/generate_whiteboard_token_at_app_server?platform=RESTful
+
 [agora-app-id-auth]: https://docs.agora.io/en/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
+
 [cloud-recording]: https://docs.agora.io/en/cloud-recording/cloud_recording_api_rest?platform=RESTful#storageConfig
+
 [cloud-recording-background]: https://docs.agora.io/en/cloud-recording/cloud_recording_layout?platform=RESTful#background
+
 [electron-updater]: https://github.com/electron-userland/electron-builder/tree/master/packages/electron-updater

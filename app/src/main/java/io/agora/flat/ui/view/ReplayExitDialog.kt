@@ -3,7 +3,6 @@ package io.agora.flat.ui.view
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.DialogFragment
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogReplayExitBinding
 

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 object RoomOverlayManager {
     const val AREA_ID_NO_OVERLAY = 0
     const val AREA_ID_FASTBOARD = 1
+
     // const val AREA_ID_PAINT = 2
     const val AREA_ID_SETTING = 3
     const val AREA_ID_MESSAGE = 4

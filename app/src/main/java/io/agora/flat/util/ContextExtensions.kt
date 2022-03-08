@@ -8,7 +8,6 @@ import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay

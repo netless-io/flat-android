@@ -10,7 +10,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
-import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager

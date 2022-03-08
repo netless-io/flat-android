@@ -2,7 +2,6 @@ package io.agora.flat.ui.activity.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatTextBodyOne
-import io.agora.flat.ui.theme.FlatTitleTextStyle
 
 @Composable
 internal fun EmptyView(imgRes: Int, message: Int, modifier: Modifier = Modifier.fillMaxSize()) {
