@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.0] - March 08, 2022
+
+- Support DarkMode
+- Add Network acceleration setting
+
 ## [1.2.0] - January 29, 2022
 
 - Replace whiteboard-sdk with fastboard-sdk
