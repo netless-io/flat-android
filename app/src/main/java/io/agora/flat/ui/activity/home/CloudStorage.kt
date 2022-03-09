@@ -175,7 +175,7 @@ private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -
         }
         Box(MaxWidth
             .height(160.dp * aniValue)
-            .background(FlatColorWhite)) {
+            .background(MaterialTheme.colors.surface)) {
             Box(Modifier
                 .align(Alignment.TopCenter)
                 .clickable { onCoverClick() }) {
@@ -363,7 +363,7 @@ private fun CloudStorageItem(
             }
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
-                Text(file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                FlatTextBodyTwo(file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Row {
                     FlatTextCaption(FlatFormatter.dateDash(file.createAt))

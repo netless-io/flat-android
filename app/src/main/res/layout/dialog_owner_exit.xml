@@ -16,12 +16,11 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/RoomDialogTextTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭选项"
-            android:textColor="@color/flat_black"
-            android:textSize="16sp" />
+            android:text="@string/room_dialog_exit_title" />
 
         <ImageView
             android:id="@+id/close"

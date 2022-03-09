@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Switch
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -24,7 +23,7 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatTextBodyOne
-import io.agora.flat.ui.theme.FlatCommonTextStyle
+import io.agora.flat.ui.compose.FlatTextBodyTwo
 import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showDebugToast
@@ -145,7 +144,7 @@ fun MockEnableFlag() {
             .height(56.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "登录Mock", style = FlatCommonTextStyle)
+        FlatTextBodyTwo(text = "登录Mock")
         Spacer(modifier = Modifier.weight(1f))
         Switch(
             checked = mockEnable,

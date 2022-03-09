@@ -9,7 +9,7 @@
     android:visibility="visible">
 
     <TextView
-        style="@style/RoomTextViewTitle"
+        style="@style/RoomTextTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
