@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.3.1] - March 11, 2022
+- Fix LargeDpi Phone login bug
+
 ## [1.3.0] - March 08, 2022
 
 - Support DarkMode
