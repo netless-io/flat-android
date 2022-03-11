@@ -9,9 +9,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
+import io.agora.flat.R
 import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     var versionName: String? = null
@@ -60,8 +62,7 @@ fun Context.px2dp(px: Int): Int {
 }
 
 fun Context.isTabletMode(): Boolean {
-    val configuration = this.resources.configuration
-    return configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    return resources.getBoolean(R.bool.isTablet)
 }
 
 fun Context.isPhoneMode(): Boolean {
