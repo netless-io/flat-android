@@ -44,11 +44,8 @@ jobs:
           name: build-reports
           path: '*/build/reports/'
 
-      - name: Move artifacts
-        run: cp app/build/outputs/apk/release/*.apk  flat-android.apk
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: flat-android
-          path: flat-android.apk
+          name: flat-artifact
+          path: app/build/outputs/apk/release/*.apk

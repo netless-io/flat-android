@@ -69,6 +69,19 @@ android {
 
             buildConfigField "String", "CHANNEL", "\"debug\""
         }
+
+        applicationVariants.all {
+            variant ->
+                variant.outputs.each { output ->
+                    def formattedDate = new Date().format('MM-dd-HH')
+                    def apkName = output.outputFile.name
+                    if (apkName.contains("debug")) {
+                        output.outputFileName = "Flat-v${defaultConfig.versionName}-$formattedDate-debug.apk"
+                    } else {
+                        output.outputFileName = "Flat-v${defaultConfig.versionName}.apk"
+                    }
+                }
+        }
     }
 
     compileOptions {
