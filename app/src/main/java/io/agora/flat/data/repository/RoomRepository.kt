@@ -67,10 +67,9 @@ class RoomRepository @Inject constructor(
         }
     }
 
-    suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>): Result<Map<String, RtcUser>> {
+    suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>): Result<Map<String, RoomUser>> {
         return withContext(Dispatchers.IO) {
-            roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID))
-                .toResult()
+            roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID)).toResult()
         }
     }
 

@@ -60,7 +60,7 @@ interface RoomService {
     @POST("v1/room/info/users")
     fun getRoomUsers(
         @Body roomUsersReq: RoomUsersReq,
-    ): Call<BaseResp<Map<String, RtcUser>>>
+    ): Call<BaseResp<Map<String, RoomUser>>>
 
     // 创建房间
     @POST("v1/room/create/ordinary")

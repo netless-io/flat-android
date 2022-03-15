@@ -6,7 +6,7 @@ data class RtcUser(
     var avatarURL: String = "",
 
     var userUUID: String = "",
-    var audioOpen: Boolean = false,
+    var audioOpen: Boolean = true,
     var videoOpen: Boolean = false,
     var isSpeak: Boolean = false,
     var isRaiseHand: Boolean = false,

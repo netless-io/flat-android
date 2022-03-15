@@ -340,7 +340,7 @@ class ClassRoomViewModel @Inject constructor(
                 updateChannelState(event.value)
             }
             is RTMEvent.RequestChannelStatus -> {
-                updateUserState(event.value.roomUUID, event.value.user)
+                updateUserState(senderId, event.value.user)
                 if (event.value.userUUIDs.contains(_state.value.userUUID)) {
                     sendChannelStatus(senderId)
                 }

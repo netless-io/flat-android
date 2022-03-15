@@ -11,6 +11,7 @@ import javax.inject.Singleton
 class RoomConfigRepository @Inject constructor(
     private val roomConfigDao: RoomConfigDao,
 ) {
+
     suspend fun updateRoomConfig(roomConfig: RoomConfig) {
         return withContext(Dispatchers.IO) {
             roomConfigDao.insertOrUpdate(roomConfig)

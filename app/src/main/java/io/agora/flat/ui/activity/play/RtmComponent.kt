@@ -175,12 +175,12 @@ class RtmComponent(
     private fun enterChannel(rtmToken: String, channelId: String) {
         lifecycleScope.launch {
             try {
-                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                rtmApi.getMembers().map { it.userId }.also { viewModel.initRoomUsers(it) }
                 rtmApi.addRtmListener(flatRTMListener)
+                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
+                viewModel.initRoomUsers(rtmApi.getMembers().map { it.userId })
                 viewModel.requestChannelStatus()
-                Log.d(TAG, "notify rtm joined success")
                 viewModel.notifyRTMChannelJoined()
+                Log.d(TAG, "notify rtm joined success")
             } catch (e: FlatException) {
                 // showExistDialog()
             }
