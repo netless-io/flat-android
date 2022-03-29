@@ -26,6 +26,8 @@ data class RoomPlayInfo(
     val rtcToken: String,
     // rtm token
     val rtmToken: String,
+
+    val region: String,
 ) : Parcelable
 
 @Parcelize

@@ -30,6 +30,8 @@ data class RoomInfo(
     val hasRecord: Boolean,
     // 邀请短号
     val inviteCode: String,
+    // 区域信息
+    val region: String,
 ) : Parcelable {
     // local for listHead
     var showDayHead: Boolean = false

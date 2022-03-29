@@ -145,6 +145,7 @@ class ClassRoomViewModel @Inject constructor(
             beginTime = roomInfo.beginTime,
             endTime = roomInfo.endTime,
             roomStatus = roomInfo.roomStatus,
+            region = roomInfo.region,
         )
         observerUserState()
     }
@@ -705,6 +706,8 @@ data class ClassRoomState(
     val roomType: RoomType = RoomType.SmallClass,
     // 房间状态
     val roomStatus: RoomStatus = RoomStatus.Idle,
+    //
+    val region: String = "",
     // 房间所有者
     val ownerUUID: String = "",
 

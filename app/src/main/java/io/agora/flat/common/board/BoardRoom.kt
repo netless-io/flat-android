@@ -6,8 +6,10 @@ import com.herewhite.sdk.domain.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
+import io.agora.board.fast.FastRoomListener
 import io.agora.board.fast.Fastboard
 import io.agora.board.fast.FastboardView
+import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
@@ -35,6 +37,7 @@ class BoardRoom @Inject constructor(
     private var fastboardView: FastboardView? = null
     private var fastRoom: FastRoom? = null
     private var darkMode: Boolean = false
+    private var rootRoomController: RoomControllerGroup? = null
     private var sceneState = MutableStateFlow<BoardSceneState?>(null)
     private var memberState = MutableStateFlow<MemberState?>(null)
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
@@ -46,14 +49,23 @@ class BoardRoom @Inject constructor(
     }
 
     override fun setRoomController(rootRoomController: RoomControllerGroup) {
-        this.fastboardView?.rootRoomController = rootRoomController
+        this.rootRoomController = rootRoomController
+        if (fastRoom != null) {
+            fastRoom!!.rootRoomController = rootRoomController;
+        }
     }
 
-    override fun join(roomUUID: String, roomToken: String, userId: String, writable: Boolean) {
-        val fastRoomOptions = FastRoomOptions(Constants.NETLESS_APP_IDENTIFIER, roomUUID, roomToken, userId)
+    override fun join(roomUUID: String, roomToken: String, userId: String, region: String, writable: Boolean) {
+        val fastRoomOptions = FastRoomOptions(
+            Constants.NETLESS_APP_IDENTIFIER,
+            roomUUID,
+            roomToken,
+            userId,
+            region.toFastRegion(),
+            writable
+        )
         val roomParams = fastRoomOptions.roomParams.apply {
             windowParams.setPrefersColorScheme(if (darkMode) WindowPrefersColorScheme.Dark else WindowPrefersColorScheme.Light)
-            isWritable = writable
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
                 nickName = userRepository.getUsername(),
@@ -63,21 +75,24 @@ class BoardRoom @Inject constructor(
         }
         fastRoomOptions.roomParams = roomParams
 
-        fastboard.setErrorHandler { error ->
-            boardRoomPhase.value = BoardRoomPhase.Error(error.message ?: "no error message")
-        }
+        fastRoom = fastboard.createFastRoom(fastRoomOptions)
 
-        fastboard.setRoomPhaseHandler { phase ->
-            Log.d(TAG, "onPhaseChanged:${phase.name}")
-            when (phase) {
-                RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
-                RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
-                RoomPhase.disconnected -> boardRoomPhase.value = BoardRoomPhase.Disconnected
+        fastRoom?.addListener(object : FastRoomListener {
+            override fun onRoomPhaseChanged(phase: RoomPhase) {
+                Log.d(TAG, "onPhaseChanged:${phase.name}")
+                when (phase) {
+                    RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
+                    RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
+                    RoomPhase.disconnected -> boardRoomPhase.value = BoardRoomPhase.Disconnected
+                    else -> {}
+                }
             }
-        }
+        })
 
-        fastboard.joinRoom(fastRoomOptions) {
-            fastRoom = it
+        fastRoom?.join {
+            if (rootRoomController != null) {
+                fastRoom?.rootRoomController = rootRoomController
+            }
         }
     }
 
@@ -88,16 +103,21 @@ class BoardRoom @Inject constructor(
             val fastStyle = fastboard.fastStyle.apply {
                 isDarkMode = dark
             }
-            fastboard.fastStyle = fastStyle
+            fastRoom?.fastStyle = fastStyle
         }
     }
 
     override fun release() {
-        fastboard.destroy()
+        fastRoom?.destroy()
     }
 
     override fun setWritable(writable: Boolean) {
         fastRoom?.setWritable(writable)
+        if (writable) {
+            fastRoom?.rootRoomController?.show()
+        } else {
+            fastRoom?.rootRoomController?.hide()
+        }
     }
 
     override fun setDeviceInputEnable(enable: Boolean) {
@@ -105,7 +125,7 @@ class BoardRoom @Inject constructor(
     }
 
     override fun hideAllOverlay() {
-        fastboard.overlayManger.hideAll()
+        fastRoom?.overlayManger?.hideAll()
     }
 
     override fun insertImage(imageUrl: String, w: Int, h: Int) {
@@ -148,4 +168,10 @@ class BoardRoom @Inject constructor(
      * }
      */
     private data class UserPayload(val userId: String, val nickName: String, val cursorName: String)
+
+
+    private fun String.toFastRegion(): FastRegion {
+        val region = FastRegion.values().find { it.name.lowercase().replace('_', '-') == this }
+        return region ?: FastRegion.CN_HZ
+    }
 }

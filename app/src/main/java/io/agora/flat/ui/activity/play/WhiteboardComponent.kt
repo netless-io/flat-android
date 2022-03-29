@@ -70,6 +70,7 @@ class WhiteboardComponent(
                     it.whiteboardRoomUUID,
                     it.whiteboardRoomToken,
                     viewModel.state.value.userUUID,
+                    it.region,
                     viewModel.state.value.isWritable,
                 )
             }
@@ -116,12 +117,6 @@ class WhiteboardComponent(
 
     private fun onRoomWritableChange(writable: Boolean) {
         boardRoom.setWritable(writable)
-        val uiSettings = binding.fastboardView.uiSettings
-        if (writable) {
-            uiSettings.showRoomControllerGroup()
-        } else {
-            uiSettings.hideRoomControllerGroup()
-        }
     }
 
     private fun initWhiteboard() {
