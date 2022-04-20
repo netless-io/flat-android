@@ -22,14 +22,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
-import io.agora.flat.common.login.LoginHelper
+import io.agora.flat.common.login.LoginManager
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatPage
@@ -39,13 +38,12 @@ import io.agora.flat.ui.theme.FillMaxSize
 import io.agora.flat.ui.theme.MaxHeight
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : BaseComposeActivity() {
-    private val viewModel: MainViewModel by viewModels()
-    private val loginHelper = LoginHelper(this)
+    @Inject
+    lateinit var loginManager: LoginManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +51,8 @@ class MainActivity : BaseComposeActivity() {
         setContent {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
+            val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+            val error by viewModel.error.collectAsState()
 
             if (viewState.protocolAgreed) {
                 MainScreen(viewState)
@@ -69,28 +69,25 @@ class MainActivity : BaseComposeActivity() {
                     onRefuse = { finish() },
                 )
             }
-        }
-        loginHelper.register()
-        observerState()
-    }
 
-    private fun observerState() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.roomPlayInfo.filterNotNull().collect {
-                Navigator.launchRoomPlayActivity(this@MainActivity, it)
+            LaunchedEffect(error) {
+                error?.let {
+                    showToast(it.message)
+                }
+            }
+
+            LaunchedEffect(roomPlayInfo) {
+                roomPlayInfo?.let {
+                    Navigator.launchRoomPlayActivity(this@MainActivity, it)
+                }
             }
         }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.error.filterNotNull().collect {
-                showToast(it.message)
-            }
-        }
+        loginManager.onRegister(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        loginHelper.unregister()
+        loginManager.onUnregister(this)
     }
 }
 

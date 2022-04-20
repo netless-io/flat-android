@@ -5,7 +5,6 @@ import io.agora.flat.data.model.AuthUUIDReq
 import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
-import io.agora.flat.di.AppModule
 import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -16,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService,
-    @AppModule.GlobalData private val appKVCenter: AppKVCenter,
+    private val appKVCenter: AppKVCenter,
 ) {
     suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
@@ -94,7 +93,7 @@ class UserRepository @Inject constructor(
         return UserInfo(
             name = this.name,
             uuid = this.uuid,
-            avatar = this.avatar
+            avatar = this.avatar,
         )
     }
 }

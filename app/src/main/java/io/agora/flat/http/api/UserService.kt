@@ -29,4 +29,32 @@ interface UserService {
     fun loginProcess(
         @Body req: AuthUUIDReq,
     ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v1/login/phone/sendMessage")
+    fun requestSmsCode(
+        @Body req: PhoneReq,
+    ): Call<RespNoData>
+
+    @POST("v1/login/phone")
+    fun loginWithPhone(
+        @Body req: PhoneSmsLoginReq,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v1/user/bindingPhone/sendMessage")
+    fun requestBindSmsCode(
+        @Body req: PhoneReq,
+    ): Call<RespNoData>
+
+    @POST("v1/user/bindingPhone")
+    fun bindPhone(
+        @Body req: PhoneReq,
+    ): Call<RespNoData>
+
+    /**
+     * 长度最小为1，最大为50
+     */
+    @POST("v1/user/rename")
+    fun rename(
+        @Body req: UserRenameReq,
+    ): Call<RespNoData>
 }

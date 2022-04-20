@@ -1,6 +1,7 @@
 package io.agora.flat.util
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.net.Uri
@@ -59,6 +60,10 @@ fun Context.dp2px(dp: Int): Int {
 
 fun Context.px2dp(px: Int): Int {
     return (px.toFloat() / resources.displayMetrics.density + 0.5).toInt()
+}
+
+fun Context.resolveActivity(intent: Intent): Boolean {
+    return intent.resolveActivity(this.packageManager) != null
 }
 
 fun Context.isTabletMode(): Boolean {

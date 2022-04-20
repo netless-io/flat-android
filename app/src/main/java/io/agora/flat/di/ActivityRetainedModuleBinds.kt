@@ -12,4 +12,6 @@ import io.agora.flat.di.interfaces.IBoardRoom
 abstract class ActivityRetainedModuleBinds {
     @Binds
     abstract fun providerBoardRoom(bind: BoardRoom): IBoardRoom
+
+
 }

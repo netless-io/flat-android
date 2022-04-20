@@ -7,15 +7,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.agora.flat.common.android.AndroidClipboardController
-import io.agora.flat.common.android.ClipboardController
-import io.agora.flat.common.android.StringFetcher
+import io.agora.flat.common.android.*
+import io.agora.flat.common.login.LoginManager
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.EventBus
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 /**
@@ -24,14 +22,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-    @Qualifier
-    @Retention(AnnotationRetention.RUNTIME)
-    annotation class GlobalData
-
     @Provides
     fun provideIoDispatcher() = Dispatchers.IO
 
-    @GlobalData
+    @Singleton
+    @Provides
+    fun provideCoroutineDispatchers() = AppCoroutineDispatchers(
+        io = Dispatchers.IO,
+        computation = Dispatchers.Default,
+        main = Dispatchers.Main
+    )
+
     @Singleton
     @Provides
     fun provideKVCenter(@ApplicationContext context: Context): AppKVCenter {
@@ -70,5 +71,11 @@ class AppModule {
     @Provides
     fun providerStringFetcher(@ApplicationContext context: Context): StringFetcher {
         return StringFetcher(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providerLoginManager(@ApplicationContext context: Context): LoginManager {
+        return LoginManager(context = context)
     }
 }

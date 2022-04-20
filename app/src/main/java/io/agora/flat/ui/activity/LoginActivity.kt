@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -27,16 +26,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.insets.navigationBarsPadding
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
-import io.agora.flat.Constants.Login.AUTH_ERROR
-import io.agora.flat.Constants.Login.AUTH_SUCCESS
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.login.LoginActivityHandler
+import io.agora.flat.common.login.LoginState
+import io.agora.flat.common.login.LoginType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.activity.login.LoginUiAction
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isTabletMode
@@ -44,55 +42,57 @@ import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginActivity : BaseComposeActivity() {
-    companion object {
-        const val LOGIN_WECHAT = 1
-        const val LOGIN_GITHUB = 2
-    }
-
     private val viewModel: LoginViewModel by viewModels()
-    private lateinit var api: IWXAPI
 
-    private var currentLogin = 0
+    @Inject
+    lateinit var loginHandler: LoginActivityHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            val actioner: (LoginUIAction) -> Unit = { action ->
+            // val viewState by viewModel.state.collectAsState()
+            val loginState by loginHandler.observeLoginState().collectAsState()
+
+            val actioner: (LoginUiAction) -> Unit = { action ->
                 when (action) {
-                    LoginUIAction.WeChatLogin -> {
-                        currentLogin = LOGIN_WECHAT
-                        loginAfterSetAuthUUID(::callWeChatLogin)
+                    LoginUiAction.WeChatLogin -> {
+                        loginHandler.loginWithType(LoginType.WeChat);
                     }
-                    LoginUIAction.GithubLogin -> {
-                        currentLogin = LOGIN_GITHUB
-                        loginAfterSetAuthUUID(::callGithubLogin)
+                    LoginUiAction.GithubLogin -> {
+                        loginHandler.loginWithType(LoginType.Github)
                     }
-                    LoginUIAction.OpenServiceProtocol -> {
+                    LoginUiAction.OpenServiceProtocol -> {
                         Navigator.launchWebViewActivity(this, Constants.URL.Service)
                     }
-                    LoginUIAction.OpenPrivacyProtocol -> {
+                    LoginUiAction.OpenPrivacyProtocol -> {
                         Navigator.launchWebViewActivity(this, Constants.URL.Privacy)
                     }
-                    LoginUIAction.AgreementHint -> {
-                        this.showToast(R.string.login_agreement_unchecked_hint)
+                    LoginUiAction.AgreementHint -> {
+                        showToast(R.string.login_agreement_unchecked_hint)
                     }
                 }
             }
+
+            LaunchedEffect(loginState) {
+                when (loginState) {
+                    LoginState.Init -> {}
+                    is LoginState.Process -> showToast((loginState as LoginState.Process).message)
+                    LoginState.Success -> {
+                        showToast(R.string.login_success_and_jump)
+                        delay(2000)
+                        Navigator.launchHomeActivity(this@LoginActivity)
+                    }
+                }
+            }
+
             LoginPage(actioner = actioner)
         }
-
-        api = WXAPIFactory.createWXAPI(this, Constants.WX_APP_ID, false)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        handleLoginResult()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -100,98 +100,31 @@ class LoginActivity : BaseComposeActivity() {
         setIntent(intent)
     }
 
-    private fun handleLoginResult() {
-        when (currentLogin) {
-            LOGIN_WECHAT -> {
-                if (!intent.hasExtra(Constants.Login.KEY_LOGIN_STATE)) {
-                    return
-                }
-                val state = intent.getIntExtra(Constants.Login.KEY_LOGIN_STATE, AUTH_ERROR)
-                if (state != AUTH_SUCCESS) {
-                    showToast(R.string.login_fail)
-                    return
-                }
-                lifecycleScope.launch {
-                    val code = intent.getStringExtra(Constants.Login.KEY_LOGIN_RESP) ?: ""
-                    if (viewModel.loginWeChatCallback(code)) {
-                        loginSuccess()
-                    } else {
-                        showToast(R.string.login_fail)
-                    }
-                }
-            }
-            LOGIN_GITHUB -> {
-                if (intent.data?.scheme != "x-agora-flat-client") {
-                    return
-                }
-                lifecycleScope.launch {
-                    if (viewModel.loginProcess()) {
-                        loginSuccess()
-                    } else {
-                        showToast(R.string.login_fail)
-                    }
-                }
-            }
-            else -> {
-                // login for url
-                lifecycleScope.launch {
-                    if (intent.data?.scheme == "x-agora-flat-client" &&
-                        intent.data?.authority == "joinRoom"
-                    ) {
-                        val roomUUID = intent.data?.getQueryParameter("roomUUID")
-                        if (viewModel.isLoggedIn() && roomUUID != null) {
-                            Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
-                            finish()
-                        }
-                    }
-                }
-            }
+    override fun onResume() {
+        super.onResume()
+        if (intent != null) {
+            loginHandler.handleResult(intent)
+            handleRoomJump(intent)
         }
     }
 
-    private fun loginSuccess() {
+    private fun handleRoomJump(intent: Intent) {
         lifecycleScope.launch {
-            showToast(R.string.login_success_and_jump)
-            delay(2000)
-            Navigator.launchHomeActivity(this@LoginActivity)
-        }
-    }
-
-    private fun callWeChatLogin() {
-        val req = SendAuth.Req().apply {
-            scope = "snsapi_userinfo"
-            state = "wechat_sdk_flat"
-        }
-        api.sendReq(req)
-    }
-
-    private fun callGithubLogin() {
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            data = Uri.parse(viewModel.githubLoginUrl())
-        }
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(intent, getString(R.string.login_github_browser_choose_title)))
-        } else {
-            showToast(R.string.login_github_no_browser)
-        }
-    }
-
-    private fun loginAfterSetAuthUUID(call: () -> Unit) {
-        lifecycleScope.launch {
-            if (viewModel.loginSetAuthUUID()) {
-                call()
-            } else {
-                showToast(R.string.login_set_auth_uuid_error)
+            if (intent.data?.scheme == "x-agora-flat-client" &&
+                intent.data?.authority == "joinRoom"
+            ) {
+                val roomUUID = intent.data?.getQueryParameter("roomUUID")
+                if (viewModel.isLoggedIn() && roomUUID != null) {
+                    Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
+                    finish()
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
-    // var globalAgree by remember { mutableStateOf(false) }
-
+internal fun LoginPage(actioner: (LoginUiAction) -> Unit) {
     FlatPage(statusBarColor = Transparent) {
         if (isTabletMode()) {
             LoginMainPad(actioner)
@@ -202,7 +135,7 @@ internal fun LoginPage(actioner: (LoginUIAction) -> Unit) {
 }
 
 @Composable
-internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
+internal fun LoginMain(actioner: (LoginUiAction) -> Unit) {
     var agreementChecked by remember { mutableStateOf(false) }
 
     Column(
@@ -229,7 +162,7 @@ internal fun LoginMain(actioner: (LoginUIAction) -> Unit) {
 }
 
 @Composable
-internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
+internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
     var agreementEnable by remember { mutableStateOf(false) }
 
     Row {
@@ -265,14 +198,14 @@ internal fun LoginMainPad(actioner: (LoginUIAction) -> Unit) {
 private fun LoginButtonsArea(
     agreementEnable: Boolean,
     onAgree: () -> Unit,
-    actioner: (LoginUIAction) -> Unit,
+    actioner: (LoginUiAction) -> Unit,
 ) {
     var showAgreement by rememberSaveable { mutableStateOf(false) }
 
     Row {
         LoginImageButton(onClick = {
             if (agreementEnable) {
-                actioner(LoginUIAction.WeChatLogin)
+                actioner(LoginUiAction.WeChatLogin)
             } else {
                 showAgreement = true
             }
@@ -282,7 +215,7 @@ private fun LoginButtonsArea(
         Spacer(Modifier.width(48.dp))
         LoginImageButton(onClick = {
             if (agreementEnable) {
-                actioner(LoginUIAction.GithubLogin)
+                actioner(LoginUiAction.GithubLogin)
             } else {
                 showAgreement = true
             }
@@ -315,7 +248,7 @@ private fun LoginAgreement(
     modifier: Modifier = Modifier,
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
-    actioner: (LoginUIAction) -> Unit,
+    actioner: (LoginUiAction) -> Unit,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
@@ -378,13 +311,4 @@ private fun AgreementPreview() {
 
         }
     }
-}
-
-sealed class LoginUIAction {
-    object WeChatLogin : LoginUIAction()
-    object GithubLogin : LoginUIAction()
-    object AgreementHint : LoginUIAction()
-
-    object OpenServiceProtocol : LoginUIAction()
-    object OpenPrivacyProtocol : LoginUIAction()
 }
