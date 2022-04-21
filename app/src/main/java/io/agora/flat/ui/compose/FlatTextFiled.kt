@@ -2,6 +2,8 @@ package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -11,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import io.agora.flat.ui.theme.*
 
@@ -39,7 +43,7 @@ fun FlatPrimaryTextField(
             textStyle = MaterialTheme.typography.body1,
             singleLine = true,
             placeholder = {
-                Text(placeholderValue, style = MaterialTheme.typography.body1, color = if (darkMode) Gray_7 else Gray_3)
+                PlaceholderText(placeholderValue, darkMode)
             },
             enabled = enabled,
             keyboardOptions = keyboardOptions,
@@ -50,6 +54,48 @@ fun FlatPrimaryTextField(
             }
         }
     }
+}
+
+@Composable
+fun FastBasicTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onFocusChanged: (FocusState) -> Unit = {},
+    textStyle: TextStyle? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    placeholderValue: String?,
+) {
+    val darkMode = isDarkTheme()
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier.onFocusChanged {
+            onFocusChanged(it)
+        },
+        textStyle = textStyle ?: MaterialTheme.typography.body1,
+        cursorBrush = SolidColor(if (darkMode) Blue_7 else Blue_6),
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        decorationBox = { innerTextField ->
+            Box(
+                Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                if (value.isEmpty() && placeholderValue != null) {
+                    PlaceholderText(placeholderValue, darkMode)
+                }
+                innerTextField()
+            }
+        }
+    )
+}
+
+@Composable
+private fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
+    Text(placeholderValue, style = MaterialTheme.typography.body1, color = if (darkMode) Gray_7 else Gray_3)
 }
 
 @Composable
