@@ -33,22 +33,22 @@ interface UserService {
     @POST("v1/login/phone/sendMessage")
     fun requestSmsCode(
         @Body req: PhoneReq,
-    ): Call<RespNoData>
+    ): Call<BaseResp<RespNoData>>
 
     @POST("v1/login/phone")
     fun loginWithPhone(
-        @Body req: PhoneSmsLoginReq,
+        @Body req: PhoneSmsCodeReq,
     ): Call<BaseResp<UserInfoWithToken>>
 
     @POST("v1/user/bindingPhone/sendMessage")
     fun requestBindSmsCode(
         @Body req: PhoneReq,
-    ): Call<RespNoData>
+    ): Call<BaseResp<RespNoData>>
 
     @POST("v1/user/bindingPhone")
     fun bindPhone(
-        @Body req: PhoneReq,
-    ): Call<RespNoData>
+        @Body req: PhoneSmsCodeReq,
+    ): Call<BaseResp<RespNoData>>
 
     /**
      * 长度最小为1，最大为50

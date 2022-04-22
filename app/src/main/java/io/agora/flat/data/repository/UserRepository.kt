@@ -1,10 +1,7 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.*
-import io.agora.flat.data.model.AuthUUIDReq
-import io.agora.flat.data.model.RespNoData
-import io.agora.flat.data.model.UserInfo
-import io.agora.flat.data.model.UserInfoWithToken
+import io.agora.flat.data.model.*
 import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -95,5 +92,29 @@ class UserRepository @Inject constructor(
             uuid = this.uuid,
             avatar = this.avatar,
         )
+    }
+
+    suspend fun requestLoginSmsCode(phone: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
+        }
+    }
+
+    suspend fun loginWithPhone(phone: String, code: String): Result<UserInfoWithToken> {
+        return withContext(Dispatchers.IO) {
+            userService.loginWithPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
+        }
+    }
+
+    suspend fun requestBindSmsCode(phone: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestBindSmsCode(PhoneReq(phone = phone)).toResult()
+        }
+    }
+
+    suspend fun bindPhone(phone: String, code: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.bindPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
+        }
     }
 }

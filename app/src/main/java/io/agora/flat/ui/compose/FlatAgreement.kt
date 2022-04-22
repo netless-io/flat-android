@@ -3,6 +3,7 @@ package io.agora.flat.ui.compose
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -58,7 +59,10 @@ fun GlobalAgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
 @Composable
 internal fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
     Dialog(onDismissRequest = onRefuse) {
-        Surface(shape = Shapes.large) {
+        Surface(
+            Modifier.widthIn(max = 400.dp),
+            shape = Shapes.large,
+        ) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
                 FlatTextTitle(stringResource(R.string.login_agreement_dialog_title))
                 FlatNormalVerticalSpacer()

@@ -1,6 +1,6 @@
 package io.agora.flat.data.model
 
-data class PhoneSmsLoginReq constructor(
+data class PhoneSmsCodeReq constructor(
     val phone: String,
     val code: String,
 )

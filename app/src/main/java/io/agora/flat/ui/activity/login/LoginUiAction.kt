@@ -7,4 +7,7 @@ sealed class LoginUiAction {
 
     object OpenServiceProtocol : LoginUiAction()
     object OpenPrivacyProtocol : LoginUiAction()
+
+    data class PhoneSendCode(val phone: String) : LoginUiAction()
+    data class PhoneLogin(val phone: String, val code: String) : LoginUiAction()
 }

@@ -131,4 +131,16 @@ class LoginActivityHandler(
     fun observeLoginState(): StateFlow<LoginState> {
         return _state.asStateFlow()
     }
+
+    fun sendPhoneCode(phone: String) {
+        scope.launch {
+            // userRepository.requestLoginSmsCode(phone)
+        }
+    }
+
+    fun loginWithPhone(phone: String, code: String) {
+        scope.launch {
+            // userRepository.loginWithPhone(phone, code)
+        }
+    }
 }
