@@ -21,12 +21,12 @@ fun UserProfile(navController: NavController) {
             title = stringResource(R.string.title_my_profile),
             onBackPressed = { navController.popBackStack() },
         )
-        SettingItemList()
+        SettingsList()
     }
 }
 
 @Composable
-private fun ColumnScope.SettingItemList() {
+private fun ColumnScope.SettingsList() {
     val context = LocalContext.current
 
     LazyColumn(Modifier.weight(1f)) {
@@ -45,6 +45,6 @@ private fun ColumnScope.SettingItemList() {
 fun MyProfileActivityPreview() {
     FlatColumnPage {
         BackTopAppBar(stringResource(id = R.string.title_my_profile), {})
-        SettingItemList()
+        SettingsList()
     }
 }

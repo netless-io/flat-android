@@ -8,6 +8,7 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
+import io.agora.flat.ui.activity.dev.DevSettingsActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
@@ -67,6 +68,11 @@ object Navigator {
 
     fun launchDevToolsActivity(context: Context) {
         val intent = Intent(context, DevToolsActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchDevSettingsActivity(context: Context) {
+        val intent = Intent(context, DevSettingsActivity::class.java)
         context.startActivity(intent)
     }
 

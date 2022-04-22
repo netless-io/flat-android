@@ -57,6 +57,7 @@
         <activity android:name=".ui.activity.setting.WebViewActivity" />
         <activity android:name=".ui.activity.setting.DarkModeActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
+        <activity android:name=".ui.activity.dev.DevSettingsActivity" />
         <activity
             android:name=".ui.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

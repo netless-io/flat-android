@@ -38,23 +38,44 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
 
+    val actioner: (SettingsUiAction) -> Unit = { action ->
+        when (action) {
+            SettingsUiAction.Back -> navController.popBackStack()
+            SettingsUiAction.Logout -> {
+                viewModel.logout()
+                Navigator.launchHomeActivity(context)
+            }
+            is SettingsUiAction.SetNetworkAcceleration -> {
+                viewModel.setNetworkAcceleration(action.acceleration)
+            }
+        }
+    }
+    SettingsScreen(state, actioner)
+}
+
+@Composable
+fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit) {
     Column {
         BackTopAppBar(
             title = stringResource(R.string.title_setting),
-            onBackPressed = { navController.popBackStack() }
+            onBackPressed = { actioner(SettingsUiAction.Back) }
         )
         Box(Modifier.weight(1f)) {
-            SettingItemList(state, onSetNetworkAcceleration = { viewModel.setNetworkAcceleration(it) })
+            SettingsList(
+                state,
+                onSetNetworkAcceleration = {
+                    actioner(SettingsUiAction.SetNetworkAcceleration(it))
+                },
+            )
             BottomOptArea(onLogoutClick = {
-                viewModel.logout()
-                Navigator.launchHomeActivity(context)
+                actioner(SettingsUiAction.Logout)
             })
         }
     }
 }
 
 @Composable
-private fun SettingItemList(state: SettingsUiState, onSetNetworkAcceleration: ((Boolean) -> Unit)?) {
+private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boolean) -> Unit)?) {
     val context = LocalContext.current
 
     LazyColumn {
@@ -199,7 +220,7 @@ fun UserSettingActivityPreview() {
     FlatColumnPage {
         BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { })
         Box(Modifier.weight(1f)) {
-            SettingItemList(state) {}
+            SettingsList(state) {}
             BottomOptArea {}
         }
     }

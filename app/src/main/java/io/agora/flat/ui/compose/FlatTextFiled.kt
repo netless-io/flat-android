@@ -74,7 +74,9 @@ fun FastBasicTextField(
         modifier.onFocusChanged {
             onFocusChanged(it)
         },
-        textStyle = textStyle ?: MaterialTheme.typography.body1,
+        textStyle = textStyle ?: MaterialTheme.typography.body1.copy(
+            color = LocalContentColor.current.copy(LocalContentAlpha.current),
+        ),
         cursorBrush = SolidColor(if (darkMode) Blue_7 else Blue_6),
         singleLine = true,
         keyboardOptions = keyboardOptions,

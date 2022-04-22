@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Checkbox
@@ -19,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
@@ -41,6 +45,7 @@ import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
+import io.agora.flat.util.isApkInDebug
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -260,11 +265,22 @@ private fun LoginButtonsArea(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoginSlogan() {
-    FlatTextTitle("欢迎使用 Flat")
-    Spacer(Modifier.height(4.dp))
-    FlatTextBodyOne(stringResource(R.string.login_page_label_1))
+    val context = LocalContext.current
+
+    Column(Modifier.pointerInput(Unit) {
+        detectTapGestures(
+            onLongPress = {
+                if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
+            },
+        )
+    }) {
+        FlatTextTitle("欢迎使用 Flat")
+        Spacer(Modifier.height(4.dp))
+        FlatTextBodyOne(stringResource(R.string.login_page_label_1))
+    }
 }
 
 @Composable
