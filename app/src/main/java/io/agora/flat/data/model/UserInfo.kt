@@ -6,4 +6,5 @@ data class UserInfo(
     val name: String,
     val avatar: String,
     @SerializedName("userUUID") val uuid: String,
+    val hasPhone: Boolean = false,
 )

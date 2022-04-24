@@ -19,6 +19,7 @@ class FlatErrorCode {
         const val Web_NeedLoginAgain = 100004 // user need login in again
         const val Web_UnsupportedPlatform = 100005// Unsupported login platform
         const val Web_JWTSignFailed = 100006// jwt sign failed
+        const val Web_ExhaustiveAttack = 100007// exhaustive attack
 
         const val Web_RoomNotFound = 200000 // room not found
         const val Web_RoomIsEnded = 200001 // room has been ended
@@ -49,5 +50,9 @@ class FlatErrorCode {
         const val Web_LoginGithubSuspended = 900000
         const val Web_LoginGithubURLMismatch = 900001
         const val Web_LoginGithubAccessDenied = 900002
+
+        const val Web_SMSVerificationCodeInvalid = 110000// verification code invalid
+        const val Web_SMSAlreadyExist = 110001 // phone already exist by current user
+        const val Web_SMSAlreadyBinding = 110002 // phone are binding by other users
     }
 }

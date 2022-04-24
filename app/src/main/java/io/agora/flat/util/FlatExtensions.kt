@@ -65,5 +65,5 @@ fun String.isValidPhone(): Boolean {
 }
 
 fun String.isValidSmsCode(): Boolean {
-    return this.length in 4..6
+    return this.length == 6
 }

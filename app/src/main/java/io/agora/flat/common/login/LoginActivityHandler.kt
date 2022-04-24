@@ -3,15 +3,16 @@ package io.agora.flat.common.login
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.util.Ticker
 import io.agora.flat.util.resolveActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -135,14 +136,27 @@ class LoginActivityHandler(
 
     fun sendPhoneCode(phone: String) {
         scope.launch {
-            // userRepository.requestLoginSmsCode(phone)
-            Ticker.tickerFlow(1000)
+            when (userRepository.requestLoginSmsCode(phone)) {
+                is Success -> {
+                    Log.e("Login", "requestLoginSmsCode success")
+                }
+                is Failure -> {
+                    Log.e("Login", "requestLoginSmsCode failure")
+                }
+            }
         }
     }
 
     fun loginWithPhone(phone: String, code: String) {
         scope.launch {
-            // userRepository.loginWithPhone(phone, code)
+            when (userRepository.loginWithPhone(phone, code)) {
+                is Success -> {
+                    notifySuccess()
+                }
+                is Failure -> {
+                    Log.e("Login", "loginWithPhone failure")
+                }
+            }
         }
     }
 }

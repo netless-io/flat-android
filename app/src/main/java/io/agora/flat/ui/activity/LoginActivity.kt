@@ -46,6 +46,8 @@ import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.isApkInDebug
+import io.agora.flat.util.isValidPhone
+import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -169,6 +171,7 @@ internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
 @Composable
 private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
     var agreementChecked by remember { mutableStateOf(false) }
+    var showAgreement by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier,
@@ -177,16 +180,37 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
         Spacer(Modifier.weight(1f))
         LoginSlogan()
         Spacer(Modifier.weight(1f))
-        PhoneLoginArea(actioner)
+        PhoneLoginArea(actioner = {
+            if (agreementChecked.not() && it is LoginUiAction.PhoneLogin) {
+                showAgreement = true
+                return@PhoneLoginArea
+            }
+            actioner(it)
+        })
         LoginAgreement(
             Modifier.padding(horizontal = 24.dp),
             checked = agreementChecked,
             onCheckedChange = { agreementChecked = it },
-            actioner = actioner
         )
         Spacer(Modifier.weight(1f))
-        LoginButtonsArea(agreementChecked, onAgree = { agreementChecked = true }, actioner)
+        LoginButtonsArea(actioner = {
+            if (agreementChecked) {
+                actioner(it)
+            } else {
+                showAgreement = true
+            }
+        })
         Spacer(Modifier.weight(1f))
+    }
+
+    if (showAgreement) {
+        AgreementDialog(
+            onAgree = {
+                agreementChecked = true
+                showAgreement = false
+            },
+            onRefuse = { showAgreement = false },
+        )
     }
 }
 
@@ -199,26 +223,27 @@ fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
         phone = phone,
         onPhoneChange = { phone = it },
         code = code,
-        onCodeChange = { code = it },
+        onCodeChange = {
+            code = it
+        },
         onSendCode = {
-            actioner(LoginUiAction.PhoneSendCode(code))
+            actioner(LoginUiAction.PhoneSendCode("+86${phone}"))
         },
     )
     Box(Modifier.padding(16.dp)) {
-        FlatPrimaryTextButton(text = "注册或登录") {
-            actioner(LoginUiAction.PhoneLogin(phone, code))
+        FlatPrimaryTextButton(
+            text = "注册或登录",
+            enabled = phone.isValidPhone() && code.isValidSmsCode(),
+        ) {
+            actioner(LoginUiAction.PhoneLogin("+86${phone}", code))
         }
     }
 }
 
 @Composable
 private fun LoginButtonsArea(
-    agreementEnable: Boolean,
-    onAgree: () -> Unit,
     actioner: (LoginUiAction) -> Unit,
 ) {
-    var showAgreement by rememberSaveable { mutableStateOf(false) }
-
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -234,34 +259,13 @@ private fun LoginButtonsArea(
     }
     Spacer(Modifier.height(32.dp))
     Row {
-        LoginImageButton(onClick = {
-            if (agreementEnable) {
-                actioner(LoginUiAction.WeChatLogin)
-            } else {
-                showAgreement = true
-            }
-        }) {
+        LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
             Image(painterResource(R.drawable.ic_wechat_login), "")
         }
         Spacer(Modifier.width(48.dp))
-        LoginImageButton(onClick = {
-            if (agreementEnable) {
-                actioner(LoginUiAction.GithubLogin)
-            } else {
-                showAgreement = true
-            }
-        }) {
+        LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
             Image(painterResource(R.drawable.ic_github_login), "")
         }
-    }
-    if (showAgreement) {
-        AgreementDialog(
-            onAgree = {
-                onAgree()
-                showAgreement = false
-            },
-            onRefuse = { showAgreement = false },
-        )
     }
 }
 
@@ -291,7 +295,6 @@ private fun LoginAgreement(
     modifier: Modifier = Modifier,
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,
-    actioner: (LoginUiAction) -> Unit,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)

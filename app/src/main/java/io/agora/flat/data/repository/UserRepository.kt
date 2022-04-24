@@ -1,5 +1,6 @@
 package io.agora.flat.data.repository
 
+import android.os.SystemClock
 import io.agora.flat.data.*
 import io.agora.flat.data.model.*
 import io.agora.flat.http.api.UserService
@@ -14,6 +15,8 @@ class UserRepository @Inject constructor(
     private val userService: UserService,
     private val appKVCenter: AppKVCenter,
 ) {
+    private var lastSendCodeTime = 0L
+
     suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
             userService.loginCheck().toResult()
@@ -91,18 +94,32 @@ class UserRepository @Inject constructor(
             name = this.name,
             uuid = this.uuid,
             avatar = this.avatar,
+            hasPhone = hasPhone,
         )
     }
 
+    /**
+     * phone: +[country code][phone number]
+     */
     suspend fun requestLoginSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
+            limitSendCode(Failure(Exception(""), error = Error(1000, 0))) {
+                userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
+            }
         }
     }
 
-    suspend fun loginWithPhone(phone: String, code: String): Result<UserInfoWithToken> {
-        return withContext(Dispatchers.IO) {
+    suspend fun loginWithPhone(phone: String, code: String): Result<Boolean> {
+        val callResult = withContext(Dispatchers.IO) {
             userService.loginWithPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
+        }
+        return when (callResult) {
+            is Success -> {
+                appKVCenter.setToken(callResult.data.token)
+                appKVCenter.setUserInfo(callResult.data.mapToUserInfo())
+                Success(true)
+            }
+            is Failure -> Failure(callResult.throwable, callResult.error)
         }
     }
 
@@ -115,6 +132,18 @@ class UserRepository @Inject constructor(
     suspend fun bindPhone(phone: String, code: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             userService.bindPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
+        }
+    }
+
+    private suspend fun limitSendCode(
+        failure: Failure<RespNoData>,
+        block: suspend () -> Result<RespNoData>,
+    ): Result<RespNoData> {
+        return if (SystemClock.elapsedRealtime() - lastSendCodeTime > 60_000) {
+            lastSendCodeTime = SystemClock.elapsedRealtime()
+            block()
+        } else {
+            failure
         }
     }
 }

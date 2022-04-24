@@ -38,13 +38,13 @@ fun PhoneAndCodeArea(
             }
 
             override fun onFinish() {
-                remainTime = 0;
+                remainTime = 0
             }
         }
     }
 
-    val sendCodeEnable = remainTime == 0L
-    val sendCodeText = if (remainTime == 0L) "发送验证码" else "$remainTime"
+    val sendCodeEnable = remainTime == 0L && phone.isValidPhone()
+    val sendCodeText = if (remainTime == 0L) "发送验证码" else "${remainTime}s"
 
     Column(Modifier.padding(horizontal = 16.dp)) {
         FlatTextCaption(text = "手机号")
@@ -93,6 +93,9 @@ fun PhoneAndCodeArea(
             FastBasicTextField(
                 value = code,
                 onValueChange = {
+                    if (it.length > 6) {
+                        return@FastBasicTextField
+                    }
                     if (isValidCode.not() && it.isValidSmsCode()) {
                         isValidCode = true
                     }
