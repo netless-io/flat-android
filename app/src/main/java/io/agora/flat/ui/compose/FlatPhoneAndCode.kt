@@ -1,3 +1,4 @@
+import android.os.CountDownTimer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Red_6
+import io.agora.flat.util.isValidPhone
+import io.agora.flat.util.isValidSmsCode
 
 @Composable
 fun PhoneAndCodeArea(
@@ -24,6 +27,25 @@ fun PhoneAndCodeArea(
     var isValidPhone by remember { mutableStateOf(true) }
     var isValidCode by remember { mutableStateOf(true) }
 
+    var hasCodeFocused by remember { mutableStateOf(false) }
+    var hasPhoneFocused by remember { mutableStateOf(false) }
+
+    var remainTime by remember { mutableStateOf(0L) }
+    val countDownTimer = remember {
+        object : CountDownTimer(60_000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                remainTime = millisUntilFinished / 1000
+            }
+
+            override fun onFinish() {
+                remainTime = 0;
+            }
+        }
+    }
+
+    val sendCodeEnable = remainTime == 0L
+    val sendCodeText = if (remainTime == 0L) "发送验证码" else "$remainTime"
+
     Column(Modifier.padding(horizontal = 16.dp)) {
         FlatTextCaption(text = "手机号")
         Spacer(modifier = Modifier.height(4.dp))
@@ -35,15 +57,24 @@ fun PhoneAndCodeArea(
             Spacer(modifier = Modifier.width(8.dp))
             FastBasicTextField(
                 value = phone,
-                onValueChange = onPhoneChange,
+                onValueChange = {
+                    if (isValidPhone.not() && it.isValidPhone()) {
+                        isValidPhone = true
+                    }
+                    onPhoneChange(it)
+                },
                 modifier = Modifier
                     .height(40.dp)
                     .weight(1f),
                 onFocusChanged = {
-                    if (!it.hasFocus) {
-                        isValidPhone = phone.isEmpty()
+                    if (hasPhoneFocused.not() && it.isFocused) {
+                        hasPhoneFocused = true
+                    }
+                    if (hasPhoneFocused && it.isFocused.not()) {
+                        isValidPhone = phone.isValidPhone()
                     }
                 },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 placeholderValue = "请输入手机号",
             )
         }
@@ -61,20 +92,35 @@ fun PhoneAndCodeArea(
             Spacer(modifier = Modifier.width(8.dp))
             FastBasicTextField(
                 value = code,
-                onValueChange = onCodeChange,
+                onValueChange = {
+                    if (isValidCode.not() && it.isValidSmsCode()) {
+                        isValidCode = true
+                    }
+                    onCodeChange(it)
+                },
                 modifier = Modifier
                     .height(40.dp)
                     .weight(1f),
                 onFocusChanged = {
-                    if (!it.hasFocus) {
-                        isValidCode = code.isEmpty()
+                    if (hasCodeFocused.not() && it.isFocused) {
+                        hasCodeFocused = true
+                    }
+
+                    if (hasCodeFocused && it.isFocused.not()) {
+                        isValidCode = code.isValidSmsCode()
                     }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 placeholderValue = "请输入验证码",
             )
-            TextButton(onClick = onSendCode) {
-                FlatTextButton(text = "发送验证码")
+            TextButton(
+                enabled = sendCodeEnable,
+                onClick = {
+                    countDownTimer.start()
+                    onSendCode()
+                },
+            ) {
+                FlatTextButton(text = sendCodeText)
             }
         }
         if (isValidCode) {

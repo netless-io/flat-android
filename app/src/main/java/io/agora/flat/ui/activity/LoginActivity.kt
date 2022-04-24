@@ -270,13 +270,16 @@ private fun LoginButtonsArea(
 private fun LoginSlogan() {
     val context = LocalContext.current
 
-    Column(Modifier.pointerInput(Unit) {
-        detectTapGestures(
-            onLongPress = {
-                if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
-            },
-        )
-    }) {
+    Column(
+        Modifier.pointerInput(Unit) {
+            detectTapGestures(
+                onLongPress = {
+                    if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
+                },
+            )
+        },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         FlatTextTitle("欢迎使用 Flat")
         Spacer(Modifier.height(4.dp))
         FlatTextBodyOne(stringResource(R.string.login_page_label_1))

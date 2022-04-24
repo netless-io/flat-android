@@ -11,6 +11,7 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.util.Ticker
 import io.agora.flat.util.resolveActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -135,6 +136,7 @@ class LoginActivityHandler(
     fun sendPhoneCode(phone: String) {
         scope.launch {
             // userRepository.requestLoginSmsCode(phone)
+            Ticker.tickerFlow(1000)
         }
     }
 
