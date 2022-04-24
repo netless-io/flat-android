@@ -69,7 +69,7 @@ class BoardRoom @Inject constructor(
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
                 nickName = userRepository.getUsername(),
-                cursorName = userRepository.getUsername()
+                cursorName = userRepository.getUsername(),
             )
             isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
         }
@@ -165,9 +165,15 @@ class BoardRoom @Inject constructor(
      *  "nickName":"aderan",
      *  "userId":"3e092001-eb7e-4da5-a715-90452fde3194",
      *  "cursorName":"aderan"
+     *  "avatar":"https://user_avatar_path"
      * }
      */
-    private data class UserPayload(val userId: String, val nickName: String, val cursorName: String)
+    private data class UserPayload(
+        val userId: String,
+        val nickName: String,
+        val cursorName: String,
+        val avatar: String? = null,
+    )
 
 
     private fun String.toFastRegion(): FastRegion {
