@@ -57,6 +57,7 @@
         <activity android:name=".ui.activity.setting.WebViewActivity" />
         <activity android:name=".ui.activity.setting.DarkModeActivity" />
         <activity android:name=".ui.activity.setting.EditNameActivity" />
+        <activity android:name=".ui.activity.setting.AccountSecurityActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity android:name=".ui.activity.dev.DevSettingsActivity" />
         <activity

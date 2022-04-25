@@ -107,6 +107,11 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    fun launchAccountSecurityActivity(context: Context) {
+        val intent = Intent(context, AccountSecurityActivity::class.java)
+        context.startActivity(intent)
+    }
+
     fun launchWebViewActivity(context: Context, url: String) {
         val intent = Intent(context, WebViewActivity::class.java).apply {
             putExtra(Constants.IntentKey.URL, url)

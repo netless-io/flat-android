@@ -57,4 +57,14 @@ interface UserService {
     fun rename(
         @Body req: UserRenameReq,
     ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/deleteAccount/validate")
+    fun validateDeleteAccount(
+        @Body req: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<RoomCount>>
+
+    @POST("v1/user/deleteAccount")
+    fun deleteAccount(
+        @Body req: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<RespNoData>>
 }

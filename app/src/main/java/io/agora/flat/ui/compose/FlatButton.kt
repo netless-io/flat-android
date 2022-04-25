@@ -2,10 +2,7 @@ package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -130,10 +127,11 @@ fun FlatSmallSecondaryTextButton(
     text: String,
     modifier: Modifier = Modifier.defaultMinSize(minWidth = 86.dp),
     enabled: Boolean = true,
+    colors: ButtonColors? = null,
     onClick: () -> Unit,
 ) {
     val darkMode = isDarkTheme()
-    val colors = ButtonDefaults.outlinedButtonColors(
+    val colors = colors ?: ButtonDefaults.outlinedButtonColors(
         contentColor = if (darkMode) Gray_4 else Gray_6,
         disabledContentColor = if (darkMode) Gray_7 else Gray_5
     )
@@ -142,7 +140,7 @@ fun FlatSmallSecondaryTextButton(
         modifier = modifier,
         enabled = enabled,
         shape = Shapes.small,
-        border = BorderStroke(1.dp, FlatColorGray),
+        border = BorderStroke(1.dp, if (darkMode) Gray_6 else Gray_3),
         colors = colors,
         onClick = onClick
     ) {

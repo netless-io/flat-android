@@ -162,6 +162,18 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun validateDeleteAccount(): Result<RoomCount> {
+        return withContext(Dispatchers.IO) {
+            userService.validateDeleteAccount().toResult()
+        }
+    }
+
+    suspend fun deleteAccount(): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.deleteAccount().toResult()
+        }
+    }
+
     private suspend fun limitSendCode(
         failure: Failure<RespNoData>? = null,
         block: suspend () -> Result<RespNoData>,

@@ -88,8 +88,8 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
             SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_security,
-                tip = stringResource(R.string.acount_security),
-                onClick = { }
+                tip = stringResource(R.string.account_security),
+                onClick = { Navigator.launchAccountSecurityActivity(context) }
             )
             SettingItemDivider()
             SettingItem(
@@ -112,7 +112,7 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
             SettingItem(
                 id = R.drawable.ic_user_profile_update,
                 tip = stringResource(R.string.setting_check_update),
-                desc = context.getAppVersion()
+                desc = context.getAppVersion(),
             )
             SettingItemDivider()
             // SettingItem(
@@ -165,7 +165,14 @@ private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
 }
 
 @Composable
-internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", onClick: () -> Unit = {}) {
+internal fun SettingItem(
+    @DrawableRes id: Int,
+    tip: String,
+    desc: String = "",
+    detail: String? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit = {},
+) {
     val color = MaterialTheme.colors.onBackground
     CompositionLocalProvider(
         LocalContentColor provides color.copy(alpha = 1f),
@@ -173,15 +180,25 @@ internal fun SettingItem(@DrawableRes id: Int, tip: String, desc: String = "", o
         Row(
             Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .clickable(onClick = onClick),
+                .heightIn(48.dp)
+                .clickable(
+                    enabled = enabled,
+                    onClick = onClick
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(Modifier.width(16.dp))
             Image(painterResource(id), contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            FlatTextBodyOne(text = tip)
-            Spacer(Modifier.weight(1f))
+            Column(Modifier
+                .weight(1f)
+                .padding(vertical = 8.dp)) {
+                FlatTextBodyOne(text = tip)
+                if (detail != null) {
+                    FlatTextCaption(text = detail)
+                }
+            }
+            Spacer(Modifier.width(8.dp))
             FlatTextBodyOneSecondary(text = desc)
             Spacer(Modifier.width(8.dp))
             Icon(Icons.Outlined.NavigateNext, contentDescription = null)

@@ -40,7 +40,8 @@
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
     <string name="network_acceleration">网络加速</string>
-    <string name="acount_security">账户安全</string>
+    <string name="account_security">账户安全</string>
+    <string name="cancel_account">注销账户</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
@@ -213,6 +214,28 @@
     <string name="dark_mode_auto">跟随系统</string>
     <string name="dark_mode_light">普通模式</string>
     <string name="dark_mode_dark">深色模式</string>
+
+    <string name="account_security_cancel_limited_tip">你有%1$d个尚未结束或退出的房间，处理完毕后才可以申请注销账号</string>
+    <string name="account_security_cancel_dialog_title">Agora Flat 账号注销重要提示</string>
+    <string name="account_security_cancel_dialog_message">"你正在进行 Flat 账号注销，为保障你的账号和财产安全，请你在注销账号前，充分阅读理解并同意下列事项，谨慎操作.
+如你申请注销的 Flat 账号同时满足以下条件，平台将为你完成核验及账号的注销，注销立即生效.
+1. 账号处于正常状态，不涉及任何争议纠纷(包括投诉举报或被投诉举报);
+2. 如有未完成的课程，为避免影响你的权利或发生纠纷，建议你在注销账号前，联系相关师生妥善处理未完成的课程;
+3. 账号内不存在其他未了结的权利义务或因注销账号而产生纠纷的情況;
+4. 不存在其他可能影响账号注销的情况.
+
+注销 Flat 账号的行为是不可逆的，Flat 账号注销成功后，我们将停止为你提供产品或服务，不再收集你的个人信息，我们将删除你的个人信息，或对其进行匿名化处理.
+Flat 账号成功注销后，你将无法再使用该 Flat 账号，也将无法找回该账号中与账号相关的任何内容或信息（即使你使用相同的方式再次注册并使用 Flat），包括但不限于:
+1. 所有课程、课节记录将被删除;
+2. 所有聊天数据（文本、图片、视频、音频等）将被抹除;
+3. 云盘数据将被删除;
+4. 所有回放将被清空;
+
+Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之前自行备份账号相关的所有信息和数据.
+在您注销帐号之后，我们将停止为您提供产品或服务，并对您的个人信息进行删除或匿名化处理，但法律法规另有规定的除外.
+点击下方按钮继续注销，即表明你对上述提示己完全知晓并同意."</string>
+    <string name="account_cancel_and_exit">注销并退出登录</string>
+    <string name="account_cancel_agree_tip">我已完全知晓并同意</string>
 
     <string name="error_request_too_frequently">请求太过频繁</string>
     <string name="error_request_common_fail">请求失败</string>

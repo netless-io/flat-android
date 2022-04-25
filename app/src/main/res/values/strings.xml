@@ -36,7 +36,8 @@
     <string name="term_of_service">Term of Service</string>
     <string name="network_acceleration">Network Acceleration</string>
     <string name="bind_phone">Bind Phone</string>
-    <string name="acount_security">Acount Security</string>
+    <string name="account_security">Account Security</string>
+    <string name="cancel_account">Cancel Account</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
@@ -200,6 +201,30 @@
     <string name="dark_mode_auto">Auto</string>
     <string name="dark_mode_light">Normal Mode</string>
     <string name="dark_mode_dark">Dark Mode</string>
+
+    <string name="account_security_cancel_limited_tip">You have %1$d rooms to closed or exited, process them before you cancel the account</string>
+    <string name="account_security_cancel_dialog_title">Important Tips</string>
+    <string name="account_security_cancel_dialog_message">"You are in the process of canceling your Flat account, in order to protect your account and property security, please read and agree to the following matters before you cancel your account, and operate with caution.
+If the Flat account you apply for cancellation also meets the following conditions, the platform will complete the verification and account cancellation for you, and the cancellation will take effect immediately.
+1. The account is in a normal state and is not involved in any dispute (including complaints or reported by complaints);
+2. if there are incomplete courses, in order to avoid affecting your rights or disputes, you are advised to contact the relevant teachers and students to properly handle the incomplete courses before canceling your account;
+3. there are no other outstanding rights and obligations in the account or disputes arising from the cancellation of the account;
+4. there are no other circumstances that may affect the account cancellation.
+
+The cancellation of a Flat account is irreversible. After a successful cancellation of a Flat account, we will stop providing products or services to you and will no longer collect your personal information, and we will delete your personal information or anonymize it.
+After a Flat account is successfully cancelled, you will no longer be able to use the Flat account and will not be able to retrieve any content or information associated with the account (even if you register and use Flat again in the same way), including but not limited to:
+1. all course and session records will be deleted;
+2. All chat data (text, images, video, audio, etc.) will be erased;
+3. Cloud data will be deleted. 4;
+4. All playback will be cleared;
+
+Flat Once your account is cancelled, all data will not be recovered, so please backup all information and data before you cancel your account.
+After you cancel your account, we will stop providing products or services to you and delete or anonymize your personal information, except as otherwise provided by law or regulation.
+By clicking on the button below to proceed with your cancellation, you acknowledge that you fully understand and agree to the above instructions.
+
+Translated with www.DeepL.com/Translator (free version)"</string>
+    <string name="account_cancel_and_exit">Cancel And Exit</string>
+    <string name="account_cancel_agree_tip">Agree</string>
 
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>

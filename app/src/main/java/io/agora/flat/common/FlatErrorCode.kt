@@ -33,6 +33,8 @@ class FlatErrorCode {
         const val Web_PeriodicSubRoomHasRunning = 300002 // periodic sub room has running
 
         const val Web_UserNotFound = 400000 // user not found
+        const val Web_UserRoomListNotEmpty = 400001 // user room list is not empty.
+
         const val Web_RecordNotFound = 500000 // record info not found
 
         const val Web_UploadConcurrentLimit = 700000
