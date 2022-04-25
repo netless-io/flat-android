@@ -59,6 +59,9 @@
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity android:name=".ui.activity.dev.DevSettingsActivity" />
         <activity
+            android:name=".ui.activity.phone.PhoneBindActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".ui.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
@@ -84,27 +87,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- need more test -->
-            <!--<intent-filter android:autoVerify="true">-->
-            <!--    <action android:name="android.intent.action.VIEW" />-->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
 
-            <!--    <category android:name="android.intent.category.DEFAULT" />-->
-            <!--    <category android:name="android.intent.category.BROWSABLE" />-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-            <!--    <data-->
-            <!--        android:host="flat-web-dev.whiteboard.agora.io"-->
-            <!--        android:scheme="https" />-->
-            <!--</intent-filter>-->
-            <!--<intent-filter>-->
-            <!--    <action android:name="android.intent.action.VIEW" />-->
+                <data
+                    android:host="flat-web-dev.whiteboard.agora.io"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-            <!--    <category android:name="android.intent.category.DEFAULT" />-->
-            <!--    <category android:name="android.intent.category.BROWSABLE" />-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-            <!--    <data-->
-            <!--        android:host="flat-web.whiteboard.agora.io"-->
-            <!--        android:scheme="https" />-->
-            <!--</intent-filter>-->
+                <data
+                    android:host="flat-web.whiteboard.agora.io"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity android:name=".ui.activity.setting.UserInfoActivity" />
         <activity

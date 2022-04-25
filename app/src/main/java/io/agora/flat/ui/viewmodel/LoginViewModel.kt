@@ -19,4 +19,8 @@ class LoginViewModel @Inject constructor(
     fun isLoggedIn(): Boolean {
         return userRepository.isLoggedIn()
     }
+
+    fun hasBindPhone(): Boolean {
+        return userRepository.getUserInfo()?.hasPhone ?: false
+    }
 }

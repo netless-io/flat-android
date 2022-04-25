@@ -60,6 +60,8 @@ class MainViewModel @Inject constructor(
 
     fun isLoggedIn() = userRepository.isLoggedIn()
 
+    fun hasBindPhone(): Boolean = userRepository.getUserInfo()?.hasPhone ?: false
+
     private fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
         viewModelScope.launch {
             roomConfigRepository.updateRoomConfig(RoomConfig(roomUUID, openVideo, openAudio))

@@ -97,6 +97,24 @@
     <string name="login_agreement_dialog_title">服务协议及隐私保护</string>
     <string name="login_agreement_dialog_message">为了更好的保证您的合法权益，请你阅读并同意以下协议《Flat 隐私政策》、《Flat 用户协议》</string>
 
+    <string name="login_phone_input_placeholder">请输入手机号</string>
+    <string name="login_phone_invalid_tip">请填写正确手机号</string>
+    <string name="login_code_input_placeholder">请输入验证码</string>
+    <string name="login_code_invalid_tip">请填写正确验证码</string>
+    <string name="login_send_sms_code">发送验证码</string>
+    <string name="login_code_send">验证码已发送</string>
+    <string name="login_others_tip">也可通过以下方式直接登录</string>
+    <string name="login_sign_in_or_up">注册或登录</string>
+    <string name="login_welcome">欢迎使用 Flat</string>
+    <string name="login_welcome_slogan">在线互动，让想法同步</string>
+
+    <string name="login_already_bind_phone">已经绑定过手机号</string>
+    <string name="login_phone_already_bound">该手机已被绑定</string>
+    <string name="login_verification_code_invalid">验证码无效</string>
+
+
+    <string name="bind_phone">绑定手机号</string>
+
     <string name="agreement_global_dialog_message">感谢您信任并使用 Flat。\n\n我们将依据《Flat 用户协议》及《Flat 隐私政策》来帮助您了解我们在收集、使用、存储您个人信息的情况以及您享有的相关权利。\n\n在您使用 Flat 时，我们将收集您的设备信息、操作日志及浏览记录等信息，同时为了保证上课的体验，你可以授予 Flat 获取您设备的摄像头权限、麦克风权限等信息。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_recheck_dialog_message">您需要同意用户协议与隐私政策后才能使 Flat。\n\n如您不同意，很遗憾我们无法为您提供服务。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_privacy">《Flat 隐私政策》</string>
@@ -194,4 +212,7 @@
     <string name="dark_mode_auto">跟随系统</string>
     <string name="dark_mode_light">普通模式</string>
     <string name="dark_mode_dark">深色模式</string>
+
+    <string name="error_request_too_frequently">请求太过频繁</string>
+    <string name="error_request_common_fail">请求失败</string>
 </resources>

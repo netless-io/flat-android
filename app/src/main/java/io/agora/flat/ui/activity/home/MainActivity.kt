@@ -60,6 +60,8 @@ class MainActivity : BaseComposeActivity() {
                     onResume = {
                         if (!viewModel.isLoggedIn()) {
                             Navigator.launchLoginActivity(this)
+                        } else if (!viewModel.hasBindPhone()) {
+                            Navigator.launchPhoneBindActivity(this)
                         }
                     },
                 )

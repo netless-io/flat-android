@@ -1,5 +1,7 @@
 package io.agora.flat.common.login
 
+import io.agora.flat.ui.util.UiMessage
+
 enum class LoginType {
     None,
     WeChat,
@@ -9,6 +11,6 @@ enum class LoginType {
 
 sealed class LoginState {
     object Init : LoginState();
-    data class Process(val message: String) : LoginState()
+    data class Process(val message: UiMessage) : LoginState()
     object Success : LoginState()
 }

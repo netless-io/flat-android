@@ -15,4 +15,12 @@ class StringFetcher @Inject constructor(val context: Context) {
     fun joinRoomError(code: Int): String = context.getString(R.string.fetcher_join_room_error, code)
 
     fun startRoomWithRecord(): String = context.getString(R.string.fetcher_start_room_with_record)
+
+    fun loginCodeSend(): String = context.getString(R.string.login_code_send)
+
+    // network
+    fun commonFail(): String = context.getString(R.string.error_request_common_fail)
+    fun phoneBound(): String = context.getString(R.string.login_phone_already_bound)
+    fun invalidVerificationCode(): String = context.getString(R.string.login_verification_code_invalid)
+    fun frequentRequest(): String = context.getString(R.string.error_request_too_frequently)
 }

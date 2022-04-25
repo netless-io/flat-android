@@ -1,6 +1,7 @@
 package io.agora.flat.data.repository
 
 import android.os.SystemClock
+import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.data.*
 import io.agora.flat.data.model.*
 import io.agora.flat.http.api.UserService
@@ -65,7 +66,7 @@ class UserRepository @Inject constructor(
         return when (result) {
             is Success -> {
                 appKVCenter.setToken(result.data.token)
-                appKVCenter.setUserInfo(result.data.mapToUserInfo())
+                appKVCenter.setUserInfo(result.data.toUserInfo())
                 Success(true)
             }
             is Failure -> {
@@ -80,7 +81,7 @@ class UserRepository @Inject constructor(
                 val result = userService.loginProcess(AuthUUIDReq(authUUID)).toResult()
                 if (result is Success && result.data.token.isNotBlank()) {
                     appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.mapToUserInfo())
+                    appKVCenter.setUserInfo(result.data.toUserInfo())
                     return@withContext Success(true)
                 }
                 delay(2000)
@@ -89,7 +90,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    private fun UserInfoWithToken.mapToUserInfo(): UserInfo {
+    private fun UserInfoWithToken.toUserInfo(): UserInfo {
         return UserInfo(
             name = this.name,
             uuid = this.uuid,
@@ -103,7 +104,7 @@ class UserRepository @Inject constructor(
      */
     suspend fun requestLoginSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            limitSendCode(Failure(Exception(""), error = Error(1000, 0))) {
+            limitSendCode {
                 userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
             }
         }
@@ -116,7 +117,7 @@ class UserRepository @Inject constructor(
         return when (callResult) {
             is Success -> {
                 appKVCenter.setToken(callResult.data.token)
-                appKVCenter.setUserInfo(callResult.data.mapToUserInfo())
+                appKVCenter.setUserInfo(callResult.data.toUserInfo())
                 Success(true)
             }
             is Failure -> Failure(callResult.throwable, callResult.error)
@@ -125,25 +126,36 @@ class UserRepository @Inject constructor(
 
     suspend fun requestBindSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestBindSmsCode(PhoneReq(phone = phone)).toResult()
+            limitSendCode {
+                userService.requestBindSmsCode(PhoneReq(phone = phone)).toResult()
+            }
         }
     }
 
-    suspend fun bindPhone(phone: String, code: String): Result<RespNoData> {
-        return withContext(Dispatchers.IO) {
+    suspend fun bindPhone(phone: String, code: String): Result<Boolean> {
+        val callResult = withContext(Dispatchers.IO) {
             userService.bindPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
+        }
+        return when (callResult) {
+            is Success -> {
+                appKVCenter.getUserInfo()?.let {
+                    appKVCenter.setUserInfo(it.copy(hasPhone = true))
+                }
+                Success(true)
+            }
+            is Failure -> Failure(callResult.throwable, callResult.error)
         }
     }
 
     private suspend fun limitSendCode(
-        failure: Failure<RespNoData>,
+        failure: Failure<RespNoData>? = null,
         block: suspend () -> Result<RespNoData>,
     ): Result<RespNoData> {
         return if (SystemClock.elapsedRealtime() - lastSendCodeTime > 60_000) {
             lastSendCodeTime = SystemClock.elapsedRealtime()
             block()
         } else {
-            failure
+            failure ?: Failure(Exception("limit send code"), Error(404, FlatErrorCode.Web_ExhaustiveAttack))
         }
     }
 }

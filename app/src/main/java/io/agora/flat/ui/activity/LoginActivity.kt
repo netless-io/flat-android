@@ -95,12 +95,18 @@ class LoginActivity : BaseComposeActivity() {
 
             LaunchedEffect(loginState) {
                 when (loginState) {
+                    is LoginState.Process -> {
+                        showToast((loginState as LoginState.Process).message.text)
+                    }
                     LoginState.Init -> {}
-                    is LoginState.Process -> showToast((loginState as LoginState.Process).message)
                     LoginState.Success -> {
-                        showToast(R.string.login_success_and_jump)
-                        delay(2000)
-                        Navigator.launchHomeActivity(this@LoginActivity)
+                        if (viewModel.hasBindPhone()) {
+                            showToast(R.string.login_success_and_jump)
+                            delay(2000)
+                            Navigator.launchHomeActivity(this@LoginActivity)
+                        } else {
+                            Navigator.launchPhoneBindActivity(this@LoginActivity)
+                        }
                     }
                 }
             }

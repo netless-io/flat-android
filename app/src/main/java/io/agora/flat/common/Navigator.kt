@@ -11,6 +11,7 @@ import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
+import io.agora.flat.ui.activity.phone.PhoneBindActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
 import io.agora.flat.ui.activity.setting.*
@@ -112,6 +113,11 @@ object Navigator {
         val intent = Intent(context, PreviewActivity::class.java).apply {
             putExtra(Constants.IntentKey.CLOUD_FILE, file)
         }
+        context.startActivity(intent)
+    }
+
+    fun launchPhoneBindActivity(context: Context) {
+        val intent = Intent(context, PhoneBindActivity::class.java)
         context.startActivity(intent)
     }
 
