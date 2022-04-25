@@ -165,44 +165,17 @@ fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
     FlatTopAppBar(
         title = stringResource(R.string.title_home),
         actions = {
-            Box {
-                var expanded by remember { mutableStateOf(false) }
-
-                IconButton(onClick = { expanded = true }) {
-                    Image(
-                        painter = rememberCoilPainter(userAvatar),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp, 24.dp)
-                            .clip(shape = RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-
-                DropdownMenu(
-                    modifier = Modifier.wrapContentSize(),
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    DropdownMenuItem(
-                        onClick = {
-                            actioner(HomeViewAction.GotoUserProfile)
-                            expanded = false
-                        }) {
-                        Image(painterResource(R.drawable.ic_user_profile_head), null, Modifier.size(24.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.title_my_profile), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                    DropdownMenuItem(
-                        onClick = {
-                            actioner(HomeViewAction.GotoSetting)
-                            expanded = false
-                        }) {
-                        Image(painterResource(R.drawable.ic_user_profile_aboutus), null, Modifier.size(24.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.title_setting), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                }
+            IconButton(onClick = {
+                actioner(HomeViewAction.GotoSetting)
+            }) {
+                Image(
+                    painter = rememberCoilPainter(userAvatar),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp, 24.dp)
+                        .clip(shape = RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
             }
         }
     )

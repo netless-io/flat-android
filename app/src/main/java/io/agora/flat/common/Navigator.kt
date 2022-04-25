@@ -102,6 +102,11 @@ object Navigator {
         context.startActivity(intent)
     }
 
+    fun launchEditNameActivity(context: Context) {
+        val intent = Intent(context, EditNameActivity::class.java)
+        context.startActivity(intent)
+    }
+
     fun launchWebViewActivity(context: Context, url: String) {
         val intent = Intent(context, WebViewActivity::class.java).apply {
             putExtra(Constants.IntentKey.URL, url)

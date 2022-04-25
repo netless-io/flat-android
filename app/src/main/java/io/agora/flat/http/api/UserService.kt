@@ -56,5 +56,5 @@ interface UserService {
     @POST("v1/user/rename")
     fun rename(
         @Body req: UserRenameReq,
-    ): Call<RespNoData>
+    ): Call<BaseResp<RespNoData>>
 }

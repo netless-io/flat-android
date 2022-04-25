@@ -147,6 +147,21 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun rename(name: String): Result<Boolean> {
+        val callResult = withContext(Dispatchers.IO) {
+            userService.rename(UserRenameReq(name)).toResult()
+        }
+        return when (callResult) {
+            is Success -> {
+                appKVCenter.getUserInfo()?.let {
+                    appKVCenter.setUserInfo(it.copy(name = name))
+                }
+                Success(true)
+            }
+            is Failure -> Failure(callResult.throwable, callResult.error)
+        }
+    }
+
     private suspend fun limitSendCode(
         failure: Failure<RespNoData>? = null,
         block: suspend () -> Result<RespNoData>,

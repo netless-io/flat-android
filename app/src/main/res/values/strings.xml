@@ -36,6 +36,7 @@
     <string name="term_of_service">Term of Service</string>
     <string name="network_acceleration">Network Acceleration</string>
     <string name="bind_phone">Bind Phone</string>
+    <string name="acount_security">Acount Security</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
@@ -202,4 +203,5 @@
 
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>
+    <string name="request_common_success">success</string>
 </resources>

@@ -34,12 +34,13 @@
     <string name="title_join_room">加入房间</string>
     <string name="title_feedback">吐个槽</string>
     <string name="title_about_us">关于我们</string>
-    <string name="title_language">多语言</string>
+    <string name="title_language">语言设置</string>
     <string name="title_dark_mode">深色模式</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
     <string name="network_acceleration">网络加速</string>
+    <string name="acount_security">账户安全</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
@@ -215,4 +216,5 @@
 
     <string name="error_request_too_frequently">请求太过频繁</string>
     <string name="error_request_common_fail">请求失败</string>
+    <string name="request_common_success">操作成功</string>
 </resources>

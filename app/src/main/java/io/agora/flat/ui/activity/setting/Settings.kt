@@ -81,20 +81,16 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
     LazyColumn {
         item {
             SettingItem(
-                id = R.drawable.ic_user_profile_update,
-                tip = stringResource(R.string.setting_check_update),
-                desc = context.getAppVersion()
+                id = R.drawable.ic_user_profile_head,
+                tip = stringResource(R.string.title_my_profile),
+                onClick = { Navigator.launchUserInfoActivity(context) }
             )
             SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_feedback,
-                tip = stringResource(R.string.title_feedback),
-                onClick = { Navigator.launchFeedbackActivity(context) })
-            SettingItemDivider()
-            SettingItem(
-                id = R.drawable.ic_user_profile_aboutus,
-                tip = stringResource(R.string.title_about_us),
-                onClick = { Navigator.launchAboutUsActivity(context) })
+                id = R.drawable.ic_settings_security,
+                tip = stringResource(R.string.acount_security),
+                onClick = { }
+            )
             SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_language,
@@ -106,6 +102,29 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 tip = stringResource(R.string.title_dark_mode),
                 onClick = { Navigator.launchDarkModeActivity(context) })
             SettingItemDivider()
+            SettingItemSwitch(
+                id = R.drawable.ic_settings_network_acceleration,
+                tip = stringResource(R.string.network_acceleration),
+                checked = state.networkAcceleration,
+                onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
+            )
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_user_profile_update,
+                tip = stringResource(R.string.setting_check_update),
+                desc = context.getAppVersion()
+            )
+            SettingItemDivider()
+            // SettingItem(
+            //     id = R.drawable.ic_user_profile_feedback,
+            //     tip = stringResource(R.string.title_feedback),
+            //     onClick = { Navigator.launchFeedbackActivity(context) })
+            // SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_user_profile_aboutus,
+                tip = stringResource(R.string.title_about_us),
+                onClick = { Navigator.launchAboutUsActivity(context) })
+            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_privacy_policy,
                 tip = stringResource(R.string.privacy_policy),
@@ -115,13 +134,6 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 id = R.drawable.ic_settings_term_of_service,
                 tip = stringResource(R.string.term_of_service),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
-            SettingItemDivider()
-            SettingItemSwitch(
-                id = R.drawable.ic_settings_network_acceleration,
-                tip = stringResource(R.string.network_acceleration),
-                checked = state.networkAcceleration,
-                onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
-            )
             SettingItemDivider()
             if (context.isApkInDebug()) {
                 // Device Test

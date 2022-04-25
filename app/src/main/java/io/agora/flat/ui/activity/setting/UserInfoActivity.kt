@@ -12,17 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
+import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BackTopAppBar
-import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.compose.FlatTextBodyOne
-import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.UserViewModel
 
 @AndroidEntryPoint
@@ -38,18 +37,29 @@ class UserInfoActivity : BaseComposeActivity() {
                 userInfo.value?.apply {
                     SettingList(name)
                 }
+
+                LifecycleHandler(
+                    onResume = {
+                        viewModel.refreshUser()
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SettingList(name: String) {
+fun SettingList(name: String) {
+    val context = LocalContext.current
+
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            // Item(stringResource(R.string.nickname), "", onClickOrNull = {})
-            // Divider(Modifier.padding(start = 16.dp, end = 16.dp), thickness = 1.dp)
-            Item(tip = stringResource(R.string.username), desc = name)
+            SettingItem(
+                id = R.drawable.ic_user_profile_head,
+                tip = stringResource(R.string.username),
+                desc = name,
+                onClick = { Navigator.launchEditNameActivity(context) }
+            )
         }
     }
 }

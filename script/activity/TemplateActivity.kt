@@ -11,6 +11,7 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 
+@AndroidEntryPoint
 class {ACTIVITY_NAME}Activity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
