@@ -31,18 +31,34 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file(property('signing.filepath'))
-            storePassword property('signing.storePassword')
-            keyAlias property('signing.keyAlias')
-            keyPassword property('signing.keyPassword')
-        }
+        if (findProperty('signing.filepath')) {
+            release {
+                storeFile file(property('signing.filepath'))
+                storePassword property('signing.storePassword')
+                keyAlias property('signing.keyAlias')
+                keyPassword property('signing.keyPassword')
+            }
 
-        debug {
-            storeFile file(property('signing.filepath'))
-            storePassword property('signing.storePassword')
-            keyAlias property('signing.keyAlias')
-            keyPassword property('signing.keyPassword')
+            debug {
+                storeFile file(property('signing.filepath'))
+                storePassword property('signing.storePassword')
+                keyAlias property('signing.keyAlias')
+                keyPassword property('signing.keyPassword')
+            }
+        } else {
+            release {
+                storeFile file("../flatrun.keystore")
+                storePassword 'agoraflat'
+                keyAlias 'flatrunkey'
+                keyPassword 'agoraflat'
+            }
+
+            debug {
+                storeFile file("../flatrun.keystore")
+                storePassword 'agoraflat'
+                keyAlias 'flatrunkey'
+                keyPassword 'agoraflat'
+            }
         }
     }
 
