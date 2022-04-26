@@ -4,11 +4,12 @@ rootProject.name = "FlatAndroid"
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 
-def fastboardPath = properties.getProperty("agora.fastboard")
-if (fastboardPath != null) {
-    include ':fastboard'
-    project(':fastboard').projectDir = new File("$fastboardPath/library")
+    def fastboardPath = properties.getProperty("agora.fastboard")
+    if (fastboardPath != null) {
+        include ':fastboard'
+        project(':fastboard').projectDir = new File("$fastboardPath/library")
+    }
 }
