@@ -1,3 +1,5 @@
+package io.agora.flat.ui.compose
+
 import android.os.CountDownTimer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -7,11 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
-import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Red_6
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
@@ -44,10 +46,10 @@ fun PhoneAndCodeArea(
     }
 
     val sendCodeEnable = remainTime == 0L && phone.isValidPhone()
-    val sendCodeText = if (remainTime == 0L) "发送验证码" else "${remainTime}s"
+    val sendCodeText = if (remainTime == 0L) stringResource(id = R.string.login_send_sms_code) else "${remainTime}s"
 
     Column(Modifier.padding(horizontal = 16.dp)) {
-        FlatTextCaption(text = "手机号")
+        FlatTextCaption(text = stringResource(id = R.string.bind_phone))
         Spacer(modifier = Modifier.height(4.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -75,17 +77,17 @@ fun PhoneAndCodeArea(
                     }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                placeholderValue = "请输入手机号",
+                placeholderValue = stringResource(R.string.login_phone_input_placeholder),
             )
         }
         if (isValidPhone) {
             FlatDivider(thickness = 1.dp)
         } else {
             FlatDivider(color = Red_6, thickness = 1.dp)
-            FlatTextBodyTwo(text = "请填写正确手机号", color = Red_6)
+            FlatTextBodyTwo(stringResource(R.string.login_phone_invalid_tip), color = Red_6)
         }
         Spacer(modifier = Modifier.height(16.dp))
-        FlatTextCaption(text = "验证码")
+        FlatTextCaption(stringResource(R.string.verification_code))
         Spacer(modifier = Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
@@ -114,7 +116,7 @@ fun PhoneAndCodeArea(
                     }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                placeholderValue = "请输入验证码",
+                placeholderValue = stringResource(R.string.login_code_input_placeholder),
             )
             TextButton(
                 enabled = sendCodeEnable,
@@ -130,7 +132,7 @@ fun PhoneAndCodeArea(
             FlatDivider(thickness = 1.dp)
         } else {
             FlatDivider(color = Red_6, thickness = 1.dp)
-            FlatTextBodyTwo(text = "请填写正确验证码", color = Red_6)
+            FlatTextBodyTwo(stringResource(R.string.login_code_invalid_tip), color = Red_6)
         }
     }
 }

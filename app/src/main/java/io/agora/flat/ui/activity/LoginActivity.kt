@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity
 
-import PhoneAndCodeArea
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -98,7 +97,8 @@ class LoginActivity : BaseComposeActivity() {
                     is LoginState.Process -> {
                         showToast((loginState as LoginState.Process).message.text)
                     }
-                    LoginState.Init -> {}
+                    LoginState.Init -> {
+                    }
                     LoginState.Success -> {
                         if (viewModel.hasBindPhone()) {
                             showToast(R.string.login_success_and_jump)
@@ -221,7 +221,7 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
 }
 
 @Composable
-fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
+private fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
     var phone by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
 
@@ -238,7 +238,7 @@ fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
     )
     Box(Modifier.padding(16.dp)) {
         FlatPrimaryTextButton(
-            text = "注册或登录",
+            text = stringResource(id = R.string.login_sign_in_or_up),
             enabled = phone.isValidPhone() && code.isValidSmsCode(),
         ) {
             actioner(LoginUiAction.PhoneLogin("+86${phone}", code))
@@ -256,7 +256,7 @@ private fun LoginButtonsArea(
             .weight(1f)
             .height(0.5.dp)
             .background(Gray_1))
-        FlatTextBodyOneSecondary("也可通过以下方式直接登录")
+        FlatTextBodyOneSecondary(stringResource(id = R.string.login_others_tip))
         Spacer(modifier = Modifier
             .padding(horizontal = 16.dp)
             .weight(1f)
@@ -290,7 +290,7 @@ private fun LoginSlogan() {
         },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        FlatTextTitle("欢迎使用 Flat")
+        FlatTextTitle(stringResource(id = R.string.login_welcome))
         Spacer(Modifier.height(4.dp))
         FlatTextBodyOne(stringResource(R.string.login_page_label_1))
     }

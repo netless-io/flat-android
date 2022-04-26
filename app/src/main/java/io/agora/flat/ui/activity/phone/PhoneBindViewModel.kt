@@ -9,6 +9,7 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -51,6 +52,9 @@ class PhoneBindViewModel @Inject constructor(
                     FlatErrorCode.Web_SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
+                    FlatErrorCode.Web_SMSAlreadyBinding -> {
+                        showUiMessage(stringFetcher.phoneBound())
+                    }
                     else -> {
                         showUiMessage(stringFetcher.commonFail())
                     }
@@ -69,7 +73,7 @@ class PhoneBindViewModel @Inject constructor(
             } else {
                 when ((bindResult as Failure).error.code) {
                     FlatErrorCode.Web_SMSAlreadyExist -> {
-                        showUiMessage(stringFetcher.phoneBound())
+                        showUiMessage(stringFetcher.alreadyHasPhone())
                     }
                     FlatErrorCode.Web_SMSVerificationCodeInvalid -> {
                         showUiMessage(stringFetcher.invalidVerificationCode())
@@ -86,10 +90,10 @@ class PhoneBindViewModel @Inject constructor(
     }
 
     private fun showUiMessage(message: String) {
-        _state.value = _state.value.copy(message = message)
+        _state.value = _state.value.copy(message = UiMessage(message))
     }
 
     private fun notifyBindSuccess() {
-        _state.value = _state.value.copy(bindSuccess = true)
+        _state.value = _state.value.copy(bindSuccess = true, message = null)
     }
 }

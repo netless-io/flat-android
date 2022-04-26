@@ -100,11 +100,14 @@
     <string name="login_others_tip">Others</string>
     <string name="login_sign_in_or_up">Sign In / Sign Up</string>
     <string name="login_welcome">Welcome to Flat</string>
-    <string name="login_welcome_slogan">Online interaction, Synchronize ideas</string>
+    <string name="login_welcome_slogan">Interact online to keep ideas in sync</string>
 
     <string name="login_already_bind_phone">Already Bound</string>
     <string name="login_phone_already_bound">Phone number is bound</string>
     <string name="login_verification_code_invalid">Invalid Verification Code</string>
+
+    <string name="phone_number">Phone Number</string>
+    <string name="verification_code">Verification Code</string>
 
     <string name="agreement_global_dialog_message">Thank you for trusting and using Flat.\n\nWe rely on the Flat User Agreement and Flat Privacy Policy to help you understand how we collect,use,and store your personal information and what rights you have with respect to it.\n\nWhen you use Flat, we collect information about your device, logs and browsing history, and to ensure a positive experience in class, you may grant Flat access to your device\'s camera, microphone, and other information.\n\nYou can read the full Flat User Agreement and Flat Privacy Policy for more information.</string>
     <string name="agreement_global_recheck_dialog_message">You need to agree to the User Agreement and Privacy Policy before you can use Flat.\n\nIf you do not agree, we regret that we cannot provide you with the Services.\n\nYou can find out more by reading the full Flat User Agreement and Flat Privacy Policy.</string>

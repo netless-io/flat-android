@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.phone
 
-import PhoneAndCodeArea
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -22,8 +21,10 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
+import io.agora.flat.ui.compose.PhoneAndCodeArea
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
+import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
 class PhoneBindActivity : BaseComposeActivity() {
@@ -45,6 +46,7 @@ fun PhoneBindScreen(
     val actioner: (PhoneBindUiAction) -> Unit = { action ->
         when (action) {
             PhoneBindUiAction.Close -> {
+                Navigator.launchLoginActivity(context)
                 (context as Activity).finish()
             }
             is PhoneBindUiAction.Bind -> viewModel.bindPhone(action.phone, action.code)
@@ -54,6 +56,9 @@ fun PhoneBindScreen(
     LaunchedEffect(viewState) {
         if (viewState.bindSuccess) {
             Navigator.launchHomeActivity(context = context)
+        }
+        viewState.message?.let {
+            context.showToast(it.text)
         }
     }
     PhoneBindScreen(viewState = viewState, actioner = actioner)

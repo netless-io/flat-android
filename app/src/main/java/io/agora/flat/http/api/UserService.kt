@@ -51,7 +51,7 @@ interface UserService {
     ): Call<BaseResp<RespNoData>>
 
     /**
-     * 长度最小为1，最大为50
+     * [UserRenameReq.name] length limited as 1..50
      */
     @POST("v1/user/rename")
     fun rename(

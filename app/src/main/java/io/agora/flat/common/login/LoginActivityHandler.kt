@@ -14,7 +14,6 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.util.UiMessage
-import io.agora.flat.util.resolveActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,7 +37,8 @@ class LoginActivityHandler(
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
                 LoginType.Github -> callGithubLogin()
-                else -> {}
+                else -> {
+                }
             }
         }
     }
@@ -56,28 +56,29 @@ class LoginActivityHandler(
     }
 
     private suspend fun callGithubLogin() {
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            data = Uri.parse(githubLoginUrl())
-        }
+        // ensure authUUID the same as githubLoginUrl
+        if (loginSetAuthUUID()) {
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = Uri.parse(githubLoginUrl())
+            }
 
-        if (context.resolveActivity(intent)) {
-            if (loginSetAuthUUID()) {
+            if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(Intent.createChooser(
                     intent,
                     context.getString(R.string.login_github_browser_choose_title),
                 ))
+            } else {
+                showUiMessage(context.getString(R.string.login_github_no_browser))
             }
-        } else {
-            showUiMessage(context.getString(R.string.login_github_no_browser))
         }
     }
 
     private fun githubLoginUrl(): String {
+        val redirectUri = "${appEnv.githubCallback}?platform=android&state=${appKVCenter.getAuthUUID()}"
         return "https://github.com/login/oauth/authorize?" +
                 "client_id=${appEnv.githubClientID}&" +
-                "redirect_uri=${appEnv.githubCallback}&" +
-                "state=${appKVCenter.getAuthUUID()}"
+                "redirect_uri=${Uri.encode(redirectUri)}"
     }
 
     private suspend fun loginProcess(): Boolean {
@@ -118,7 +119,8 @@ class LoginActivityHandler(
                         showUiMessage(context.getString(R.string.login_fail))
                     }
                 }
-                else -> {}
+                else -> {
+                }
             }
         }
     }

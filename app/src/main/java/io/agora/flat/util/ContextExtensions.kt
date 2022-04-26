@@ -62,10 +62,6 @@ fun Context.px2dp(px: Int): Int {
     return (px.toFloat() / resources.displayMetrics.density + 0.5).toInt()
 }
 
-fun Context.resolveActivity(intent: Intent): Boolean {
-    return intent.resolveActivity(this.packageManager) != null
-}
-
 fun Context.isTabletMode(): Boolean {
     return resources.getBoolean(R.bool.isTablet)
 }
