@@ -67,10 +67,10 @@ fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit)
                     actioner(SettingsUiAction.SetNetworkAcceleration(it))
                 },
             )
-            BottomOptArea(onLogoutClick = {
-                actioner(SettingsUiAction.Logout)
-            })
         }
+        BottomOptArea(onLogoutClick = {
+            actioner(SettingsUiAction.Logout)
+        })
     }
 }
 
@@ -152,9 +152,8 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
 }
 
 @Composable
-private fun BoxScope.BottomOptArea(onLogoutClick: () -> Unit) {
+private fun BottomOptArea(onLogoutClick: () -> Unit) {
     Box(Modifier
-        .align(Alignment.BottomCenter)
         .padding(horizontal = 16.dp, vertical = 32.dp)) {
         FlatHighlightTextButton(
             stringResource(R.string.login_exit),

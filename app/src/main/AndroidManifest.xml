@@ -68,7 +68,8 @@
             android:name=".ui.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustNothing|stateHidden">
             <intent-filter>
                 <data android:scheme="x-agora-flat-client" />
                 <action android:name="android.intent.action.VIEW" />

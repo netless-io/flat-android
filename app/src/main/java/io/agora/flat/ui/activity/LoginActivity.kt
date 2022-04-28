@@ -39,15 +39,13 @@ import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.login.LoginUiAction
+import io.agora.flat.ui.activity.phone.PhoneBindDialog
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
-import io.agora.flat.util.isApkInDebug
-import io.agora.flat.util.isValidPhone
-import io.agora.flat.util.isValidSmsCode
-import io.agora.flat.util.showToast
+import io.agora.flat.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,6 +63,7 @@ class LoginActivity : BaseComposeActivity() {
 
         setContent {
             val loginState by loginHandler.observeLoginState().collectAsState()
+            var showPhoneBind by remember { mutableStateOf(false) }
 
             val actioner: (LoginUiAction) -> Unit = { action ->
                 when (action) {
@@ -105,13 +104,27 @@ class LoginActivity : BaseComposeActivity() {
                             delay(2000)
                             Navigator.launchHomeActivity(this@LoginActivity)
                         } else {
-                            Navigator.launchPhoneBindActivity(this@LoginActivity)
+                            if (isPhoneMode()) {
+                                Navigator.launchPhoneBindActivity(this@LoginActivity)
+                            } else {
+                                showPhoneBind = true
+                            }
                         }
                     }
                 }
             }
 
             LoginPage(actioner = actioner)
+            if (showPhoneBind) {
+                PhoneBindDialog(
+                    onBindSuccess = {
+                        Navigator.launchHomeActivity(this)
+                    },
+                    onDismissRequest = {
+                        // should not cancel dialog
+                    }
+                )
+            }
         }
     }
 

@@ -3,16 +3,15 @@ package io.agora.flat.ui.activity.phone
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
@@ -22,6 +21,7 @@ import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.PhoneAndCodeArea
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showToast
@@ -31,13 +31,30 @@ class PhoneBindActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PhoneBindScreen()
+            PhoneBindScreen(onBindSuccess = {
+                Navigator.launchHomeActivity(this@PhoneBindActivity)
+            })
+        }
+    }
+}
+
+@Composable
+fun PhoneBindDialog(onBindSuccess: () -> Unit, onDismissRequest: () -> Unit) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            Modifier
+                .widthIn(max = 400.dp)
+                .height(500.dp),
+            shape = Shapes.large,
+        ) {
+            PhoneBindScreen(onBindSuccess)
         }
     }
 }
 
 @Composable
 fun PhoneBindScreen(
+    onBindSuccess: () -> Unit,
     viewModel: PhoneBindViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -55,7 +72,7 @@ fun PhoneBindScreen(
     }
     LaunchedEffect(viewState) {
         if (viewState.bindSuccess) {
-            Navigator.launchHomeActivity(context = context)
+            onBindSuccess()
         }
         viewState.message?.let {
             context.showToast(it.text)
