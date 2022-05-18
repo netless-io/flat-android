@@ -204,7 +204,7 @@ dependencies {
     if (findProject(":fastboard") != null) {
         implementation project(':fastboard')
     } else {
-        implementation 'com.github.netless-io:fastboard-android:a5f2f7af4c236200064d13f7cec8af0ee12ed377'
+        implementation 'com.github.netless-io:fastboard-android:1.2.0'
     }
 
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'

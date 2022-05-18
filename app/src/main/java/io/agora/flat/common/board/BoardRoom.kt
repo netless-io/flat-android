@@ -50,8 +50,8 @@ class BoardRoom @Inject constructor(
 
     override fun setRoomController(rootRoomController: RoomControllerGroup) {
         this.rootRoomController = rootRoomController
-        if (fastRoom != null) {
-            fastRoom!!.rootRoomController = rootRoomController;
+        fastRoom?.let {
+            setRoomController(rootRoomController)
         }
     }
 
@@ -65,7 +65,8 @@ class BoardRoom @Inject constructor(
             writable
         )
         val roomParams = fastRoomOptions.roomParams.apply {
-            windowParams.setPrefersColorScheme(if (darkMode) WindowPrefersColorScheme.Dark else WindowPrefersColorScheme.Light)
+            windowParams.prefersColorScheme =
+                if (darkMode) WindowPrefersColorScheme.Dark else WindowPrefersColorScheme.Light
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
                 nickName = userRepository.getUsername(),
@@ -76,7 +77,6 @@ class BoardRoom @Inject constructor(
         fastRoomOptions.roomParams = roomParams
 
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
-
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
                 Log.d(TAG, "onPhaseChanged:${phase.name}")
@@ -89,11 +89,11 @@ class BoardRoom @Inject constructor(
             }
         })
 
-        fastRoom?.join {
-            if (rootRoomController != null) {
-                fastRoom?.rootRoomController = rootRoomController
-            }
+        rootRoomController?.let {
+            fastRoom?.rootRoomController = rootRoomController
         }
+
+        fastRoom?.join()
     }
 
     override fun setDarkMode(dark: Boolean) {
