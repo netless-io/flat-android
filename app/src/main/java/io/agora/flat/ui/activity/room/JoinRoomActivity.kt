@@ -77,19 +77,19 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
     var openAudio by remember { mutableStateOf(false) }
     var openVideo by remember { mutableStateOf(false) }
 
-    val clipboard = rememberAndroidClipboardController()
+    // val clipboard = rememberAndroidClipboardController()
     val context = LocalContext.current
 
-    WindowFocusObserver { isWindowFocused ->
-        if (isWindowFocused) {
-            val id = clipboard.getText().toString().parseRoomID()
-            if (!id.isNullOrBlank()) {
-                uuid = id
-                // clear clipboard when fetched
-                clipboard.putText("")
-            }
-        }
-    }
+    // WindowFocusObserver { isWindowFocused ->
+    //     if (isWindowFocused) {
+    //         val id = clipboard.getText().toString().parseRoomID()
+    //         if (!id.isNullOrBlank()) {
+    //             uuid = id
+    //             // clear clipboard when fetched
+    //             clipboard.putText("")
+    //         }
+    //     }
+    // }
 
     Column {
         CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
