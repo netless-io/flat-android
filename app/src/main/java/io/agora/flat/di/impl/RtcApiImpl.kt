@@ -1,9 +1,9 @@
 package io.agora.flat.di.impl
 
 import android.content.Context
-import io.agora.flat.Constants
 import io.agora.flat.common.rtc.RTCEventHandler
 import io.agora.flat.common.rtc.RTCEventListener
+import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
@@ -13,13 +13,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RtcApiImpl @Inject constructor() : RtcApi, StartupInitializer {
+class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitializer {
     private lateinit var rtcEngine: RtcEngine
     private val mHandler: RTCEventHandler = RTCEventHandler()
 
     override fun init(context: Context) {
         try {
-            rtcEngine = RtcEngine.create(context, Constants.AGORA_APP_ID, mHandler)
+            rtcEngine = RtcEngine.create(context, appEnv.agoraAppId, mHandler)
             // rtcEngine.setLogFile(FileUtil.initializeLogFile(this))
         } catch (e: Exception) {
             e.printStackTrace()

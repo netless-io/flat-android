@@ -1,6 +1,5 @@
 package io.agora.flat.data.repository
 
-import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
 import io.agora.flat.data.*
 import io.agora.flat.data.model.MessageQueryFilter
@@ -20,6 +19,7 @@ class MessageRepository @Inject constructor(
     private val messageService: MessageService,
     private val miscService: MiscService,
     private val userRepository: UserRepository,
+    private val appEnv: AppEnv,
 ) {
     private var rtmToken: String? = null
 
@@ -54,7 +54,7 @@ class MessageRepository @Inject constructor(
             }
 
             val result = messageService.queryHistory(
-                Constants.AGORA_APP_ID,
+                appEnv.agoraAppId,
                 MessageQueryHistoryReq(
                     filter = MessageQueryFilter(destination = channel, start_time = start, end_time = end),
                     limit = limit,
@@ -82,7 +82,7 @@ class MessageRepository @Inject constructor(
     suspend fun getMessageList(handle: String): Result<List<RtmQueryMessage>> {
         return withContext(Dispatchers.IO) {
             val result = messageService.getMessageList(
-                Constants.AGORA_APP_ID,
+                appEnv.agoraAppId,
                 handle,
                 userRepository.getUserInfo()!!.uuid,
                 rtmToken!!
@@ -118,7 +118,7 @@ class MessageRepository @Inject constructor(
             }
 
             val result = messageService.getMessageCount(
-                Constants.AGORA_APP_ID,
+                appEnv.agoraAppId,
                 source = null,
                 destination = channel,
                 startTime = start,

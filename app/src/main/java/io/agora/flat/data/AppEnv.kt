@@ -17,17 +17,22 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         const val ENV_DEV = "dev"
 
         const val STORE_KEY_ENV = "key_env"
+
+        const val AGORA_APP_ID = "931b86d6781e49a2a255db4ce6e8e804"
+        const val AGORA_APP_ID_DEV = "a185de0a777f4c159e302abcc0f03b64"
     }
 
     val envMap = mutableMapOf<String, EnvItem>()
 
     init {
         envMap[ENV_DEV] = EnvItem(
+            AGORA_APP_ID_DEV,
             "https://flat-api-dev.whiteboard.agora.io",
             "9821657775fbc74773f1",
             "https://flat-web-dev.whiteboard.agora.io"
         )
         envMap[ENV_PROD] = EnvItem(
+            AGORA_APP_ID,
             "https://flat-api.whiteboard.agora.io",
             "71a29285a437998bdfe0",
             "https://flat-web.whiteboard.agora.io",
@@ -60,7 +65,10 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         currentEnvItem.baseInviteUrl
     }
 
+    val agoraAppId get() = currentEnvItem.agoraAppId;
+
     data class EnvItem(
+        val agoraAppId: String,
         val serviceUrl: String,
         val githubClientId: String,
         val baseInviteUrl: String,

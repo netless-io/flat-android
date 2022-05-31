@@ -2,11 +2,11 @@ package io.agora.flat.di.impl
 
 import android.content.Context
 import android.util.Log
-import io.agora.flat.Constants
 import io.agora.flat.common.rtm.EmptyRtmChannelListener
 import io.agora.flat.common.rtm.EmptyRtmClientListener
 import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.common.toFlatException
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
@@ -22,7 +22,11 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Singleton
-class RtmApiImpl @Inject constructor(private val messageRepository: MessageRepository) : RtmApi, StartupInitializer {
+class RtmApiImpl @Inject constructor(
+    private val messageRepository: MessageRepository,
+    private val appEnv: AppEnv,
+) : RtmApi,
+    StartupInitializer {
     companion object {
         val TAG = RtmApiImpl::class.simpleName
 
@@ -62,7 +66,7 @@ class RtmApiImpl @Inject constructor(private val messageRepository: MessageRepos
 
     override fun init(context: Context) {
         try {
-            rtmClient = RtmClient.createInstance(context, Constants.AGORA_APP_ID, rtmClientListener)
+            rtmClient = RtmClient.createInstance(context, appEnv.agoraAppId, rtmClientListener)
         } catch (e: Exception) {
             Log.w(TAG, "RTM SDK init fatal error!")
         }
