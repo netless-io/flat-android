@@ -42,6 +42,7 @@ class DevToolsActivity : BaseComposeActivity() {
 
                 LazyColumn(MaxWidthSpread) {
                     item {
+                        ProjectorEnableFlag()
                         UserLoginFlag()
                         MockEnableFlag()
                         EnvSwitch()
@@ -157,6 +158,31 @@ fun MockEnableFlag() {
     }
 }
 
+
+@Composable
+fun ProjectorEnableFlag() {
+    val context = LocalContext.current
+    val appKVCenter = AppKVCenter(context)
+    var useProjector by remember { mutableStateOf(appKVCenter.useProjectorConvertor()) }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Spacer(modifier = Modifier.width(16.dp))
+        FlatTextBodyTwo(text = "使用 Projector")
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            checked = useProjector,
+            onCheckedChange = {
+                useProjector = it
+                appKVCenter.setUseProjectorConvertor(useProjector)
+            })
+        Spacer(modifier = Modifier.width(16.dp))
+    }
+}
 
 @Preview
 @Composable

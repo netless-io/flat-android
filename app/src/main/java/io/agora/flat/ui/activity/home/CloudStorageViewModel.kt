@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.herewhite.sdk.ConverterCallbacks
 import com.herewhite.sdk.converter.ConvertType
 import com.herewhite.sdk.converter.ConverterV5
+import com.herewhite.sdk.converter.ProjectorQuery
 import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
@@ -14,17 +15,15 @@ import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.upload.UploadFile
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.CloudStorageFile
-import io.agora.flat.data.model.CloudStorageUploadStartResp
-import io.agora.flat.data.model.CoursewareType
-import io.agora.flat.data.model.FileConvertStep
+import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.ContentFileInfo
 import io.agora.flat.util.coursewareType
-import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.isDynamicDoc
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -36,11 +35,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CloudStorageViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
+    private val appKVCenter: AppKVCenter,
 ) : ViewModel() {
-    companion object {
-        const val TAG = "CloudStorageViewModel"
-    }
-
     private val files = MutableStateFlow(listOf<CloudStorageUIFile>())
     private val totalUsage = MutableStateFlow(0L)
     private val refreshing = ObservableLoadingCounter()
@@ -103,16 +99,18 @@ class CloudStorageViewModel @Inject constructor(
                 checkAndStartConvert(file.fileURL, file.fileUUID)
             }
             FileConvertStep.Converting -> {
-                val type = file.fileURL.coursewareType()
-                if (type in listOf(CoursewareType.DocDynamic, CoursewareType.DocStatic)) {
-                    startConvertQuery(
-                        type == CoursewareType.DocDynamic,
-                        file.taskToken,
-                        file.taskUUID,
-                        file.fileUUID,
+                if (file.resourceType == ResourceType.WhiteboardConvert) {
+                    startConvertQuery(file.fileURL.isDynamicDoc(), file.taskToken, file.taskUUID, file.fileUUID)
+                }
+                if (file.resourceType == ResourceType.WhiteboardProjector) {
+                    startProjectorQuery(
+                        taskUUID = file.taskUUID,
+                        taskToken = file.taskToken,
+                        fileUUID = file.fileUUID,
                     )
                 }
             }
+            else -> {}
         }
     }
 
@@ -141,15 +139,25 @@ class CloudStorageViewModel @Inject constructor(
 
     fun uploadFile(action: CloudStorageUIAction.UploadFile) {
         viewModelScope.launch {
+            // val useProjector = action.info.filename.endsWith("pptx")
             var result: CloudStorageUploadStartResp? = null
-            var resp = cloudStorageRepository.updateStart(action.info.filename, action.info.size)
+            var resp =
+                cloudStorageRepository.updateStart(
+                    action.info.filename,
+                    action.info.size,
+                    // projector = if (useProjector) true else null
+                )
             when (resp) {
                 is Success -> result = resp.data
                 is Failure -> {
                     if (resp.error.code == FlatErrorCode.Web_UploadConcurrentLimit) {
                         cloudStorageRepository.cancel()
                         // retry
-                        resp = cloudStorageRepository.updateStart(action.info.filename, action.info.size)
+                        resp = cloudStorageRepository.updateStart(
+                            action.info.filename,
+                            action.info.size,
+                            // projector = if (useProjector) true else null,
+                        )
                         if (resp is Success) {
                             result = resp.data
                         }
@@ -179,7 +187,8 @@ class CloudStorageViewModel @Inject constructor(
 
     private fun handleUploadSuccess(fileUUID: String, filename: String, size: Long) {
         viewModelScope.launch {
-            val resp = cloudStorageRepository.updateFinish(fileUUID)
+            val useProjector = filename.isDynamicDoc() && appKVCenter.useProjectorConvertor()
+            val resp = cloudStorageRepository.updateFinish(fileUUID, projector = useProjector)
             if (resp is Success) {
                 // delayRemoveSuccess(fileUUID)
                 totalUsage.value = totalUsage.value + size
@@ -193,7 +202,7 @@ class CloudStorageViewModel @Inject constructor(
                             convertStep = FileConvertStep.None,
                             taskUUID = "",
                             taskToken = "",
-                            createAt = System.currentTimeMillis()
+                            createAt = System.currentTimeMillis(),
                         )
                     ))
                 }
@@ -203,11 +212,55 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun checkAndStartConvert(filename: String, fileUUID: String) {
-        when (filename.fileSuffix()) {
-            "ppt", "pptx" -> startConvert(fileUUID, true)
-            "pdf" -> startConvert(fileUUID, false)
+        when (filename.coursewareType()) {
+            CoursewareType.DocStatic -> {
+                startConvert(fileUUID, false)
+            }
+            CoursewareType.DocDynamic -> {
+                val useProjector = appKVCenter.useProjectorConvertor()
+                if (useProjector) {
+                    startProjectorConvert(fileUUID)
+                } else {
+                    startConvert(fileUUID, true)
+                }
+            }
             else -> {; }
         }
+    }
+
+    private fun startProjectorConvert(fileUUID: String) {
+        viewModelScope.launch {
+            val resp = cloudStorageRepository.convertStart(fileUUID, projector = true)
+            if (resp is Success) {
+                updateConvertStep(fileUUID, FileConvertStep.Converting)
+                startProjectorQuery(resp.data.taskUUID, resp.data.taskToken, fileUUID)
+            }
+        }
+    }
+
+    private fun startProjectorQuery(
+        taskUUID: String,
+        taskToken: String,
+        fileUUID: String,
+    ) {
+        val projectorQuery = ProjectorQuery.Builder()
+            .setTaskUuid(taskUUID)
+            .setTaskToken(taskToken)
+            .setPoolInterval(3000L)
+            .setTimeout(120_000)
+            .setCallback(object : ProjectorQuery.Callback {
+                override fun onProgress(progress: Double, convertInfo: ProjectorQuery.QueryResponse) {
+                }
+
+                override fun onFinish(response: ProjectorQuery.QueryResponse) {
+                    finishConvert(fileUUID, success = true)
+                }
+
+                override fun onFailure(e: ConvertException) {
+                    finishConvert(fileUUID, false)
+                }
+            }).build()
+        projectorQuery.startQuery()
     }
 
     private fun startConvert(fileUUID: String, dynamic: Boolean) {
@@ -215,15 +268,20 @@ class CloudStorageViewModel @Inject constructor(
             val resp = cloudStorageRepository.convertStart(fileUUID)
             if (resp is Success) {
                 updateConvertStep(fileUUID, FileConvertStep.Converting)
-                startConvertQuery(dynamic, resp.data.taskToken, resp.data.taskUUID, fileUUID)
+                startConvertQuery(
+                    dynamic,
+                    taskUUID = resp.data.taskUUID,
+                    taskToken = resp.data.taskToken,
+                    fileUUID = fileUUID,
+                )
             }
         }
     }
 
     private fun startConvertQuery(
         dynamic: Boolean,
-        taskToken: String,
         taskUUID: String,
+        taskToken: String,
         fileUUID: String,
     ) {
         val converterV5 = ConverterV5.Builder().apply {

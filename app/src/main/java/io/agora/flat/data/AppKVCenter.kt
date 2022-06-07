@@ -93,6 +93,16 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         return store.getBoolean(KEY_NETWORK_ACCELERATION, false)
     }
 
+    fun setUseProjectorConvertor(enable: Boolean) {
+        store.edit().apply {
+            putBoolean(KEY_PROJECTOR_CONVERTOR, enable)
+        }.apply()
+    }
+
+    fun useProjectorConvertor(): Boolean {
+        return store.getBoolean(KEY_PROJECTOR_CONVERTOR, true)
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -103,6 +113,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_AGREEMENT_GLOBAL_AGREED = "key_agreement_global_agreed"
 
         const val KEY_NETWORK_ACCELERATION = "key_network_acceleration"
+
+        const val KEY_PROJECTOR_CONVERTOR = "key_convertor_projector"
     }
 
     class MockData {

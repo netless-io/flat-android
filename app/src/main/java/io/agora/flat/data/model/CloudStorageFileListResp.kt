@@ -21,6 +21,7 @@ data class CloudStorageFile constructor(
     val taskToken: String,
     val region: String = "cn-hz",
     val createAt: Long,
+    val resourceType: ResourceType? = null,
 ) : Parcelable
 
 enum class FileConvertStep {
@@ -28,4 +29,12 @@ enum class FileConvertStep {
     Converting,
     Done,
     Failed;
+}
+
+enum class ResourceType {
+    WhiteboardConvert,
+    WhiteboardProjector,
+    LocalCourseware,
+    OnlineCourseware,
+    NormalResources,
 }

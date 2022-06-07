@@ -12,10 +12,10 @@ fun String.coursewareType(): CoursewareType {
         "jpg", "jpeg", "png", "webp" -> {
             CoursewareType.Image
         }
-        "doc", "docx", "ppt", "pdf" -> {
+        "doc", "docx", "pdf" -> {
             CoursewareType.DocStatic
         }
-        "pptx" -> {
+        "ppt", "pptx" -> {
             CoursewareType.DocDynamic
         }
         "mp3" -> {
@@ -28,6 +28,10 @@ fun String.coursewareType(): CoursewareType {
             CoursewareType.Unknown
         }
     }
+}
+
+fun String.isDynamicDoc() : Boolean {
+    return this.coursewareType() == CoursewareType.DocDynamic
 }
 
 fun String.toInviteCodeDisplay() = if (length == 10) {

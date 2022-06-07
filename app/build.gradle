@@ -201,6 +201,9 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
+    implementation("com.github.netless-io:whiteboard-android:9cbb9e4f10") {
+        force true
+    }
     if (findProject(":fastboard") != null) {
         implementation project(':fastboard')
     } else {

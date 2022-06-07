@@ -31,6 +31,8 @@ interface IBoardRoom {
 
     fun insertPpt(dir: String, files: ConvertedFiles, title: String)
 
+    fun insertProjectorPpt(taskUuid: String, prefixUrl: String, title: String)
+
     fun insertVideo(videoUrl: String, title: String)
 
     fun observeSceneState(): Flow<BoardSceneState>

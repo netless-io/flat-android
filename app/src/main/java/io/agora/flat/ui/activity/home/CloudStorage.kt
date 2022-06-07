@@ -32,6 +32,7 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.common.upload.UploadState
 import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
+import io.agora.flat.data.model.ResourceType
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
@@ -409,7 +410,7 @@ private fun CloudStoragePreview() {
                 fileURL = "",
                 convertStep = FileConvertStep.Done,
                 taskUUID = "",
-                taskToken = ""
+                taskToken = "",
             ),
         ),
         CloudStorageUIFile(
@@ -420,7 +421,8 @@ private fun CloudStoragePreview() {
                 fileURL = "",
                 convertStep = FileConvertStep.Done,
                 taskUUID = "",
-                taskToken = ""),
+                taskToken = "",
+            ),
         ),
         CloudStorageUIFile(
             CloudStorageFile("3",
@@ -430,7 +432,8 @@ private fun CloudStoragePreview() {
                 fileURL = "",
                 convertStep = FileConvertStep.Done,
                 taskUUID = "",
-                taskToken = ""),
+                taskToken = "",
+            ),
         ),
     )
     val viewState = CloudStorageViewState(

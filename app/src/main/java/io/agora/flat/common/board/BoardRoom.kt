@@ -137,6 +137,11 @@ class BoardRoom @Inject constructor(
         fastRoom?.room?.addApp(param, null)
     }
 
+    override fun insertProjectorPpt(taskUuid: String, prefixUrl: String, title: String) {
+        val param = WindowAppParam.createSlideApp(taskUuid, prefixUrl, title)
+        fastRoom?.room?.addApp(param, null)
+    }
+
     override fun insertVideo(videoUrl: String, title: String) {
         val param = WindowAppParam.createMediaPlayerApp(videoUrl, title)
         fastRoom?.room?.addApp(param, null)

@@ -29,13 +29,21 @@ class CloudStorageRepository @Inject constructor(
         region: String = "cn-hz",
     ): Result<CloudStorageUploadStartResp> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.updateStart(CloudStorageUploadStartReq(fileName, fileSize, region)).toResult()
+            cloudStorageService.updateStart(
+                CloudStorageUploadStartReq(fileName, fileSize, region)
+            ).toResult()
         }
     }
 
-    suspend fun updateFinish(fileUUID: String): Result<RespNoData> {
+    suspend fun updateFinish(
+        fileUUID: String,
+        region: String = "cn-hz",
+        projector: Boolean? = null,
+    ): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.updateFinish(CloudStorageFileReq(fileUUID)).toResult()
+            cloudStorageService.updateFinish(
+                CloudStorageFileReq(fileUUID, region, projector)
+            ).toResult()
         }
     }
 
@@ -51,16 +59,26 @@ class CloudStorageRepository @Inject constructor(
         }
     }
 
-    suspend fun convertStart(fileUUID: String): Result<CloudStorageFileConvertResp> {
+    suspend fun convertStart(
+        fileUUID: String,
+        region: String = "cn-hz",
+        projector: Boolean? = null,
+    ): Result<CloudStorageFileConvertResp> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.convertStart(CloudStorageFileReq(fileUUID)).toResult()
+            cloudStorageService.convertStart(
+                CloudStorageFileReq(fileUUID, region, projector)
+            ).toResult()
         }
     }
 
-    suspend fun convertFinish(fileUUID: String): Result<RespNoData> {
+    suspend fun convertFinish(
+        fileUUID: String,
+        region: String = "cn-hz",
+    ): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.convertFinish(CloudStorageFileReq(fileUUID))
-                .toResult()
+            cloudStorageService.convertFinish(
+                CloudStorageFileReq(fileUUID, region, null)
+            ).toResult()
         }
     }
 }

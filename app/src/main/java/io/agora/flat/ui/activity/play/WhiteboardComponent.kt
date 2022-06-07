@@ -88,6 +88,9 @@ class WhiteboardComponent(
                     is ClassRoomEvent.InsertPpt -> {
                         boardRoom.insertPpt(event.dirPath, event.convertedFiles, event.title)
                     }
+                    is ClassRoomEvent.InsertProjectorPpt -> {
+                        boardRoom.insertProjectorPpt(event.taskUuid, event.prefixUrl, event.title)
+                    }
                     is ClassRoomEvent.InsertVideo -> {
                         boardRoom.insertVideo(event.videoUrl, event.title)
                     }

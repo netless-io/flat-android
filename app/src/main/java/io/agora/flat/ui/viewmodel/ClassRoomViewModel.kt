@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.herewhite.sdk.ConverterCallbacks
 import com.herewhite.sdk.converter.ConvertType
 import com.herewhite.sdk.converter.ConverterV5
+import com.herewhite.sdk.converter.ProjectorQuery
 import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
@@ -28,7 +29,7 @@ import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.Ticker
-import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -599,16 +600,23 @@ class ClassRoomViewModel @Inject constructor(
     fun insertCourseware(file: CloudStorageFile) {
         viewModelScope.launch {
             // "正在插入课件……"
-            when (val ext = file.fileURL.fileSuffix()) {
-                "jpg", "jpeg", "png", "webp" -> {
+            when (file.fileURL.coursewareType()) {
+                CoursewareType.Image -> {
                     val imageSize = loadImageSize(file.fileURL)
                     onEvent(ClassRoomEvent.InsertImage(file.fileURL, imageSize.width, imageSize.height))
                 }
-                "doc", "docx", "ppt", "pptx", "pdf" -> {
-                    insertDocs(file, ext == "pptx")
-                }
-                "mp4", "mp3" -> {
+                CoursewareType.Audio, CoursewareType.Video -> {
                     onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
+                }
+                CoursewareType.DocStatic -> {
+                    insertDocs(file, false)
+                }
+                CoursewareType.DocDynamic -> {
+                    if (file.resourceType == ResourceType.WhiteboardConvert) {
+                        insertDocs(file, true)
+                    } else if (file.resourceType == ResourceType.WhiteboardProjector) {
+                        insertProjectorDocs(file)
+                    }
                 }
                 else -> {
                     // Not Support Mobile
@@ -645,21 +653,50 @@ class ClassRoomViewModel @Inject constructor(
             setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
             setTaskUuid(file.taskUUID)
             setTaskToken(file.taskToken)
+            setPoolInterval(2000)
             setCallback(object : ConverterCallbacks {
                 override fun onProgress(progress: Double, convertInfo: ConversionInfo?) {
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    val uuid = UUID.randomUUID().toString()
-                    onEvent(ClassRoomEvent.InsertPpt("/${file.taskUUID}/${uuid}", ppt, file.fileName))
+                    onEvent(ClassRoomEvent.InsertPpt(
+                        "/${file.taskUUID}/${UUID.randomUUID()}",
+                        ppt,
+                        file.fileName
+                    ))
                 }
 
                 override fun onFailure(e: ConvertException) {
-                    //
                 }
             })
         }.build()
         convert.startConvertTask()
+    }
+
+    private fun insertProjectorDocs(file: CloudStorageFile) {
+        val projectorQuery = ProjectorQuery.Builder()
+            .setTaskToken(file.taskToken)
+            .setTaskUuid(file.taskUUID)
+            .setPoolInterval(2000)
+            .setCallback(object : ProjectorQuery.Callback {
+                override fun onProgress(progress: Double, convertInfo: ProjectorQuery.QueryResponse) {
+
+                }
+
+                override fun onFinish(response: ProjectorQuery.QueryResponse) {
+                    onEvent(ClassRoomEvent.InsertProjectorPpt(
+                        file.taskUUID,
+                        response.prefix,
+                        file.fileName
+                    ))
+                }
+
+                override fun onFailure(e: ConvertException?) {
+
+                }
+            })
+            .build()
+        projectorQuery.startQuery()
     }
 
     fun closeSpeak(userUUID: String) {
@@ -785,5 +822,6 @@ sealed class ClassRoomEvent {
     data class NoOptPermission(val id: Int) : ClassRoomEvent()
     data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
     data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()
+    data class InsertProjectorPpt(val taskUuid: String, val prefixUrl: String, val title: String) : ClassRoomEvent()
     data class InsertVideo(val videoUrl: String, val title: String) : ClassRoomEvent()
 }
