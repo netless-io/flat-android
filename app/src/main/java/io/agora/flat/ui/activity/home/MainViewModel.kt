@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.StringFetcher
@@ -60,7 +61,10 @@ class MainViewModel @Inject constructor(
 
     fun isLoggedIn() = userRepository.isLoggedIn()
 
-    fun hasBindPhone(): Boolean = userRepository.getUserInfo()?.hasPhone ?: false
+    fun needBindPhone(): Boolean {
+        val bound = userRepository.getUserInfo()?.hasPhone ?: false
+        return !bound && Config.forceBindPhone
+    }
 
     private fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
         viewModelScope.launch {

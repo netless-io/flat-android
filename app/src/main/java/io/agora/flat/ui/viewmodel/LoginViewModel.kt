@@ -2,6 +2,7 @@ package io.agora.flat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Config
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.activity.login.LoginUiViewState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ class LoginViewModel @Inject constructor(
         return userRepository.isLoggedIn()
     }
 
-    fun hasBindPhone(): Boolean {
-        return userRepository.getUserInfo()?.hasPhone ?: false
+    fun needBindPhone(): Boolean {
+        val bound = userRepository.getUserInfo()?.hasPhone ?: false
+        return !bound && Config.forceBindPhone
     }
 }

@@ -58,7 +58,7 @@ class MainActivity : BaseComposeActivity() {
                 MainScreen(viewState)
                 LifecycleHandler(
                     onResume = {
-                        if (!viewModel.isLoggedIn() || !viewModel.hasBindPhone()) {
+                        if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
                             Navigator.launchLoginActivity(this)
                         }
                     },

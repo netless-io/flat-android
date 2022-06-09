@@ -99,16 +99,16 @@ class LoginActivity : BaseComposeActivity() {
                     LoginState.Init -> {
                     }
                     LoginState.Success -> {
-                        if (viewModel.hasBindPhone()) {
-                            showToast(R.string.login_success_and_jump)
-                            delay(2000)
-                            Navigator.launchHomeActivity(this@LoginActivity)
-                        } else {
+                        if (viewModel.needBindPhone()) {
                             if (isPhoneMode()) {
                                 Navigator.launchPhoneBindActivity(this@LoginActivity)
                             } else {
                                 showPhoneBind = true
                             }
+                        } else {
+                            showToast(R.string.login_success_and_jump)
+                            delay(2000)
+                            Navigator.launchHomeActivity(this@LoginActivity)
                         }
                     }
                 }
