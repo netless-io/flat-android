@@ -1,6 +1,13 @@
 # Changelog
 
+## [1.3.5] - June 10, 2022
+
+- Add `Projector`(a ppt converter service) support
+- Fix darkMode switch bug
+- Fix `MainBoard` not darkStyle in darkMode
+
 ## [1.3.1] - March 11, 2022
+
 - Fix LargeDpi Phone login bug
 
 ## [1.3.0] - March 08, 2022
