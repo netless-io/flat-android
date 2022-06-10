@@ -50,9 +50,7 @@ class BoardRoom @Inject constructor(
 
     override fun setRoomController(rootRoomController: RoomControllerGroup) {
         this.rootRoomController = rootRoomController
-        fastRoom?.let {
-            setRoomController(rootRoomController)
-        }
+        fastRoom?.rootRoomController = rootRoomController
     }
 
     override fun join(roomUUID: String, roomToken: String, userId: String, region: String, writable: Boolean) {
@@ -92,6 +90,8 @@ class BoardRoom @Inject constructor(
         rootRoomController?.let {
             fastRoom?.rootRoomController = rootRoomController
         }
+
+        setDarkMode(darkMode)
 
         fastRoom?.join()
     }

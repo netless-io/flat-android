@@ -50,6 +50,7 @@ class RtmComponent(
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val messageViewModel: MessageViewModel by activity.viewModels()
+    private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     private lateinit var userRepository: UserRepository
     private lateinit var rtmApi: RtmApi
@@ -78,21 +79,23 @@ class RtmComponent(
             }
         })
 
-        KeyboardHeightProvider(activity).setHeightListener(object : KeyboardHeightProvider.HeightListener {
-            private var originBottomMargin: Int? = null
-            override fun onHeightChanged(height: Int) {
-                if (originBottomMargin == null && binding.messageLv.isVisible) {
-                    originBottomMargin = (binding.messageLv.layoutParams as ConstraintLayout.LayoutParams).bottomMargin
+        keyboardHeightProvider =
+            KeyboardHeightProvider(activity).setHeightListener(object : KeyboardHeightProvider.HeightListener {
+                private var originBottomMargin: Int? = null
+                override fun onHeightChanged(height: Int) {
+                    if (originBottomMargin == null && binding.messageLv.isVisible) {
+                        originBottomMargin =
+                            (binding.messageLv.layoutParams as ConstraintLayout.LayoutParams).bottomMargin
+                    }
+                    if (originBottomMargin != null) {
+                        val lp = binding.messageLv.layoutParams as ConstraintLayout.LayoutParams
+                        lp.bottomMargin = height + originBottomMargin!!
+                        binding.messageLv.postDelayed({
+                            binding.messageLv.layoutParams = lp
+                        }, 100)
+                    }
                 }
-                if (originBottomMargin != null) {
-                    val lp = binding.messageLv.layoutParams as ConstraintLayout.LayoutParams
-                    lp.bottomMargin = height + originBottomMargin!!
-                    binding.messageLv.postDelayed({
-                        binding.messageLv.layoutParams = lp
-                    }, 100)
-                }
-            }
-        }).start()
+            }).start()
     }
 
     private fun loadData() {
@@ -137,6 +140,7 @@ class RtmComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
+        keyboardHeightProvider?.dismiss()
         runBlocking {
             rtmApi.logout()
             rtmApi.removeRtmListener(flatRTMListener)
