@@ -1,20 +1,21 @@
 package io.agora.flat.util
 
+import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.R
 import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     var versionName: String? = null
@@ -32,6 +33,13 @@ fun Context.isApkInDebug(): Boolean {
     } catch (e: java.lang.Exception) {
         false
     }
+}
+
+fun Context.hasPermission(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(
+        this,
+        permission
+    ) == PackageManager.PERMISSION_GRANTED
 }
 
 fun Context.showDebugToast(@StringRes resId: Int) {

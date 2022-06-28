@@ -16,7 +16,6 @@ abstract class BaseComponent(
         return activity.lifecycle
     }
 
-
     open fun onConfigurationChanged(newConfig: Configuration) {
 
     }

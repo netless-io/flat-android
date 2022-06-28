@@ -50,7 +50,6 @@ class RtcComponent(
         val REQUESTED_PERMISSIONS = arrayOf(
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
     }
 
