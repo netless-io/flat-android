@@ -90,7 +90,7 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
     }
 
     fun isNetworkAcceleration(): Boolean {
-        return store.getBoolean(KEY_NETWORK_ACCELERATION, false)
+        return store.getBoolean(KEY_NETWORK_ACCELERATION, true)
     }
 
     fun setUseProjectorConvertor(enable: Boolean) {
