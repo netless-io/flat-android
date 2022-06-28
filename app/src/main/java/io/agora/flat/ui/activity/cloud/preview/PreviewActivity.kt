@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.cloud.preview
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.WebSettings
 import androidx.activity.compose.setContent
@@ -21,7 +22,6 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.setting.ComposeWebView
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.MaxWidthSpread
-import java.net.URLEncoder
 
 @AndroidEntryPoint
 class PreviewActivity : BaseComposeActivity() {
@@ -71,8 +71,7 @@ private fun PreviewPage(
                     CoursewareType.DocStatic,
                     CoursewareType.DocDynamic,
                     -> DocumentPreview(
-                        file = viewState.file!!,
-                        baseUrl = viewState.baseUrl!!,
+                        viewState = viewState,
                         actioner = actioner
                     )
                 }
@@ -86,20 +85,17 @@ private fun PreviewPage(
     }
 }
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun DocumentPreview(
     modifier: Modifier = Modifier.fillMaxSize(),
-    file: CloudStorageFile,
-    baseUrl: String,
+    viewState: PreviewState,
     actioner: (PreviewAction) -> Unit,
 ) {
-    val encodeURL = URLEncoder.encode(file.fileURL, "utf-8")
-    val previewUrl = "$baseUrl/preview/${encodeURL}/${file.taskToken}/${file.taskUUID}/${file.region}/"
-
     Box {
         ComposeWebView(
             modifier = modifier,
-            url = previewUrl,
+            url = viewState.previewUrl,
             initSettings = { settings ->
                 settings?.apply {
                     javaScriptEnabled = true
