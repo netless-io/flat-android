@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.6] - June 29, 2022
+
+- Add permission check when pick files
+- Fix Ppt preview converted by projector
+- Fix login fail when close Register Page
+- Enable network acceleration by default
+
 ## [1.3.5] - June 10, 2022
 
 - Add `Projector`(a ppt converter service) support
