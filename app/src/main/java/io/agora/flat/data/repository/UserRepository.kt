@@ -104,9 +104,7 @@ class UserRepository @Inject constructor(
      */
     suspend fun requestLoginSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            limitSendCode {
-                userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
-            }
+            userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
         }
     }
 
@@ -126,9 +124,7 @@ class UserRepository @Inject constructor(
 
     suspend fun requestBindSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            limitSendCode {
-                userService.requestBindSmsCode(PhoneReq(phone = phone)).toResult()
-            }
+            userService.requestBindSmsCode(PhoneReq(phone = phone)).toResult()
         }
     }
 
