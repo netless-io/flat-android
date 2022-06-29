@@ -32,6 +32,7 @@ class LoginActivityHandler(
     private var loginType: LoginType = LoginType.None
 
     fun loginWithType(type: LoginType) {
+        _state.value = LoginState.Init
         loginType = type
         scope.launch {
             when (loginType) {
