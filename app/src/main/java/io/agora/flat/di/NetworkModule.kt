@@ -1,15 +1,20 @@
 package io.agora.flat.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.agora.flat.BuildConfig
+import io.agora.flat.common.version.VersionChecker
 import io.agora.flat.data.AppEnv
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.http.HeaderProvider
 import io.agora.flat.http.api.*
 import io.agora.flat.http.interceptor.AgoraMessageInterceptor
 import io.agora.flat.http.interceptor.HeaderInterceptor
+import io.agora.flat.util.getAppVersion
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -118,5 +123,15 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MessageService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVersionChecker(
+        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        appKVCenter: AppKVCenter,
+        @ApplicationContext context: Context,
+    ): VersionChecker {
+        return VersionChecker(client, appKVCenter, context.getAppVersion())
     }
 }

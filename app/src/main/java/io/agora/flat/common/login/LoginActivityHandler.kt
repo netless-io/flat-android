@@ -67,10 +67,10 @@ class LoginActivityHandler(
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(Intent.createChooser(
                     intent,
-                    context.getString(R.string.login_github_browser_choose_title),
+                    context.getString(R.string.intent_browser_choose_title),
                 ))
             } else {
-                showUiMessage(context.getString(R.string.login_github_no_browser))
+                showUiMessage(context.getString(R.string.intent_no_browser))
             }
         }
     }

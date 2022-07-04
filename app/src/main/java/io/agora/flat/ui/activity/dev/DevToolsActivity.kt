@@ -42,6 +42,7 @@ class DevToolsActivity : BaseComposeActivity() {
 
                 LazyColumn(MaxWidthSpread) {
                     item {
+                        ClearLastCancelUpdate()
                         ProjectorEnableFlag()
                         UserLoginFlag()
                         MockEnableFlag()
@@ -183,6 +184,33 @@ fun ProjectorEnableFlag() {
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
+
+@Composable
+fun ClearLastCancelUpdate() {
+    val context = LocalContext.current
+    val appKVCenter = AppKVCenter(context)
+    var lastCancelUpdate by remember { mutableStateOf(appKVCenter.getLastCancelUpdate()) }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Spacer(modifier = Modifier.width(16.dp))
+        FlatTextBodyTwo(text = "清除 LastCancelUpdate")
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            enabled = lastCancelUpdate != 0L,
+            checked = lastCancelUpdate != 0L,
+            onCheckedChange = {
+                lastCancelUpdate = 0
+                appKVCenter.setLastCancelUpdate(0)
+            })
+        Spacer(modifier = Modifier.width(16.dp))
+    }
+}
+
 
 @Preview
 @Composable

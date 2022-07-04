@@ -9,19 +9,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Divider
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -29,14 +29,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
+import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.FlatDivider
-import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.GlobalAgreementDialog
-import io.agora.flat.ui.compose.LifecycleHandler
-import io.agora.flat.ui.theme.FillMaxSize
-import io.agora.flat.ui.theme.MaxHeight
-import io.agora.flat.ui.theme.isTabletMode
+import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.*
 import io.agora.flat.util.showToast
 import javax.inject.Inject
 
@@ -70,6 +66,14 @@ class MainActivity : BaseComposeActivity() {
                 )
             }
 
+            if (viewState.versionCheckResult.showUpdate) {
+                UpdateDialog(
+                    viewState.versionCheckResult,
+                    viewState.updating,
+                    viewModel::updateApp,
+                    viewModel::cancelUpdate)
+            }
+
             LaunchedEffect(error) {
                 error?.let {
                     showToast(it.message)
@@ -88,6 +92,45 @@ class MainActivity : BaseComposeActivity() {
     override fun onDestroy() {
         super.onDestroy()
         loginManager.onUnregister(this)
+    }
+}
+
+@Composable
+internal fun UpdateDialog(
+    versionCheckResult: VersionCheckResult,
+    uploading: Boolean,
+    onUpdate: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val dismissBlocked = {}
+    Dialog(onDismissRequest = if (versionCheckResult.forceUpdate) dismissBlocked else onCancel) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                Text(versionCheckResult.title, style = FlatTitleTextStyle)
+                FlatNormalVerticalSpacer()
+                FlatTextBodyOneSecondary(versionCheckResult.description)
+                FlatNormalVerticalSpacer()
+
+                if (uploading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(CenterHorizontally),
+                        color = MaterialTheme.colors.primary,
+                    )
+                } else {
+                    Column {
+                        FlatPrimaryTextButton(stringResource(R.string.update)) {
+                            onUpdate()
+                        }
+                        if (!versionCheckResult.forceUpdate) {
+                            FlatSmallVerticalSpacer()
+                            FlatSecondaryTextButton(stringResource(R.string.cancel)) {
+                                onCancel()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -13,6 +13,7 @@
     <string name="create">Create</string>
     <string name="start">Start</string>
     <string name="enter">Enter</string>
+    <string name="update">Update</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
@@ -78,8 +79,8 @@
     <string name="home_no_room_tip">No rooms available</string>
     <string name="home_no_history_room_tip">No records</string>
     <string name="setting_check_update">Check for updates</string>
-    <string name="login_github_no_browser">Link error or no browser</string>
-    <string name="login_github_browser_choose_title">Choose Browser</string>
+    <string name="intent_no_browser">Link error or no browser</string>
+    <string name="intent_browser_choose_title">Choose Browser</string>
     <string name="login_set_auth_uuid_error">Set auth uuid error</string>
     <string name="login_page_label_1">Interact online to keep ideas in sync</string>
     <string name="login_page_label_2">Powered by Agora</string>

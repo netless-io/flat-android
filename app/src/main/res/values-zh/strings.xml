@@ -15,6 +15,7 @@
     <string name="create">创建</string>
     <string name="start">开始</string>
     <string name="enter">加入</string>
+    <string name="update">升级</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -85,8 +86,8 @@
 
     <string name="setting_check_update">检查更新</string>
 
-    <string name="login_github_no_browser">链接错误或无浏览器</string>
-    <string name="login_github_browser_choose_title">选择浏览器</string>
+    <string name="intent_no_browser">链接错误或无浏览器</string>
+    <string name="intent_browser_choose_title">选择浏览器</string>
     <string name="login_set_auth_uuid_error">设置认证码失败</string>
     <string name="login_page_label_1">在线互动，让想法同步</string>
     <string name="login_page_label_2">powered by Agora</string>

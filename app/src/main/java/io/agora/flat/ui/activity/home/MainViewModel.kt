@@ -7,7 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.android.AndroidDownloader
+import io.agora.flat.common.android.IntentHandler
 import io.agora.flat.common.android.StringFetcher
+import io.agora.flat.common.version.VersionCheckResult
+import io.agora.flat.common.version.VersionChecker
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
@@ -17,6 +21,7 @@ import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.util.UiError
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -28,8 +33,11 @@ class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
+    private val versionChecker: VersionChecker,
     private val stringFetcher: StringFetcher,
     private val appKVCenter: AppKVCenter,
+    private val downloader: AndroidDownloader,
+    private val intentHandler: IntentHandler,
 ) : ViewModel() {
     private var _state = MutableStateFlow(MainViewState(appKVCenter.isProtocolAgreed()))
     val state = _state.asStateFlow()
@@ -53,9 +61,14 @@ class MainViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            if (roomUUID != null) {
-                joinRoom(roomUUID, false, openAudio = false)
+            roomUUID?.let {
+                joinRoom(it, false, openAudio = false)
             }
+        }
+
+        viewModelScope.launch {
+            delay(3000)
+            _state.value = _state.value.copy(versionCheckResult = versionChecker.check())
         }
     }
 
@@ -87,6 +100,21 @@ class MainViewModel @Inject constructor(
         appKVCenter.setProtocolAgreed(true)
         _state.value = _state.value.copy(protocolAgreed = true)
     }
+
+    fun updateApp() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(updating = true)
+            val result = _state.value.versionCheckResult
+            val uri = downloader.download(result.appUrl!!, "${result.appVersion}.apk")
+            intentHandler.installApk(uri)
+            _state.value = _state.value.copy(updating = false)
+        }
+    }
+
+    fun cancelUpdate() {
+        versionChecker.cancelUpdate()
+        _state.value = _state.value.copy(versionCheckResult = VersionCheckResult.Default)
+    }
 }
 
 enum class MainTab {
@@ -101,6 +129,8 @@ data class MainViewState(
     val protocolAgreed: Boolean,
     val loginState: LoginState = LoginState.Init,
     val mainTab: MainTab = MainTab.Home,
+    val versionCheckResult: VersionCheckResult = VersionCheckResult.Default,
+    val updating: Boolean = false,
 )
 
 sealed class LoginState {

@@ -1,6 +1,5 @@
 package io.agora.flat.util
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager

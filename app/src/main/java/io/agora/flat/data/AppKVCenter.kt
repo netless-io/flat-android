@@ -103,6 +103,16 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         return store.getBoolean(KEY_PROJECTOR_CONVERTOR, true)
     }
 
+    fun getLastCancelUpdate(): Long {
+        return store.getLong(KEY_LAST_CANCEL_UPDATE, 0)
+    }
+
+    fun setLastCancelUpdate(timeMillis: Long) {
+        store.edit().apply {
+            putLong(KEY_LAST_CANCEL_UPDATE, timeMillis)
+        }.apply()
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -115,6 +125,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_NETWORK_ACCELERATION = "key_network_acceleration"
 
         const val KEY_PROJECTOR_CONVERTOR = "key_convertor_projector"
+
+        const val KEY_LAST_CANCEL_UPDATE = "key_last_cancel_update"
     }
 
     class MockData {
