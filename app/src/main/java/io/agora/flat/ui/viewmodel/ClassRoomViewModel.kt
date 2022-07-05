@@ -86,6 +86,7 @@ class ClassRoomViewModel @Inject constructor(
     private val eventId = AtomicInteger(0)
 
     private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
+    private val periodicUUID = savedStateHandle.get<String>(Constants.IntentKey.PERIODIC_UUID)
     private val playInfo = savedStateHandle.get<RoomPlayInfo?>(Constants.IntentKey.ROOM_PLAY_INFO)
     private val quickStart = savedStateHandle.get<Boolean?>(Constants.IntentKey.ROOM_QUICK_START)
     private val userUUID = userRepository.getUserUUID()
@@ -109,7 +110,7 @@ class ClassRoomViewModel @Inject constructor(
             }
             if (playInfo != null) {
                 _roomPlayInfo.value = playInfo
-            } else when (val result = roomRepository.joinRoom(roomUUID)) {
+            } else when (val result = roomRepository.joinRoom(periodicUUID ?: roomUUID)) {
                 is Success -> _roomPlayInfo.value = result.data
                 is Failure -> {
                     _errorMessage.value = when (result.error.code) {
