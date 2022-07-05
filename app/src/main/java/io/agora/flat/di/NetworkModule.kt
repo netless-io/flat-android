@@ -131,7 +131,8 @@ object NetworkModule {
         @NetworkModule.NormalOkHttpClient client: OkHttpClient,
         appKVCenter: AppKVCenter,
         @ApplicationContext context: Context,
+        appEnv: AppEnv
     ): VersionChecker {
-        return VersionChecker(client, appKVCenter, context.getAppVersion())
+        return VersionChecker(client, appKVCenter, context.getAppVersion(), appEnv.versionCheckUrl)
     }
 }

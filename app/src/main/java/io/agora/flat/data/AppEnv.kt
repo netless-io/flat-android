@@ -29,13 +29,15 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             AGORA_APP_ID_DEV,
             "https://flat-api-dev.whiteboard.agora.io",
             "9821657775fbc74773f1",
-            "https://flat-web-dev.whiteboard.agora.io"
+            "https://flat-web-dev.whiteboard.agora.io",
+            versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/test/latest/stable/android/checkVersion.json",
         )
         envMap[ENV_PROD] = EnvItem(
             AGORA_APP_ID,
             "https://flat-api.whiteboard.agora.io",
             "71a29285a437998bdfe0",
             "https://flat-web.whiteboard.agora.io",
+            versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/checkVersion.json",
         )
     }
 
@@ -65,12 +67,15 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         currentEnvItem.baseInviteUrl
     }
 
-    val agoraAppId get() = currentEnvItem.agoraAppId;
+    val agoraAppId get() = currentEnvItem.agoraAppId
+
+    val versionCheckUrl get() = currentEnvItem.versionCheckUrl
 
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
         val githubClientId: String,
         val baseInviteUrl: String,
+        val versionCheckUrl: String,
     )
 }

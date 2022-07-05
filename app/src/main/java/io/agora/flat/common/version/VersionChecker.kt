@@ -13,12 +13,11 @@ class VersionChecker constructor(
     @NetworkModule.NormalOkHttpClient val client: OkHttpClient,
     val appKVCenter: AppKVCenter,
     private val appVersion: String,
+    private val versionCheckerUrl: String,
 ) {
     private val gson = Gson();
 
     companion object {
-        const val url = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/test/latest/stable/android/checkVersion.json"
-
         internal fun checkCanUpdate(local: String, remote: String): Boolean {
             return !local.atLeast(remote)
         }
@@ -49,7 +48,7 @@ class VersionChecker constructor(
     suspend fun check(): VersionCheckResult {
         return withContext(Dispatchers.IO) {
             try {
-                val request = Request.Builder().url(url).build()
+                val request = Request.Builder().url(versionCheckerUrl).build()
                 val newCall = client.newCall(request)
                 val versionBody = newCall.execute().body?.string()
                 val response = gson.fromJson(versionBody, VersionResponse::class.java)
@@ -63,6 +62,7 @@ class VersionChecker constructor(
                     forceUpdate = forceUpdate,
                 )
             } catch (e: Exception) {
+                // ignore
                 e.printStackTrace()
                 return@withContext VersionCheckResult.Default
             }

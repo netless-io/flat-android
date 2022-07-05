@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -102,29 +101,31 @@ internal fun UpdateDialog(
     onUpdate: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val dismissBlocked = {}
-    Dialog(onDismissRequest = if (versionCheckResult.forceUpdate) dismissBlocked else onCancel) {
-        Surface(shape = Shapes.large) {
-            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                Text(versionCheckResult.title, style = FlatTitleTextStyle)
-                FlatNormalVerticalSpacer()
-                FlatTextBodyOneSecondary(versionCheckResult.description)
-                FlatNormalVerticalSpacer()
+    FlatAndroidTheme {
+        val dismissBlocked = {}
+        Dialog(onDismissRequest = if (versionCheckResult.forceUpdate) dismissBlocked else onCancel) {
+            Surface(shape = Shapes.large) {
+                Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                    FlatTextTitle(versionCheckResult.title)
+                    FlatNormalVerticalSpacer()
+                    FlatTextBodyOneSecondary(versionCheckResult.description)
+                    FlatNormalVerticalSpacer()
 
-                if (uploading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(CenterHorizontally),
-                        color = MaterialTheme.colors.primary,
-                    )
-                } else {
-                    Column {
-                        FlatPrimaryTextButton(stringResource(R.string.update)) {
-                            onUpdate()
-                        }
-                        if (!versionCheckResult.forceUpdate) {
-                            FlatSmallVerticalSpacer()
-                            FlatSecondaryTextButton(stringResource(R.string.cancel)) {
-                                onCancel()
+                    if (uploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = MaterialTheme.colors.primary,
+                        )
+                    } else {
+                        Column {
+                            FlatPrimaryTextButton(stringResource(R.string.update)) {
+                                onUpdate()
+                            }
+                            if (!versionCheckResult.forceUpdate) {
+                                FlatSmallVerticalSpacer()
+                                FlatSecondaryTextButton(stringResource(R.string.cancel)) {
+                                    onCancel()
+                                }
                             }
                         }
                     }
