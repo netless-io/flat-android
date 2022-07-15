@@ -7,7 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.agora.flat.common.android.*
+import io.agora.flat.common.android.AndroidClipboardController
+import io.agora.flat.common.android.AppCoroutineDispatchers
+import io.agora.flat.common.android.ClipboardController
+import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.common.login.LoginManager
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv

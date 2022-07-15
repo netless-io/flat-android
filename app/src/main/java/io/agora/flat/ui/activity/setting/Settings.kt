@@ -165,7 +165,7 @@ private fun BottomOptArea(onLogoutClick: () -> Unit) {
 
 @Composable
 internal fun SettingItem(
-    @DrawableRes id: Int,
+    @DrawableRes id: Int = 0,
     tip: String,
     desc: String = "",
     detail: String? = null,
@@ -187,8 +187,10 @@ internal fun SettingItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(Modifier.width(16.dp))
-            Image(painterResource(id), contentDescription = null)
-            Spacer(Modifier.width(4.dp))
+            if (id != 0) {
+                Image(painterResource(id), contentDescription = null)
+                Spacer(Modifier.width(4.dp))
+            }
             Column(Modifier
                 .weight(1f)
                 .padding(vertical = 8.dp)) {

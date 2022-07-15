@@ -6,5 +6,7 @@ class Config {
 
         // three days in milliseconds
         const val INTERVAL_VERSION_CHECK = 259_200_000L
+
+        val cancelAccountCountTime = if (BuildConfig.DEBUG) 5_000L else 30_000L
     }
 }

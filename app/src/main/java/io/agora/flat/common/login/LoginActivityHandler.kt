@@ -13,6 +13,7 @@ import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,7 @@ class LoginActivityHandler(
     fun loginWithType(type: LoginType) {
         _state.value = LoginState.Init
         loginType = type
+        loginManager.actionClazz = LoginActivity::class.java
         scope.launch {
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
@@ -52,7 +54,7 @@ class LoginActivityHandler(
 
     private suspend fun callWeChatLogin() {
         if (loginSetAuthUUID()) {
-            loginManager.callWeChatLogin()
+            loginManager.callWeChatAuth()
         }
     }
 

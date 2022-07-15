@@ -193,7 +193,7 @@ class ReplayWhiteboardComponent(
                 .setDebug(true)
                 .setCollectorStyles(styleMap)
                 .setContainerSizeRatio(9.0f / 16)
-            windowParams.setPrefersColorScheme(WindowPrefersColorScheme.Auto)
+            windowParams.prefersColorScheme = WindowPrefersColorScheme.Auto
         }
 
         val playerListener = object : PlayerListener {

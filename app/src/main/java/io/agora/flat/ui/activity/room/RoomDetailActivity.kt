@@ -769,7 +769,5 @@ internal sealed class DetailUiAction {
     object DeleteRoom : DetailUiAction()
 
     // AllRoom
-    object AllRoomBack : DetailUiAction() {
-
-    }
+    object AllRoomBack : DetailUiAction()
 }

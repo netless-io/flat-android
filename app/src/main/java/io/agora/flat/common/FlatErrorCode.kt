@@ -34,6 +34,7 @@ class FlatErrorCode {
 
         const val Web_UserNotFound = 400000 // user not found
         const val Web_UserRoomListNotEmpty = 400001 // user room list is not empty.
+        const val Web_UserAlreadyBinding = 400002 // user already binding.
 
         const val Web_RecordNotFound = 500000 // record info not found
 

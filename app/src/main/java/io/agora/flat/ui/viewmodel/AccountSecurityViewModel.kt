@@ -19,7 +19,7 @@ class AccountSecurityViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(AccountSecurityUiState.Empty)
     val state: StateFlow<AccountSecurityUiState>
-        get() = _state;
+        get() = _state
 
     init {
         viewModelScope.launch {

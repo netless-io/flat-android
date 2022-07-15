@@ -70,15 +70,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustNothing|stateHidden">
-            <intent-filter>
-                <data android:scheme="x-agora-flat-client" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustNothing|stateHidden" />
         <activity
             android:name=".ui.activity.dev.ComposeTestActivity"
             android:label="@string/title_activity_compose_test" />
@@ -113,7 +105,25 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.setting.UserInfoActivity" />
+        <activity
+            android:name=".ui.activity.setting.UserInfoActivity"
+            android:exported="true"
+            android:launchMode="singleTask" />
+
+        <activity
+            android:name=".common.login.GithubEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}">
+
+            <intent-filter>
+                <data android:scheme="x-agora-flat-client" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="${applicationId}.wxapi.WXEntryActivity"
             android:exported="true"
@@ -130,7 +140,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
     </application>
 </manifest>

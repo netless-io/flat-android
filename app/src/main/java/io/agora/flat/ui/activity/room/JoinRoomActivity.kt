@@ -18,13 +18,10 @@ import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.common.android.WindowFocusObserver
-import io.agora.flat.common.android.rememberAndroidClipboardController
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
-import io.agora.flat.util.parseRoomID
 import io.agora.flat.util.showToast
 
 @AndroidEntryPoint

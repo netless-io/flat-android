@@ -106,6 +106,15 @@
     <string name="login_already_bind_phone">Already Bound</string>
     <string name="login_phone_already_bound">Phone number is bound</string>
     <string name="login_verification_code_invalid">Invalid Verification Code</string>
+    <string name="wechat">WeChat</string>
+    <string name="github">Github</string>
+
+    <string name="bind">bind</string>
+    <string name="unbind">unbind</string>
+    <string name="bind_fail">bind fail</string>
+    <string name="bind_success">bind success</string>
+    <string name="user_avatar">User Avatar</string>
+    <string name="bind_info">Bindings</string>
 
     <string name="phone_number">Phone Number</string>
     <string name="verification_code">Verification Code</string>

@@ -15,7 +15,7 @@ class VersionChecker constructor(
     private val appVersion: String,
     private val versionCheckerUrl: String,
 ) {
-    private val gson = Gson();
+    private val gson = Gson()
 
     companion object {
         internal fun checkCanUpdate(local: String, remote: String): Boolean {
@@ -31,7 +31,7 @@ class VersionChecker constructor(
             val versionParts = version.split(".")
 
             if (localParts.size != 3 && versionParts.size != 3) {
-                return true;
+                return true
             }
             for (i in 0..2) {
                 if (versionParts[i].toInt() < localParts[i].toInt()) {

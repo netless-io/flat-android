@@ -12,10 +12,9 @@ import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
-import io.agora.flat.Constants.Login.AUTH_SUCCESS
+import io.agora.flat.common.login.LoginManager
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.ui.activity.LoginActivity
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,6 +29,9 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
 
     @Inject
     lateinit var appKVCenter: AppKVCenter
+
+    @Inject
+    lateinit var loginManager: LoginManager
 
     private lateinit var api: IWXAPI
 
@@ -75,21 +77,12 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
     }
 
     private fun onAuthSuccess(code: String) {
-        val intent = Intent(this, LoginActivity::class.java).apply {
-            putExtra(Constants.Login.KEY_LOGIN_STATE, AUTH_SUCCESS)
-            putExtra(Constants.Login.KEY_LOGIN_RESP, code)
-        }
-        startActivity(intent)
+        loginManager.wechatAuthSuccess(this, code)
         finish()
     }
 
     private fun onAuthFail(state: Int, errCode: Int, errMessage: String) {
-        val intent = Intent(this, LoginActivity::class.java).apply {
-            putExtra(Constants.Login.KEY_LOGIN_STATE, state)
-            putExtra(Constants.Login.KEY_ERROR_CODE, errCode)
-            putExtra(Constants.Login.KEY_ERROR_MESSAGE, errMessage)
-        }
-        startActivity(intent)
+        loginManager.wechatAuthFail(this, state, errCode, errMessage)
         finish()
     }
 }

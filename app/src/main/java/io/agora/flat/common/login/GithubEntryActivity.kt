@@ -1,0 +1,32 @@
+package io.agora.flat.common.login
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class GithubEntryActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var loginManager: LoginManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent != null) {
+            loginManager.handleGithubAuth(this, intent)
+        }
+        finish()
+    }
+}

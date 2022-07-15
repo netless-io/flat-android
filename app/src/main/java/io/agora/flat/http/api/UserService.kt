@@ -40,12 +40,12 @@ interface UserService {
         @Body req: PhoneSmsCodeReq,
     ): Call<BaseResp<UserInfoWithToken>>
 
-    @POST("v1/user/bindingPhone/sendMessage")
+    @POST("v1/binding/platform/phone/sendMessage")
     fun requestBindSmsCode(
         @Body req: PhoneReq,
     ): Call<BaseResp<RespNoData>>
 
-    @POST("v1/user/bindingPhone")
+    @POST("v1/user/binding/platform/phone")
     fun bindPhone(
         @Body req: PhoneSmsCodeReq,
     ): Call<BaseResp<RespNoData>>
@@ -67,4 +67,30 @@ interface UserService {
     fun deleteAccount(
         @Body req: BaseReq = BaseReq.EMPTY,
     ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/binding/list")
+    fun listBindings(
+        @Body req: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<UserBindings>>
+
+    @POST("v1/user/binding/set-auth-uuid")
+    fun bindingSetAuthUUID(
+        @Body req: AuthUUIDReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/binding/process")
+    fun bindingProcess(
+        @Body req: AuthUUIDReq,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @GET("v1/user/binding/platform/wechat/mobile")
+    fun bindWeChat(
+        @Query("state") state: String,
+        @Query("code") code: String,
+    ): Call<BaseResp<RespNoData>>
+    
+    @POST("v1/user/binding/remove")
+    fun removeBinding(
+        @Body req: RemoveBindingReq,
+    ): Call<BaseResp<UserTokenData>>
 }

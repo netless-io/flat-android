@@ -24,7 +24,7 @@ class UserViewModel @Inject constructor(
         get() = _userInfo
 
     val loggedInData: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>(isLoggedIn())
+        MutableLiveData<Boolean>(userRepository.isLoggedIn())
     }
 
     fun refreshUser() {
@@ -36,10 +36,6 @@ class UserViewModel @Inject constructor(
     fun logout() {
         userRepository.logout()
         loggedInData.value = false
-    }
-
-    private fun isLoggedIn(): Boolean {
-        return userRepository.isLoggedIn()
     }
 
     suspend fun rename(name: String): Boolean {

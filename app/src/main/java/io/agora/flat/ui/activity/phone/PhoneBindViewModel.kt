@@ -37,14 +37,14 @@ class PhoneBindViewModel @Inject constructor(
                     binding = binding
                 )
             }.collect {
-                _state.value = it;
+                _state.value = it
             }
         }
     }
 
     fun sendSmsCode(phone: String) {
         viewModelScope.launch {
-            val sendResult = userRepository.requestBindSmsCode(phone = phone);
+            val sendResult = userRepository.requestBindSmsCode(phone = phone)
             if (sendResult is Success) {
                 showUiMessage(stringFetcher.loginCodeSend())
             } else {

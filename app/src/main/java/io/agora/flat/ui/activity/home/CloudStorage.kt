@@ -193,7 +193,7 @@ fun CloudUploadPick(onPickClose: () -> Unit, viewModel: CloudStorageViewModel = 
     Column {
         CloseTopAppBar(stringResource(id = R.string.title_cloud_pick), onClose = onPickClose)
         Box(MaxWidthSpread) {
-            UploadPickRow(viewModel::uploadFile);
+            UploadPickRow(viewModel::uploadFile)
         }
     }
 }

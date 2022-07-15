@@ -10,6 +10,6 @@ data class LoginUiViewState(
     val uiError: UiError? = null,
 ) {
     companion object {
-        val Empty = LoginUiViewState();
+        val Empty = LoginUiViewState()
     }
 }

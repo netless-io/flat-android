@@ -10,7 +10,7 @@ enum class LoginType {
 }
 
 sealed class LoginState {
-    object Init : LoginState();
+    object Init : LoginState()
     data class Process(val message: UiMessage) : LoginState()
     object Success : LoginState()
 }

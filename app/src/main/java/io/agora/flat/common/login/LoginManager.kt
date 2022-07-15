@@ -1,9 +1,7 @@
 package io.agora.flat.common.login
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.Activity
+import android.content.*
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -17,8 +15,10 @@ import javax.inject.Singleton
 class LoginManager @Inject constructor(
     @ApplicationContext val context: Context,
 ) {
-    private var api: IWXAPI = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID, true);
+    private var api: IWXAPI = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID, true)
     private var wechatReceiver: BroadcastReceiver? = null
+
+    var actionClazz: Class<out Activity>? = null
 
     init {
         api.registerApp(Constants.WX_APP_ID)
@@ -42,11 +42,44 @@ class LoginManager @Inject constructor(
         }
     }
 
-    fun callWeChatLogin() {
+    fun callWeChatAuth() {
         val req = SendAuth.Req().apply {
             scope = "snsapi_userinfo"
             state = "wechat_sdk_flat"
         }
         api.sendReq(req)
+    }
+
+    fun wechatAuthSuccess(context: Context, code: String) {
+        if (actionClazz == null) {
+            return
+        }
+        val intent = Intent(context, actionClazz).apply {
+            putExtra(Constants.Login.KEY_LOGIN_STATE, Constants.Login.AUTH_SUCCESS)
+            putExtra(Constants.Login.KEY_LOGIN_RESP, code)
+        }
+        context.startActivity(intent)
+    }
+
+    fun wechatAuthFail(context: Context, state: Int, errCode: Int, errMessage: String) {
+        if (actionClazz == null) {
+            return
+        }
+        val intent = Intent(context, actionClazz).apply {
+            putExtra(Constants.Login.KEY_LOGIN_STATE, state)
+            putExtra(Constants.Login.KEY_ERROR_CODE, errCode)
+            putExtra(Constants.Login.KEY_ERROR_MESSAGE, errMessage)
+        }
+        context.startActivity(intent)
+    }
+
+    fun handleGithubAuth(context: Context, oldIntent: Intent) {
+        if (actionClazz == null) {
+            return
+        }
+        val intent = Intent(oldIntent).apply {
+            component = ComponentName(context, actionClazz!!)
+        }
+        context.startActivity(intent)
     }
 }

@@ -23,6 +23,6 @@ class ActivityModule {
         appKVCenter: AppKVCenter,
         appEnv: AppEnv,
     ): LoginActivityHandler {
-        return LoginActivityHandler(context, loginManager, userRepository, appKVCenter, appEnv);
+        return LoginActivityHandler(context, loginManager, userRepository, appKVCenter, appEnv)
     }
 }

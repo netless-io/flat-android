@@ -86,6 +86,7 @@
 
     <string name="setting_check_update">检查更新</string>
 
+    <!-- login -->
     <string name="intent_no_browser">链接错误或无浏览器</string>
     <string name="intent_browser_choose_title">选择浏览器</string>
     <string name="login_set_auth_uuid_error">设置认证码失败</string>
@@ -114,6 +115,17 @@
     <string name="login_already_bind_phone">已经绑定过手机号</string>
     <string name="login_phone_already_bound">该手机已被绑定</string>
     <string name="login_verification_code_invalid">验证码无效</string>
+    <string name="wechat">WeChat</string>
+    <string name="github">Github</string>
+
+
+    <!-- bind -->
+    <string name="bind">绑定</string>
+    <string name="unbind">解绑</string>
+    <string name="bind_fail">绑定失败</string>
+    <string name="bind_success">绑定成功</string>
+    <string name="user_avatar">用户头像</string>
+    <string name="bind_info">绑定信息</string>
 
     <string name="bind_phone">绑定手机号</string>
     <string name="phone_number">手机号</string>
@@ -172,7 +184,7 @@
     <string name="cloud_storage_upload_doc">上传文件</string>
     <string name="cloud_storage_upload_list_title">传输列表</string>
     <string name="cloud_storage_no_files">暂无数据</string>
-    <string name="cloud_preview_transcoding_hint">课件转换中，请稍后...</string>
+    <string name="cloud_preview_transcoding_hint">课件转换中，请稍后…</string>
 
     <string name="upload_success">上传成功</string>
     <string name="upload_failure">上传失败</string>

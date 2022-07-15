@@ -16,7 +16,7 @@ class UserRepository @Inject constructor(
     private val userService: UserService,
     private val appKVCenter: AppKVCenter,
 ) {
-    private var lastSendCodeTime = 0L
+    private var bindings: UserBindings? = null
 
     suspend fun loginCheck(): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
@@ -51,6 +51,10 @@ class UserRepository @Inject constructor(
 
     fun getUserUUID(): String {
         return getUserInfo()!!.uuid
+    }
+
+    fun getBindings(): UserBindings? {
+        return bindings
     }
 
     suspend fun loginSetAuthUUID(authUUID: String): Result<RespNoData> {
@@ -169,6 +173,77 @@ class UserRepository @Inject constructor(
             userService.deleteAccount().toResult()
         }
     }
+
+    suspend fun bindingSetAuthUUID(authUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.bindingSetAuthUUID(AuthUUIDReq(authUUID)).toResult()
+        }
+    }
+
+    suspend fun listBindings(): Result<UserBindings> {
+        return withContext(Dispatchers.IO) {
+            val result = userService.listBindings().toResult()
+            bindings = result.get()
+            result
+        }
+    }
+
+    suspend fun bindWeChat(state: String, code: String): Result<Boolean> {
+        val result = withContext(Dispatchers.IO) {
+            userService.bindWeChat(state, code).toResult()
+        }
+        return when (result) {
+            is Success -> {
+                bindings = bindings?.copy(wechat = true)
+                Success(true)
+            }
+            is Failure -> {
+                Failure(result.throwable, result.error)
+            }
+        }
+    }
+
+    suspend fun bindingProcess(authUUID: String, times: Int = 5): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            repeat(times) {
+                val result = userService.bindingProcess(AuthUUIDReq(authUUID)).toResult()
+                when (result) {
+                    is Success -> {
+                        bindings = bindings?.copy(github = true)
+                        return@withContext Success(true)
+                    }
+                    is Failure -> {
+                        // state == 1 error; state == 2 loop
+                        if (result.error.status == 1) {
+                            return@withContext Failure(result.throwable, result.error)
+                        }
+                    }
+                }
+                delay(2000)
+            }
+            return@withContext Failure(RuntimeException("process timeout"))
+        }
+    }
+
+    suspend fun removeBinding(loginPlatform: LoginPlatform): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            val result = userService.removeBinding(RemoveBindingReq(loginPlatform)).toResult()
+
+            return@withContext when (result) {
+                is Success -> {
+                    appKVCenter.setToken(result.data.token)
+                    when (loginPlatform) {
+                        LoginPlatform.WeChat -> bindings = bindings?.copy(wechat = false)
+                        LoginPlatform.Github -> bindings = bindings?.copy(github = false)
+                    }
+                    Success(true)
+                }
+                is Failure -> Failure(result.throwable, result.error)
+            }
+        }
+    }
+
+    private var lastSendCodeTime = 0L
 
     private suspend fun limitSendCode(
         failure: Failure<RespNoData>? = null,

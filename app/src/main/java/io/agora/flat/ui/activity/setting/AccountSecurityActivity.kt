@@ -25,6 +25,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.Config
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
@@ -128,7 +129,7 @@ fun CancelAccountCheck(onAgree: () -> Unit) {
 
     var remainTime by remember { mutableStateOf(0L) }
     val countDownTimer = remember {
-        object : CountDownTimer(30_000, 1000) {
+        object : CountDownTimer(Config.cancelAccountCountTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 remainTime = millisUntilFinished / 1000
             }
