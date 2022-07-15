@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * This activity is the unified Github callback.
+ */
 @AndroidEntryPoint
 class GithubEntryActivity : ComponentActivity() {
 

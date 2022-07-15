@@ -11,10 +11,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +34,6 @@ import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.viewmodel.UserInfoUiAction
 import io.agora.flat.ui.viewmodel.UserInfoUiState
 import io.agora.flat.ui.viewmodel.UserInfoViewModel
-import io.agora.flat.util.showDebugToast
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,9 +57,7 @@ class UserInfoActivity : BaseComposeActivity() {
                         UserInfoUiAction.BindWeChat -> {
                             bindingHandler.bindWithType(LoginType.WeChat)
                         }
-                        UserInfoUiAction.UnbindGithub,
-                        UserInfoUiAction.UnbindWeChat,
-                        -> viewModel.processAction(action)
+                        else -> viewModel.processAction(action)
                     }
                 }
 
@@ -94,11 +88,17 @@ fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
     val context = LocalContext.current
     val bindingWeChat = state.bindings?.wechat == true
     val bindingGithub = state.bindings?.github == true
+    var avatar by remember { mutableStateOf<Any?>(state.userInfo?.avatar) }
+
+    val launcherPickAvatar = launcherPickContent {
+        avatar = it.uri
+        actioner(UserInfoUiAction.PickedAvatar(it))
+    }
 
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            AvatarItem(tip = stringResource(R.string.user_avatar), userAvatar = state.userInfo?.avatar ?: "") {
-                context.showDebugToast("Pick User avatar")
+            AvatarItem(tip = stringResource(R.string.user_avatar), userAvatar = avatar) {
+                launcherPickAvatar("image/*")
             }
             SettingItem(
                 tip = stringResource(R.string.username),
@@ -129,13 +129,11 @@ fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
 @Composable
 internal fun AvatarItem(
     tip: String,
-    userAvatar: String,
+    userAvatar: Any?,
     onClick: () -> Unit = {},
 ) {
     val color = MaterialTheme.colors.onBackground
-    CompositionLocalProvider(
-        LocalContentColor provides color.copy(alpha = 1f),
-    ) {
+    CompositionLocalProvider(LocalContentColor provides color.copy(alpha = 1f)) {
         Row(
             Modifier
                 .fillMaxWidth()

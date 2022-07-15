@@ -49,4 +49,15 @@ interface CloudStorageService {
     fun convertFinish(
         @Body req: CloudStorageFileReq,
     ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/upload-avatar/start")
+    fun updateAvatarStart(
+        @Body req: CloudStorageUploadStartReq,
+    ): Call<BaseResp<CloudStorageUploadStartResp>>
+
+    @POST("v1/user/upload-avatar/finish")
+    fun updateAvatarFinish(
+        @Body req: CloudStorageFileReq,
+    ): Call<BaseResp<AvatarData>>
+
 }

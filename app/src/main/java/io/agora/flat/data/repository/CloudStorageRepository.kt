@@ -1,6 +1,8 @@
 package io.agora.flat.data.repository
 
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Result
+import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.toResult
 import io.agora.flat.http.api.CloudStorageService
@@ -12,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class CloudStorageRepository @Inject constructor(
     private val cloudStorageService: CloudStorageService,
+    private val appKVCenter: AppKVCenter,
 ) {
     suspend fun getFileList(
         page: Int = 1,
@@ -79,6 +82,40 @@ class CloudStorageRepository @Inject constructor(
             cloudStorageService.convertFinish(
                 CloudStorageFileReq(fileUUID, region, null)
             ).toResult()
+        }
+    }
+
+    suspend fun updateAvatarStart(
+        fileName: String,
+        fileSize: Long,
+        region: String = "cn-hz",
+    ): Result<CloudStorageUploadStartResp> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.updateAvatarStart(
+                CloudStorageUploadStartReq(fileName, fileSize, region)
+            ).toResult()
+        }
+    }
+
+    suspend fun updateAvatarFinish(
+        fileUUID: String,
+        region: String = "cn-hz",
+    ): Result<AvatarData> {
+        return withContext(Dispatchers.IO) {
+            val result = cloudStorageService.updateAvatarFinish(
+                CloudStorageFileReq(
+                    fileUUID,
+                    region,
+                    null
+                )).toResult()
+            // update local avatar.
+            // there is a doubt here that CloudRepository may update userinfo.
+            if (result is Success) {
+                appKVCenter.getUserInfo()?.copy(avatar = result.data.avatarURL)?.run {
+                    appKVCenter.setUserInfo(this)
+                }
+            }
+            result
         }
     }
 }

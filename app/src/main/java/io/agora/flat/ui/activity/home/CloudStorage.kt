@@ -1,8 +1,5 @@
 package io.agora.flat.ui.activity.home
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.*
@@ -35,7 +32,9 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.*
+import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.showToast
 
 @Composable
 fun CloudScreen(
@@ -152,14 +151,6 @@ private fun BoxScope.AddFileLayoutPad(actioner: (CloudStorageUIAction) -> Unit) 
 
 @Composable
 private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -> Unit, onCoverClick: () -> Unit) {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.run {
-            val info = context.contentFileInfo(this) ?: return@run
-            actioner(CloudStorageUIAction.UploadFile(uri = this, info = info))
-        }
-    }
-
     Column {
         Box(Modifier
             .fillMaxWidth()
@@ -200,42 +191,21 @@ fun CloudUploadPick(onPickClose: () -> Unit, viewModel: CloudStorageViewModel = 
 
 @Composable
 internal fun BoxScope.UploadPickRow(onUploadFile: (CloudStorageUIAction.UploadFile) -> Unit) {
-    val context = LocalContext.current
-    var hasPermission by remember {
-        mutableStateOf(context.hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE))
-    }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.also {
-            val info = context.contentFileInfo(it) ?: return@rememberLauncherForActivityResult
-            onUploadFile(CloudStorageUIAction.UploadFile(it, info))
-        }
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
-            hasPermission = true
-        } else {
-            context.showToast("Permission Not Granted")
-        }
-    }
-    val launcherCheckPermission: (String) -> Unit = {
-        if (hasPermission) {
-            launcher.launch(it)
-        } else {
-            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
+    val launcher: (String) -> Unit = launcherPickContent {
+        onUploadFile(CloudStorageUIAction.UploadFile(it.uri, it))
     }
     Row(Modifier.align(Alignment.Center)) {
         UpdatePickItem(R.drawable.ic_cloud_storage_image, R.string.cloud_storage_upload_image) {
-            launcherCheckPermission("image/*")
+            launcher("image/*")
         }
         UpdatePickItem(R.drawable.ic_cloud_storage_video, R.string.cloud_storage_upload_video) {
-            launcherCheckPermission("video/*")
+            launcher("video/*")
         }
         UpdatePickItem(R.drawable.ic_cloud_storage_music, R.string.cloud_storage_upload_music) {
-            launcherCheckPermission("audio/*")
+            launcher("audio/*")
         }
         UpdatePickItem(R.drawable.ic_cloud_storage_doc, R.string.cloud_storage_upload_doc) {
-            launcherCheckPermission("*/*")
+            launcher("*/*")
         }
     }
 }

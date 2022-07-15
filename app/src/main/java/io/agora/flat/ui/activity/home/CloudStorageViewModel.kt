@@ -21,7 +21,7 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
-import io.agora.flat.util.ContentFileInfo
+import io.agora.flat.util.ContentInfo
 import io.agora.flat.util.coursewareType
 import io.agora.flat.util.isDynamicDoc
 import io.agora.flat.util.runAtLeast
@@ -359,5 +359,5 @@ sealed class CloudStorageUIAction {
     object OpenItemPick : CloudStorageUIAction()
     object OpenUploading : CloudStorageUIAction()
 
-    data class UploadFile(val uri: Uri, val info: ContentFileInfo) : CloudStorageUIAction()
+    data class UploadFile(val uri: Uri, val info: ContentInfo) : CloudStorageUIAction()
 }

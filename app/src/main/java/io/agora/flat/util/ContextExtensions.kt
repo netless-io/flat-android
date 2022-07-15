@@ -97,7 +97,7 @@ fun ComponentActivity.isDarkMode(): Boolean = when (DarkModeManager.current()) {
 }
 
 
-fun Context.contentFileInfo(uri: Uri): ContentFileInfo? {
+fun Context.contentInfo(uri: Uri): ContentInfo? {
     val mediaType = contentResolver.getType(uri) ?: "text/plain"
     val projection = arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)
     return contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -106,9 +106,9 @@ fun Context.contentFileInfo(uri: Uri): ContentFileInfo? {
         val size = cursor.getLong(1)
         cursor.close()
 
-        return ContentFileInfo(filename, size, mediaType)
+        return ContentInfo(uri, filename, size, mediaType)
     }
 }
 
-data class ContentFileInfo(val filename: String, val size: Long, val mediaType: String)
+data class ContentInfo(val uri: Uri, val filename: String, val size: Long, val mediaType: String)
 
