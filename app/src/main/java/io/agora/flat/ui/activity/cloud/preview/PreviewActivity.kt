@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.coil.rememberCoilPainter
+import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.data.model.CloudStorageFile
@@ -154,7 +154,7 @@ fun ImagePreview(
     }
 
     Image(
-        painter = rememberCoilPainter(file.fileURL),
+        painter = rememberImagePainter(file.fileURL),
         contentDescription = null,
         modifier = modifier,
         contentScale = ContentScale.Crop

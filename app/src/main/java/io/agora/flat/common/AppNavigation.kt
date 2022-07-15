@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import io.agora.flat.ui.activity.home.*
@@ -66,10 +65,10 @@ fun AppNavigation(
     AnimatedNavHost(
         navController = navController,
         startDestination = startDestination,
-        enterTransition = { initial, target -> defaultEnterTransition(initial, target) },
-        exitTransition = { initial, target -> defaultExitTransition(initial, target) },
-        popEnterTransition = { _, _ -> defaultPopEnterTransition() },
-        popExitTransition = { _, _ -> defaultPopExitTransition() },
+        enterTransition = { defaultEnterTransition(this.initialState, this.targetState) },
+        exitTransition = { defaultExitTransition(this.initialState, this.targetState) },
+        popEnterTransition = { defaultEnterTransition(this.initialState, this.targetState) },
+        popExitTransition = { defaultExitTransition(this.initialState, this.targetState) },
         modifier = modifier,
     ) {
         addHomeGraph(navController)

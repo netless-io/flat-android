@@ -216,14 +216,12 @@ fun ClearLastCancelUpdate() {
 @Composable
 fun PreviewDevTools() {
     FlatColumnPage {
-        BackTopAppBar(title = "DevTools", {})
+        BackTopAppBar(title = "DevTools", onBackPressed = {  })
 
-        LazyColumn(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
+        LazyColumn(MaxWidthSpread) {
             item {
+                ClearLastCancelUpdate()
+                ProjectorEnableFlag()
                 UserLoginFlag()
                 MockEnableFlag()
                 EnvSwitch()

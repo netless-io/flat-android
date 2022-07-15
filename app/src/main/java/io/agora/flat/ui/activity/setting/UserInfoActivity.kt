@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.coil.rememberCoilPainter
+import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
@@ -159,7 +159,7 @@ internal fun AvatarItem(
         FlatTextBodyOne(tip, Modifier.weight(1f))
         IconButton(onClick = onIconClick) {
             Image(
-                painter = rememberCoilPainter(userAvatar),
+                painter = rememberImagePainter(userAvatar),
                 contentDescription = null,
                 modifier = Modifier
                     .size(32.dp, 32.dp)
@@ -182,7 +182,7 @@ private fun BindingItem(
         Spacer(modifier = Modifier.width(16.dp))
         FlatTextBodyOne(tip, modifier = Modifier.weight(1f))
         TextButton(onClick = onClick) {
-            FlatTextButton(stringResource(if (bind) R.string.bind else R.string.unbind))
+            FlatTextButton(stringResource(if (bind) R.string.unbind else R.string.bind))
         }
         Spacer(modifier = Modifier.width(16.dp))
     }

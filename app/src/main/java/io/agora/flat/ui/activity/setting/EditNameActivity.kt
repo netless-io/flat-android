@@ -34,8 +34,7 @@ class EditNameActivity : BaseComposeActivity() {
 }
 
 @Composable
-private fun EditNameScreen() {
-    val viewModel: UserViewModel = hiltViewModel()
+private fun EditNameScreen(viewModel: UserViewModel = hiltViewModel()) {
     val state by viewModel.userInfo.collectAsState()
 
     var name by remember { mutableStateOf(state?.name ?: "") }

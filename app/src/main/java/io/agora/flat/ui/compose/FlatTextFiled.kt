@@ -1,7 +1,9 @@
 package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +18,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.agora.flat.ui.theme.*
 
 @Composable
@@ -39,6 +42,7 @@ fun FlatPrimaryTextField(
                 focusedIndicatorColor = if (darkMode) Blue_7 else Blue_6,
                 unfocusedIndicatorColor = if (darkMode) Gray_8 else Gray_6,
                 cursorColor = if (darkMode) Blue_7 else Blue_6,
+                backgroundColor = if (darkMode) Gray_10 else Gray_0,
             ),
             textStyle = MaterialTheme.typography.body1,
             singleLine = true,
@@ -101,12 +105,15 @@ private fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
 }
 
 @Composable
-@Preview
+@Preview(uiMode = 0x30)
 @Preview(uiMode = 0x20)
 private fun FlatTextButtonPreview() {
     FlatColumnPage {
-        FlatPrimaryTextField("TextField", onValueChange = {})
-        FlatNormalVerticalSpacer()
-        FlatPrimaryTextField("TextButton", enabled = false, onValueChange = {})
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            FlatNormalVerticalSpacer()
+            FlatPrimaryTextField("TextField", onValueChange = {})
+            FlatNormalVerticalSpacer()
+            FlatPrimaryTextField("TextButton", enabled = false, onValueChange = {})
+        }
     }
 }

@@ -26,7 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.accompanist.coil.rememberCoilPainter
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
@@ -162,6 +163,7 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
     FlatTopAppBar(
@@ -171,7 +173,7 @@ fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
                 actioner(HomeViewAction.GotoSetting)
             }) {
                 Image(
-                    painter = rememberCoilPainter(userAvatar),
+                    painter = rememberImagePainter(userAvatar),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp, 24.dp)
