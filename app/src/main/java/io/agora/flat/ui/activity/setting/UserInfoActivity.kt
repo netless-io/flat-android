@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.coil.rememberCoilPainter
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
@@ -36,6 +34,9 @@ import io.agora.flat.ui.viewmodel.UserInfoUiState
 import io.agora.flat.ui.viewmodel.UserInfoViewModel
 import javax.inject.Inject
 
+/**
+ * bindingHandler -> thirdParty(webview, wechat) -> XXXEntryActivity -> LoginManager -> bindingHandler.handleResult
+ */
 @AndroidEntryPoint
 class UserInfoActivity : BaseComposeActivity() {
 
@@ -45,35 +46,11 @@ class UserInfoActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlatColumnPage {
-                val viewModel = viewModel(UserInfoViewModel::class.java)
-                val state by viewModel.state.collectAsState()
-
-                val actioner: (UserInfoUiAction) -> Unit = { action ->
-                    when (action) {
-                        UserInfoUiAction.BindGithub -> {
-                            bindingHandler.bindWithType(LoginType.Github)
-                        }
-                        UserInfoUiAction.BindWeChat -> {
-                            bindingHandler.bindWithType(LoginType.WeChat)
-                        }
-                        else -> viewModel.processAction(action)
-                    }
-                }
-
-                BackTopAppBar(stringResource(R.string.title_user_info), { finish() })
-
-                SettingList(state, actioner)
-
-                LifecycleHandler(
-                    onResume = {
-                        viewModel.refreshUser()
-                        intent?.run {
-                            bindingHandler.handleResult(this)
-                        }
-                    }
-                )
-            }
+            UserInfoScreen(
+                onBindGithub = { bindingHandler.bindWithType(LoginType.Github) },
+                onBindWeChat = { bindingHandler.bindWithType(LoginType.WeChat) },
+                onBackPressed = { finish() }
+            )
         }
     }
 
@@ -81,13 +58,58 @@ class UserInfoActivity : BaseComposeActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
     }
+
+    override fun onResume() {
+        super.onResume()
+        intent?.run {
+            bindingHandler.handleResult(this)
+        }
+    }
+}
+
+
+@Composable
+internal fun UserInfoScreen(
+    viewModel: UserInfoViewModel = hiltViewModel(),
+    onBindGithub: () -> Unit,
+    onBindWeChat: () -> Unit,
+    onBackPressed: () -> Unit,
+) {
+    val state by viewModel.state.collectAsState()
+
+    val actioner: (UserInfoUiAction) -> Unit = { action ->
+        when (action) {
+            UserInfoUiAction.Finish -> {
+                onBackPressed()
+            }
+            UserInfoUiAction.BindGithub -> {
+                onBindGithub()
+            }
+            UserInfoUiAction.BindWeChat -> {
+                onBindWeChat()
+            }
+            else -> viewModel.processAction(action)
+        }
+    }
+
+    UserInfoScreen(state, actioner)
+    LifecycleHandler(onResume = { viewModel.refreshUser() })
 }
 
 @Composable
-fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
+internal fun UserInfoScreen(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
+    FlatColumnPage {
+        BackTopAppBar(stringResource(R.string.title_user_info), { actioner(UserInfoUiAction.Finish) })
+        SettingList(state, actioner)
+    }
+}
+
+@Composable
+private fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
     val context = LocalContext.current
     val bindingWeChat = state.bindings?.wechat == true
     val bindingGithub = state.bindings?.github == true
+    // avatar may be image uri string or android content uri
     var avatar by remember { mutableStateOf<Any?>(state.userInfo?.avatar) }
 
     val launcherPickAvatar = launcherPickContent {
@@ -97,7 +119,7 @@ fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
 
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            AvatarItem(tip = stringResource(R.string.user_avatar), userAvatar = avatar) {
+            AvatarItem(stringResource(R.string.user_avatar), userAvatar = avatar) {
                 launcherPickAvatar("image/*")
             }
             SettingItem(
@@ -107,7 +129,7 @@ fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
             )
         }
         item {
-            FlatTextBodyOneSecondary(stringResource(R.string.bind_info), Modifier.padding(16.dp))
+            FlatTextBodyTwo(stringResource(R.string.bind_info), Modifier.padding(16.dp))
             BindingItem(stringResource(R.string.github), bindingGithub) {
                 if (bindingGithub) {
                     actioner(UserInfoUiAction.UnbindGithub)
@@ -130,34 +152,22 @@ fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> Unit) {
 internal fun AvatarItem(
     tip: String,
     userAvatar: Any?,
-    onClick: () -> Unit = {},
+    onIconClick: () -> Unit = {},
 ) {
-    val color = MaterialTheme.colors.onBackground
-    CompositionLocalProvider(LocalContentColor provides color.copy(alpha = 1f)) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Spacer(Modifier.width(16.dp))
-            FlatTextBodyOne(text = tip,
-                Modifier
-                    .weight(1f)
-                    .padding(vertical = 8.dp))
-            Spacer(Modifier.width(8.dp))
-            IconButton(onClick = { onClick() }) {
-                Image(
-                    painter = rememberCoilPainter(userAvatar),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(32.dp, 32.dp)
-                        .clip(shape = RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(Modifier.width(16.dp))
+    Row(Modifier.heightIn(48.dp), verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.width(16.dp))
+        FlatTextBodyOne(tip, Modifier.weight(1f))
+        IconButton(onClick = onIconClick) {
+            Image(
+                painter = rememberCoilPainter(userAvatar),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(32.dp, 32.dp)
+                    .clip(shape = RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
+        Spacer(Modifier.width(16.dp))
     }
 }
 
@@ -168,33 +178,21 @@ private fun BindingItem(
     bind: Boolean,
     onClick: () -> Unit,
 ) {
-    val modifier = Modifier
-        .fillMaxWidth()
-        .height(48.dp)
-
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.heightIn(48.dp), verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
-        FlatTextBodyOne(tip)
-        Spacer(modifier = Modifier.weight(1f))
+        FlatTextBodyOne(tip, modifier = Modifier.weight(1f))
         TextButton(onClick = onClick) {
-            FlatTextButton(if (bind) "解绑" else "绑定")
+            FlatTextButton(stringResource(if (bind) R.string.bind else R.string.unbind))
         }
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = 0x30)
+@Preview(showBackground = true, uiMode = 0x20)
 @Composable
 fun DefaultPreview() {
-    FlatColumnPage {
-        SettingList(UserInfoUiState(
-            UserInfo("name", "", "uuid", false),
-            UserBindings(
-                wechat = false,
-                phone = true,
-                github = false,
-                google = true
-            )
-        )) { }
-    }
+    val userInfo = UserInfo("name", "", "uuid", false)
+    val userBindings = UserBindings(wechat = false, phone = true, github = false, google = true)
+    UserInfoScreen(UserInfoUiState(userInfo, userBindings)) { }
 }

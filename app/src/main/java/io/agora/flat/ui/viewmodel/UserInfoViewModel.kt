@@ -67,7 +67,7 @@ class UserInfoViewModel @Inject constructor(
 
     fun refreshUser() {
         viewModelScope.launch {
-
+            _userInfo.value = userRepository.getUserInfo()
         }
     }
 
@@ -77,6 +77,7 @@ class UserInfoViewModel @Inject constructor(
                 UserInfoUiAction.UnbindGithub -> userRepository.removeBinding(LoginPlatform.Github)
                 UserInfoUiAction.UnbindWeChat -> userRepository.removeBinding(LoginPlatform.WeChat)
                 is UserInfoUiAction.PickedAvatar -> handlePickedAvatar(action.info)
+                else -> {}
             }
             _userBindings.value = userRepository.getBindings()
         }
@@ -132,10 +133,11 @@ data class UserInfoUiState(
 )
 
 sealed class UserInfoUiAction {
-    object UnbindWeChat : UserInfoUiAction()
-    object UnbindGithub : UserInfoUiAction()
+    object Finish : UserInfoUiAction()
     object BindGithub : UserInfoUiAction()
     object BindWeChat : UserInfoUiAction()
 
+    object UnbindWeChat : UserInfoUiAction()
+    object UnbindGithub : UserInfoUiAction()
     data class PickedAvatar(val info: ContentInfo) : UserInfoUiAction()
 }

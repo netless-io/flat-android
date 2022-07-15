@@ -24,7 +24,7 @@ object DarkModeManager {
 
     private const val KEY_DARK_MODE = "key_dark_mode"
 
-    private lateinit var store: SharedPreferences
+    private var store: SharedPreferences? = null
 
     fun init(application: Application) {
         store = application.getSharedPreferences("flat_config", Context.MODE_PRIVATE)
@@ -32,7 +32,7 @@ object DarkModeManager {
     }
 
     fun current(): Mode {
-        return Mode.of(store.getString(KEY_DARK_MODE, Mode.Auto.type))
+        return Mode.of(store?.getString(KEY_DARK_MODE, Mode.Auto.type))
     }
 
     fun update(mode: Mode) {
@@ -41,7 +41,7 @@ object DarkModeManager {
             Mode.Light -> AppCompatDelegate.MODE_NIGHT_NO
             Mode.Dark -> AppCompatDelegate.MODE_NIGHT_YES
         })
-        store.edit(commit = true) {
+        store?.edit(commit = true) {
             putString(KEY_DARK_MODE, mode.type)
         }
     }
