@@ -12,10 +12,14 @@ import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.RoomsUpdated
+import io.agora.flat.event.UserUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.FlatFormatter
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -77,6 +81,15 @@ class HomeViewModel @Inject constructor(
                 reloadRoomList()
             }
         }
+
+        viewModelScope.launch {
+            eventBus.events.filterIsInstance<UserUpdated>().collect {
+                appKVCenter.getUserInfo()?.let {
+                    userInfo.value = it
+                }
+            }
+        }
+
 
         reloadRoomList()
     }

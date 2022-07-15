@@ -16,6 +16,7 @@ import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.event.UserBindingsUpdated
+import io.agora.flat.event.UserUpdated
 import io.agora.flat.util.ContentInfo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -55,6 +56,7 @@ class UserInfoViewModel @Inject constructor(
         viewModelScope.launch {
             UploadManager.uploadSuccess.filterNotNull().filter { it.uuid == currentFileUUID }.collect {
                 cloudStorageRepository.updateAvatarFinish(it.uuid)
+                eventBus.produceEvent(UserUpdated)
             }
         }
     }
