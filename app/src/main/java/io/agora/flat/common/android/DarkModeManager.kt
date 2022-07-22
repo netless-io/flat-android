@@ -28,7 +28,7 @@ object DarkModeManager {
 
     fun init(application: Application) {
         store = application.getSharedPreferences("flat_config", Context.MODE_PRIVATE)
-        update(current())
+        setDarkMode(current())
     }
 
     fun current(): Mode {
@@ -36,13 +36,17 @@ object DarkModeManager {
     }
 
     fun update(mode: Mode) {
+        setDarkMode(mode)
+        store?.edit(commit = true) {
+            putString(KEY_DARK_MODE, mode.type)
+        }
+    }
+
+    private fun setDarkMode(mode: Mode) {
         AppCompatDelegate.setDefaultNightMode(when (mode) {
             Mode.Auto -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             Mode.Light -> AppCompatDelegate.MODE_NIGHT_NO
             Mode.Dark -> AppCompatDelegate.MODE_NIGHT_YES
         })
-        store?.edit(commit = true) {
-            putString(KEY_DARK_MODE, mode.type)
-        }
     }
 }
