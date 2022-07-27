@@ -1,5 +1,7 @@
 package io.agora.flat.di.interfaces
 
+import io.agora.flat.common.rtm.ClassRemoteData
+import io.agora.flat.common.rtm.ClassRtmEvent
 import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.RTMEvent
@@ -20,7 +22,11 @@ interface RtmApi {
 
     suspend fun sendChannelCommand(event: RTMEvent): Boolean
 
+    suspend fun sendChannelCommand(event: ClassRemoteData): Boolean
+
     suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean
+
+    suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String): Boolean
 
     /**
      * 获取历史聊天消息

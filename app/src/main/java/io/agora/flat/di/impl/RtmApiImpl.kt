@@ -2,9 +2,7 @@ package io.agora.flat.di.impl
 
 import android.content.Context
 import android.util.Log
-import io.agora.flat.common.rtm.EmptyRtmChannelListener
-import io.agora.flat.common.rtm.EmptyRtmClientListener
-import io.agora.flat.common.rtm.RTMListener
+import io.agora.flat.common.rtm.*
 import io.agora.flat.common.toFlatException
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
@@ -25,8 +23,7 @@ import kotlin.coroutines.suspendCoroutine
 class RtmApiImpl @Inject constructor(
     private val messageRepository: MessageRepository,
     private val appEnv: AppEnv,
-) : RtmApi,
-    StartupInitializer {
+) : RtmApi, StartupInitializer {
     companion object {
         val TAG = RtmApiImpl::class.simpleName
 
@@ -47,6 +44,7 @@ class RtmApiImpl @Inject constructor(
     }
 
     private lateinit var rtmClient: RtmClient
+
     private val rtmClientListener = object : EmptyRtmClientListener {
         override fun onConnectionStateChanged(state: Int, reason: Int) {
             Log.d(TAG, "Connection state changes to $state reason:$reason")
@@ -56,11 +54,9 @@ class RtmApiImpl @Inject constructor(
         }
 
         override fun onMessageReceived(message: RtmMessage, peerId: String) {
-            Log.d(TAG, "Message received from $peerId ${message.text}")
-            val event = RTMEvent.parseRTMEvent(message.text)
-            if (channelCommandID == event.r) {
-                rtmListeners.forEach { it.onRTMEvent(event, peerId) }
-            }
+            Log.d(TAG, "Message received from $peerId ${String(message.rawMessage)}")
+            val event = ClassRtmEvent.parse(String(message.rawMessage), peerId)
+            rtmListeners.forEach { it.onClassEvent(event) }
         }
     }
 
@@ -203,6 +199,30 @@ class RtmApiImpl @Inject constructor(
                 }
             }) ?: cont.resume(false)
         }
+    }
+
+    override suspend fun sendChannelCommand(event: ClassRemoteData): Boolean {
+        throw RuntimeException("NOT REALIZE")
+    }
+
+    override suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
+        Log.d(TAG, "sendPeerCommand ${ClassRtmEvent.toText(event)}")
+
+        val message = rtmClient.createMessage()
+        message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
+        val option = SendMessageOptions().apply {
+            enableOfflineMessaging = true
+        }
+
+        rtmClient.sendMessageToPeer(peerId, message, option, object : ResultCallback<Void?> {
+            override fun onSuccess(v: Void?) {
+                cont.resume(true)
+            }
+
+            override fun onFailure(error: ErrorInfo) {
+                cont.resume(false)
+            }
+        })
     }
 
     override suspend fun sendPeerCommand(event: RTMEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->

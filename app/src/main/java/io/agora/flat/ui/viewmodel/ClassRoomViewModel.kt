@@ -16,8 +16,7 @@ import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.android.StringFetcher
-import io.agora.flat.common.rtm.Message
-import io.agora.flat.common.rtm.MessageFactory
+import io.agora.flat.common.rtm.*
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
@@ -26,6 +25,7 @@ import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
+import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.util.Ticker
@@ -56,6 +56,7 @@ class ClassRoomViewModel @Inject constructor(
     private val messageState: MessageState,
     private val rtmApi: RtmApi,
     private val rtcApi: RtcApi,
+    private val syncedClassState: SyncedClassState,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,
@@ -361,6 +362,35 @@ class ClassRoomViewModel @Inject constructor(
         return userUUID == _state.value.ownerUUID
     }
 
+    fun onClassEvent(event: ClassRtmEvent) {
+        when (event) {
+            is OnStageEvent -> {
+                val sender = event.sender!!
+                if (event.onStage) {
+                    if (sender == state.value.ownerUUID) {
+                        userManager.updateSpeakAndRaise(
+                            userUUID,
+                            isSpeak = event.onStage,
+                            isRaiseHand = false,
+                        )
+                    }
+                } else {
+                    if (sender == state.value.ownerUUID || sender == userUUID) {
+                        syncedClassState.updateOnStage(userUUID)
+                        userManager.updateSpeakAndRaise(
+                            userUUID,
+                            isSpeak = event.onStage,
+                            isRaiseHand = false,
+                        )
+                    }
+                }
+            }
+            is RaiseHandEvent -> {
+                userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
+            }
+        }
+    }
+
     fun onRTMEvent(event: RTMEvent, senderId: String) {
         when (event) {
             is RTMEvent.ChannelMessage -> {
@@ -466,9 +496,12 @@ class ClassRoomViewModel @Inject constructor(
                 if (this.isSpeak) {
                     return@run
                 }
-                val event = RTMEvent.RaiseHand(!isRaiseHand)
-                rtmApi.sendChannelCommand(event)
-                updateRaiseHandStatus(_state.value.userUUID, event)
+                val event = RaiseHandEvent(
+                    roomUUID = roomUUID,
+                    raiseHand = !isRaiseHand,
+                )
+                rtmApi.sendPeerCommand(event, state.value.ownerUUID)
+                userManager.updateRaiseHandStatus(userUUID, event.raiseHand)
             }
         }
     }
@@ -740,21 +773,22 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun acceptSpeak(userUUID: String) {
+    fun acceptRaiseHand(userUUID: String) {
         viewModelScope.launch {
             if (isRoomOwner()) {
-                rtmApi.sendChannelCommand(RTMEvent.Speak(listOf(SpeakItem(userUUID, true))))
+                sendOnStage(userUUID, true)
                 userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
             }
         }
     }
 
-    fun acceptRaiseHand(userUUID: String) {
+    private fun sendOnStage(userUUID: String, onStage: Boolean) {
         viewModelScope.launch {
-            if (isRoomOwner()) {
-                rtmApi.sendChannelCommand(RTMEvent.AcceptRaiseHand(AcceptRaiseHandValue(userUUID, true)))
-                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
-            }
+            val event = OnStageEvent(
+                roomUUID = _state.value.roomUUID,
+                onStage = onStage
+            )
+            rtmApi.sendPeerCommand(event, userUUID)
         }
     }
 

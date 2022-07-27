@@ -14,6 +14,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.FlatException
+import io.agora.flat.common.rtm.ClassRtmEvent
 import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
@@ -157,6 +158,10 @@ class RtmComponent(
         override fun onRTMEvent(event: RTMEvent, senderId: String) {
             Log.d(TAG, "event is $event")
             viewModel.onRTMEvent(event, senderId)
+        }
+
+        override fun onClassEvent(event: ClassRtmEvent) {
+            viewModel.onClassEvent(event)
         }
 
         override fun onMemberJoined(userId: String, channelId: String) {

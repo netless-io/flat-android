@@ -16,6 +16,7 @@ import io.agora.flat.Constants
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.util.getAppVersion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,7 @@ class BoardRoom @Inject constructor(
     val context: Context,
     val userRepository: UserRepository,
     val appKVCenter: AppKVCenter,
+    val syncedClassState: SyncedClassState,
 ) : IBoardRoom {
     companion object {
         const val TAG = "BoardRoom"
@@ -43,7 +45,7 @@ class BoardRoom @Inject constructor(
     private var memberState = MutableStateFlow<MemberState?>(null)
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
-    private var netlessUA = listOf(
+    private var flatNetlessUA = listOf(
         "fastboard/${Fastboard.VERSION}",
         "FLAT/NETLESS@${context.getAppVersion()}"
     )
@@ -69,7 +71,8 @@ class BoardRoom @Inject constructor(
         )
         val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isUserCursor = true
-            setNetlessUA(netlessUA)
+            isEnableSyncedStore = true
+            netlessUA = flatNetlessUA
         }
         fastRoomOptions.sdkConfiguration = sdkConfiguration
 
@@ -88,6 +91,7 @@ class BoardRoom @Inject constructor(
             disableEraseImage = true
         }
         fastRoomOptions.roomParams = roomParams
+        fastRoomOptions.sdkConfiguration = sdkConfiguration;
 
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
         fastRoom?.addListener(object : FastRoomListener {
@@ -100,6 +104,11 @@ class BoardRoom @Inject constructor(
                     else -> {}
                 }
             }
+
+            override fun onRoomReadyChanged(fastRoom: FastRoom) {
+                super.onRoomReadyChanged(fastRoom)
+                initStorage(fastRoom)
+            }
         })
 
         if (rootRoomController != null) {
@@ -109,6 +118,12 @@ class BoardRoom @Inject constructor(
         setDarkMode(darkMode)
 
         fastRoom?.join()
+    }
+
+    private fun initStorage(fastRoom: FastRoom) {
+        if (syncedClassState is WhiteSyncedState) {
+            syncedClassState.resetRoom(fastRoom)
+        }
     }
 
     override fun setDarkMode(dark: Boolean) {

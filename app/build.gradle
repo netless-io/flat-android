@@ -14,8 +14,8 @@ android {
         applicationId "io.agora.flat"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 23
-        versionName "1.4.1"
+        versionCode 24
+        versionName "1.4.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -203,14 +203,14 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
-    // implementation("com.github.netless-io:whiteboard-android:2.16.23") {
+    // implementation("com.github.netless-io:whiteboard-android:7181ee4544f43dc3a7e38ddea79e6ab5574c7ca1") {
     //     force true
     // }
     // for local fastboard debug
     if (findProject(":fastboard") != null) {
         implementation project(':fastboard')
     } else {
-        implementation 'com.github.netless-io:fastboard-android:1.2.2'
+        implementation('com.github.netless-io:fastboard-android:1.2.3')
     }
 
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'

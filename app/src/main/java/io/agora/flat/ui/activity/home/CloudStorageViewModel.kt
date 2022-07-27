@@ -139,13 +139,11 @@ class CloudStorageViewModel @Inject constructor(
 
     fun uploadFile(action: CloudStorageUIAction.UploadFile) {
         viewModelScope.launch {
-            // val useProjector = action.info.filename.endsWith("pptx")
             var result: CloudStorageUploadStartResp? = null
             var resp =
                 cloudStorageRepository.updateStart(
                     action.info.filename,
                     action.info.size,
-                    // projector = if (useProjector) true else null
                 )
             when (resp) {
                 is Success -> result = resp.data
@@ -156,7 +154,6 @@ class CloudStorageViewModel @Inject constructor(
                         resp = cloudStorageRepository.updateStart(
                             action.info.filename,
                             action.info.size,
-                            // projector = if (useProjector) true else null,
                         )
                         if (resp is Success) {
                             result = resp.data
