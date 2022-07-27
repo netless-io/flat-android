@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.3.8] - July 27, 2022
+
+- Support Force Update Notice
+- Support User Binding
+
 ## [1.3.6] - June 29, 2022
 
 - Add permission check when pick files
