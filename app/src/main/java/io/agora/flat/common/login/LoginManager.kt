@@ -15,27 +15,33 @@ import javax.inject.Singleton
 class LoginManager @Inject constructor(
     @ApplicationContext val context: Context,
 ) {
-    private var api: IWXAPI = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID, true)
+    private var api: IWXAPI? = null
     private var wechatReceiver: BroadcastReceiver? = null
-
     var actionClazz: Class<out Activity>? = null
 
-    init {
-        api.registerApp(Constants.WX_APP_ID)
+    fun registerApp() {
+        ensureInit()
+        api?.registerApp(Constants.WX_APP_ID)
     }
 
-    fun onRegister(context: Context) {
+    private fun ensureInit() {
+        if (api == null) {
+            api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID, true)
+        }
+    }
+
+    fun registerReceiver(context: Context) {
         if (wechatReceiver != null) {
             wechatReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    api.registerApp(Constants.WX_APP_ID)
+                    registerApp()
                 }
             }
         }
         context.registerReceiver(wechatReceiver, IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP))
     }
 
-    fun onUnregister(context: Context) {
+    fun unregisterReceiver(context: Context) {
         if (wechatReceiver != null) {
             context.unregisterReceiver(wechatReceiver)
             wechatReceiver = null
@@ -47,7 +53,7 @@ class LoginManager @Inject constructor(
             scope = "snsapi_userinfo"
             state = "wechat_sdk_flat"
         }
-        api.sendReq(req)
+        api?.sendReq(req)
     }
 
     fun wechatAuthSuccess(context: Context, code: String) {

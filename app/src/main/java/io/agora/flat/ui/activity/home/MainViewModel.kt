@@ -65,7 +65,9 @@ class MainViewModel @Inject constructor(
                 joinRoom(it, false, openAudio = false)
             }
         }
+    }
 
+    fun checkVersion() {
         viewModelScope.launch {
             delay(3000)
             _state.value = _state.value.copy(versionCheckResult = versionChecker.check())

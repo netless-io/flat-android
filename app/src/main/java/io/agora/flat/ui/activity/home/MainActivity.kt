@@ -52,15 +52,25 @@ class MainActivity : BaseComposeActivity() {
             if (viewState.protocolAgreed) {
                 MainScreen(viewState)
                 LifecycleHandler(
+                    onCreate = {
+                        loginManager.registerApp()
+                        loginManager.registerReceiver(this)
+                        viewModel.checkVersion()
+                    },
                     onResume = {
                         if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
                             Navigator.launchLoginActivity(this)
                         }
                     },
+                    onDestroy = {
+                        loginManager.unregisterReceiver(this)
+                    },
                 )
             } else {
                 GlobalAgreementDialog(
-                    onAgree = { viewModel.agreeProtocol() },
+                    onAgree = {
+                        viewModel.agreeProtocol()
+                    },
                     onRefuse = { finish() },
                 )
             }
@@ -85,12 +95,10 @@ class MainActivity : BaseComposeActivity() {
                 }
             }
         }
-        loginManager.onRegister(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        loginManager.onUnregister(this)
     }
 }
 
