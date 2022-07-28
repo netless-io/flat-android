@@ -69,7 +69,6 @@ class WhiteboardComponent(
                 boardRoom.join(
                     it.whiteboardRoomUUID,
                     it.whiteboardRoomToken,
-                    viewModel.state.value.userUUID,
                     it.region,
                     viewModel.state.value.isWritable,
                 )

@@ -53,18 +53,21 @@ class BoardRoom @Inject constructor(
         fastRoom?.rootRoomController = rootRoomController
     }
 
-    override fun join(roomUUID: String, roomToken: String, userId: String, region: String, writable: Boolean) {
+    override fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean) {
         val fastRoomOptions = FastRoomOptions(
             Constants.NETLESS_APP_IDENTIFIER,
             roomUUID,
             roomToken,
-            userId,
+            userRepository.getUserUUID(),
             region.toFastRegion(),
             writable
         )
         val roomParams = fastRoomOptions.roomParams.apply {
-            windowParams.prefersColorScheme =
-                if (darkMode) WindowPrefersColorScheme.Dark else WindowPrefersColorScheme.Light
+            windowParams.prefersColorScheme = if (darkMode) {
+                WindowPrefersColorScheme.Dark
+            } else {
+                WindowPrefersColorScheme.Light
+            }
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
                 nickName = userRepository.getUsername(),
@@ -87,10 +90,10 @@ class BoardRoom @Inject constructor(
             }
         })
 
-        rootRoomController?.let {
+        if (rootRoomController != null) {
             fastRoom?.rootRoomController = rootRoomController
+            updateRoomController(writable)
         }
-
         setDarkMode(darkMode)
 
         fastRoom?.join()
@@ -112,7 +115,13 @@ class BoardRoom @Inject constructor(
     }
 
     override fun setWritable(writable: Boolean) {
-        fastRoom?.setWritable(writable)
+        if (fastRoom?.room?.writable != writable) {
+            fastRoom?.setWritable(writable)
+        }
+        updateRoomController(writable)
+    }
+
+    private fun updateRoomController(writable: Boolean) {
         if (writable) {
             fastRoom?.rootRoomController?.show()
         } else {
