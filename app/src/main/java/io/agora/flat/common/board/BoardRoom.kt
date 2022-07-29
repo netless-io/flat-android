@@ -62,6 +62,11 @@ class BoardRoom @Inject constructor(
             region.toFastRegion(),
             writable
         )
+        val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
+            isUserCursor = true
+        }
+        fastRoomOptions.sdkConfiguration = sdkConfiguration
+
         val roomParams = fastRoomOptions.roomParams.apply {
             windowParams.prefersColorScheme = if (darkMode) {
                 WindowPrefersColorScheme.Dark

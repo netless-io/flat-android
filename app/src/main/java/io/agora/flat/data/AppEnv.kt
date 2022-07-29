@@ -30,7 +30,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             "https://flat-api-dev.whiteboard.agora.io",
             "9821657775fbc74773f1",
             "https://flat-web-dev.whiteboard.agora.io",
-            versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/test/latest/stable/android/checkVersion.json",
+            versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/beta/android/checkVersion.json",
         )
         envMap[ENV_PROD] = EnvItem(
             AGORA_APP_ID,
