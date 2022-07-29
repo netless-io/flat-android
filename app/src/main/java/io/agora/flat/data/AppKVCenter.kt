@@ -90,7 +90,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
     }
 
     fun isNetworkAcceleration(): Boolean {
-        return store.getBoolean(KEY_NETWORK_ACCELERATION, true)
+        // default close fpa
+        return store.getBoolean(KEY_NETWORK_ACCELERATION, false)
     }
 
     fun setUseProjectorConvertor(enable: Boolean) {
