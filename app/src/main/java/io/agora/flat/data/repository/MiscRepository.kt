@@ -1,6 +1,7 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
+import io.agora.flat.data.model.LogErrorReq
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
 import io.agora.flat.data.toResult
@@ -23,6 +24,12 @@ class MiscRepository @Inject constructor(
     suspend fun generateRtmToken(page: Int): Result<PureToken> {
         return withContext(Dispatchers.IO) {
             miscService.generateRtmToken().toResult()
+        }
+    }
+
+    suspend fun logError(message: String) {
+        return withContext(Dispatchers.IO) {
+            miscService.logError(LogErrorReq(message)).toResult()
         }
     }
 }

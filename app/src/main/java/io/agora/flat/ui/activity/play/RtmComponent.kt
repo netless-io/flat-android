@@ -17,6 +17,7 @@ import io.agora.flat.common.FlatException
 import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
@@ -28,7 +29,6 @@ import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.KeyboardHeightProvider
 import io.agora.flat.util.delayAndFinish
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -45,6 +45,7 @@ class RtmComponent(
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
         fun userRepository(): UserRepository
+        fun miscRepository(): MiscRepository
         fun rtmApi(): RtmApi
     }
 
@@ -53,6 +54,7 @@ class RtmComponent(
     private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     private lateinit var userRepository: UserRepository
+    private lateinit var miscRepository: MiscRepository
     private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
@@ -60,6 +62,7 @@ class RtmComponent(
         super.onCreate(owner)
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
+        miscRepository = entryPoint.miscRepository()
         rtmApi = entryPoint.rtmApi()
 
         initView()
@@ -142,8 +145,11 @@ class RtmComponent(
         super.onDestroy(owner)
         keyboardHeightProvider?.dismiss()
         runBlocking {
-            rtmApi.logout()
-            rtmApi.removeRtmListener(flatRTMListener)
+            try {
+                rtmApi.logout()
+                rtmApi.removeRtmListener(flatRTMListener)
+            } catch (e: FlatException) {
+            }
         }
     }
 
@@ -186,7 +192,8 @@ class RtmComponent(
                 viewModel.notifyRTMChannelJoined()
                 Log.d(TAG, "notify rtm joined success")
             } catch (e: FlatException) {
-                // showExistDialog()
+                miscRepository.logError(e.toString())
+                showRoomExitDialog(e.toString())
             }
         }
     }

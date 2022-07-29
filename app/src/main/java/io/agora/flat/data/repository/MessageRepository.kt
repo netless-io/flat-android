@@ -71,7 +71,7 @@ class MessageRepository @Inject constructor(
                     val handle = location.replace(Regex("^.*/query/"), "")
                     Success(data = handle)
                 } else {
-                    Failure(FlatException(0, ""))
+                    Failure(FlatException("query history handle error"))
                 }
             } catch (e: Exception) {
                 Failure(e)
@@ -93,7 +93,7 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
                 } else {
-                    Failure(FlatException(0, ""))
+                    Failure(FlatException("get messages error"))
                 }
             } catch (e: Exception) {
                 Failure(e)
@@ -132,7 +132,7 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().count)
                 } else {
-                    Failure(FlatException(0, ""))
+                    Failure(FlatException("get messages count error"))
                 }
             } catch (e: Exception) {
                 Failure(e)

@@ -1,9 +1,6 @@
 package io.agora.flat.http.api
 
-import io.agora.flat.data.model.BaseReq
-import io.agora.flat.data.model.BaseResp
-import io.agora.flat.data.model.PureRoomReq
-import io.agora.flat.data.model.PureToken
+import io.agora.flat.data.model.*
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -23,4 +20,9 @@ interface MiscService {
     fun generateRtmToken(
         @Body empty: BaseReq = BaseReq.EMPTY,
     ): Call<BaseResp<PureToken>>
+
+    @POST("v1/log")
+    fun logError(
+        @Body req: LogErrorReq,
+    ): Call<BaseResp<RespNoData>>
 }

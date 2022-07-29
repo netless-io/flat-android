@@ -32,7 +32,10 @@ import io.agora.flat.util.Ticker
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -104,9 +107,9 @@ class ClassRoomViewModel @Inject constructor(
                 is Success -> result.data.run {
                     initRoomInfo(result.data.roomInfo)
                 }
-            }
-            if (quickStart == true) {
-                startClass()
+                is Failure -> {
+                    _errorMessage.value = "fetch room info error"
+                }
             }
             if (playInfo != null) {
                 _roomPlayInfo.value = playInfo
@@ -124,6 +127,16 @@ class ClassRoomViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateRoomConfig(roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID))
+        }
+
+        viewModelScope.launch {
+            roomEvent.collect {
+                if (it is ClassRoomEvent.RtmChannelJoined) {
+                    if (quickStart == true) {
+                        startClass()
+                    }
+                }
+            }
         }
     }
 
@@ -814,9 +827,6 @@ data class RecordState constructor(
 data class ImageSize(val width: Int, val height: Int)
 
 sealed class ClassRoomEvent {
-    data class RoomPlayInfoFetched(val info: RoomPlayInfo) : ClassRoomEvent()
-    data class Loading(val show: Boolean) : ClassRoomEvent()
-
     object RtmChannelJoined : ClassRoomEvent()
     data class StartRoomResult(val success: Boolean) : ClassRoomEvent()
 
