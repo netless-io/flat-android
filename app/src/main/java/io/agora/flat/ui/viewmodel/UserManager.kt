@@ -2,7 +2,6 @@ package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.model.RTMUserProp
-import io.agora.flat.data.model.RTMUserState
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.di.interfaces.RtcApi
@@ -229,6 +228,19 @@ class UserManager @Inject constructor(
         }
         updateUsers.forEach {
             updateRtcStream(it.rtcUID, it.audioOpen, it.videoOpen)
+        }
+        sortAndNotify(updateUsers)
+    }
+
+    fun handleAllOffStage() {
+        val updateUsers = users.value.filter { it.userUUID != ownerUUID }.toMutableList().map { rtcUser ->
+            rtcUser.copy(videoOpen = false, audioOpen = false, isSpeak = false, isRaiseHand = false)
+        }
+        updateUsers.forEach {
+            updateRtcStream(it.rtcUID, it.audioOpen, it.videoOpen)
+        }
+        updateUsers.forEach {
+            usersCache[it.userUUID] = it
         }
         sortAndNotify(updateUsers)
     }

@@ -394,6 +394,10 @@ class ClassRoomViewModel @Inject constructor(
             is RTMEvent.BanText -> {
                 _state.value = _state.value.copy(ban = event.v)
                 appendMessage(MessageFactory.createNotice(ban = event.v))
+                userManager.handleAllOffStage()
+            }
+            is RTMEvent.AllOffStage -> {
+                userManager.handleAllOffStage()
             }
             is RTMEvent.CancelHandRaising -> {
                 if (senderId == _state.value.ownerUUID) {
@@ -802,14 +806,17 @@ data class ClassRoomState(
     val recordState: RecordState? = null,
 ) {
     val isWritable: Boolean
-        get() = when (roomType) {
-            RoomType.BigClass -> {
-                isOwner || isSpeak
+        get() {
+            if (ban) return isOwner
+            return when (roomType) {
+                RoomType.BigClass -> {
+                    isOwner || isSpeak
+                }
+                RoomType.SmallClass -> {
+                    isOwner || isSpeak || classMode == ClassModeType.Interaction
+                }
+                RoomType.OneToOne -> true
             }
-            RoomType.SmallClass -> {
-                isOwner || isSpeak || classMode == ClassModeType.Interaction
-            }
-            RoomType.OneToOne -> true
         }
 
     val isOwner: Boolean
@@ -822,10 +829,13 @@ data class ClassRoomState(
         get() = roomType == RoomType.SmallClass
 
     val showRaiseHand: Boolean
-        get() = !isWritable and when (roomType) {
-            RoomType.OneToOne -> false
-            RoomType.BigClass -> !isOwner
-            RoomType.SmallClass -> !isOwner && classMode == ClassModeType.Lecture
+        get() {
+            if (ban) return false
+            return !isWritable and when (roomType) {
+                RoomType.OneToOne -> false
+                RoomType.BigClass -> !isOwner
+                RoomType.SmallClass -> !isOwner && classMode == ClassModeType.Lecture
+            }
         }
 
     val needOwnerExitDialog: Boolean

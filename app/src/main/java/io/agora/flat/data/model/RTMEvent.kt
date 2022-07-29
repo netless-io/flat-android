@@ -68,9 +68,12 @@ sealed class RTMEvent(type: RTMessageType = RTMessageType.ChannelMessage) {
     ) : RTMEvent(RTMessageType.RequestChannelStatus)
 
     data class ChannelStatus(
-        @SerializedName("v") val value:
-        ChannelStatusValue,
+        @SerializedName("v") val value: ChannelStatusValue,
     ) : RTMEvent(RTMessageType.ChannelStatus)
+
+    data class AllOffStage(
+        @SerializedName("v") val value: Boolean
+    ) : RTMEvent(RTMessageType.AllOffStage)
 
     companion object {
         val gson = Gson()
@@ -92,6 +95,7 @@ sealed class RTMEvent(type: RTMessageType = RTMessageType.ChannelMessage) {
                     RTMessageType.RoomStatus -> gson.fromJson(jsonObject, RoomStatus::class.java)
                     RTMessageType.RequestChannelStatus -> gson.fromJson(jsonObject, RequestChannelStatus::class.java)
                     RTMessageType.ChannelStatus -> gson.fromJson(jsonObject, ChannelStatus::class.java)
+                    RTMessageType.AllOffStage -> gson.fromJson(jsonObject, AllOffStage::class.java)
                     // TODO
                     else -> ChannelMessage(text)
                 }
@@ -187,7 +191,9 @@ enum class RTMessageType {
     RequestChannelStatus,
 
     /** send room's status */
-    ChannelStatus;
+    ChannelStatus,
+
+    AllOffStage;
 }
 
 enum class RTMUserProp(val flag: String) {
