@@ -148,6 +148,11 @@ class ClassRoomViewModel @Inject constructor(
             scope = viewModelScope,
         )
 
+        // TODO ClassModeType is a configuration of SmallClass
+        val classMode = when (roomInfo.roomType) {
+            RoomType.BigClass -> ClassModeType.Lecture
+            else -> ClassModeType.Interaction
+        }
         _state.value = ClassRoomState(
             roomUUID = roomUUID,
             inviteCode = roomInfo.inviteCode,
@@ -161,6 +166,7 @@ class ClassRoomViewModel @Inject constructor(
             endTime = roomInfo.endTime,
             roomStatus = roomInfo.roomStatus,
             region = roomInfo.region,
+            classMode = classMode,
         )
         observerUserState()
     }
