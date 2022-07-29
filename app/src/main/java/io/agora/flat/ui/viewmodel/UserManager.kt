@@ -2,6 +2,7 @@ package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.model.RTMUserProp
+import io.agora.flat.data.model.RTMUserState
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.di.interfaces.RtcApi
@@ -34,13 +35,13 @@ class UserManager @Inject constructor(
     private var usersCache = mutableMapOf<String, RtcUser>()
 
     private lateinit var roomUUID: String
-    private lateinit var userUUID: String
+    private lateinit var currentUserUUID: String
     private lateinit var ownerUUID: String
     private lateinit var scope: CoroutineScope
 
     fun reset(roomUUID: String, userUUID: String, ownerUUID: String, scope: CoroutineScope) {
         this.roomUUID = roomUUID
-        this.userUUID = userUUID
+        this.currentUserUUID = userUUID
         this.ownerUUID = ownerUUID
         this.scope = scope
 
@@ -61,7 +62,7 @@ class UserManager @Inject constructor(
                     rtcUID = it.value.rtcUID,
                 )
             }
-            userMap[userUUID]?.run {
+            userMap[currentUserUUID]?.run {
                 val config = roomConfigRepository.getRoomConfig(roomUUID)
                 this.audioOpen = config?.enableAudio ?: false
                 this.videoOpen = config?.enableVideo ?: false
@@ -78,7 +79,7 @@ class UserManager @Inject constructor(
     }
 
     private fun sortUser(rtcUser: RtcUser) {
-        if (rtcUser.userUUID == userUUID) {
+        if (rtcUser.userUUID == currentUserUUID) {
             _currentUser.value = rtcUser.copy()
         }
 
@@ -146,7 +147,7 @@ class UserManager @Inject constructor(
     }
 
     fun findFirstOtherUser(): RtcUser? {
-        return users.value.find { it.userUUID != userUUID }
+        return users.value.find { it.userUUID != currentUserUUID }
     }
 
     fun findFirstUser(uuid: String): RtcUser? {
@@ -177,9 +178,17 @@ class UserManager @Inject constructor(
 
     fun updateUserState(uuid: String, audioOpen: Boolean, videoOpen: Boolean, name: String, isSpeak: Boolean) {
         scope.launch {
-            findUser(uuid)?.run {
-                updateUser(copy(audioOpen = audioOpen, videoOpen = videoOpen, name = name, isSpeak = isSpeak))
+            if (usersCache[uuid] == null) {
+                usersCache[uuid] = RtcUser(userUUID = uuid)
+                asyncLoadUserInfo(uuid)
             }
+            val user = usersCache[uuid]!!.copy(
+                audioOpen = audioOpen,
+                videoOpen = videoOpen,
+                name = name,
+                isSpeak = isSpeak,
+            )
+            updateUser(user)
         }
     }
 
@@ -228,8 +237,19 @@ class UserManager @Inject constructor(
         return usersCache[uuid]
     }
 
+    private fun asyncLoadUserInfo(uuid: String) {
+        scope.launch {
+            userQuery.loadUser(uuid)?.let {
+                val rtcUser = usersCache[uuid]!!
+                usersCache[uuid] = rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
+            }
+        }
+    }
+
     private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
         rtcApi.rtcEngine().muteRemoteAudioStream(rtcUID, !audioOpen)
         rtcApi.rtcEngine().muteRemoteVideoStream(rtcUID, !videoOpen)
     }
+
+
 }

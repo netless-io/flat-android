@@ -187,8 +187,7 @@ class RtmComponent(
             try {
                 rtmApi.addRtmListener(flatRTMListener)
                 rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                viewModel.initRoomUsers(rtmApi.getMembers().map { it.userId })
-                viewModel.requestChannelStatus()
+                viewModel.initChannelStatus()
                 viewModel.notifyRTMChannelJoined()
                 Log.d(TAG, "notify rtm joined success")
             } catch (e: FlatException) {
