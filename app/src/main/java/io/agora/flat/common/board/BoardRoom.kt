@@ -79,6 +79,7 @@ class BoardRoom @Inject constructor(
                 cursorName = userRepository.getUsername(),
             )
             isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
+            disableEraseImage = true
         }
         fastRoomOptions.roomParams = roomParams
 
