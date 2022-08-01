@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.4.1] - August 01, 2022
+
+- Fix audio and video state in class room
+
 ## [1.3.8] - July 27, 2022
 
 - Support Force Update Notice
