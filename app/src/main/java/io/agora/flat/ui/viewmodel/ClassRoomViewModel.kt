@@ -174,9 +174,7 @@ class ClassRoomViewModel @Inject constructor(
     private suspend fun updateRoomConfig(config: RoomConfig) {
         _roomConfig.value = config
         roomConfigRepository.updateRoomConfig(config)
-
-        rtcApi.rtcEngine().muteLocalAudioStream(!config.enableAudio)
-        rtcApi.rtcEngine().muteLocalVideoStream(!config.enableVideo)
+        rtcApi.updateLocalStream(audio = config.enableAudio, video = config.enableVideo)
     }
 
     private fun observerUserState() {
@@ -257,7 +255,6 @@ class ClassRoomViewModel @Inject constructor(
     private suspend fun sendAndUpdateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
         val event = RTMEvent.DeviceState(DeviceStateValue(userUUID, enableVideo, enableAudio))
         rtmApi.sendChannelCommand(event)
-
         updateDeviceState(event.value)
     }
 
@@ -311,7 +308,6 @@ class ClassRoomViewModel @Inject constructor(
     private fun updateChannelState(status: ChannelStatusValue) {
         // update room state
         _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
-
         userManager.updateUserStates(status.uStates)
     }
 

@@ -16,6 +16,13 @@ interface RtcApi {
 
     fun setupRemoteVideo(remote: VideoCanvas)
 
+    /**
+     * enable local audio or video
+     */
+    fun updateLocalStream(audio: Boolean, video: Boolean)
+
+    fun updateRemoteStream(rtcUid: Int, audio: Boolean, video: Boolean)
+
     fun addEventListener(listener: RTCEventListener)
 
     fun removeEventListener(listener: RTCEventListener)

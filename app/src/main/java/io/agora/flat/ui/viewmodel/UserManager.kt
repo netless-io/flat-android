@@ -237,7 +237,7 @@ class UserManager @Inject constructor(
             rtcUser.copy(videoOpen = false, audioOpen = false, isSpeak = false, isRaiseHand = false)
         }
         updateUsers.forEach {
-            updateRtcStream(it.rtcUID, it.audioOpen, it.videoOpen)
+            updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
         }
         updateUsers.forEach {
             usersCache[it.userUUID] = it
@@ -259,9 +259,10 @@ class UserManager @Inject constructor(
     }
 
     private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
-        rtcApi.rtcEngine().muteRemoteAudioStream(rtcUID, !audioOpen)
-        rtcApi.rtcEngine().muteRemoteVideoStream(rtcUID, !videoOpen)
+        if (rtcUID == currentUser.value?.rtcUID) {
+            rtcApi.updateLocalStream(audio = audioOpen, video = videoOpen)
+        } else {
+            rtcApi.updateRemoteStream(rtcUid = rtcUID, audio = audioOpen, video = videoOpen)
+        }
     }
-
-
 }

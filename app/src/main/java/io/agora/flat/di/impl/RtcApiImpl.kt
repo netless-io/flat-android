@@ -60,6 +60,17 @@ class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitia
         rtcEngine.setupRemoteVideo(remote)
     }
 
+    override fun updateLocalStream(audio: Boolean, video: Boolean) {
+        // 使用 enableLocalAudio 关闭或开启本地采集后，本地听远端播放会有短暂中断。
+        rtcEngine.enableLocalAudio(audio)
+        rtcEngine.enableLocalVideo(video)
+    }
+
+    override fun updateRemoteStream(rtcUid: Int, audio: Boolean, video: Boolean) {
+        rtcEngine.muteRemoteAudioStream(rtcUid, !audio)
+        rtcEngine.muteRemoteVideoStream(rtcUid, !video)
+    }
+
     override fun addEventListener(listener: RTCEventListener) {
         mHandler.addListener(listener)
     }
