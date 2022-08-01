@@ -3,7 +3,6 @@ package io.agora.flat.ui.viewmodel
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
-import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.di.interfaces.RtcApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +14,6 @@ import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
 class UserManager @Inject constructor(
-    private val roomConfigRepository: RoomConfigRepository,
     private val userQuery: UserQuery,
     private val rtcApi: RtcApi,
 ) {
@@ -51,7 +49,7 @@ class UserManager @Inject constructor(
         notifyUsers()
     }
 
-    suspend fun init(uuids: List<String>): Boolean = suspendCoroutine { cont ->
+    suspend fun initUsers(uuids: List<String>): Boolean = suspendCoroutine { cont ->
         scope.launch {
             val userMap = userQuery.loadUsers(uuids).mapValues {
                 RtcUser(
@@ -60,11 +58,6 @@ class UserManager @Inject constructor(
                     avatarURL = it.value.avatarURL,
                     rtcUID = it.value.rtcUID,
                 )
-            }
-            userMap[currentUserUUID]?.run {
-                val config = roomConfigRepository.getRoomConfig(roomUUID)
-                this.audioOpen = config?.enableAudio ?: false
-                this.videoOpen = config?.enableVideo ?: false
             }
             usersCache.putAll(userMap)
             sortAndNotify(userMap.values.toList())
@@ -188,6 +181,7 @@ class UserManager @Inject constructor(
                 isSpeak = isSpeak,
             )
             updateUser(user)
+            updateRtcStream(user.rtcUID, audioOpen, videoOpen)
         }
     }
 

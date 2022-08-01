@@ -126,10 +126,6 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            updateRoomConfig(roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID))
-        }
-
-        viewModelScope.launch {
             roomEvent.collect {
                 if (it is ClassRoomEvent.RtmChannelJoined) {
                     if (quickStart == true) {
@@ -171,16 +167,22 @@ class ClassRoomViewModel @Inject constructor(
         observerUserState()
     }
 
-    private suspend fun updateRoomConfig(config: RoomConfig) {
-        _roomConfig.value = config
-        roomConfigRepository.updateRoomConfig(config)
-        rtcApi.updateLocalStream(audio = config.enableAudio, video = config.enableVideo)
+    private suspend fun getInitRoomConfig(): RoomConfig {
+        val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
+        return config.copy(
+            enableAudio = state.value.isWritable && config.enableAudio,
+            enableVideo = state.value.isWritable && config.enableVideo,
+        )
     }
 
     private fun observerUserState() {
         viewModelScope.launch {
             userManager.currentUser.filterNotNull().collect {
                 _state.value = _state.value.copy(isSpeak = it.isSpeak, isRaiseHand = it.isRaiseHand)
+                _roomConfig.value = roomConfig.value.copy(
+                    enableVideo = it.videoOpen and it.isSpeak,
+                    enableAudio = it.audioOpen and it.isSpeak,
+                )
             }
         }
 
@@ -215,8 +217,9 @@ class ClassRoomViewModel @Inject constructor(
     fun enableVideo(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch {
             if (isCurrentUser(uuid)) {
-                val config = roomConfig.value.copy(enableVideo = enable)
-                updateRoomConfig(config)
+                roomConfigRepository.updateRoomConfig(
+                    roomConfig.value.copy(enableAudio = enable)
+                )
             }
 
             userManager.findFirstUser(uuid)?.run {
@@ -235,8 +238,9 @@ class ClassRoomViewModel @Inject constructor(
     fun enableAudio(enable: Boolean, uuid: String = _state.value.userUUID) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isCurrentUser(uuid)) {
-                val config = roomConfig.value.copy(enableAudio = enable)
-                updateRoomConfig(config)
+                roomConfigRepository.updateRoomConfig(
+                    roomConfig.value.copy(enableAudio = enable)
+                )
             }
 
             userManager.findFirstUser(uuid)?.run {
@@ -313,32 +317,28 @@ class ClassRoomViewModel @Inject constructor(
 
     fun initChannelStatus() {
         viewModelScope.launch {
-            userManager.init(uuids = rtmApi.getMembers().map { it.userId })
-
-            val firstOtherUser = userManager.findFirstOtherUser()
-            if (firstOtherUser == null) {
-                userManager.updateUserState(
-                    uuid = userUUID,
-                    audioOpen = roomConfig.value.enableAudio,
-                    videoOpen = roomConfig.value.enableVideo,
+            userManager.initUsers(uuids = rtmApi.getMembers().map { it.userId })
+            // update local user state
+            val initRoomConfig = getInitRoomConfig()
+            userManager.updateUserState(
+                uuid = userUUID,
+                audioOpen = initRoomConfig.enableAudio,
+                videoOpen = initRoomConfig.enableVideo,
+                name = userName,
+                isSpeak = isRoomOwner(),
+            )
+            userManager.findFirstOtherUser()?.run {
+                val state = RTMUserState(
                     name = userRepository.getUsername(),
+                    camera = roomConfig.value.enableVideo,
+                    mic = roomConfig.value.enableAudio,
                     isSpeak = isRoomOwner(),
                 )
-            } else {
-                // state change by updateChannelState
-                firstOtherUser.run {
-                    val state = RTMUserState(
-                        name = userRepository.getUsername(),
-                        camera = roomConfig.value.enableVideo,
-                        mic = roomConfig.value.enableAudio,
-                        isSpeak = isRoomOwner(),
-                    )
 
-                    val event = RTMEvent.RequestChannelStatus(
-                        RequestChannelStatusValue(roomUUID, listOf(userUUID), state)
-                    )
-                    rtmApi.sendChannelCommand(event)
-                }
+                val event = RTMEvent.RequestChannelStatus(
+                    RequestChannelStatusValue(roomUUID, listOf(userUUID), state)
+                )
+                rtmApi.sendChannelCommand(event)
             }
         }
     }

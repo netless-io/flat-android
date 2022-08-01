@@ -31,7 +31,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -145,6 +144,9 @@ class ToolComponent(
 
                 binding.handup.isVisible = it.showRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
+
+                binding.layoutSettings.switchVideo.isEnabled = it.isWritable
+                binding.layoutSettings.switchAudio.isEnabled = it.isWritable
             }
         }
 
