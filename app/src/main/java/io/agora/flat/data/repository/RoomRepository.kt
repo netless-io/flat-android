@@ -62,8 +62,7 @@ class RoomRepository @Inject constructor(
 
     suspend fun joinRoom(uuid: String): Result<RoomPlayInfo> {
         return withContext(Dispatchers.IO) {
-            roomService.joinRoom(JoinRoomReq(uuid))
-                .toResult()
+            roomService.joinRoom(JoinRoomReq(uuid)).toResult()
         }
     }
 

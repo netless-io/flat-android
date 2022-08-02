@@ -1,3 +1,5 @@
 package io.agora.flat.data.model
 
-data class JoinRoomReq(val uuid: String)
+import io.agora.flat.BuildConfig
+
+data class JoinRoomReq(val uuid: String, val version: String = BuildConfig.VERSION_NAME)
