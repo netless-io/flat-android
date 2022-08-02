@@ -44,8 +44,8 @@ class BoardRoom @Inject constructor(
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
     private var netlessUA = listOf(
-        "fastboard/${context.getAppVersion()}",
-        "FLAT/NETLESS@${Fastboard.VERSION}"
+        "fastboard/${Fastboard.VERSION}",
+        "FLAT/NETLESS@${context.getAppVersion()}"
     )
 
     override fun initSdk(fastboardView: FastboardView) {
