@@ -69,8 +69,11 @@ class MainViewModel @Inject constructor(
 
     fun checkVersion() {
         viewModelScope.launch {
-            delay(3000)
-            _state.value = _state.value.copy(versionCheckResult = versionChecker.check())
+            val result = versionChecker.check()
+            if (result != VersionCheckResult.Default) {
+                delay(2000)
+                _state.value = _state.value.copy(versionCheckResult = result)
+            }
         }
     }
 

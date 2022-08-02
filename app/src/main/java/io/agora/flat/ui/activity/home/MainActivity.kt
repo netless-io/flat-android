@@ -55,12 +55,12 @@ class MainActivity : BaseComposeActivity() {
                     onCreate = {
                         loginManager.registerApp()
                         loginManager.registerReceiver(this)
-                        viewModel.checkVersion()
                     },
                     onResume = {
                         if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
-                            Navigator.launchLoginActivity(this)
+                            Navigator.launchLoginActivity(this@MainActivity)
                         }
+                        viewModel.checkVersion()
                     },
                     onDestroy = {
                         loginManager.unregisterReceiver(this)
@@ -95,10 +95,6 @@ class MainActivity : BaseComposeActivity() {
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }
 

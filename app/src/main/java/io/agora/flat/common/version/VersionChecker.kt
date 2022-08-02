@@ -16,6 +16,7 @@ class VersionChecker constructor(
     private val versionCheckerUrl: String,
 ) {
     private val gson = Gson()
+    private var lastCheckerTime = 0L
 
     companion object {
         internal fun checkCanUpdate(local: String, remote: String): Boolean {
@@ -46,6 +47,11 @@ class VersionChecker constructor(
     }
 
     suspend fun check(): VersionCheckResult {
+        if (System.currentTimeMillis() - lastCheckerTime < Config.callVersionCheckInterval) {
+            return VersionCheckResult.Default
+        }
+        lastCheckerTime = System.currentTimeMillis()
+
         return withContext(Dispatchers.IO) {
             try {
                 val request = Request.Builder().url(versionCheckerUrl).build()

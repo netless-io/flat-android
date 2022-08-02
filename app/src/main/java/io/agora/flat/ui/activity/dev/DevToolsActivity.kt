@@ -1,13 +1,15 @@
 package io.agora.flat.ui.activity.dev
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Switch
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -17,13 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.Config
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BackTopAppBar
-import io.agora.flat.ui.compose.FlatColumnPage
-import io.agora.flat.ui.compose.FlatTextBodyOne
-import io.agora.flat.ui.compose.FlatTextBodyTwo
+import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showDebugToast
@@ -42,6 +42,7 @@ class DevToolsActivity : BaseComposeActivity() {
 
                 LazyColumn(MaxWidthSpread) {
                     item {
+                        ResumeCheckVersion()
                         ClearLastCancelUpdate()
                         ProjectorEnableFlag()
                         UserLoginFlag()
@@ -54,7 +55,38 @@ class DevToolsActivity : BaseComposeActivity() {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ResumeCheckVersion() {
+    var interval by remember { mutableStateOf("${Config.callVersionCheckInterval}") }
+    val context = LocalContext.current
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Spacer(modifier = Modifier.width(16.dp))
+        FlatTextBodyTwo(text = "checkVersion")
+        Spacer(modifier = Modifier.width(8.dp))
+        OutlinedTextField(
+            value = interval,
+            onValueChange = { interval = it },
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        TextButton(
+            onClick = {
+                Config.callVersionCheckInterval = interval.toLong() * 1000
+                if (context is Activity) {
+                    context.finish()
+                }
+            }) {
+            FlatTextButton("确定")
+        }
+    }
+}
+
 @Composable
 private fun EnvSwitch() {
     val context = LocalContext.current
@@ -159,7 +191,6 @@ fun MockEnableFlag() {
     }
 }
 
-
 @Composable
 fun ProjectorEnableFlag() {
     val context = LocalContext.current
@@ -216,7 +247,7 @@ fun ClearLastCancelUpdate() {
 @Composable
 fun PreviewDevTools() {
     FlatColumnPage {
-        BackTopAppBar(title = "DevTools", onBackPressed = {  })
+        BackTopAppBar(title = "DevTools", onBackPressed = { })
 
         LazyColumn(MaxWidthSpread) {
             item {
