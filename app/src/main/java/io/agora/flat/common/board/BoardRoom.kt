@@ -16,6 +16,7 @@ import io.agora.flat.Constants
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.util.getAppVersion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,10 @@ class BoardRoom @Inject constructor(
     private var memberState = MutableStateFlow<MemberState?>(null)
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
+    private var netlessUA = listOf(
+        "fastboard/${context.getAppVersion()}",
+        "FLAT/NETLESS@${Fastboard.VERSION}"
+    )
 
     override fun initSdk(fastboardView: FastboardView) {
         this.fastboardView = fastboardView
@@ -64,6 +69,7 @@ class BoardRoom @Inject constructor(
         )
         val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isUserCursor = true
+            setNetlessUA(netlessUA)
         }
         fastRoomOptions.sdkConfiguration = sdkConfiguration
 
