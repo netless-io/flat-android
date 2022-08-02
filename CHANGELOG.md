@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.2] - August 02, 2022
+
+- Add BoardRoom netlessUA
+- Move checkVersion to onResume
+
 ## [1.4.1] - August 01, 2022
 
 - Fix audio and video state in class room
