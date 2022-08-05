@@ -43,7 +43,7 @@ class BoardRoom @Inject constructor(
     private var memberState = MutableStateFlow<MemberState?>(null)
     private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
-    private var netlessUA = listOf(
+    private var flatNetlessUA = listOf(
         "fastboard/${Fastboard.VERSION}",
         "FLAT/NETLESS@${context.getAppVersion()}"
     )
@@ -68,8 +68,9 @@ class BoardRoom @Inject constructor(
             writable
         )
         val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
+            isLog = true
             isUserCursor = true
-            setNetlessUA(netlessUA)
+            setNetlessUA(flatNetlessUA)
         }
         fastRoomOptions.sdkConfiguration = sdkConfiguration
 
@@ -130,7 +131,9 @@ class BoardRoom @Inject constructor(
         if (fastRoom?.room?.writable != writable) {
             fastRoom?.setWritable(writable)
         }
-        updateRoomController(writable)
+        fastboardView?.post {
+            updateRoomController(writable)
+        }
     }
 
     private fun updateRoomController(writable: Boolean) {

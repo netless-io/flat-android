@@ -18,7 +18,6 @@ import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -70,7 +69,7 @@ class WhiteboardComponent(
                     it.whiteboardRoomUUID,
                     it.whiteboardRoomToken,
                     it.region,
-                    viewModel.state.value.isWritable,
+                    viewModel.defaultWritable(it),
                 )
             }
         }
