@@ -33,12 +33,12 @@ Cutting a Release
    git push origin $RELEASE_VERSION
    ```
 
-5. Push release app to oss
-   ```shell
-   oss_push_new_app Flat-x.x.x.apk
-   ```
+   1. Push release app to oss
+      ```shell
+      oss_push_prod_app Flat-x.x.x.apk
+      ```
 
-6. If force update
+5. If force update
    ```shell
    oss_push_dev_check_version checkVersion.json
    # then test in dev

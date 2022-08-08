@@ -1,11 +1,9 @@
 package io.agora.flat.common.rtm
 
-import io.agora.flat.data.model.RTMEvent
-
 interface RTMListener {
-    fun onRTMEvent(event: RTMEvent, senderId: String)
-
     fun onClassEvent(event: ClassRtmEvent)
+
+    fun onChatMessage(chatMessage: ChatMessage)
 
     fun onMemberJoined(userId: String, channelId: String)
 

@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,9 +13,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.FlatException
-import io.agora.flat.common.rtm.ClassRtmEvent
-import io.agora.flat.common.rtm.RTMListener
-import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
@@ -103,13 +99,13 @@ class RtmComponent(
     }
 
     private fun loadData() {
-        lifecycleScope.launch {
-            viewModel.roomPlayInfo.collect {
-                it?.apply {
-                    enterChannel(channelId = roomUUID, rtmToken = rtmToken)
-                }
-            }
-        }
+//        lifecycleScope.launch {
+//            viewModel.roomPlayInfo.collect {
+//                it?.apply {
+//                    enterChannel(channelId = roomUUID, rtmToken = rtmToken)
+//                }
+//            }
+//        }
 
         lifecycleScope.launch {
             viewModel.state.filter { it != ClassRoomState.Init }.collect {
@@ -148,34 +144,32 @@ class RtmComponent(
         runBlocking {
             try {
                 rtmApi.logout()
-                rtmApi.removeRtmListener(flatRTMListener)
             } catch (e: FlatException) {
             }
         }
     }
 
-    private val flatRTMListener = object : RTMListener {
-        override fun onRTMEvent(event: RTMEvent, senderId: String) {
-            Log.d(TAG, "event is $event")
-            viewModel.onRTMEvent(event, senderId)
-        }
-
-        override fun onClassEvent(event: ClassRtmEvent) {
-            viewModel.onClassEvent(event)
-        }
-
-        override fun onMemberJoined(userId: String, channelId: String) {
-            viewModel.addRtmMember(userId)
-        }
-
-        override fun onMemberLeft(userId: String, channelId: String) {
-            viewModel.removeRtmMember(userId)
-        }
-
-        override fun onRemoteLogin() {
-            showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
-        }
-    }
+//    private val flatRTMListener = object : RTMListener {
+//        override fun onClassEvent(event: ClassRtmEvent) {
+//            viewModel.handleClassEvent(event)
+//        }
+//
+//        override fun onChatMessage(chatMessage: ChatMessage) {
+//
+//        }
+//
+//        override fun onMemberJoined(userId: String, channelId: String) {
+//            viewModel.addRtmMember(userId)
+//        }
+//
+//        override fun onMemberLeft(userId: String, channelId: String) {
+//            viewModel.removeRtmMember(userId)
+//        }
+//
+//        override fun onRemoteLogin() {
+//            showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
+//        }
+//    }
 
     private fun showRoomExitDialog(message: String) {
         val dialog = RoomExitDialog().apply {
@@ -187,18 +181,22 @@ class RtmComponent(
         dialog.show(activity.supportFragmentManager, "RoomExitDialog")
     }
 
-    private fun enterChannel(rtmToken: String, channelId: String) {
-        lifecycleScope.launch {
-            try {
-                rtmApi.addRtmListener(flatRTMListener)
-                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                viewModel.initChannelStatus()
-                viewModel.notifyRTMChannelJoined()
-                Log.d(TAG, "notify rtm joined success")
-            } catch (e: FlatException) {
-                miscRepository.logError(e.toString())
-                showRoomExitDialog(e.toString())
-            }
-        }
-    }
+//    private fun enterChannel(rtmToken: String, channelId: String) {
+//        lifecycleScope.launch {
+//            try {
+//                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
+//                viewModel.initChannelStatus()
+//                launch {
+//                    rtmApi.observeClassEvent().collect {
+//                        Log.e("Rtm", "ClassEvent $it")
+//                    }
+//                }
+//                viewModel.notifyRTMChannelJoined()
+//                Log.d(TAG, "notify rtm joined success")
+//            } catch (e: FlatException) {
+//                miscRepository.logError(e.toString())
+//                showRoomExitDialog(e.toString())
+//            }
+//        }
+//    }
 }

@@ -8,6 +8,7 @@ import com.herewhite.sdk.SyncedStore
 import com.herewhite.sdk.domain.Promise
 import com.herewhite.sdk.domain.SDKError
 import io.agora.board.fast.FastRoom
+import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.di.interfaces.SyncedClassState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,8 +34,8 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
         .create()
 
     private var deviceStates = mutableMapOf<String, DeviceState>()
-    private var onStageStates = mutableListOf<String>()
-    private var raiseHandsStates = mutableListOf<String>()
+    // private var onStageStates = mutableListOf<String>()
+    // private var raiseHandsStates = mutableListOf<String>()
 
     // private var classRoomState: ClassroomStorageState = ClassroomStorageState()
 
@@ -49,7 +50,7 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
             override fun then(state: String) {
                 Log.d(TAG, "[deviceState] initial state: $state")
                 deviceStates = getDevicesStates(state)
-                _devicesFlow.value = deviceStates
+                _devicesFlow.value = deviceStates.toMap()
             }
 
             override fun catchEx(t: SDKError) {
@@ -59,6 +60,8 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
             override fun then(state: String) {
                 Log.d(TAG, "[deviceState] initial state: $state")
                 val classRoomState = gson.fromJson(state, ClassroomStorageState::class.java)
+                // onStageStates.addAll(classRoomState.onStageUsers ?: listOf())
+                // raiseHandsStates.addAll(classRoomState.raiseHandUsers ?: listOf())
 
                 _onStagesFlow.value = classRoomState.onStageUsers ?: listOf()
                 _raiseHandsFlow.value = classRoomState.raiseHandUsers ?: listOf()
@@ -71,13 +74,16 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
         syncedStore.addOnStateChangedListener(DEVICE_STATE_STORAGE) { value, diff ->
             Log.d(TAG, "[deviceState] updated: value: $value\ndiff: $diff")
             val states = getDevicesStates(diff)
-            
+            _devicesFlow.value = (deviceStates + states).toMap()
         }
 
         syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
             Log.d(TAG, "[classroom] updated: value: $value\ndiff: $diff")
             val state = gson.fromJson(diff, ClassroomStorageState::class.java)
 
+            state.classMode?.let {
+
+            }
             state.raiseHandUsers?.let {
                 _raiseHandsFlow.value = it
             }
@@ -89,10 +95,13 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
 
     private fun getDevicesStates(state: String): MutableMap<String, DeviceState> {
         val deviceStates = mutableMapOf<String, DeviceState>()
-        val jsonObject = gson.fromJson(state, JsonObject::class.java)
-        val entrySet = jsonObject.entrySet()
-        entrySet.forEach {
-            deviceStates[it.key] = gson.fromJson(it.value, DeviceState::class.java)
+        try {
+            val jsonObject = gson.fromJson(state, JsonObject::class.java)
+            val entrySet = jsonObject.entrySet()
+            entrySet.forEach {
+                deviceStates[it.key] = gson.fromJson(it.value, DeviceState::class.java)
+            }
+        } catch (e: Exception) {
         }
         return deviceStates
     }
@@ -120,24 +129,28 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
     }
 
     override fun updateOnStage(userId: String, onStage: Boolean) {
-        val onStageUsers = onStageStates.toMutableSet()
+        val onStageUsers = _onStagesFlow.value?.toMutableSet() ?: mutableSetOf()
         if (onStage) {
             onStageUsers.add(userId)
         } else {
             onStageUsers.remove(userId)
         }
-        val jsonObj = mapOf(userId to onStageUsers.toList())
+        val jsonObj = mapOf("onStageUsers" to onStageUsers.toList())
         syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
     }
 
     override fun updateRaiseHand(userId: String, raiseHand: Boolean) {
-        val usersSet = raiseHandsStates.toMutableSet()
+        val usersSet = _raiseHandsFlow.value?.toMutableSet() ?: mutableSetOf()
         if (raiseHand) {
             usersSet.add(userId)
         } else {
             usersSet.remove(userId)
         }
-        val jsonObj = mapOf(userId to usersSet.toList())
+        val jsonObj = mapOf("raiseHandUsers" to usersSet.toList())
         syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
+    }
+
+    override fun updateClassModeType(classModeType: ClassModeType) {
+
     }
 }

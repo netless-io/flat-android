@@ -73,12 +73,19 @@ data class RaiseHandEvent(
 data class OnMemberJoined(
     val channelId: String,
     val userId: String,
-)
+) : ClassRtmEvent()
+
+object OnRemoteLogin : ClassRtmEvent()
 
 data class OnMemberLeft(
     val channelId: String,
     val userId: String,
-)
+) : ClassRtmEvent()
+
+data class ChatMessage(
+    val message: String,
+    val sender: String,
+) : ClassRtmEvent()
 
 data class UnknownEvent(
     val id: Long = UUID.randomUUID().mostSignificantBits,

@@ -187,6 +187,13 @@ class UserManager @Inject constructor(
         }
     }
 
+    fun updateOnStage(onStages: List<String>) {
+        val usersList = users.value.map {
+            it.copy(isSpeak = onStages.contains(it.userUUID))
+        }
+        sortAndNotify(usersList)
+    }
+
     fun updateSpeakStatus(uuid: String, isSpeak: Boolean) {
         scope.launch {
             findUser(uuid)?.run {
@@ -201,6 +208,13 @@ class UserManager @Inject constructor(
                 updateUser(copy(isRaiseHand = isRaiseHand))
             }
         }
+    }
+
+    fun updateRaiseHandStatus(status: List<String>) {
+        val usersList = users.value.map {
+            it.copy(isRaiseHand = status.contains(it.userUUID))
+        }
+        sortAndNotify(usersList)
     }
 
     fun updateSpeakAndRaise(uuid: String, isSpeak: Boolean, isRaiseHand: Boolean) {

@@ -1,13 +1,13 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.rtm.ClassRemoteData
+import android.util.Log
 import io.agora.flat.common.rtm.ClassRtmEvent
-import io.agora.flat.common.rtm.RTMListener
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
 import io.agora.rtm.RtmClient
+import kotlinx.coroutines.flow.Flow
 
 interface RtmApi {
     fun rtmEngine(): RtmClient
@@ -20,11 +20,7 @@ interface RtmApi {
 
     suspend fun sendChannelMessage(msg: String): Boolean
 
-    suspend fun sendChannelCommand(event: RTMEvent): Boolean
-
-    suspend fun sendChannelCommand(event: ClassRemoteData): Boolean
-
-    suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean
+    suspend fun sendChannelCommand(event: ClassRtmEvent): Boolean
 
     suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String): Boolean
 
@@ -46,9 +42,17 @@ interface RtmApi {
         endTime: Long,
     ): Int
 
-    fun addRtmListener(listener: RTMListener)
+    fun observeClassEvent(): Flow<ClassRtmEvent>
 
-    fun removeRtmListener(listener: RTMListener)
+    // TODO Remove
+    suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean {
+        Log.e("RTM", "sendPeerCommand Fix")
+        return false;
+    }
+
+    fun sendChannelCommand(event: RTMEvent) {
+        Log.e("RTM", "sendChannelCommand Fix")
+    }
 }
 
 

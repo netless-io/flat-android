@@ -1,6 +1,7 @@
 package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.data.model.ClassModeType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -32,4 +33,10 @@ interface SyncedClassState {
      * 更新举手状态
      */
     fun updateRaiseHand(userId: String, raiseHand: Boolean)
+
+    /**
+     * 更新 ClassModeType
+     * TODO
+     */
+    fun updateClassModeType(classModeType: ClassModeType)
 }

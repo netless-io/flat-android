@@ -74,14 +74,6 @@ class ToolComponent(
 
     private fun observeState() {
         lifecycleScope.launch {
-            viewModel.roomEvent.collect {
-                when (it) {
-                    is ClassRoomEvent.StartRoomResult -> {; }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
             RoomOverlayManager.observeShowId().collect { areaId ->
                 if (areaId != RoomOverlayManager.AREA_ID_MESSAGE) {
                     viewModel.setMessageAreaShown(false)
@@ -113,10 +105,11 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.roomConfig.collect {
-                binding.layoutSettings.switchVideo.isChecked = it.enableVideo
-                binding.layoutSettings.switchAudio.isChecked = it.enableAudio
-            }
+            // TODO
+//            viewModel.roomConfig.collect {
+//                binding.layoutSettings.switchVideo.isChecked = it.enableVideo
+//                binding.layoutSettings.switchAudio.isChecked = it.enableAudio
+//            }
         }
 
         lifecycleScope.launch {

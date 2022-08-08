@@ -20,6 +20,7 @@ import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
@@ -63,7 +64,7 @@ class WhiteboardComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launchWhenResumed {
+        lifecycleScope.launch {
             viewModel.roomPlayInfo.filterNotNull().collect {
                 boardRoom.join(
                     it.whiteboardRoomUUID,

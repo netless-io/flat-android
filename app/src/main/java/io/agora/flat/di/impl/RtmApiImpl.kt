@@ -6,13 +6,15 @@ import io.agora.flat.common.rtm.*
 import io.agora.flat.common.toFlatException
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.flat.data.repository.MessageRepository
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtm.*
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -81,14 +83,18 @@ class RtmApiImpl @Inject constructor(
 
         override fun onMessageReceived(message: RtmMessage, member: RtmChannelMember) {
             super.onMessageReceived(message, member)
-            rtmListeners.forEach { it.onRTMEvent(RTMEvent.parseRTMEvent(message.text), member.userId) }
+            rtmListeners.forEach {
+                it.onChatMessage(ChatMessage(message.text, member.userId))
+            }
         }
     }
 
     private var commandListener = object : EmptyRtmChannelListener {
         override fun onMessageReceived(message: RtmMessage, member: RtmChannelMember) {
             super.onMessageReceived(message, member)
-            rtmListeners.forEach { it.onRTMEvent(RTMEvent.parseRTMEvent(message.text), member.userId) }
+            rtmListeners.forEach {
+                it.onClassEvent(ClassRtmEvent.parse(String(message.rawMessage), member.userId))
+            }
         }
     }
 
@@ -184,10 +190,10 @@ class RtmApiImpl @Inject constructor(
         }) ?: cont.resume(false)
     }
 
-    override suspend fun sendChannelCommand(event: RTMEvent) = suspendCoroutine<Boolean> { cont ->
+    override suspend fun sendChannelCommand(event: ClassRtmEvent) = suspendCoroutine<Boolean> { cont ->
         run {
             val message = rtmClient.createMessage()
-            message.text = RTMEvent.toText(event)
+            message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
 
             channelCommand?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
                 override fun onSuccess(v: Void?) {
@@ -201,37 +207,11 @@ class RtmApiImpl @Inject constructor(
         }
     }
 
-    override suspend fun sendChannelCommand(event: ClassRemoteData): Boolean {
-        throw RuntimeException("NOT REALIZE")
-    }
-
     override suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
         Log.d(TAG, "sendPeerCommand ${ClassRtmEvent.toText(event)}")
 
         val message = rtmClient.createMessage()
         message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
-        val option = SendMessageOptions().apply {
-            enableOfflineMessaging = true
-        }
-
-        rtmClient.sendMessageToPeer(peerId, message, option, object : ResultCallback<Void?> {
-            override fun onSuccess(v: Void?) {
-                cont.resume(true)
-            }
-
-            override fun onFailure(error: ErrorInfo) {
-                cont.resume(false)
-            }
-        })
-    }
-
-    override suspend fun sendPeerCommand(event: RTMEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
-        // Peer command requires setting the channel id
-        event.r = channelCommandID
-
-        val message = rtmClient.createMessage()
-        message.text = RTMEvent.toText(event)
-
         val option = SendMessageOptions().apply {
             enableOfflineMessaging = true
         }
@@ -281,11 +261,40 @@ class RtmApiImpl @Inject constructor(
 
     private var rtmListeners = mutableListOf<RTMListener>()
 
-    override fun addRtmListener(listener: RTMListener) {
+    private fun addRtmListener(listener: RTMListener) {
         rtmListeners.add(listener)
     }
 
-    override fun removeRtmListener(listener: RTMListener) {
+    private fun removeRtmListener(listener: RTMListener) {
         rtmListeners.remove(listener)
+    }
+
+    override fun observeClassEvent(): Flow<ClassRtmEvent> = callbackFlow {
+        val listener = object : RTMListener {
+            override fun onClassEvent(event: ClassRtmEvent) {
+                trySend(event)
+            }
+
+            override fun onChatMessage(chatMessage: ChatMessage) {
+                trySend(chatMessage)
+            }
+
+            override fun onRemoteLogin() {
+                trySend(OnRemoteLogin)
+            }
+
+            override fun onMemberJoined(userId: String, channelId: String) {
+                trySend(OnMemberJoined(userId = userId, channelId = channelId))
+            }
+
+            override fun onMemberLeft(userId: String, channelId: String) {
+                trySend(OnMemberLeft(userId = userId, channelId = channelId))
+            }
+        }
+        rtmListeners.add(listener)
+        awaitClose {
+            Log.e(TAG, "close Flow")
+            rtmListeners.remove(listener)
+        }
     }
 }

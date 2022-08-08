@@ -23,6 +23,12 @@ sealed class Result<T> {
         is Success -> get()
         is Failure -> throw throwable
     }
+
+    fun asFailure() = this as Failure
+
+    val isSuccess: Boolean get() = this !is Failure
+
+    val isFailure: Boolean get() = this is Failure
 }
 
 data class Success<T>(val data: T) : Result<T>() {
