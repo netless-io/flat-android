@@ -1,6 +1,7 @@
 package io.agora.flat.ui.viewmodel
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcApi
@@ -16,6 +17,7 @@ import kotlin.coroutines.suspendCoroutine
 class UserManager @Inject constructor(
     private val userQuery: UserQuery,
     private val rtcApi: RtcApi,
+    private val boardRoom: BoardRoom,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users = _users.asStateFlow()
@@ -232,6 +234,10 @@ class UserManager @Inject constructor(
         }
         updateUsers.forEach {
             updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
+        }
+        // TODO UI Update
+        scope.launch {
+            boardRoom.setWritable(false)
         }
         updateUsers.forEach {
             usersCache[it.userUUID] = it
