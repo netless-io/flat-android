@@ -25,13 +25,11 @@ import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
-import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class ToolComponent(
@@ -99,40 +97,34 @@ class ToolComponent(
 
         lifecycleScope.launch {
             viewModel.messageUsers.collect {
-                userListAdapter.setDataSet(it)
+                userListAdapter.setData(it)
                 binding.userlistDot.isVisible = it.find { user -> user.isRaiseHand } != null
             }
         }
 
         lifecycleScope.launch {
-            // TODO
-//            viewModel.roomConfig.collect {
-//                binding.layoutSettings.switchVideo.isChecked = it.enableVideo
-//                binding.layoutSettings.switchAudio.isChecked = it.enableAudio
-//            }
+            viewModel.recordState.collect {
+                val isRecording = it != null
+                binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = isRecording
+                binding.layoutRoomStateSettings.startRecord.isVisible = !isRecording
+                binding.layoutRoomStateSettings.stopRecord.isVisible = isRecording
+                if (it != null) {
+                    binding.layoutRoomStateSettings.recordTime.text = FlatFormatter.timeMS(it.recordTime * 1000)
+                }
+            }
         }
 
         lifecycleScope.launch {
-            viewModel.state.filter { it != ClassRoomState.Init }.collect {
+            viewModel.state.filterNotNull().collect {
                 binding.roomCtrlTool.isVisible = it.isOwner
                 if (it.isOwner) {
                     binding.roomStart.isVisible = it.roomStatus == RoomStatus.Idle
                     binding.roomStateSetting.isVisible = it.roomStatus != RoomStatus.Idle
-
                     if (it.roomStatus == RoomStatus.Started) {
-                        binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = it.isRecording
-                        binding.layoutRoomStateSettings.startRecord.isVisible = !it.isRecording
-                        binding.layoutRoomStateSettings.stopRecord.isVisible = it.isRecording
-                        if (it.recordState != null) {
-                            binding.layoutRoomStateSettings.recordTime.text =
-                                FlatFormatter.timeMS(it.recordState.recordTime * 1000)
-                        }
                         binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
                     }
-
                     updateClassMode(it.classMode)
                 }
-
                 binding.cloudservice.isVisible = it.isWritable
 
                 binding.handup.isVisible = it.showRaiseHand
@@ -140,6 +132,9 @@ class ToolComponent(
 
                 binding.layoutSettings.switchVideo.isEnabled = it.isWritable
                 binding.layoutSettings.switchAudio.isEnabled = it.isWritable
+
+                binding.layoutSettings.switchVideo.isChecked = it.videoOpen
+                binding.layoutSettings.switchAudio.isChecked = it.audioOpen
             }
         }
 
@@ -309,12 +304,16 @@ class ToolComponent(
             hideSettingLayout()
         }
 
-        binding.layoutSettings.switchVideo.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.enableVideo(isChecked)
+        binding.layoutSettings.switchVideo.setOnCheckedChangeListener { it, isChecked ->
+            if (it.isPressed) {
+                viewModel.enableVideo(isChecked)
+            }
         }
 
-        binding.layoutSettings.switchAudio.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.enableAudio(isChecked)
+        binding.layoutSettings.switchAudio.setOnCheckedChangeListener { it, isChecked ->
+            if (it.isPressed) {
+                viewModel.enableAudio(isChecked)
+            }
         }
 
         cloudStorageAdapter = CloudStorageAdapter()
@@ -342,7 +341,8 @@ class ToolComponent(
     }
 
     private fun handleExit() {
-        if (viewModel.state.value.needOwnerExitDialog) {
+        val state = viewModel.state.value ?: return
+        if (state.needOwnerExitDialog) {
             showOwnerExitDialog()
         } else {
             viewModel.sendGlobalEvent(RoomsUpdated)
@@ -389,7 +389,7 @@ class ToolComponent(
     }
 
     private fun showInviteDialog() {
-        val state = viewModel.state.value
+        val state = viewModel.state.value ?: return
         val inviteTitle = activity.getString(R.string.invite_title_format, state.userName)
         val roomTime =
             "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"

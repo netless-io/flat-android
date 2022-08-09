@@ -9,18 +9,12 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
-import io.agora.flat.R
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
-import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.isDarkMode
-import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
@@ -64,39 +58,7 @@ class WhiteboardComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
-            viewModel.roomPlayInfo.filterNotNull().collect {
-                boardRoom.join(
-                    it.whiteboardRoomUUID,
-                    it.whiteboardRoomToken,
-                    it.region,
-                    viewModel.defaultWritable(it),
-                )
-            }
-        }
-
-        lifecycleScope.launchWhenResumed {
-            viewModel.roomEvent.collect { event ->
-                when (event) {
-                    is ClassRoomEvent.NoOptPermission -> {
-                        activity.showToast(R.string.class_room_no_operate_permission)
-                    }
-                    is ClassRoomEvent.InsertImage -> {
-                        boardRoom.insertImage(event.imageUrl, event.width, event.height)
-                    }
-                    is ClassRoomEvent.InsertPpt -> {
-                        boardRoom.insertPpt(event.dirPath, event.convertedFiles, event.title)
-                    }
-                    is ClassRoomEvent.InsertProjectorPpt -> {
-                        boardRoom.insertProjectorPpt(event.taskUuid, event.prefixUrl, event.title)
-                    }
-                    is ClassRoomEvent.InsertVideo -> {
-                        boardRoom.insertVideo(event.videoUrl, event.title)
-                    }
-                    else -> {; }
-                }
-            }
-        }
+        viewModel.onWhiteboardInit()
 
         lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
@@ -110,16 +72,16 @@ class WhiteboardComponent(
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            viewModel.state.filter { it != ClassRoomState.Init }.collect {
-                onRoomWritableChange(it.isWritable)
-            }
-        }
+//        lifecycleScope.launchWhenResumed {
+//            viewModel.state.filterNotNull().collect {
+//                onRoomWritableChange(it.isWritable)
+//            }
+//        }
     }
 
-    private fun onRoomWritableChange(writable: Boolean) {
-        boardRoom.setWritable(writable)
-    }
+//    private fun onRoomWritableChange(writable: Boolean) {
+//        boardRoom.setWritable(writable)
+//    }
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)

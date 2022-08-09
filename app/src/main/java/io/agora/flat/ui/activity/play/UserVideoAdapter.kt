@@ -50,7 +50,7 @@ class UserVideoAdapter(
     )
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        var itemData = dataSet[position]
+        val itemData = dataSet[position]
 
         viewHolder.avatar.load(itemData.avatarURL) {
             // placeholder(avatars[itemData.rtcUID % avatars.size])

@@ -23,8 +23,6 @@ import kotlinx.coroutines.flow.collect
 class ExtComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
-    whiteboardContainer: FrameLayout,
-    videoListContainer: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val TAG = ExtComponent::class.simpleName
@@ -35,9 +33,7 @@ class ExtComponent(
     private val viewModel: ExtensionViewModel by activity.viewModels()
 
     override fun onCreate(owner: LifecycleOwner) {
-        // injectApi()
         initView()
-        // initListener()
         observeState()
     }
 

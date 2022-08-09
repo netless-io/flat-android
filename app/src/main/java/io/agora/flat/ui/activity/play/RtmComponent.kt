@@ -14,19 +14,17 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.FlatException
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.view.RoomExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomState
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.KeyboardHeightProvider
 import io.agora.flat.util.delayAndFinish
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -42,7 +40,7 @@ class RtmComponent(
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
         fun userRepository(): UserRepository
-        fun miscRepository(): MiscRepository
+        // fun miscRepository(): MiscRepository
         fun rtmApi(): RtmApi
     }
 
@@ -51,7 +49,7 @@ class RtmComponent(
     private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     private lateinit var userRepository: UserRepository
-    private lateinit var miscRepository: MiscRepository
+    // private lateinit var miscRepository: MiscRepository
     private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
@@ -59,7 +57,7 @@ class RtmComponent(
         super.onCreate(owner)
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
-        miscRepository = entryPoint.miscRepository()
+        // miscRepository = entryPoint.miscRepository()
         rtmApi = entryPoint.rtmApi()
 
         initView()
@@ -99,16 +97,8 @@ class RtmComponent(
     }
 
     private fun loadData() {
-//        lifecycleScope.launch {
-//            viewModel.roomPlayInfo.collect {
-//                it?.apply {
-//                    enterChannel(channelId = roomUUID, rtmToken = rtmToken)
-//                }
-//            }
-//        }
-
         lifecycleScope.launch {
-            viewModel.state.filter { it != ClassRoomState.Init }.collect {
+            viewModel.state.filterNotNull().collect {
                 if (it.roomStatus == RoomStatus.Stopped) {
                     showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }

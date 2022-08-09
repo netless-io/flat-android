@@ -293,7 +293,7 @@ class RtmApiImpl @Inject constructor(
         }
         rtmListeners.add(listener)
         awaitClose {
-            Log.e(TAG, "close Flow")
+            Log.d(TAG, "close Flow")
             rtmListeners.remove(listener)
         }
     }

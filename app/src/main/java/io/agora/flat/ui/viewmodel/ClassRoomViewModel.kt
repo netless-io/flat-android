@@ -18,28 +18,31 @@ import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.android.StringFetcher
+import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.common.rtm.*
 import io.agora.flat.data.Failure
-import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
-import io.agora.flat.data.repository.*
+import io.agora.flat.data.repository.CloudStorageRepository
+import io.agora.flat.data.repository.RoomConfigRepository
+import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.MessagesAppended
-import io.agora.flat.ui.activity.play.RtmComponent
-import io.agora.flat.util.Ticker
+import io.agora.flat.event.NoOptPermission
+import io.agora.flat.event.RtmChannelJoined
+import io.agora.flat.ui.manager.RecordManager
+import io.agora.flat.util.ClassroomTrace
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,26 +51,32 @@ class ClassRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
     private val cloudStorageRepository: CloudStorageRepository,
-    private val cloudRecordRepository: CloudRecordRepository,
     private val roomConfigRepository: RoomConfigRepository,
     private val userManager: UserManager,
+    private val recordManager: RecordManager,
     private val messageState: MessageState,
     private val rtmApi: RtmApi,
+    private val boardRoom: BoardRoom,
     private val syncedClassState: SyncedClassState,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val stringFetcher: StringFetcher,
 ) : ViewModel() {
-    private var timer: Job? = null
-
     private var _roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val roomPlayInfo = _roomPlayInfo.asStateFlow()
 
-    private var _state = MutableStateFlow(ClassRoomState.Init)
+    private var _state = MutableStateFlow<ClassRoomState?>(null)
     val state = _state.asStateFlow()
 
     private var _videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val videoUsers = _videoUsers.asStateFlow()
+
+    // cloud record state
+    val recordState get() = recordManager.observeRecordState()
+
+    val joinRtmEvent get() = eventbus.events.filterIsInstance<RtmChannelJoined>().take(1)
+
+    val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
     private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
     val messageUsers = _messageUsers.asStateFlow()
@@ -83,10 +92,6 @@ class ClassRoomViewModel @Inject constructor(
 
     val messageCount = messageState.messages.map { it.size }
 
-    private var _roomEvent = MutableStateFlow<ClassRoomEvent?>(null)
-    val roomEvent = _roomEvent
-    private val eventId = AtomicInteger(0)
-
     private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
     private val periodicUUID = savedStateHandle.get<String>(Constants.IntentKey.PERIODIC_UUID)
     private val playInfo = savedStateHandle.get<RoomPlayInfo?>(Constants.IntentKey.ROOM_PLAY_INFO)
@@ -94,38 +99,41 @@ class ClassRoomViewModel @Inject constructor(
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
 
-    private var _roomConfig = MutableStateFlow(RoomConfig(roomUUID))
-    val roomConfig = _roomConfig.asStateFlow()
-
     private var _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow().filterNotNull()
 
     init {
         viewModelScope.launch {
-            when (val result = roomRepository.getOrdinaryRoomInfo(roomUUID)) {
-                is Success -> result.data.run {
-                    initRoomInfo(result.data.roomInfo)
-                }
-                is Failure -> {
-                    _errorMessage.value = "fetch room info error"
-                }
-            }
-            if (playInfo != null) {
-                _roomPlayInfo.value = playInfo
-            } else when (val result = roomRepository.joinRoom(periodicUUID ?: roomUUID)) {
-                is Success -> _roomPlayInfo.value = result.data
-                is Failure -> {
-                    _errorMessage.value = when (result.error.code) {
-                        FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
-                        FlatErrorCode.Web_RoomIsEnded -> stringFetcher.roomIsEnded()
-                        else -> stringFetcher.joinRoomError(result.error.code)
-                    }
-                }
+            val result = roomRepository.getOrdinaryRoomInfo(roomUUID)
+            if (result.isSuccess) {
+                initRoomInfo(result.getOrThrow().roomInfo)
+            } else {
+                _errorMessage.value = "fetch room info error"
             }
         }
 
         viewModelScope.launch {
-            roomEvent.filterIsInstance<ClassRoomEvent.RtmChannelJoined>().collect {
+            state.filterNotNull().take(1).collect {
+                var info: RoomPlayInfo? = playInfo
+                if (info == null) {
+                    val result = roomRepository.joinRoom(periodicUUID ?: roomUUID)
+                    if (result.isSuccess) {
+                        info = result.getOrThrow()
+                    } else {
+                        result as Failure
+                        _errorMessage.value = when (result.error.code) {
+                            FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
+                            FlatErrorCode.Web_RoomIsEnded -> stringFetcher.roomIsEnded()
+                            else -> stringFetcher.joinRoomError(result.error.code)
+                        }
+                    }
+                }
+                _roomPlayInfo.value = info
+            }
+        }
+
+        viewModelScope.launch {
+            eventbus.events.filterIsInstance<RtmChannelJoined>().collect {
                 if (quickStart == true) {
                     startClass()
                 }
@@ -133,18 +141,26 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            roomPlayInfo.filterNotNull().collect {
+            roomPlayInfo.filterNotNull().take(1).collect {
                 enterChannel(channelId = roomUUID, rtmToken = it.rtmToken)
             }
         }
 
-        // syncedClassState()
+        recordManager.reset(roomUUID, viewModelScope)
     }
 
-    private fun syncedClassState() {
+    fun onWhiteboardInit() {
+        viewModelScope.launch {
+            roomPlayInfo.filterNotNull().take(1).collect {
+                ClassroomTrace.trace("start joining board room")
+                boardRoom.join(it.whiteboardRoomUUID, it.whiteboardRoomToken, it.region, it.defaultWritable())
+            }
+        }
+    }
+
+    private fun observeSyncedState() {
         viewModelScope.launch {
             syncedClassState.observeDeviceState().collect {
-                Log.e("RTM", "observeDeviceState $it")
                 it.forEach { entry ->
                     userManager.updateDeviceState(entry.key, entry.value.camera, entry.value.mic)
                 }
@@ -168,35 +184,27 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                initChannelStatus()
-                observeClassEvent()
+                // TODO store events
+                val eventFlow = rtmApi.observeClassEvent()
+                initUsersStatus()
+                launch {
+                    eventFlow.collect {
+                        handleClassEvent(it)
+                    }
+                }
+                observeSyncedState()
+                ClassroomTrace.trace("rtm joined success")
                 notifyRTMChannelJoined()
-                syncedClassState()
-                Log.d(RtmComponent.TAG, "notify rtm joined success")
             } catch (e: FlatException) {
-                // miscRepository.logError(e.toString())
+                // TODO
                 // showRoomExitDialog(e.toString())
             }
         }
     }
 
-    private fun observeClassEvent() {
-        viewModelScope.launch {
-            rtmApi.observeClassEvent().collect {
-                handleClassEvent(it)
-            }
-        }
-    }
-
     private fun initRoomInfo(roomInfo: RoomInfo) {
-        userManager.reset(
-            roomUUID = roomUUID,
-            userUUID = currentUserUUID,
-            ownerUUID = roomInfo.ownerUUID,
-            scope = viewModelScope,
-        )
+        userManager.reset(userUUID = currentUserUUID, ownerUUID = roomInfo.ownerUUID)
 
-        // TODO ClassModeType is a configuration of SmallClass
         val classMode = when (roomInfo.roomType) {
             RoomType.BigClass -> ClassModeType.Lecture
             else -> ClassModeType.Interaction
@@ -216,41 +224,40 @@ class ClassRoomViewModel @Inject constructor(
             roomStatus = roomInfo.roomStatus,
             region = roomInfo.region,
             classMode = classMode,
-        )
-
-        observerUserState()
-    }
-
-    private suspend fun getInitRoomConfig(): RoomConfig {
-        val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
-        return config.copy(
-            enableAudio = defaultWritable(roomPlayInfo.value!!) && config.enableAudio,
-            enableVideo = defaultWritable(roomPlayInfo.value!!) && config.enableVideo,
+            isRaiseHand = false,
+            videoOpen = false,
+            audioOpen = false,
         )
     }
 
     private fun observerUserState() {
         viewModelScope.launch {
             userManager.currentUser.filterNotNull().collect {
-                _state.value = _state.value.copy(isSpeak = it.isSpeak, isRaiseHand = it.isRaiseHand)
-                _roomConfig.value = roomConfig.value.copy(
-                    enableVideo = it.videoOpen and it.isSpeak,
-                    enableAudio = it.audioOpen and it.isSpeak,
+                ClassroomTrace.trace("currentUser collect")
+                val state = _state.value ?: return@collect
+                _state.value = state.copy(
+                    isSpeak = it.isSpeak,
+                    isRaiseHand = it.isRaiseHand,
+                    videoOpen = it.videoOpen,
+                    audioOpen = it.audioOpen
                 )
+                boardRoom.setWritable(state.isOwner || it.isSpeak)
             }
         }
 
         viewModelScope.launch {
             userManager.users.collect {
-                val users = it.filter { value ->
-                    when (_state.value.roomType) {
-                        RoomType.BigClass -> (value.userUUID == _state.value.ownerUUID || value.isSpeak)
+                ClassroomTrace.trace("users collect")
+                val state = _state.value ?: return@collect
+                val users = it.filter { user ->
+                    when (state.roomType) {
+                        RoomType.BigClass -> (state.isCreator(user.userUUID) || user.isSpeak)
                         else -> true
                     }
                 }.toMutableList()
 
                 if (it.isNotEmpty() && !users.containOwner()) {
-                    users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = _state.value.ownerUUID))
+                    users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = state.ownerUUID))
                 }
 
                 _videoUsers.value = users
@@ -265,59 +272,41 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun List<RtcUser>.containOwner(): Boolean {
-        return this.find { _state.value.ownerUUID == it.userUUID } != null
+        return this.find { _state.value!!.ownerUUID == it.userUUID } != null
     }
 
-    fun enableVideo(enable: Boolean, uuid: String = _state.value.userUUID) {
+    fun enableVideo(enableVideo: Boolean, uuid: String = currentUserUUID) {
         viewModelScope.launch {
-            if (isCurrentUser(uuid)) {
-                roomConfigRepository.updateRoomConfig(
-                    roomConfig.value.copy(enableAudio = enable)
-                )
-            }
-
+            val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
-                if (isCurrentUser(uuid)) {
-                    sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
-                } else if (isRoomOwner() && !enable) {
-                    sendAndUpdateDeviceState(uuid, enableVideo = enable, enableAudio = audioOpen)
+                if (state.isCurrentUser(uuid)) {
+                    updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
+                } else if (state.isOwner && !enableVideo) {
+                    updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
                 } else {
-                    // no permission
-                    onEvent(ClassRoomEvent.NoOptPermission(eventId.incrementAndGet()))
+                    notifyNoOptPermission()
                 }
             }
         }
     }
 
-    fun enableAudio(enable: Boolean, uuid: String = _state.value.userUUID) {
+    fun enableAudio(enableAudio: Boolean, uuid: String = currentUserUUID) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (isCurrentUser(uuid)) {
-                roomConfigRepository.updateRoomConfig(
-                    roomConfig.value.copy(enableAudio = enable)
-                )
-            }
-
+            val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
-                if (isCurrentUser(uuid)) {
-                    sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
-                } else if (isRoomOwner() && !enable) {
-                    sendAndUpdateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enable)
+                if (state.isCurrentUser(uuid)) {
+                    updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
+                } else if (state.isOwner && !enableAudio) {
+                    updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
                 } else {
-                    // no permission
-                    onEvent(ClassRoomEvent.NoOptPermission(eventId.incrementAndGet()))
+                    notifyNoOptPermission()
                 }
             }
         }
     }
 
-    private fun sendAndUpdateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
+    private fun updateDeviceState(userUUID: String, enableVideo: Boolean, enableAudio: Boolean) {
         syncedClassState.updateDeviceState(userUUID, camera = enableVideo, mic = enableAudio)
-    }
-
-    private fun onEvent(event: ClassRoomEvent) {
-        viewModelScope.launch {
-            _roomEvent.value = event
-        }
     }
 
     fun sendGlobalEvent(event: Event) {
@@ -327,16 +316,16 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun notifyRTMChannelJoined() {
-        onEvent(ClassRoomEvent.RtmChannelJoined)
+        viewModelScope.launch {
+            eventbus.produceEvent(RtmChannelJoined)
+        }
     }
 
-//    fun removeRtmMember(userUUID: String) {
-//        userManager.removeUser(userUUID)
-//    }
-//
-//    fun addRtmMember(userUUID: String) {
-//        userManager.addUser(userUUID)
-//    }
+    private fun notifyNoOptPermission() {
+        viewModelScope.launch {
+            eventbus.produceEvent(NoOptPermission())
+        }
+    }
 
     fun setVideoAreaShown(shown: Boolean) {
         _videoAreaShown.value = shown
@@ -346,52 +335,43 @@ class ClassRoomViewModel @Inject constructor(
         _messageAreaShown.value = shown
     }
 
-    // RTCCommand Handle
-    // private fun updateDeviceState(value: DeviceStateValue) {
-    //     userManager.updateDeviceState(uuid = value.userUUID, audioOpen = value.mic, videoOpen = value.camera)
-    // }
-
     private fun updateRequestUserState(userUUID: String, state: RTMUserState) {
-        userManager.updateUserState(
-            uuid = userUUID,
-            audioOpen = state.mic,
-            videoOpen = state.camera,
-            name = state.name,
-            isSpeak = state.isSpeak,
-        )
+        viewModelScope.launch {
+            userManager.updateUserState(
+                uuid = userUUID,
+                audioOpen = state.mic,
+                videoOpen = state.camera,
+                name = state.name,
+                isSpeak = state.isSpeak,
+            )
+        }
     }
 
     private fun updateChannelState(status: ChannelStatusValue) {
         // update room state
-        _state.value = _state.value.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
-        userManager.updateUserStates(status.uStates)
+        _state.value?.let {
+            _state.value = it.copy(classMode = status.rMode, ban = status.ban, roomStatus = status.rStatus)
+            userManager.updateUserStates(status.uStates)
+        }
     }
 
-    private suspend fun initChannelStatus() {
+    private suspend fun initUsersStatus() {
+        ClassroomTrace.trace("init users status")
+        val state = _state.value ?: return
+
+        val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
+        val audioOpen = roomPlayInfo.value!!.defaultWritable() && config.enableAudio
+        val videoOpen = roomPlayInfo.value!!.defaultWritable() && config.enableVideo
+
         userManager.initUsers(uuids = rtmApi.getMembers().map { it.userId })
-        // update local user state
-        val initRoomConfig = getInitRoomConfig()
         userManager.updateUserState(
             uuid = currentUserUUID,
-            audioOpen = initRoomConfig.enableAudio,
-            videoOpen = initRoomConfig.enableVideo,
+            audioOpen = audioOpen,
+            videoOpen = videoOpen,
             name = currentUserName,
-            isSpeak = isRoomOwner(),
+            isSpeak = state.isOwner,
         )
-
-//        userManager.findFirstOtherUser()?.run {
-//            val state = RTMUserState(
-//                name = userRepository.getUsername(),
-//                camera = roomConfig.value.enableVideo,
-//                mic = roomConfig.value.enableAudio,
-//                isSpeak = isRoomOwner(),
-//            )
-//
-//            val event = RTMEvent.RequestChannelStatus(
-//                RequestChannelStatusValue(roomUUID, listOf(userUUID), state)
-//            )
-//            rtmApi.sendChannelCommand(event)
-//        }
+        observerUserState()
     }
 
     private fun appendMessage(message: Message) {
@@ -400,38 +380,24 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun isRoomOwner(): Boolean {
-        return _state.value.ownerUUID == currentUserUUID
-    }
-
-    private fun isCurrentUser(userId: String): Boolean {
-        return userId == currentUserUUID
-    }
-
-    fun isCreator(userUUID: String): Boolean {
-        return userUUID == _state.value.ownerUUID
-    }
-
-    private fun handleClassEvent(event: ClassRtmEvent) {
+    private suspend fun handleClassEvent(event: ClassRtmEvent) {
+        Log.e("ClassRoomViewModel", "handleClassEvent $event")
         when (event) {
             is OnStageEvent -> {
+                val state = state.value ?: return
                 val sender = event.sender!!
-                if (event.onStage) {
-                    if (sender == state.value.ownerUUID) {
-                        userManager.updateSpeakAndRaise(
-                            currentUserUUID,
-                            isSpeak = event.onStage,
-                            isRaiseHand = false,
-                        )
-                    }
+                // from owner to audience
+                if (state.isCreator(sender)) {
+                    userManager.updateSpeakAndRaise(
+                        currentUserUUID,
+                        isSpeak = event.onStage,
+                        isRaiseHand = false,
+                    )
                 } else {
-                    if (sender == state.value.ownerUUID || sender == currentUserUUID) {
-                        syncedClassState.updateOnStage(currentUserUUID, false)
-                        userManager.updateSpeakAndRaise(
-                            currentUserUUID,
-                            isSpeak = event.onStage,
-                            isRaiseHand = false,
-                        )
+                    // from audience stage off
+                    if (state.isOwner && !event.onStage) {
+                        syncedClassState.updateOnStage(sender, false)
+                        userManager.updateSpeakAndRaise(sender, isSpeak = false, isRaiseHand = false)
                     }
                 }
             }
@@ -443,6 +409,13 @@ class ClassRoomViewModel @Inject constructor(
             }
             is OnMemberLeft -> {
                 userManager.removeUser(event.userId)
+                // when user left, owner clear state;
+                state.value?.let {
+                    if (it.isOwner) {
+                        syncedClassState.deleteDeviceState(event.userId)
+                        syncedClassState.updateOnStage(event.userId, false)
+                    }
+                }
             }
             is ChatMessage -> {
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
@@ -530,6 +503,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun sendChannelStatus(senderId: String) {
+        val state = _state.value ?: return
         viewModelScope.launch {
             val uStates = HashMap<String, String>()
             userManager.users.value.forEach {
@@ -542,9 +516,9 @@ class ClassRoomViewModel @Inject constructor(
             }
             val channelState = RTMEvent.ChannelStatus(
                 ChannelStatusValue(
-                    ban = _state.value.ban,
-                    rStatus = _state.value.roomStatus,
-                    rMode = _state.value.classMode,
+                    ban = state.ban,
+                    rStatus = state.roomStatus,
+                    rMode = state.classMode,
                     uStates = uStates
                 )
             )
@@ -553,6 +527,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun sendRaiseHand() {
+        val state = state.value ?: return
         viewModelScope.launch {
             userManager.currentUser.value?.run {
                 if (this.isSpeak) {
@@ -562,7 +537,7 @@ class ClassRoomViewModel @Inject constructor(
                     roomUUID = roomUUID,
                     raiseHand = !isRaiseHand,
                 )
-                rtmApi.sendPeerCommand(event, state.value.ownerUUID)
+                rtmApi.sendPeerCommand(event, state.ownerUUID)
                 userManager.updateRaiseHandStatus(userUUID, event.raiseHand)
             }
         }
@@ -570,139 +545,37 @@ class ClassRoomViewModel @Inject constructor(
 
     fun startClass() {
         viewModelScope.launch {
+            val state = _state.value ?: return@launch
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
                 rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Started))
-                _state.value = _state.value.copy(roomStatus = RoomStatus.Started)
-            }
-        }
-    }
-
-    val width = 120 * 3
-    val height = 360 * 3
-
-    private var startRecordJob: Job? = null
-
-    fun startRecord() {
-        if (videoUsers.value.isEmpty()) {
-            startRecordJob = viewModelScope.launch {
-                videoUsers.collect {
-                    if (videoUsers.value.isNotEmpty()) {
-                        startRecord()
-                    }
-                }
-            }
-            return
-        }
-        startRecordJob?.cancel()
-
-        viewModelScope.launch {
-            val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
-            if (acquireResp is Success) {
-                val transcodingConfig = TranscodingConfig(
-                    width,
-                    height,
-                    15,
-                    500,
-                    mixedVideoLayout = 3,
-                    layoutConfig = getLayoutConfig(),
-                    backgroundConfig = getBackgroundConfig()
-                )
-                val startResp = cloudRecordRepository.startRecordWithAgora(
-                    roomUUID,
-                    acquireResp.data.resourceId,
-                    transcodingConfig
-                )
-                if (startResp is Success) {
-                    _state.value = _state.value.copy(
-                        recordState = RecordState(
-                            resourceId = startResp.data.resourceId,
-                            sid = startResp.data.sid
-                        )
-                    )
-                    startTimer()
-                }
-            }
-        }
-    }
-
-    private fun updateRecordLayout() {
-        viewModelScope.launch {
-            val config = UpdateLayoutClientRequest(
-                layoutConfig = getLayoutConfig(),
-                backgroundConfig = getBackgroundConfig(),
-            )
-            cloudRecordRepository.updateRecordLayoutWithAgora(roomUUID, _state.value.recordState!!.resourceId, config)
-        }
-    }
-
-    private fun getBackgroundConfig(): List<BackgroundConfig> {
-        return _videoUsers.value.map { user: RtcUser ->
-            BackgroundConfig(uid = user.rtcUID.toString(), image_url = user.avatarURL)
-        }
-    }
-
-    private fun getLayoutConfig(): List<LayoutConfig> {
-        return _videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
-            LayoutConfig(
-                uid = user.rtcUID.toString(),
-                x_axis = 12f / 120,
-                y_axis = (8f + index * 80) / 360,
-                width = 96f / 120,
-                height = 72f / 360,
-            )
-        }
-    }
-
-    private fun startTimer() {
-        timer = viewModelScope.launch {
-            Ticker.tickerFlow(1000, 1000).collect {
-                val recordState = _state.value.recordState
-                _state.value =
-                    _state.value.copy(recordState = recordState?.copy(recordTime = recordState.recordTime + 1))
-                updateRecordLayout()
-            }
-        }
-    }
-
-    private fun stopTimer() {
-        timer?.cancel()
-    }
-
-    fun stopRecord() {
-        viewModelScope.launch {
-            _state.value.recordState?.run {
-                val resp = cloudRecordRepository.stopRecordWithAgora(
-                    roomUUID,
-                    resourceId,
-                    sid,
-                )
-                if (resp is Success) {
-                    _state.value = _state.value.copy(recordState = null)
-                }
-                stopTimer()
+                _state.value = state.copy(roomStatus = RoomStatus.Started)
             }
         }
     }
 
     suspend fun pauseClass(): Boolean {
-        return when (roomRepository.pauseRoomClass(roomUUID)) {
-            is Success -> {
-                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Paused))
-                true
-            }
-            else -> false
+        val result = roomRepository.pauseRoomClass(roomUUID)
+        if (result.isSuccess) {
+            rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Paused))
         }
+        return result.isSuccess
     }
 
     suspend fun stopClass(): Boolean {
-        return when (roomRepository.stopRoomClass(roomUUID)) {
-            is Success -> {
-                rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Stopped))
-                stopRecord()
-                true
-            }
-            else -> false
+        val result = roomRepository.stopRoomClass(roomUUID)
+        if (result.isSuccess) {
+            rtmApi.sendChannelCommand(RTMEvent.RoomStatus(RoomStatus.Stopped))
+            recordManager.stopRecord()
         }
+        return result.isSuccess
+    }
+
+    fun startRecord() {
+        recordManager.startRecord()
+    }
+
+    fun stopRecord() {
+        recordManager.stopRecord()
     }
 
     fun onCopyText(text: String) {
@@ -711,11 +584,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun requestCloudStorageFiles() {
         viewModelScope.launch {
-            when (val res = cloudStorageRepository.getFileList(1)) {
-                is Success -> {
-                    _cloudStorageFiles.value = res.data.files.filter {
-                        it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
-                    }
+            val result = cloudStorageRepository.getFileList(1)
+            if (result.isSuccess) {
+                _cloudStorageFiles.value = result.getOrThrow().files.filter {
+                    it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
                 }
             }
         }
@@ -727,10 +599,10 @@ class ClassRoomViewModel @Inject constructor(
             when (file.fileURL.coursewareType()) {
                 CoursewareType.Image -> {
                     val imageSize = loadImageSize(file.fileURL)
-                    onEvent(ClassRoomEvent.InsertImage(file.fileURL, imageSize.width, imageSize.height))
+                    boardRoom.insertImage(file.fileURL, w = imageSize.width, h = imageSize.height)
                 }
                 CoursewareType.Audio, CoursewareType.Video -> {
-                    onEvent(ClassRoomEvent.InsertVideo(file.fileURL, file.fileName))
+                    boardRoom.insertVideo(file.fileURL, file.fileName)
                 }
                 CoursewareType.DocStatic -> {
                     insertDocs(file, false)
@@ -783,11 +655,7 @@ class ClassRoomViewModel @Inject constructor(
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    onEvent(ClassRoomEvent.InsertPpt(
-                        "/${file.taskUUID}/${UUID.randomUUID()}",
-                        ppt,
-                        file.fileName
-                    ))
+                    boardRoom.insertPpt("/${file.taskUUID}/${UUID.randomUUID()}", ppt, file.fileName)
                 }
 
                 override fun onFailure(e: ConvertException) {
@@ -808,11 +676,7 @@ class ClassRoomViewModel @Inject constructor(
                 }
 
                 override fun onFinish(response: ProjectorQuery.QueryResponse) {
-                    onEvent(ClassRoomEvent.InsertProjectorPpt(
-                        file.taskUUID,
-                        response.prefix,
-                        file.fileName
-                    ))
+                    boardRoom.insertProjectorPpt(file.taskUUID, response.prefix, file.fileName)
                 }
 
                 override fun onFailure(e: ConvertException?) {
@@ -825,8 +689,14 @@ class ClassRoomViewModel @Inject constructor(
 
     fun closeSpeak(userUUID: String) {
         viewModelScope.launch {
-            if (isRoomOwner() || isCurrentUser(userUUID)) {
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                sendOnStageCommand(userUUID, false)
                 syncedClassState.updateOnStage(userUUID, false)
+                userManager.updateSpeakStatus(uuid = userUUID, isSpeak = false)
+            }
+            if (state.isCurrentUser(userUUID)) {
+                sendOnStageCommand(state.ownerUUID, onStage = false)
                 userManager.updateSpeakStatus(uuid = userUUID, isSpeak = false)
             }
         }
@@ -834,48 +704,53 @@ class ClassRoomViewModel @Inject constructor(
 
     fun acceptRaiseHand(userUUID: String) {
         viewModelScope.launch {
-            if (isRoomOwner()) {
-                val event = OnStageEvent(
-                    roomUUID = _state.value.roomUUID,
-                    onStage = true
-                )
-                rtmApi.sendPeerCommand(event, userUUID)
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                sendOnStageCommand(userUUID, true)
                 syncedClassState.updateOnStage(userUUID, true)
                 userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
             }
         }
     }
 
+    private suspend fun sendOnStageCommand(userUUID: String, onStage: Boolean) {
+        val event = OnStageEvent(
+            roomUUID = roomUUID,
+            onStage = onStage
+        )
+        rtmApi.sendPeerCommand(event, userUUID)
+    }
+
     fun updateClassMode(classMode: ClassModeType) {
         viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            _state.value = state.copy(classMode = classMode)
             syncedClassState.updateClassModeType(classMode)
-            _state.value = _state.value.copy(classMode = classMode)
         }
     }
 
-    fun defaultWritable(playInfo: RoomPlayInfo): Boolean {
-        return when (playInfo.roomType) {
+    private fun RoomPlayInfo.defaultWritable(): Boolean {
+        return when (roomType) {
             RoomType.OneToOne -> true
             RoomType.SmallClass -> true
-            RoomType.BigClass -> playInfo.ownerUUID == currentUserUUID
+            RoomType.BigClass -> ownerUUID == currentUserUUID
         }
     }
 }
 
 data class ClassRoomState(
     // 房间的 uuid
-    val roomUUID: String = "",
+    val roomUUID: String,
     // 房间邀请码
-    val inviteCode: String = "",
+    val inviteCode: String,
     // 房间类型
-    val roomType: RoomType = RoomType.BigClass,
+    val roomType: RoomType,
     // 房间状态
-    val roomStatus: RoomStatus = RoomStatus.Idle,
-    //
-    val region: String = "",
+    val roomStatus: RoomStatus,
+    // 房间区域
+    val region: String,
     // 房间所有者
-    val ownerUUID: String = "ownerUUID",
-
+    val ownerUUID: String,
     // 房间所有者的名称
     val ownerName: String? = null,
     // 房间标题
@@ -887,15 +762,14 @@ data class ClassRoomState(
     // 禁用
     val ban: Boolean = false,
     // 交互模式
-    val classMode: ClassModeType = ClassModeType.Lecture,
-
+    val classMode: ClassModeType,
     // 当前用户
-    // TODO currentUserID
-    val userUUID: String = "userUUID",
+    val userUUID: String,
     val userName: String = "",
     val isSpeak: Boolean = ownerUUID == userUUID,
-    val isRaiseHand: Boolean = false,
-    val recordState: RecordState? = null,
+    val isRaiseHand: Boolean,
+    val videoOpen: Boolean,
+    val audioOpen: Boolean,
 ) {
     val isWritable: Boolean
         get() {
@@ -914,9 +788,6 @@ data class ClassRoomState(
     val isOwner: Boolean
         get() = ownerUUID == userUUID
 
-    val isRecording: Boolean
-        get() = recordState != null
-
     val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
 
@@ -933,25 +804,13 @@ data class ClassRoomState(
     val needOwnerExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
 
-    companion object {
-        val Init = ClassRoomState()
+    fun isCreator(userId: String): Boolean {
+        return userId == this.ownerUUID
+    }
+
+    fun isCurrentUser(userId: String): Boolean {
+        return userId == this.userUUID
     }
 }
 
-data class RecordState constructor(
-    val resourceId: String,
-    val sid: String,
-    val recordTime: Long = 0,
-)
-
 data class ImageSize(val width: Int, val height: Int)
-
-sealed class ClassRoomEvent {
-    object RtmChannelJoined : ClassRoomEvent()
-
-    data class NoOptPermission(val id: Int) : ClassRoomEvent()
-    data class InsertImage(val imageUrl: String, val width: Int, val height: Int) : ClassRoomEvent()
-    data class InsertPpt(val dirPath: String, val convertedFiles: ConvertedFiles, val title: String) : ClassRoomEvent()
-    data class InsertProjectorPpt(val taskUuid: String, val prefixUrl: String, val title: String) : ClassRoomEvent()
-    data class InsertVideo(val videoUrl: String, val title: String) : ClassRoomEvent()
-}

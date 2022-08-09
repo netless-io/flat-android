@@ -34,14 +34,11 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
         .create()
 
     private var deviceStates = mutableMapOf<String, DeviceState>()
-    // private var onStageStates = mutableListOf<String>()
-    // private var raiseHandsStates = mutableListOf<String>()
-
-    // private var classRoomState: ClassroomStorageState = ClassroomStorageState()
 
     private var _devicesFlow = MutableStateFlow<Map<String, DeviceState>?>(null)
     private var _onStagesFlow = MutableStateFlow<List<String>?>(null)
     private var _raiseHandsFlow = MutableStateFlow<List<String>?>(null)
+    private var _classModeFlow = MutableStateFlow<ClassModeType?>(null)
 
     fun resetRoom(fastRoom: FastRoom) {
         this.fastRoom = fastRoom
@@ -58,13 +55,12 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
         })
         syncedStore.connectStorage(CLASSROOM_STORAGE, gson.toJson(ClassroomStorageState()), object : Promise<String> {
             override fun then(state: String) {
-                Log.d(TAG, "[deviceState] initial state: $state")
+                Log.d(TAG, "[classroom] initial state: $state")
                 val classRoomState = gson.fromJson(state, ClassroomStorageState::class.java)
-                // onStageStates.addAll(classRoomState.onStageUsers ?: listOf())
-                // raiseHandsStates.addAll(classRoomState.raiseHandUsers ?: listOf())
-
                 _onStagesFlow.value = classRoomState.onStageUsers ?: listOf()
                 _raiseHandsFlow.value = classRoomState.raiseHandUsers ?: listOf()
+                // TODO by init user and type
+                _classModeFlow.value = classRoomState.classMode ?: ClassModeType.Lecture
             }
 
             override fun catchEx(t: SDKError) {
@@ -72,14 +68,14 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
         })
 
         syncedStore.addOnStateChangedListener(DEVICE_STATE_STORAGE) { value, diff ->
-            Log.d(TAG, "[deviceState] updated: value: $value\ndiff: $diff")
-            val states = getDevicesStates(diff)
+            Log.d(TAG, "[deviceState] updated: value: $value diff: $diff")
+            val states = getDevicesStates(value)
             _devicesFlow.value = (deviceStates + states).toMap()
         }
 
         syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
-            Log.d(TAG, "[classroom] updated: value: $value\ndiff: $diff")
-            val state = gson.fromJson(diff, ClassroomStorageState::class.java)
+            Log.d(TAG, "[classroom] updated: value: $value diff: $diff")
+            val state = gson.fromJson(value, ClassroomStorageState::class.java)
 
             state.classMode?.let {
 
@@ -125,10 +121,11 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
 
     override fun deleteDeviceState(userId: String) {
         val devicesState = mapOf(userId to null)
-        syncedStore.setStorageState(DEVICE_STATE_STORAGE, gson.toJson(devicesState))
+        syncedStore.setStorageState(DEVICE_STATE_STORAGE, gsonWithNull.toJson(devicesState))
     }
 
     override fun updateOnStage(userId: String, onStage: Boolean) {
+        Log.d(TAG, "updateOnStage $userId $onStage")
         val onStageUsers = _onStagesFlow.value?.toMutableSet() ?: mutableSetOf()
         if (onStage) {
             onStageUsers.add(userId)
@@ -151,6 +148,7 @@ class WhiteSyncedState @Inject constructor() : SyncedClassState {
     }
 
     override fun updateClassModeType(classModeType: ClassModeType) {
-
+        val jsonObj = mapOf("classMode" to classModeType)
+        syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
     }
 }

@@ -37,8 +37,9 @@ class UserListAdapter(
 
         // state
         viewHolder.state.run {
+            val classState = viewModel.state.value ?: return
             when {
-                viewModel.isCreator(itemData.userUUID) -> {
+                classState.isCreator(itemData.userUUID) -> {
                     setText(R.string.room_class_userlist_state_teacher)
                     setTextColor(ContextCompat.getColor(context, R.color.flat_text_secondary))
                 }
@@ -58,9 +59,10 @@ class UserListAdapter(
 
         // handup
         viewHolder.handup.run {
-            if (viewModel.state.value.isOwner) {
+            val state = viewModel.state.value ?: return
+            if (state.isOwner) {
                 when {
-                    viewModel.isCreator(itemData.userUUID) -> {
+                    state.isCreator(itemData.userUUID) -> {
                         isVisible = false
                     }
                     itemData.isSpeak -> {
@@ -80,7 +82,7 @@ class UserListAdapter(
                     else -> isVisible = false
                 }
             } else {
-                if (itemData.isSpeak && itemData.userUUID == viewModel.state.value.userUUID) {
+                if (itemData.isSpeak && state.isCurrentUser(itemData.userUUID)) {
                     isVisible = true
                     setImageResource(R.drawable.ic_room_userlist_handup_close)
                     setOnClickListener {
@@ -99,7 +101,7 @@ class UserListAdapter(
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataSet(data: List<RtcUser>) {
+    fun setData(data: List<RtcUser>) {
         dataSet.clear()
         dataSet.addAll(data.distinctBy { it.rtcUID })
         notifyDataSetChanged()

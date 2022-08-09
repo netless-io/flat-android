@@ -5,13 +5,9 @@ import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcApi
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
 class UserManager @Inject constructor(
@@ -33,16 +29,12 @@ class UserManager @Inject constructor(
     // current all users
     private var usersCache = mutableMapOf<String, RtcUser>()
 
-    private lateinit var roomUUID: String
     private lateinit var currentUserUUID: String
     private lateinit var ownerUUID: String
-    private lateinit var scope: CoroutineScope
 
-    fun reset(roomUUID: String, userUUID: String, ownerUUID: String, scope: CoroutineScope) {
-        this.roomUUID = roomUUID
+    fun reset(userUUID: String, ownerUUID: String) {
         this.currentUserUUID = userUUID
         this.ownerUUID = ownerUUID
-        this.scope = scope
 
         creator = null
         speakingJoiners.clear()
@@ -51,20 +43,17 @@ class UserManager @Inject constructor(
         notifyUsers()
     }
 
-    suspend fun initUsers(uuids: List<String>): Boolean = suspendCoroutine { cont ->
-        scope.launch {
-            val userMap = userQuery.loadUsers(uuids).mapValues {
-                RtcUser(
-                    userUUID = it.value.userUUID,
-                    name = it.value.name,
-                    avatarURL = it.value.avatarURL,
-                    rtcUID = it.value.rtcUID,
-                )
-            }
-            usersCache.putAll(userMap)
-            sortAndNotify(userMap.values.toList())
-            cont.resume(true)
+    suspend fun initUsers(uuids: List<String>) {
+        val userMap = userQuery.loadUsers(uuids).mapValues {
+            RtcUser(
+                userUUID = it.value.userUUID,
+                name = it.value.name,
+                avatarURL = it.value.avatarURL,
+                rtcUID = it.value.rtcUID,
+            )
         }
+        usersCache.putAll(userMap)
+        sortAndNotify(userMap.values.toList())
     }
 
     private fun sortAndNotify(users: List<RtcUser>) {
@@ -97,29 +86,25 @@ class UserManager @Inject constructor(
         }
     }
 
-    fun addUser(userUUID: String) {
-        scope.launch {
-            if (usersCache[userUUID] == null) {
-                usersCache[userUUID] = RtcUser(userUUID = userUUID)
-            }
-            userQuery.loadUser(userUUID)?.let {
-                val rtcUser = usersCache[userUUID]!!
-                updateUser(rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
-            }
+    suspend fun addUser(userUUID: String) {
+        if (usersCache[userUUID] == null) {
+            usersCache[userUUID] = RtcUser(userUUID = userUUID)
+        }
+        userQuery.loadUser(userUUID)?.let {
+            val rtcUser = usersCache[userUUID]!!
+            updateUser(rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
         }
     }
 
     fun removeUser(userUUID: String) {
-        scope.launch {
-            usersCache.remove(userUUID)
-            if (userUUID == ownerUUID) {
-                creator = null
-            }
-            speakingJoiners.removeAll { it.userUUID == userUUID }
-            handRaisingJoiners.removeAll { it.userUUID == userUUID }
-            otherJoiners.removeAll { it.userUUID == userUUID }
-            notifyUsers()
+        usersCache.remove(userUUID)
+        if (userUUID == ownerUUID) {
+            creator = null
         }
+        speakingJoiners.removeAll { it.userUUID == userUUID }
+        handRaisingJoiners.removeAll { it.userUUID == userUUID }
+        otherJoiners.removeAll { it.userUUID == userUUID }
+        notifyUsers()
     }
 
     private fun updateUser(user: RtcUser) {
@@ -140,10 +125,6 @@ class UserManager @Inject constructor(
         _users.value = ranked
     }
 
-    fun findFirstOtherUser(): RtcUser? {
-        return users.value.find { it.userUUID != currentUserUUID }
-    }
-
     fun findFirstUser(uuid: String): RtcUser? {
         return users.value.find { it.userUUID == uuid }
     }
@@ -153,60 +134,59 @@ class UserManager @Inject constructor(
     }
 
     fun cancelHandRaising() {
-        scope.launch {
-            val updateUsers = handRaisingJoiners.toMutableList()
-            handRaisingJoiners.clear()
-            updateUsers.forEach { it.isRaiseHand = false }
-            sortAndNotify(updateUsers)
-        }
+        val updateUsers = handRaisingJoiners.toMutableList()
+        handRaisingJoiners.clear()
+        updateUsers.forEach { it.isRaiseHand = false }
+        sortAndNotify(updateUsers)
     }
 
     fun updateDeviceState(uuid: String, videoOpen: Boolean, audioOpen: Boolean) {
-        scope.launch {
-            findUser(uuid)?.apply {
-                updateUser(copy(audioOpen = audioOpen, videoOpen = videoOpen))
-                updateRtcStream(rtcUID, audioOpen, videoOpen)
-            }
+        findUser(uuid)?.apply {
+            updateUser(copy(audioOpen = audioOpen, videoOpen = videoOpen))
+            updateRtcStream(rtcUID, audioOpen, videoOpen)
         }
     }
 
-    fun updateUserState(uuid: String, audioOpen: Boolean, videoOpen: Boolean, name: String, isSpeak: Boolean) {
-        scope.launch {
-            if (usersCache[uuid] == null) {
-                usersCache[uuid] = RtcUser(userUUID = uuid)
-                asyncLoadUserInfo(uuid)
-            }
-            val user = usersCache[uuid]!!.copy(
-                audioOpen = audioOpen,
-                videoOpen = videoOpen,
-                name = name,
-                isSpeak = isSpeak,
-            )
-            updateUser(user)
-            updateRtcStream(user.rtcUID, audioOpen, videoOpen)
+    suspend fun updateUserState(
+        uuid: String,
+        audioOpen: Boolean,
+        videoOpen: Boolean,
+        name: String,
+        isSpeak: Boolean,
+    ) {
+        if (usersCache[uuid] == null) {
+            usersCache[uuid] = RtcUser(userUUID = uuid)
+            asyncLoadUserInfo(uuid)
         }
+        val user = usersCache[uuid]!!.copy(
+            audioOpen = audioOpen,
+            videoOpen = videoOpen,
+            name = name,
+            isSpeak = isSpeak,
+        )
+        updateUser(user)
+        updateRtcStream(user.rtcUID, audioOpen, videoOpen)
     }
 
     fun updateOnStage(onStages: List<String>) {
         val usersList = users.value.map {
             it.copy(isSpeak = onStages.contains(it.userUUID))
         }
+        usersList.forEach {
+            usersCache[it.userUUID] = it
+        }
         sortAndNotify(usersList)
     }
 
     fun updateSpeakStatus(uuid: String, isSpeak: Boolean) {
-        scope.launch {
-            findUser(uuid)?.run {
-                updateUser(copy(isSpeak = isSpeak))
-            }
+        findUser(uuid)?.run {
+            updateUser(copy(isSpeak = isSpeak))
         }
     }
 
     fun updateRaiseHandStatus(uuid: String, isRaiseHand: Boolean) {
-        scope.launch {
-            findUser(uuid)?.run {
-                updateUser(copy(isRaiseHand = isRaiseHand))
-            }
+        findUser(uuid)?.run {
+            updateUser(copy(isRaiseHand = isRaiseHand))
         }
     }
 
@@ -214,14 +194,15 @@ class UserManager @Inject constructor(
         val usersList = users.value.map {
             it.copy(isRaiseHand = status.contains(it.userUUID))
         }
+        usersList.forEach {
+            usersCache[it.userUUID] = it
+        }
         sortAndNotify(usersList)
     }
 
     fun updateSpeakAndRaise(uuid: String, isSpeak: Boolean, isRaiseHand: Boolean) {
-        scope.launch {
-            findUser(uuid)?.run {
-                updateUser(copy(isSpeak = isSpeak, isRaiseHand = isRaiseHand))
-            }
+        findUser(uuid)?.run {
+            updateUser(copy(isSpeak = isSpeak, isRaiseHand = isRaiseHand))
         }
     }
 
@@ -250,9 +231,7 @@ class UserManager @Inject constructor(
             updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
         }
         // TODO UI Update
-        scope.launch {
-            boardRoom.setWritable(false)
-        }
+        boardRoom.setWritable(false)
         updateUsers.forEach {
             usersCache[it.userUUID] = it
         }
@@ -263,12 +242,10 @@ class UserManager @Inject constructor(
         return usersCache[uuid]
     }
 
-    private fun asyncLoadUserInfo(uuid: String) {
-        scope.launch {
-            userQuery.loadUser(uuid)?.let {
-                val rtcUser = usersCache[uuid]!!
-                usersCache[uuid] = rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
-            }
+    private suspend fun asyncLoadUserInfo(uuid: String) {
+        userQuery.loadUser(uuid)?.let {
+            val rtcUser = usersCache[uuid]!!
+            usersCache[uuid] = rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
         }
     }
 

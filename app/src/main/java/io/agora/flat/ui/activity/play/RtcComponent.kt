@@ -30,12 +30,11 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.util.ClassroomTrace
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class RtcComponent(
@@ -108,11 +107,12 @@ class RtcComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.roomEvent.collect {
-                when (it) {
-                    is ClassRoomEvent.RtmChannelJoined -> joinRtcChannel()
-                    else -> {; }
-                }
+            viewModel.joinRtmEvent.collect { joinRtcChannel() }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            viewModel.noOptPermission.collect {
+                activity.showToast(R.string.class_room_no_operate_permission)
             }
         }
 
@@ -148,7 +148,7 @@ class RtcComponent(
     }
 
     private fun joinRtcChannel() {
-        Log.d(TAG, "call rtc joinChannel")
+        ClassroomTrace.trace("call rtc joinChannel")
         viewModel.roomPlayInfo.value?.apply {
             rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
 

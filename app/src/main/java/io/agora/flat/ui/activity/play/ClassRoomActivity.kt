@@ -10,7 +10,6 @@ import io.agora.flat.databinding.ActivityRoomPlayBinding
 import io.agora.flat.ui.activity.base.BaseActivity
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class ClassRoomActivity : BaseActivity() {
@@ -32,12 +31,7 @@ class ClassRoomActivity : BaseActivity() {
             binding.shareScreenContainer))
         componentSet.add(RtmComponent(this, binding.messageContainer))
         componentSet.add(ToolComponent(this, binding.toolContainer))
-        componentSet.add(ExtComponent(
-            this,
-            binding.extensionContainer,
-            binding.whiteboardContainer,
-            binding.videoListContainer,
-        ))
+        componentSet.add(ExtComponent(this, binding.extensionContainer))
         componentSet.forEach { lifecycle.addObserver(it) }
 
         observeData()

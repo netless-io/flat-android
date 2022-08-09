@@ -7,8 +7,8 @@ data class DeviceState(
     val mic: Boolean,
 )
 
-class ClassroomStorageState(
-    val classMode: ClassModeType? = ClassModeType.Lecture,
-    val raiseHandUsers: List<String>? = listOf(),
-    val onStageUsers: List<String>? = listOf(),
+data class ClassroomStorageState(
+    val classMode: ClassModeType? = null,
+    val raiseHandUsers: List<String>? = null,
+    val onStageUsers: List<String>? = null,
 )

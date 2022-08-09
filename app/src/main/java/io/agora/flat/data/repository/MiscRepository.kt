@@ -27,9 +27,9 @@ class MiscRepository @Inject constructor(
         }
     }
 
-    suspend fun logError(message: String) {
-        return withContext(Dispatchers.IO) {
-            miscService.logError(LogErrorReq(message)).toResult()
-        }
-    }
+    // suspend fun logError(message: String) {
+    //     return withContext(Dispatchers.IO) {
+    //         miscService.logError(LogErrorReq(message)).toResult()
+    //     }
+    // }
 }
