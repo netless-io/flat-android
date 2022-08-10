@@ -221,4 +221,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
+
+    implementation project(":base")
+    implementation project(":logger")
 }
