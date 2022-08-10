@@ -10,6 +10,7 @@ import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.di.impl.EventBus
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.event.UserUpdated
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**
@@ -32,6 +34,7 @@ class HomeViewModel @Inject constructor(
     private val eventBus: EventBus,
     private val appKVCenter: AppKVCenter,
     private val networkObserver: NetworkObserver,
+    private val logger: Logger,
 ) : ViewModel() {
     private val userInfo = MutableStateFlow(appKVCenter.getUserInfo() ?: UserInfo("", "", ""))
     private val roomCategory = MutableStateFlow(RoomCategory.Current)

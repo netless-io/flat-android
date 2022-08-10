@@ -1,20 +1,36 @@
 package io.agora.flat.logger
 
 import android.content.Context
+import com.tencent.bugly.CrashModule
 import com.tencent.bugly.crashreport.BuglyLog
 import com.tencent.bugly.crashreport.CrashReport
 import io.agora.flat.di.interfaces.Crashlytics
 
-internal object BuglyCrashlytics : Crashlytics {
+/**
+ * Initialize the Bugly SDK after the user has authorized the Privacy Policy
+ */
+internal class BuglyCrashlytics : Crashlytics {
+    var uid: String? = null
+
     override fun init(context: Context) {
         CrashReport.initCrashReport(context, "57ff6f9227", false)
+        uid?.let {
+            setUserId(it)
+        }
     }
 
     override fun setUserId(id: String) {
-        CrashReport.setUserId(id)
+        if (CrashModule.getInstance().hasInitialized()) {
+            CrashReport.setUserId(id)
+        } else {
+            this.uid = id
+        }
     }
 
     override fun log(tag: String?, message: String, t: Throwable?) {
         BuglyLog.e(tag, message, t)
+        if (t != null) {
+            CrashReport.postCatchedException(t)
+        }
     }
 }

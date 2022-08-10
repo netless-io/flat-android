@@ -13,7 +13,7 @@ import javax.inject.Singleton
 object LoggerModule {
     @Singleton
     @Provides
-    fun providerCrashlytics(): Crashlytics = BuglyCrashlytics
+    fun providerCrashlytics(): Crashlytics = BuglyCrashlytics()
 
     @Singleton
     @Provides
