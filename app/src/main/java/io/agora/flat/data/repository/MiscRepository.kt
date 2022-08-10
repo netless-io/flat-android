@@ -4,6 +4,7 @@ import io.agora.flat.data.Result
 import io.agora.flat.data.model.LogErrorReq
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
+import io.agora.flat.data.model.RtmCensorReq
 import io.agora.flat.data.toResult
 import io.agora.flat.http.api.MiscService
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,13 @@ class MiscRepository @Inject constructor(
     suspend fun logError(message: String) {
         return withContext(Dispatchers.IO) {
             miscService.logError(LogErrorReq(message)).toResult()
+        }
+    }
+
+    suspend fun censorRtm(text: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val result = miscService.censorRtm(RtmCensorReq(text)).toResult()
+            return@withContext result.get()?.valid == true
         }
     }
 }

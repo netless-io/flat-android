@@ -25,4 +25,10 @@ interface MiscService {
     fun logError(
         @Body req: LogErrorReq,
     ): Call<BaseResp<RespNoData>>
+    
+    // 消息审核
+    @POST("v1/agora/rtm/censor")
+    fun censorRtm(
+        @Body req: RtmCensorReq,
+    ): Call<BaseResp<RtmCensorRespData>>
 }

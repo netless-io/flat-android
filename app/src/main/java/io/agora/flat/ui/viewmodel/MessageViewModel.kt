@@ -7,13 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +22,7 @@ import javax.inject.Inject
 class MessageViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
+    private val miscRepository: MiscRepository,
     private val messageState: MessageState,
     private val messageQuery: MessageQuery,
     private val rtmApi: RtmApi,
@@ -91,8 +92,10 @@ class MessageViewModel @Inject constructor(
 
     fun sendChatMessage(message: String) {
         viewModelScope.launch {
-            rtmApi.sendChannelMessage(message)
-            appendMessages(listOf(MessageFactory.createText(userRepository.getUserUUID(), message)))
+            if (miscRepository.censorRtm(message)) {
+                rtmApi.sendChannelMessage(message)
+                appendMessages(listOf(MessageFactory.createText(userRepository.getUserUUID(), message)))
+            }
         }
     }
 }
