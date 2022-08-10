@@ -20,6 +20,7 @@ import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.ui.util.UiError
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,7 @@ class MainViewModel @Inject constructor(
     private val appKVCenter: AppKVCenter,
     private val downloader: AndroidDownloader,
     private val intentHandler: IntentHandler,
+    private val logger: Logger,
 ) : ViewModel() {
     private var _state = MutableStateFlow(MainViewState(appKVCenter.isProtocolAgreed()))
     val state = _state.asStateFlow()
@@ -52,6 +54,8 @@ class MainViewModel @Inject constructor(
             if (isLoggedIn()) {
                 if (AppKVCenter.MockData.mockEnable || userRepository.loginCheck() is Success) {
                     _state.value = _state.value.copy(loginState = LoginState.Login)
+                    // init logger userId here
+                    logger.setUserId(userRepository.getUserUUID())
                 } else {
                     _state.value = _state.value.copy(loginState = LoginState.Error)
                 }

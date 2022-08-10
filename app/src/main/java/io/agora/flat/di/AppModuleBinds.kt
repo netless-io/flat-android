@@ -9,12 +9,13 @@ import io.agora.flat.common.board.WhiteSyncedState
 import io.agora.flat.di.impl.RtcApiImpl
 import io.agora.flat.di.impl.RtmApiImpl
 import io.agora.flat.di.interfaces.*
+import io.agora.flat.logger.LoggerModuleBinds
 
 /**
  * 全局
  */
-@Module
 @InstallIn(SingletonComponent::class)
+@Module(includes = [LoggerModuleBinds::class])
 abstract class AppModuleBinds {
     @Binds
     @IntoSet

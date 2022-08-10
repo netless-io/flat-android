@@ -16,15 +16,16 @@ import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.EventBus
+import io.agora.flat.logger.LoggerModule
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 /**
  * 全局
  */
-@Module
+@Module(includes = [LoggerModule::class])
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
     @Provides
     fun provideIoDispatcher() = Dispatchers.IO
 
