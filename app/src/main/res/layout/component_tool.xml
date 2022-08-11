@@ -64,7 +64,7 @@
             <FrameLayout
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <ImageView
                     android:id="@+id/message"

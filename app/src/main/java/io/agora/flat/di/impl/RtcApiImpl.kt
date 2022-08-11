@@ -38,6 +38,7 @@ class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitia
                 VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_LANDSCAPE
             )
         )
+        rtcEngine.adjustRecordingSignalVolume(200)
     }
 
     override fun rtcEngine(): RtcEngine {

@@ -1,9 +1,6 @@
 package io.agora.flat.http.api
 
-import io.agora.flat.data.model.BaseReq
-import io.agora.flat.data.model.BaseResp
-import io.agora.flat.data.model.PureRoomReq
-import io.agora.flat.data.model.PureToken
+import io.agora.flat.data.model.*
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -28,4 +25,10 @@ interface MiscService {
     // fun logError(
     //     @Body req: LogErrorReq,
     // ): Call<BaseResp<RespNoData>>
+
+    // 消息审核
+    @POST("v1/agora/rtm/censor")
+    fun censorRtm(
+        @Body req: RtmCensorReq,
+    ): Call<BaseResp<RtmCensorRespData>>
 }

@@ -8,7 +8,7 @@ import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-class FlatLogger @Inject constructor(
+internal class FlatLogger @Inject constructor(
     private val crashlytics: Crashlytics,
 ) : Logger {
     override fun setup(debugMode: Boolean) {

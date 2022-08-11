@@ -29,6 +29,7 @@ import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
 import io.agora.flat.common.version.VersionCheckResult
+import io.agora.flat.di.interfaces.Crashlytics
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
@@ -39,6 +40,9 @@ import javax.inject.Inject
 class MainActivity : BaseComposeActivity() {
     @Inject
     lateinit var loginManager: LoginManager
+
+    @Inject
+    lateinit var crashlytics: Crashlytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +59,7 @@ class MainActivity : BaseComposeActivity() {
                     onCreate = {
                         loginManager.registerApp()
                         loginManager.registerReceiver(this)
+                        crashlytics.init(applicationContext)
                     },
                     onResume = {
                         if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
