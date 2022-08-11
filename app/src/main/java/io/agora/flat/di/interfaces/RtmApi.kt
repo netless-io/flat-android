@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface RtmApi {
     fun rtmEngine(): RtmClient
 
-    suspend fun initChannel(rtmToken: String, channelId: String, userUUID: String): Boolean
+    suspend fun login(rtmToken: String, channelId: String, userUUID: String): Boolean
 
     suspend fun logout(): Boolean
 
@@ -43,16 +43,6 @@ interface RtmApi {
     ): Int
 
     fun observeClassEvent(): Flow<ClassRtmEvent>
-
-    // TODO Remove
-    suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean {
-        Log.e("RTM", "sendPeerCommand Fix")
-        return false;
-    }
-
-    fun sendChannelCommand(event: RTMEvent) {
-        Log.e("RTM", "sendChannelCommand Fix")
-    }
 }
 
 

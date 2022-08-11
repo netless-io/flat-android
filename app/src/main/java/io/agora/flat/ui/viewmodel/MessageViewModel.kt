@@ -23,7 +23,7 @@ class MessageViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val miscRepository: MiscRepository,
-    private val messageState: MessageState,
+    private val messageManager: ChatMessageManager,
     private val messageQuery: MessageQuery,
     private val rtmApi: RtmApi,
     private val eventbus: EventBus,
@@ -61,7 +61,7 @@ class MessageViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _messageLoading.value = true
-            if (messageState.isEmpty()) {
+            if (messageManager.isEmpty()) {
                 val msgs = messageQuery.loadMore().asReversed()
                 appendMessages(msgs)
             } else {
@@ -73,7 +73,7 @@ class MessageViewModel @Inject constructor(
     }
 
     private fun appendMessages(msgs: List<Message>) {
-        messageState.appendMessages(msgs)
+        messageManager.appendMessages(msgs)
 
         _messageUpdate.value = _messageUpdate.value.copy(
             updateOp = MessagesUpdate.APPEND,
@@ -82,7 +82,7 @@ class MessageViewModel @Inject constructor(
     }
 
     private fun prependMessages(msgs: List<Message>) {
-        messageState.prependMessages(msgs)
+        messageManager.prependMessages(msgs)
 
         _messageUpdate.value = _messageUpdate.value.copy(
             updateOp = MessagesUpdate.PREPEND,

@@ -14,15 +14,11 @@ import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.isDarkMode
-import kotlinx.coroutines.flow.filterNotNull
 
 class WhiteboardComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = WhiteboardComponent::class.simpleName
-    }
 
     @EntryPoint
     @InstallIn(ActivityComponent::class)
@@ -71,17 +67,7 @@ class WhiteboardComponent(
                 }
             }
         }
-
-//        lifecycleScope.launchWhenResumed {
-//            viewModel.state.filterNotNull().collect {
-//                onRoomWritableChange(it.isWritable)
-//            }
-//        }
     }
-
-//    private fun onRoomWritableChange(writable: Boolean) {
-//        boardRoom.setWritable(writable)
-//    }
 
     private fun initWhiteboard() {
         boardRoom.initSdk(binding.fastboardView)

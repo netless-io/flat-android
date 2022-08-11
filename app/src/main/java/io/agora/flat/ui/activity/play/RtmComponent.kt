@@ -32,15 +32,11 @@ class RtmComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = RtmComponent::class.simpleName
-    }
 
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
         fun userRepository(): UserRepository
-        // fun miscRepository(): MiscRepository
         fun rtmApi(): RtmApi
     }
 
@@ -49,7 +45,6 @@ class RtmComponent(
     private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     private lateinit var userRepository: UserRepository
-    // private lateinit var miscRepository: MiscRepository
     private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
@@ -57,7 +52,6 @@ class RtmComponent(
         super.onCreate(owner)
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
-        // miscRepository = entryPoint.miscRepository()
         rtmApi = entryPoint.rtmApi()
 
         initView()
@@ -139,28 +133,6 @@ class RtmComponent(
         }
     }
 
-//    private val flatRTMListener = object : RTMListener {
-//        override fun onClassEvent(event: ClassRtmEvent) {
-//            viewModel.handleClassEvent(event)
-//        }
-//
-//        override fun onChatMessage(chatMessage: ChatMessage) {
-//
-//        }
-//
-//        override fun onMemberJoined(userId: String, channelId: String) {
-//            viewModel.addRtmMember(userId)
-//        }
-//
-//        override fun onMemberLeft(userId: String, channelId: String) {
-//            viewModel.removeRtmMember(userId)
-//        }
-//
-//        override fun onRemoteLogin() {
-//            showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
-//        }
-//    }
-
     private fun showRoomExitDialog(message: String) {
         val dialog = RoomExitDialog().apply {
             arguments = Bundle().apply {
@@ -170,23 +142,4 @@ class RtmComponent(
         dialog.setListener { activity.delayAndFinish(250) }
         dialog.show(activity.supportFragmentManager, "RoomExitDialog")
     }
-
-//    private fun enterChannel(rtmToken: String, channelId: String) {
-//        lifecycleScope.launch {
-//            try {
-//                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-//                viewModel.initChannelStatus()
-//                launch {
-//                    rtmApi.observeClassEvent().collect {
-//                        Log.e("Rtm", "ClassEvent $it")
-//                    }
-//                }
-//                viewModel.notifyRTMChannelJoined()
-//                Log.d(TAG, "notify rtm joined success")
-//            } catch (e: FlatException) {
-//                miscRepository.logError(e.toString())
-//                showRoomExitDialog(e.toString())
-//            }
-//        }
-//    }
 }

@@ -36,10 +36,6 @@ class ToolComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = ToolComponent::class.simpleName
-    }
-
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {

@@ -102,14 +102,14 @@ class RtmApiImpl @Inject constructor(
         return rtmClient
     }
 
-    override suspend fun initChannel(rtmToken: String, channelId: String, userUUID: String): Boolean {
+    override suspend fun login(rtmToken: String, channelId: String, userUUID: String): Boolean {
+        login(rtmToken, userUUID)
+
         channelMessageID = channelId
         channelCommandID = channelId + "commands"
 
-        login(rtmToken, userUUID)
         channelMessage = joinChannel(channelMessageID, messageListener)
         channelCommand = joinChannel(channelCommandID, commandListener)
-
         return true
     }
 

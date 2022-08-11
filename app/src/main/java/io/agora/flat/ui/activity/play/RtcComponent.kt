@@ -3,7 +3,6 @@ package io.agora.flat.ui.activity.play
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Rect
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -26,6 +25,7 @@ import io.agora.flat.data.model.RtcUser
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -44,8 +44,6 @@ class RtcComponent(
     private val shareScreenContainer: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
-        val TAG = RtcComponent::class.simpleName
-
         val REQUESTED_PERMISSIONS = arrayOf(
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA,
@@ -58,6 +56,7 @@ class RtcComponent(
         fun userRepository(): UserRepository
         fun rtcApi(): RtcApi
         fun rtcVideoController(): RtcVideoController
+        fun logger(): Logger
     }
 
     private lateinit var fullScreenBinding: ComponentFullscreenBinding
@@ -66,6 +65,7 @@ class RtcComponent(
     private lateinit var userRepository: UserRepository
     private lateinit var rtcApi: RtcApi
     private lateinit var rtcVideoController: RtcVideoController
+    private lateinit var logger: Logger
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
     private lateinit var adapter: UserVideoAdapter
@@ -85,12 +85,13 @@ class RtcComponent(
         userRepository = entryPoint.userRepository()
         rtcApi = entryPoint.rtcApi()
         rtcVideoController = entryPoint.rtcVideoController()
+        logger = entryPoint.logger()
     }
 
     private fun observeState() {
         lifecycleScope.launch {
             viewModel.videoUsers.collect { users ->
-                Log.d(TAG, "videoUsers changed to $users")
+                logger.d("videoUsers changed to $users")
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
@@ -107,7 +108,7 @@ class RtcComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.joinRtmEvent.collect { joinRtcChannel() }
+            viewModel.rtmSuccess.collect { joinRtcChannel() }
         }
 
         lifecycleScope.launchWhenResumed {
@@ -322,7 +323,7 @@ class RtcComponent(
         val right = start.right + (end.right - start.right) * value
         val top = start.top + (end.top - start.top) * value
         val bottom = start.bottom + (end.bottom - start.bottom) * value
-        Log.d(TAG, "left:$left,right:$right,top:$top,bottom:$bottom")
+        logger.d("left:$left,right:$right,top:$top,bottom:$bottom")
 
         fullScreenBinding.fullVideoView.run {
             val lp = layoutParams as ViewGroup.MarginLayoutParams
@@ -371,7 +372,7 @@ class RtcComponent(
             return
         }
 
-        Log.i(TAG, "checkPermission request $permissions")
+        logger.d("checkPermission request $permissions")
         activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { it ->
             val allGranted = it.mapNotNull { it.key }.size == it.size
             if (allGranted) {
@@ -388,14 +389,14 @@ class RtcComponent(
 
     private var eventListener = object : RTCEventListener {
         override fun onUserOffline(uid: Int, reason: Int) {
-            Log.d(TAG, "onUserOffline uid: $uid reason: $reason")
+            logger.d("rtc user left. uid: $uid reason: $reason")
             lifecycleScope.launch {
                 rtcVideoController.handleOffline(uid)
             }
         }
 
         override fun onUserJoined(uid: Int, elapsed: Int) {
-            Log.d(TAG, "onUserJoined uid: $uid elapsed: $elapsed")
+            logger.d("rtc user joined. uid: $uid elapsed: $elapsed")
             lifecycleScope.launch {
                 rtcVideoController.handlerJoined(uid)
             }

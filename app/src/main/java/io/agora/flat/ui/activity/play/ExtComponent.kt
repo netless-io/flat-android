@@ -15,7 +15,6 @@ import io.agora.flat.R
 import io.agora.flat.databinding.ComponentExtensionBinding
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.collect
 
 /**
  * display common loading, toast, dialog, global layout change.
@@ -24,10 +23,6 @@ class ExtComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = ExtComponent::class.simpleName
-    }
-
     private lateinit var extensionBinding: ComponentExtensionBinding
 
     private val viewModel: ExtensionViewModel by activity.viewModels()

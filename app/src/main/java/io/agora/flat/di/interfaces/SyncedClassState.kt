@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface SyncedClassState {
     fun observeDeviceState(): Flow<Map<String, DeviceState>>
 
-    fun observeOnStage(): Flow<List<String>>
+    fun observeOnStage(): Flow<Map<String, Boolean>>
 
     fun observeRaiseHand(): Flow<List<String>>
 

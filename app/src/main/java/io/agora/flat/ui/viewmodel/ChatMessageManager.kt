@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
- * 页面内同步
+ * a class to manage chat messages in classroom.
  */
 @ActivityRetainedScoped
-class MessageState @Inject constructor() {
+class ChatMessageManager @Inject constructor() {
     private var _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages = _messages.asStateFlow()
 
@@ -31,4 +31,6 @@ class MessageState @Inject constructor() {
         }
         _messages.value = list
     }
+
+
 }

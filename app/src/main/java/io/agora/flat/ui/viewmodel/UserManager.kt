@@ -168,9 +168,9 @@ class UserManager @Inject constructor(
         updateRtcStream(user.rtcUID, audioOpen, videoOpen)
     }
 
-    fun updateOnStage(onStages: List<String>) {
+    fun updateOnStage(onStages: Map<String, Boolean>) {
         val usersList = users.value.map {
-            it.copy(isSpeak = onStages.contains(it.userUUID))
+            it.copy(isSpeak = onStages[it.userUUID] ?: false)
         }
         usersList.forEach {
             usersCache[it.userUUID] = it

@@ -2,6 +2,7 @@ package io.agora.flat.common.rtm
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import io.agora.flat.data.model.RoomStatus
 import java.util.*
 
 data class ClassRemoteData(val t: String, val v: JsonObject)
@@ -11,14 +12,12 @@ sealed class ClassRtmEvent {
         val gson = Gson()
 
         private val eventClasses = mapOf(
-            "on-stage" to OnStageEvent::class.java,
-            "raise-hand" to RaiseHandEvent::class.java,
+            "on-stage" to OnStageEventWithSender::class.java,
+            "raise-hand" to RaiseHandEventWithSender::class.java,
+            "update-room-status" to RaiseHandEventWithSender::class.java,
         )
 
-        private val eventTypes = mapOf(
-            OnStageEvent::class.java to "on-stage",
-            RaiseHandEvent::class.java to "raise-hand",
-        )
+        private val eventTypes = eventClasses.map { it.value to it.key }.toMap()
 
         fun parse(message: String, sender: String? = null): ClassRtmEvent {
             try {
@@ -26,14 +25,14 @@ sealed class ClassRtmEvent {
                 val eventClazz = eventClasses[data.t]
                 if (eventClazz != null) {
                     val result = gson.fromJson(data.v, eventClazz)
-                    if (result is P2pEvent) {
+                    if (result is EventWithSender) {
                         result.sender = sender
                     }
                     return result as ClassRtmEvent
                 }
             } catch (e: Exception) {
             }
-            return UnknownEvent();
+            return UnknownEvent()
         }
 
         fun toText(event: ClassRtmEvent): String {
@@ -54,21 +53,27 @@ sealed class ClassRtmEvent {
 
 }
 
-interface P2pEvent {
+interface EventWithSender {
     var sender: String?
 }
 
-data class OnStageEvent(
+data class OnStageEventWithSender(
     override var sender: String? = null,
     val roomUUID: String,
     val onStage: Boolean,
-) : ClassRtmEvent(), P2pEvent
+) : ClassRtmEvent(), EventWithSender
 
-data class RaiseHandEvent(
+data class RaiseHandEventWithSender(
     override var sender: String? = null,
     val roomUUID: String,
     val raiseHand: Boolean,
-) : ClassRtmEvent(), P2pEvent
+) : ClassRtmEvent(), EventWithSender
+
+data class RoomStateEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val state: RoomStatus,
+) : ClassRtmEvent(), EventWithSender
 
 data class OnMemberJoined(
     val channelId: String,

@@ -8,7 +8,6 @@ import io.agora.flat.common.board.BoardRoomPhase
 import io.agora.flat.ui.util.UiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
