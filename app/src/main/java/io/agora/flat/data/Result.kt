@@ -21,7 +21,7 @@ sealed class Result<T> {
 
     fun getOrThrow(): T = when (this) {
         is Success -> get()
-        is Failure -> throw throwable
+        is Failure -> throw exception
     }
 
     fun asFailure() = this as Failure
@@ -36,12 +36,11 @@ data class Success<T>(val data: T) : Result<T>() {
 }
 
 data class Failure<T>(
-    val throwable: Throwable,
-    val error: Error = Error.Unknown,
+    val exception: Throwable,
 ) : Result<T>()
 
-data class Error(val status: Int, val code: Int) {
-    companion object {
-        var Unknown: Error = Error(-1, -1)
-    }
-}
+//data class Error(val status: Int, val code: Int) {
+//    companion object {
+//        var Unknown: Error = Error(-1, -1)
+//    }
+//}

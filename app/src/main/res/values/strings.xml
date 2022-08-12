@@ -242,4 +242,6 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>
     <string name="request_common_success">success</string>
+
+    <string name="error_string_network">please check your network</string>
 </resources>

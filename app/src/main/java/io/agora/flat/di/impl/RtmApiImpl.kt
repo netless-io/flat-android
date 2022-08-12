@@ -2,8 +2,9 @@ package io.agora.flat.di.impl
 
 import android.content.Context
 import android.util.Log
+import io.agora.flat.common.FlatException
+import io.agora.flat.common.FlatRtmException
 import io.agora.flat.common.rtm.*
-import io.agora.flat.common.toFlatException
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RtmQueryMessage
@@ -296,5 +297,9 @@ class RtmApiImpl @Inject constructor(
             Log.d(TAG, "close Flow")
             rtmListeners.remove(listener)
         }
+    }
+
+    internal fun ErrorInfo.toFlatException(): FlatException {
+        return FlatRtmException(this.errorDescription, this.errorCode)
     }
 }

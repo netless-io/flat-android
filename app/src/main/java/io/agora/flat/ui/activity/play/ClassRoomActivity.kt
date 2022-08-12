@@ -4,12 +4,10 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.databinding.ActivityRoomPlayBinding
 import io.agora.flat.ui.activity.base.BaseActivity
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
-import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
 class ClassRoomActivity : BaseActivity() {
@@ -33,16 +31,6 @@ class ClassRoomActivity : BaseActivity() {
         componentSet.add(ToolComponent(this, binding.toolContainer))
         componentSet.add(ExtComponent(this, binding.extensionContainer))
         componentSet.forEach { lifecycle.addObserver(it) }
-
-        observeData()
-    }
-
-    private fun observeData() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.errorMessage.collect {
-                showToast(it)
-            }
-        }
     }
 
     override fun onResume() {

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.android.AndroidDownloader
 import io.agora.flat.common.android.IntentHandler
 import io.agora.flat.common.android.StringFetcher
@@ -95,10 +96,11 @@ class MainViewModel @Inject constructor(
             when (val result = roomRepository.joinRoom(roomUUID)) {
                 is Success -> roomPlayInfo.value = result.data
                 is Failure -> {
-                    error.value = when (result.error.code) {
+                    result.exception as FlatNetException
+                    error.value = when (result.exception.code) {
                         FlatErrorCode.Web_RoomNotFound -> UiError(stringFetcher.roomNotFound())
                         FlatErrorCode.Web_RoomIsEnded -> UiError(stringFetcher.roomIsEnded())
-                        else -> UiError(stringFetcher.joinRoomError(result.error.code))
+                        else -> UiError(stringFetcher.joinRoomError(result.exception.code))
                     }
                 }
             }

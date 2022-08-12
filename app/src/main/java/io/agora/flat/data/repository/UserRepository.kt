@@ -2,6 +2,7 @@ package io.agora.flat.data.repository
 
 import android.os.SystemClock
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.data.*
 import io.agora.flat.data.model.*
 import io.agora.flat.http.api.UserService
@@ -27,9 +28,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(result.data)
                 Success(true)
             }
-            is Failure -> {
-                Failure(result.throwable, result.error)
-            }
+            is Failure -> Failure(result.exception)
         }
     }
 
@@ -73,9 +72,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(result.data.toUserInfo())
                 Success(true)
             }
-            is Failure -> {
-                Failure(result.throwable, result.error)
-            }
+            is Failure -> Failure(result.exception)
         }
     }
 
@@ -122,7 +119,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(callResult.data.toUserInfo())
                 Success(true)
             }
-            is Failure -> Failure(callResult.throwable, callResult.error)
+            is Failure -> Failure(callResult.exception)
         }
     }
 
@@ -143,7 +140,7 @@ class UserRepository @Inject constructor(
                 }
                 Success(true)
             }
-            is Failure -> Failure(callResult.throwable, callResult.error)
+            is Failure -> Failure(callResult.exception)
         }
     }
 
@@ -158,7 +155,7 @@ class UserRepository @Inject constructor(
                 }
                 Success(true)
             }
-            is Failure -> Failure(callResult.throwable, callResult.error)
+            is Failure -> Failure(callResult.exception)
         }
     }
 
@@ -198,7 +195,7 @@ class UserRepository @Inject constructor(
                 Success(true)
             }
             is Failure -> {
-                Failure(result.throwable, result.error)
+                Failure(result.exception)
             }
         }
     }
@@ -206,16 +203,16 @@ class UserRepository @Inject constructor(
     suspend fun bindingProcess(authUUID: String, times: Int = 5): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             repeat(times) {
-                val result = userService.bindingProcess(AuthUUIDReq(authUUID)).toResult()
-                when (result) {
+                when (val result = userService.bindingProcess(AuthUUIDReq(authUUID)).toResult()) {
                     is Success -> {
                         bindings = bindings?.copy(github = true)
                         return@withContext Success(true)
                     }
                     is Failure -> {
                         // state == 1 error; state == 2 loop
-                        if (result.error.status == 1) {
-                            return@withContext Failure(result.throwable, result.error)
+                        val exception = result.exception as FlatNetException
+                        if (exception.status == 1) {
+                            return@withContext Failure(result.exception)
                         }
                     }
                 }
@@ -238,7 +235,7 @@ class UserRepository @Inject constructor(
                     }
                     Success(true)
                 }
-                is Failure -> Failure(result.throwable, result.error)
+                is Failure -> Failure(result.exception)
             }
         }
     }
@@ -253,7 +250,13 @@ class UserRepository @Inject constructor(
             lastSendCodeTime = SystemClock.elapsedRealtime()
             block()
         } else {
-            failure ?: Failure(Exception("limit send code"), Error(404, FlatErrorCode.Web_ExhaustiveAttack))
+            failure ?: Failure(
+                FlatNetException(
+                    RuntimeException("limit send code"),
+                    status = 404,
+                    code = FlatErrorCode.Web_ExhaustiveAttack
+                )
+            )
         }
     }
 }

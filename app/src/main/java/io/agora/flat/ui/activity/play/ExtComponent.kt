@@ -2,6 +2,7 @@ package io.agora.flat.ui.activity.play
 
 import android.graphics.Rect
 import android.os.Build
+import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
@@ -12,7 +13,11 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.load
 import io.agora.flat.R
+import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.databinding.ComponentExtensionBinding
+import io.agora.flat.ui.util.UiMessage
+import io.agora.flat.ui.view.RoomExitDialog
+import io.agora.flat.util.delayAndFinish
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
 
@@ -45,10 +50,19 @@ class ExtComponent(
         lifecycleScope.launchWhenResumed {
             viewModel.state.collect {
                 showLoading(it.loading)
-                if (it.error != null) {
-                    activity.showToast(it.error.message)
+                it.error?.run {
+                    handleErrorMessage(it.error)
                 }
             }
+        }
+    }
+
+    private fun handleErrorMessage(error: UiMessage) {
+        if (error.exception == null) {
+            activity.showToast(error.text)
+        } else {
+            // TODO
+            showRoomExitDialog(FlatErrorHandler.getStringByError(activity, error.exception, ""))
         }
     }
 
@@ -73,4 +87,15 @@ class ExtComponent(
             }
         }
     }.build()
+
+
+    private fun showRoomExitDialog(message: String) {
+        val dialog = RoomExitDialog().apply {
+            arguments = Bundle().apply {
+                putString(RoomExitDialog.MESSAGE, message)
+            }
+        }
+        dialog.setListener { activity.delayAndFinish(250) }
+        dialog.show(activity.supportFragmentManager, "RoomExitDialog")
+    }
 }

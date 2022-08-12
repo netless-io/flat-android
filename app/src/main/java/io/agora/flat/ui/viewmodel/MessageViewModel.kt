@@ -12,6 +12,7 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.event.MessagesAppended
+import io.agora.flat.ui.manager.RoomErrorManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -24,6 +25,7 @@ class MessageViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val miscRepository: MiscRepository,
     private val messageManager: ChatMessageManager,
+    private val errorManager: RoomErrorManager,
     private val messageQuery: MessageQuery,
     private val rtmApi: RtmApi,
     private val eventbus: EventBus,
@@ -38,8 +40,13 @@ class MessageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            initMessageQuery()
-            loadHistoryMessage()
+            // TODO
+            try {
+                initMessageQuery()
+                loadHistoryMessage()
+            } catch (e: Exception) {
+                errorManager.notifyError("fetch message error", e)
+            }
         }
 
         viewModelScope.launch {

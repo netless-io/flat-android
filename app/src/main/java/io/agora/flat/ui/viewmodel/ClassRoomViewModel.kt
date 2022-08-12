@@ -14,13 +14,11 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
-import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.common.rtm.*
-import io.agora.flat.data.Failure
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomConfigRepository
@@ -34,6 +32,7 @@ import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.NoOptPermission
 import io.agora.flat.event.RtmChannelJoined
 import io.agora.flat.ui.manager.RecordManager
+import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.util.ClassroomTrace
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +54,7 @@ class ClassRoomViewModel @Inject constructor(
     private val userManager: UserManager,
     private val recordManager: RecordManager,
     private val messageManager: ChatMessageManager,
+    private val roomErrorManager: RoomErrorManager,
     private val rtmApi: RtmApi,
     private val boardRoom: BoardRoom,
     private val syncedClassState: SyncedClassState,
@@ -99,16 +99,13 @@ class ClassRoomViewModel @Inject constructor(
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
 
-    private var _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage = _errorMessage.asStateFlow().filterNotNull()
-
     init {
         viewModelScope.launch {
             val result = roomRepository.getOrdinaryRoomInfo(roomUUID)
             if (result.isSuccess) {
                 initRoomInfo(result.getOrThrow().roomInfo)
             } else {
-                _errorMessage.value = "fetch room info error"
+                roomErrorManager.notifyError("fetch room info error", result.asFailure().exception)
             }
         }
 
@@ -120,12 +117,7 @@ class ClassRoomViewModel @Inject constructor(
                     if (result.isSuccess) {
                         info = result.getOrThrow()
                     } else {
-                        result as Failure
-                        _errorMessage.value = when (result.error.code) {
-                            FlatErrorCode.Web_RoomNotFound -> stringFetcher.roomNotFound()
-                            FlatErrorCode.Web_RoomIsEnded -> stringFetcher.roomIsEnded()
-                            else -> stringFetcher.joinRoomError(result.error.code)
-                        }
+                        roomErrorManager.notifyError("fetch join room info", result.asFailure().exception)
                     }
                 }
                 _roomPlayInfo.value = info
@@ -199,8 +191,7 @@ class ClassRoomViewModel @Inject constructor(
                 ClassroomTrace.trace("rtm joined success")
                 notifyRTMChannelJoined()
             } catch (e: FlatException) {
-                // TODO
-                // showRoomExitDialog(e.toString())
+                roomErrorManager.notifyError("rtm join exception", e)
             }
         }
     }

@@ -133,6 +133,7 @@ class RtmComponent(
         }
     }
 
+    // TODO remove to ExtComponent
     private fun showRoomExitDialog(message: String) {
         val dialog = RoomExitDialog().apply {
             arguments = Bundle().apply {

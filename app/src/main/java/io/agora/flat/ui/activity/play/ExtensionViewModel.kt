@@ -5,7 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.common.board.BoardRoomPhase
-import io.agora.flat.ui.util.UiError
+import io.agora.flat.ui.manager.RoomErrorManager
+import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -13,6 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExtensionViewModel @Inject constructor(
+    private val errorManager: RoomErrorManager,
     private val boardRoom: BoardRoom,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExtensionState())
@@ -29,10 +31,16 @@ class ExtensionViewModel @Inject constructor(
                         _state.value = _state.value.copy(loading = false)
                     }
                     is BoardRoomPhase.Error -> {
-                        _state.value = _state.value.copy(error = UiError(phase.message))
+                        _state.value = _state.value.copy(error = UiMessage(phase.message))
                     }
                     else -> {; }
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            errorManager.observeError().collect {
+                _state.value = _state.value.copy(error = it)
             }
         }
     }
@@ -40,5 +48,5 @@ class ExtensionViewModel @Inject constructor(
 
 data class ExtensionState(
     val loading: Boolean = true,
-    val error: UiError? = null,
+    val error: UiMessage? = null,
 )

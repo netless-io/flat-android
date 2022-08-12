@@ -1,13 +1,21 @@
 package io.agora.flat.common
 
 class FlatErrorCode {
-    companion object {
+
+    object Web
+
+    object RTM {
         /**
-         * RTM
+         * Agora RTM
          */
         const val RTM_LOGIN_ERROR_START = 0x11000
-        const val RTM_LOGOUT_ERROR_START = 0x12000
 
+        const val RTM_LOGOUT_ERROR_START = 0x12000
+    }
+
+    object RTC
+
+    companion object {
         /**
          * Flat Web 服务
          * https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
@@ -60,5 +68,9 @@ class FlatErrorCode {
         const val Web_SMSVerificationCodeInvalid = 110000// verification code invalid
         const val Web_SMSAlreadyExist = 110001 // phone already exist by current user
         const val Web_SMSAlreadyBinding = 110002 // phone are binding by other users
+
+
     }
+
+
 }

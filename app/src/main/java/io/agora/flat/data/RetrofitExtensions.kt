@@ -18,6 +18,7 @@
 
 package io.agora.flat.data
 
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.data.model.BaseResp
 import kotlinx.coroutines.delay
 import retrofit2.Call
@@ -108,10 +109,15 @@ inline fun <T> Response<BaseResp<T>>.toResult(): Result<T> = try {
         if (resp.status == 0) {
             Success(resp.data)
         } else {
-            Failure(toException(), Error(resp.status, resp.code ?: -1))
+            Failure(
+                FlatNetException(
+                    code = resp.code ?: FlatNetException.DEFAULT_WEB_ERROR_CODE,
+                    status = resp.status
+                )
+            )
         }
     } else {
-        Failure(toException())
+        Failure(FlatNetException(toException()))
     }
 } catch (e: Exception) {
     Failure(e)

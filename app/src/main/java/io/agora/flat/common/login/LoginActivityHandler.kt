@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
@@ -158,7 +159,8 @@ class LoginActivityHandler(
             if (loginResult is Success) {
                 notifySuccess()
             } else {
-                when ((loginResult as Failure).error.code) {
+                val exception = (loginResult as Failure).exception as FlatNetException
+                when (exception.code) {
                     FlatErrorCode.Web_SMSVerificationCodeInvalid -> {
                         showUiMessage(context.getString(R.string.login_verification_code_invalid))
                     }
