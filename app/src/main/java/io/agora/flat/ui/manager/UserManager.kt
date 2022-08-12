@@ -41,7 +41,7 @@ class UserManager @Inject constructor(
         speakingJoiners.clear()
         handRaisingJoiners.clear()
         otherJoiners.clear()
-        notifyUsers()
+        sortUser(currentUser)
     }
 
     suspend fun initUsers(uuids: List<String>) {

@@ -14,7 +14,7 @@ sealed class ClassRtmEvent {
         private val eventClasses = mapOf(
             "on-stage" to OnStageEventWithSender::class.java,
             "raise-hand" to RaiseHandEventWithSender::class.java,
-            "update-room-status" to RaiseHandEventWithSender::class.java,
+            "update-room-status" to RoomStateEvent::class.java,
         )
 
         private val eventTypes = eventClasses.map { it.value to it.key }.toMap()

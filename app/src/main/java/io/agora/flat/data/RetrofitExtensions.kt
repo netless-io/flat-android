@@ -36,7 +36,7 @@ inline fun <T> Response<T>.toException() = HttpException(this)
 suspend inline fun <T> Call<BaseResp<T>>.toResult(): Result<T> = try {
     executeWithRetry(maxAttempts = 1).toResult()
 } catch (e: Exception) {
-    Failure(e)
+    Failure(FlatNetException(e))
 }
 
 suspend inline fun <T> Call<BaseResp<T>>.toResultWithRetry(
@@ -50,7 +50,7 @@ suspend inline fun <T> Call<BaseResp<T>>.toResultWithRetry(
         shouldRetry = shouldRetry,
     ).toResult()
 } catch (e: Exception) {
-    Failure(e)
+    Failure(FlatNetException(e))
 }
 
 suspend inline fun <T> Call<T>.executeOnce(): Response<T> {
@@ -120,5 +120,5 @@ inline fun <T> Response<BaseResp<T>>.toResult(): Result<T> = try {
         Failure(FlatNetException(toException()))
     }
 } catch (e: Exception) {
-    Failure(e)
+    Failure(FlatNetException(e))
 }
