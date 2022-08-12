@@ -32,7 +32,6 @@ import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
-import io.agora.flat.util.ClassroomTrace
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
@@ -149,8 +148,8 @@ class RtcComponent(
     }
 
     private fun joinRtcChannel() {
-        ClassroomTrace.trace("call rtc joinChannel")
-        viewModel.roomPlayInfo.value?.apply {
+        logger.i("start join rtc")
+        viewModel.state.value?.apply {
             rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
 
             rtcVideoController.localUid = rtcUID

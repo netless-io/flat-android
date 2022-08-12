@@ -104,7 +104,9 @@ class WhiteSyncedState @Inject constructor(
         try {
             val jsonObject = gson.fromJson(state, JsonObject::class.java)
             jsonObject.entrySet().forEach {
-                deviceStates[it.key] = gson.fromJson(it.value, DeviceState::class.java)
+                if (!it.value.isJsonNull) {
+                    deviceStates[it.key] = gson.fromJson(it.value, DeviceState::class.java)
+                }
             }
         } catch (e: Exception) {
             logger.e(e, "devices states parse error")

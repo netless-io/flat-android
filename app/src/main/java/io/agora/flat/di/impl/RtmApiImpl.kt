@@ -262,15 +262,7 @@ class RtmApiImpl @Inject constructor(
 
     private var rtmListeners = mutableListOf<RTMListener>()
 
-    private fun addRtmListener(listener: RTMListener) {
-        rtmListeners.add(listener)
-    }
-
-    private fun removeRtmListener(listener: RTMListener) {
-        rtmListeners.remove(listener)
-    }
-
-    override fun observeClassEvent(): Flow<ClassRtmEvent> = callbackFlow {
+    override fun observeRtmEvent(): Flow<ClassRtmEvent> = callbackFlow {
         val listener = object : RTMListener {
             override fun onClassEvent(event: ClassRtmEvent) {
                 trySend(event)

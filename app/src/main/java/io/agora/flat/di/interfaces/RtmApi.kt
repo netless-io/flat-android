@@ -42,7 +42,7 @@ interface RtmApi {
         endTime: Long,
     ): Int
 
-    fun observeClassEvent(): Flow<ClassRtmEvent>
+    fun observeRtmEvent(): Flow<ClassRtmEvent>
 }
 
 

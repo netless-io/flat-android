@@ -1,4 +1,4 @@
-package io.agora.flat.ui.viewmodel
+package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.BoardRoom
@@ -32,8 +32,9 @@ class UserManager @Inject constructor(
     private lateinit var currentUserUUID: String
     private lateinit var ownerUUID: String
 
-    fun reset(userUUID: String, ownerUUID: String) {
-        this.currentUserUUID = userUUID
+
+    fun reset(currentUser: RtcUser, ownerUUID: String) {
+        this.currentUserUUID = currentUser.userUUID
         this.ownerUUID = ownerUUID
 
         creator = null

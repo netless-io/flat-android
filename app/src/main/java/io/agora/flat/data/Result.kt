@@ -38,9 +38,3 @@ data class Success<T>(val data: T) : Result<T>() {
 data class Failure<T>(
     val exception: Throwable,
 ) : Result<T>()
-
-//data class Error(val status: Int, val code: Int) {
-//    companion object {
-//        var Unknown: Error = Error(-1, -1)
-//    }
-//}

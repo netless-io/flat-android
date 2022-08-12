@@ -338,11 +338,10 @@ class ToolComponent(
 
     private fun handleExit() {
         val state = viewModel.state.value ?: return
-        if (state.needOwnerExitDialog) {
+        if (state.needShowExitDialog) {
             showOwnerExitDialog()
         } else {
-            viewModel.sendGlobalEvent(RoomsUpdated)
-            activity.finish()
+            updateRoomsAndFinish()
             // showAudienceExitDialog()
         }
     }
@@ -356,16 +355,14 @@ class ToolComponent(
 
             // 挂起房间
             override fun onLeftButtonClick() {
-                viewModel.sendGlobalEvent(RoomsUpdated)
-                activity.finish()
+                updateRoomsAndFinish()
             }
 
             // 结束房间
             override fun onRightButtonClick() {
                 lifecycleScope.launch {
                     if (viewModel.stopClass()) {
-                        viewModel.sendGlobalEvent(RoomsUpdated)
-                        activity.finish()
+                        updateRoomsAndFinish()
                     } else {
                         activity.showToast(R.string.room_class_stop_class_fail)
                     }
@@ -378,6 +375,11 @@ class ToolComponent(
         })
         dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
         RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_OWNER_EXIT_DIALOG, true)
+    }
+
+    private fun updateRoomsAndFinish() {
+        viewModel.sendGlobalEvent(RoomsUpdated)
+        activity.finish()
     }
 
     private fun showAudienceExitDialog() {

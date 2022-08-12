@@ -4,7 +4,6 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudRecordRepository
-import io.agora.flat.ui.viewmodel.UserManager
 import io.agora.flat.util.Ticker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
