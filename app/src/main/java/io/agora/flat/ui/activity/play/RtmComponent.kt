@@ -6,6 +6,7 @@ import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoint
@@ -179,7 +180,9 @@ class RtmComponent(
             }
         }
         dialog.setListener { activity.delayAndFinish(250) }
-        dialog.show(activity.supportFragmentManager, "RoomExitDialog")
+        activity.supportFragmentManager.commit(true) {
+            dialog.show(this, "RoomExitDialog")
+        }
     }
 
     private fun enterChannel(rtmToken: String, channelId: String) {

@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogRoomExitBinding
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
 class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
@@ -34,7 +33,7 @@ class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
 
         binding.centerButton.setOnClickListener {
             listener?.onFinish()
-            dismiss()
+            dismissAllowingStateLoss()
         }
 
         lifecycleScope.launchWhenStarted {
@@ -43,7 +42,7 @@ class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
                 binding.centerButton.text = getString(R.string.exit_room_i_known_format, second)
                 if (--second < 0) {
                     listener?.onFinish()
-                    dismiss()
+                    dismissAllowingStateLoss()
                 }
             }
         }
