@@ -91,7 +91,7 @@ class MessageListView @JvmOverloads constructor(
     private fun hideKeyboard(view: View? = null) {
         val viewTarget = view ?: (context as? Activity)?.currentFocus
         viewTarget?.let { v ->
-            val imm = (context as Activity).getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(v.windowToken, 0)
         }
     }
