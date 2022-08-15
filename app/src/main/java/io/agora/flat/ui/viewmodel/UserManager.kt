@@ -103,8 +103,10 @@ class UserManager @Inject constructor(
                 usersCache[userUUID] = RtcUser(userUUID = userUUID)
             }
             userQuery.loadUser(userUUID)?.let {
-                val rtcUser = usersCache[userUUID]!!
-                updateUser(rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
+                if (usersCache[userUUID] != null) {
+                    val rtcUser = usersCache[userUUID]!!
+                    updateUser(rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
+                }
             }
         }
     }
