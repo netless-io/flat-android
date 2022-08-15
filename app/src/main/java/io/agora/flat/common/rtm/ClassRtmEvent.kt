@@ -7,13 +7,15 @@ import java.util.*
 
 data class ClassRemoteData(val t: String, val v: JsonObject)
 
+/**
+ * a class to parse and convert event in rtm
+ */
 sealed class ClassRtmEvent {
     companion object {
         val gson = Gson()
 
         private val eventClasses = mapOf(
-            "on-stage" to OnStageEventWithSender::class.java,
-            "raise-hand" to RaiseHandEventWithSender::class.java,
+            "raise-hand" to RaiseHandEvent::class.java,
             "update-room-status" to RoomStateEvent::class.java,
         )
 
@@ -37,15 +39,12 @@ sealed class ClassRtmEvent {
 
         fun toText(event: ClassRtmEvent): String {
             val element = gson.toJsonTree(event)
-            if (element.isJsonObject) {
+            if (event is EventWithSender) {
                 element.asJsonObject.remove("sender")
             }
             val type = eventTypes[event::class.java]
             if (type != null) {
-                val jsonObject = JsonObject()
-                jsonObject.addProperty("t", type)
-                jsonObject.add("v", element)
-                return gson.toJson(jsonObject)
+                return gson.toJson(ClassRemoteData(type, element.asJsonObject))
             }
             return ""
         }
@@ -57,13 +56,7 @@ interface EventWithSender {
     var sender: String?
 }
 
-data class OnStageEventWithSender(
-    override var sender: String? = null,
-    val roomUUID: String,
-    val onStage: Boolean,
-) : ClassRtmEvent(), EventWithSender
-
-data class RaiseHandEventWithSender(
+data class RaiseHandEvent(
     override var sender: String? = null,
     val roomUUID: String,
     val raiseHand: Boolean,

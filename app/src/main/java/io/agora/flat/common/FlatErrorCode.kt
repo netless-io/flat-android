@@ -68,9 +68,5 @@ class FlatErrorCode {
         const val Web_SMSVerificationCodeInvalid = 110000// verification code invalid
         const val Web_SMSAlreadyExist = 110001 // phone already exist by current user
         const val Web_SMSAlreadyBinding = 110002 // phone are binding by other users
-
-
     }
-
-
 }

@@ -2,9 +2,9 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.BoardRoom
-import io.agora.flat.data.model.RTMUserProp
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -16,10 +16,16 @@ class UserManager @Inject constructor(
     private val boardRoom: BoardRoom,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
-    val users = _users.asStateFlow()
+    val users: List<RtcUser>
+        get() {
+            return _users.value
+        }
 
     private var _currentUser = MutableStateFlow<RtcUser?>(null)
-    val currentUser = _currentUser.asStateFlow()
+    val currentUser: RtcUser?
+        get() {
+            return _currentUser.value
+        }
 
     private var creator: RtcUser? = null
     private var speakingJoiners: MutableList<RtcUser> = mutableListOf()
@@ -32,6 +38,13 @@ class UserManager @Inject constructor(
     private lateinit var currentUserUUID: String
     private lateinit var ownerUUID: String
 
+    fun observeUsers(): Flow<List<RtcUser>> {
+        return _users.asStateFlow()
+    }
+
+    fun observeSelf(): Flow<RtcUser?> {
+        return _currentUser.asStateFlow()
+    }
 
     fun reset(currentUser: RtcUser, ownerUUID: String) {
         this.currentUserUUID = currentUser.userUUID
@@ -47,13 +60,19 @@ class UserManager @Inject constructor(
     suspend fun initUsers(uuids: List<String>) {
         val userMap = userQuery.loadUsers(uuids).mapValues {
             RtcUser(
-                userUUID = it.value.userUUID,
-                name = it.value.name,
-                avatarURL = it.value.avatarURL,
-                rtcUID = it.value.rtcUID,
+                it.value.userUUID,
+                it.value.rtcUID,
+                it.value.name,
+                it.value.avatarURL
             )
         }
-        usersCache.putAll(userMap)
+        userMap.forEach { (uuid, user) ->
+            usersCache[uuid] = usersCache[uuid]?.copy(
+                rtcUID = user.rtcUID,
+                name = user.name,
+                avatarURL = user.avatarURL
+            ) ?: user
+        }
         sortAndNotify(userMap.values.toList())
     }
 
@@ -92,16 +111,14 @@ class UserManager @Inject constructor(
             usersCache[userUUID] = RtcUser(userUUID = userUUID)
         }
         userQuery.loadUser(userUUID)?.let {
-            val rtcUser = usersCache[userUUID]!!
-            updateUser(rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
+            updateUser(usersCache[userUUID]!!.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
         }
     }
 
     fun removeUser(userUUID: String) {
         usersCache.remove(userUUID)
-        if (userUUID == ownerUUID) {
-            creator = null
-        }
+
+        if (userUUID == ownerUUID) creator = null
         speakingJoiners.removeAll { it.userUUID == userUUID }
         handRaisingJoiners.removeAll { it.userUUID == userUUID }
         otherJoiners.removeAll { it.userUUID == userUUID }
@@ -127,11 +144,7 @@ class UserManager @Inject constructor(
     }
 
     fun findFirstUser(uuid: String): RtcUser? {
-        return users.value.find { it.userUUID == uuid }
-    }
-
-    fun username(uuid: String): String {
-        return findUser(uuid)?.name ?: ""
+        return users.find { it.userUUID == uuid }
     }
 
     fun cancelHandRaising() {
@@ -142,35 +155,14 @@ class UserManager @Inject constructor(
     }
 
     fun updateDeviceState(uuid: String, videoOpen: Boolean, audioOpen: Boolean) {
-        findUser(uuid)?.apply {
+        usersCache[uuid]?.apply {
             updateUser(copy(audioOpen = audioOpen, videoOpen = videoOpen))
             updateRtcStream(rtcUID, audioOpen, videoOpen)
         }
     }
 
-    suspend fun updateUserState(
-        uuid: String,
-        audioOpen: Boolean,
-        videoOpen: Boolean,
-        name: String,
-        isSpeak: Boolean,
-    ) {
-        if (usersCache[uuid] == null) {
-            usersCache[uuid] = RtcUser(userUUID = uuid)
-            asyncLoadUserInfo(uuid)
-        }
-        val user = usersCache[uuid]!!.copy(
-            audioOpen = audioOpen,
-            videoOpen = videoOpen,
-            name = name,
-            isSpeak = isSpeak,
-        )
-        updateUser(user)
-        updateRtcStream(user.rtcUID, audioOpen, videoOpen)
-    }
-
     fun updateOnStage(onStages: Map<String, Boolean>) {
-        val usersList = users.value.map {
+        val usersList = users.map {
             it.copy(isSpeak = onStages[it.userUUID] ?: false)
         }
         usersList.forEach {
@@ -179,20 +171,12 @@ class UserManager @Inject constructor(
         sortAndNotify(usersList)
     }
 
-    fun updateSpeakStatus(uuid: String, isSpeak: Boolean) {
-        findUser(uuid)?.run {
-            updateUser(copy(isSpeak = isSpeak))
-        }
-    }
-
     fun updateRaiseHandStatus(uuid: String, isRaiseHand: Boolean) {
-        findUser(uuid)?.run {
-            updateUser(copy(isRaiseHand = isRaiseHand))
-        }
+        usersCache[uuid]?.run { updateUser(copy(isRaiseHand = isRaiseHand)) }
     }
 
     fun updateRaiseHandStatus(status: List<String>) {
-        val usersList = users.value.map {
+        val usersList = users.map {
             it.copy(isRaiseHand = status.contains(it.userUUID))
         }
         usersList.forEach {
@@ -202,36 +186,23 @@ class UserManager @Inject constructor(
     }
 
     fun updateSpeakAndRaise(uuid: String, isSpeak: Boolean, isRaiseHand: Boolean) {
-        findUser(uuid)?.run {
+        usersCache[uuid]?.run {
             updateUser(copy(isSpeak = isSpeak, isRaiseHand = isRaiseHand))
         }
     }
 
-    fun updateUserStates(uStates: HashMap<String, String>) {
-        val updateUsers = users.value.toMutableList().map { rtcUser ->
-            // defaultFlag for no flags
-            val s = uStates[rtcUser.userUUID] ?: ""
-            rtcUser.copy(
-                videoOpen = s.contains(RTMUserProp.Camera.flag, ignoreCase = true),
-                audioOpen = s.contains(RTMUserProp.Mic.flag, ignoreCase = true),
-                isSpeak = s.contains(RTMUserProp.IsSpeak.flag, ignoreCase = true),
-                isRaiseHand = s.contains(RTMUserProp.IsRaiseHand.flag, ignoreCase = true)
-            )
-        }
-        updateUsers.forEach {
-            updateRtcStream(it.rtcUID, it.audioOpen, it.videoOpen)
-        }
-        sortAndNotify(updateUsers)
-    }
-
     fun handleAllOffStage() {
-        val updateUsers = users.value.filter { it.userUUID != ownerUUID }.toMutableList().map { rtcUser ->
-            rtcUser.copy(videoOpen = false, audioOpen = false, isSpeak = false, isRaiseHand = false)
+        val updateUsers = users.filter { it.userUUID != ownerUUID }.toMutableList().map { rtcUser ->
+            rtcUser.copy(
+                videoOpen = false,
+                audioOpen = false,
+                isSpeak = false,
+                isRaiseHand = false,
+            )
         }
         updateUsers.forEach {
             updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
         }
-        // TODO UI Update
         boardRoom.setWritable(false)
         updateUsers.forEach {
             usersCache[it.userUUID] = it
@@ -239,19 +210,8 @@ class UserManager @Inject constructor(
         sortAndNotify(updateUsers)
     }
 
-    private fun findUser(uuid: String): RtcUser? {
-        return usersCache[uuid]
-    }
-
-    private suspend fun asyncLoadUserInfo(uuid: String) {
-        userQuery.loadUser(uuid)?.let {
-            val rtcUser = usersCache[uuid]!!
-            usersCache[uuid] = rtcUser.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
-        }
-    }
-
     private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
-        if (rtcUID == currentUser.value?.rtcUID) {
+        if (rtcUID == currentUser?.rtcUID) {
             rtcApi.updateLocalStream(audio = audioOpen, video = videoOpen)
         } else {
             rtcApi.updateRemoteStream(rtcUid = rtcUID, audio = audioOpen, video = videoOpen)

@@ -1,7 +1,6 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
-import io.agora.flat.data.model.LogErrorReq
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
 import io.agora.flat.data.model.RtmCensorReq

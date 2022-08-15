@@ -74,8 +74,7 @@ class ClassRoomViewModel @Inject constructor(
 
     val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
-    private var _messageUsers = MutableStateFlow<List<RtcUser>>(emptyList())
-    val messageUsers = _messageUsers.asStateFlow()
+    val messageUsers = userManager.observeUsers()
 
     private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
     val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
@@ -88,10 +87,10 @@ class ClassRoomViewModel @Inject constructor(
 
     val messageCount = messageManager.messages.map { it.size }
 
-    private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)!!
-    private val periodicUUID = savedStateHandle.get<String>(Constants.IntentKey.PERIODIC_UUID)
-    private val playInfo = savedStateHandle.get<RoomPlayInfo?>(Constants.IntentKey.ROOM_PLAY_INFO)
-    private val quickStart = savedStateHandle.get<Boolean>(Constants.IntentKey.ROOM_QUICK_START) ?: false
+    private val roomUUID: String = checkNotNull(savedStateHandle[Constants.IntentKey.ROOM_UUID])
+    private val periodicUUID: String? = savedStateHandle[Constants.IntentKey.PERIODIC_UUID]
+    private val playInfo: RoomPlayInfo? = savedStateHandle[Constants.IntentKey.ROOM_PLAY_INFO]
+    private val quickStart: Boolean = savedStateHandle[Constants.IntentKey.ROOM_QUICK_START] ?: false
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
 
@@ -105,10 +104,10 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            takeInitState().collect {
+            takeInitState().collect { state ->
                 logger.i("start joining rtm channel")
                 try {
-                    rtmApi.login(rtmToken = it.rtmToken, channelId = roomUUID, userUUID = currentUserUUID)
+                    rtmApi.login(rtmToken = state.rtmToken, channelId = roomUUID, userUUID = currentUserUUID)
                     observerRtmEvent()
                     userManager.initUsers(rtmApi.getMembers().map { it.userId })
                     observerUserState()
@@ -204,7 +203,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             takeInitState().collect {
                 logger.i("start joining board room")
-                boardRoom.join(it.boardUUID, it.boardToken, it.region, it.defaultAllowDraw)
+                boardRoom.join(it.boardUUID, it.boardToken, it.region, it.isWritable)
             }
         }
     }
@@ -240,26 +239,12 @@ class ClassRoomViewModel @Inject constructor(
     private suspend fun handleRtmEvent(event: ClassRtmEvent) {
         logger.d("handleClassEvent $event")
         when (event) {
-            is OnStageEventWithSender -> {
+            is RaiseHandEvent -> {
                 val state = state.value ?: return
-                val sender = event.sender!!
-                // from owner to audience
-                if (state.isCreator(sender)) {
-                    userManager.updateSpeakAndRaise(
-                        currentUserUUID,
-                        isSpeak = event.onStage,
-                        isRaiseHand = false,
-                    )
-                } else {
-                    // from audience stage off
-                    if (state.isOwner && !event.onStage) {
-                        syncedClassState.updateOnStage(sender, false)
-                        userManager.updateSpeakAndRaise(sender, isSpeak = false, isRaiseHand = false)
-                    }
+                if (state.isOwner) {
+                    syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
+                    userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
                 }
-            }
-            is RaiseHandEventWithSender -> {
-                userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
             }
             is OnMemberJoined -> {
                 userManager.addUser(event.userId)
@@ -285,22 +270,26 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun observerUserState() {
         viewModelScope.launch {
-            userManager.currentUser.filterNotNull().collect {
-                logger.i("on current user collected")
+            userManager.observeSelf().filterNotNull().collect {
+                logger.d("on current user collected $it")
                 val state = _state.value ?: return@collect
                 _state.value = state.copy(
                     isSpeak = it.isSpeak,
                     isRaiseHand = it.isRaiseHand,
                     videoOpen = it.videoOpen,
-                    audioOpen = it.audioOpen
+                    audioOpen = it.audioOpen,
                 )
-                boardRoom.setWritable(state.isOwner || it.isSpeak)
+
+                logger.d("change board writable ${_state.value!!.isWritable}")
+                viewModelScope.launch {
+                    boardRoom.setWritable(_state.value!!.isWritable)
+                }
             }
         }
 
         viewModelScope.launch {
-            userManager.users.collect {
-                logger.i("on all users collected")
+            userManager.observeUsers().collect {
+                logger.d("on all users collected")
                 val state = _state.value ?: return@collect
                 val users = it.filter { user ->
                     when (state.roomType) {
@@ -309,17 +298,11 @@ class ClassRoomViewModel @Inject constructor(
                     }
                 }.toMutableList()
 
-                if (it.isNotEmpty() && !users.containOwner()) {
+                if (!users.containOwner()) {
                     users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = state.ownerUUID))
                 }
 
                 _videoUsers.value = users
-            }
-        }
-
-        viewModelScope.launch {
-            userManager.users.collect {
-                _messageUsers.value = it
             }
         }
     }
@@ -397,11 +380,11 @@ class ClassRoomViewModel @Inject constructor(
     fun sendRaiseHand() {
         val state = state.value ?: return
         viewModelScope.launch {
-            userManager.currentUser.value?.run {
+            userManager.currentUser?.run {
                 if (this.isSpeak) {
                     return@run
                 }
-                val event = RaiseHandEventWithSender(
+                val event = RaiseHandEvent(
                     roomUUID = roomUUID,
                     raiseHand = !isRaiseHand,
                 )
@@ -452,7 +435,7 @@ class ClassRoomViewModel @Inject constructor(
 
     fun requestCloudStorageFiles() {
         viewModelScope.launch {
-            val result = cloudStorageRepository.getFileList(1)
+            val result = cloudStorageRepository.listFiles(1)
             if (result.isSuccess) {
                 _cloudStorageFiles.value = result.getOrThrow().files.filter {
                     it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
@@ -559,11 +542,11 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (state.isOwner) {
-                sendOnStageCommand(userUUID, false)
+                // sendOnStageCommand(userUUID, false)
                 syncedClassState.updateOnStage(userUUID, false)
             }
             if (state.isCurrentUser(userUUID)) {
-                sendOnStageCommand(state.ownerUUID, onStage = false)
+                // sendOnStageCommand(state.ownerUUID, onStage = false)
                 syncedClassState.updateOnStage(userUUID, false)
             }
         }
@@ -579,27 +562,11 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private suspend fun sendOnStageCommand(userUUID: String, onStage: Boolean) {
-        val event = OnStageEventWithSender(
-            roomUUID = roomUUID,
-            onStage = onStage
-        )
-        rtmApi.sendPeerCommand(event, userUUID)
-    }
-
     fun updateClassMode(classMode: ClassModeType) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             _state.value = state.copy(classMode = classMode)
             syncedClassState.updateClassModeType(classMode)
-        }
-    }
-
-    private fun defaultAllowDraw(state: ClassRoomState): Boolean {
-        return when (state.roomType) {
-            RoomType.OneToOne -> true
-            RoomType.SmallClass -> true
-            RoomType.BigClass -> state.ownerUUID == currentUserUUID
         }
     }
 }
@@ -690,15 +657,6 @@ data class ClassRoomState(
     fun isCurrentUser(userId: String): Boolean {
         return userId == this.userUUID
     }
-
-    val defaultAllowDraw: Boolean
-        get() {
-            return when (roomType) {
-                RoomType.OneToOne -> true
-                RoomType.SmallClass -> true
-                RoomType.BigClass -> ownerUUID == userUUID
-            }
-        }
 }
 
 data class ImageSize(val width: Int, val height: Int)

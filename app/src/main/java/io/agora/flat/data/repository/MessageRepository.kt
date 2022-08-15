@@ -1,6 +1,5 @@
 package io.agora.flat.data.repository
 
-import io.agora.flat.common.FlatException
 import io.agora.flat.common.FlatRtmException
 import io.agora.flat.data.*
 import io.agora.flat.data.model.MessageQueryFilter
@@ -44,13 +43,11 @@ class MessageRepository @Inject constructor(
         val end: String = dateFormat.get().format(endTime)
         return withContext(Dispatchers.IO) {
             if (rtmToken == null) {
-                try {
-                    val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
-                    if (tokenResult is Success) {
-                        rtmToken = tokenResult.data.token
-                    }
-                } catch (e: Exception) {
-                    return@withContext Failure(e)
+                val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
+                if (tokenResult is Success) {
+                    rtmToken = tokenResult.data.token
+                } else {
+                    return@withContext Failure(tokenResult.asFailure().exception)
                 }
             }
 
@@ -68,7 +65,7 @@ class MessageRepository @Inject constructor(
 
             try {
                 val location = result.bodyOrThrow().location
-                if (!location.isNullOrEmpty()) {
+                if (location.isNotEmpty()) {
                     val handle = location.replace(Regex("^.*/query/"), "")
                     Success(data = handle)
                 } else {

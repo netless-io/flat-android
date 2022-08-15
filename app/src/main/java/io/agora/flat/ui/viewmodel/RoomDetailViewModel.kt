@@ -17,7 +17,6 @@ import io.agora.flat.di.impl.EventBus
 import io.agora.flat.event.RoomsUpdated
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger

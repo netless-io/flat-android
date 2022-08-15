@@ -35,7 +35,7 @@ class RecordManager @Inject constructor(
         viewModelScope = scope
 
         viewModelScope.launch {
-            userManager.users.collect {
+            userManager.observeUsers().collect {
                 // TODO here ensure isSpeak or onStage contains owners
                 videoUsers.value = it.filter { value -> value.isSpeak }
             }
@@ -104,6 +104,7 @@ class RecordManager @Inject constructor(
     }
 
     private fun startTimer() {
+        timer?.cancel()
         timer = viewModelScope.launch {
             Ticker.tickerFlow(1000, 1000).collect {
                 val state = recordState.value ?: return@collect

@@ -1,11 +1,11 @@
 package io.agora.flat.data.model
 
+// a class for record user in room. may be named as ClassUser / RoomUser etc.
 data class RtcUser(
     var userUUID: String,
+    var rtcUID: Int = NOT_FETCHED,
     var name: String? = null,
     var avatarURL: String = "",
-
-    var rtcUID: Int = NOT_FETCHED,
 
     var isSpeak: Boolean = false,
     var audioOpen: Boolean = false,

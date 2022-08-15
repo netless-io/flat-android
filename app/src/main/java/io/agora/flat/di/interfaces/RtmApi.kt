@@ -1,9 +1,7 @@
 package io.agora.flat.di.interfaces
 
-import android.util.Log
 import io.agora.flat.common.rtm.ClassRtmEvent
 import io.agora.flat.data.model.ORDER_ASC
-import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
 import io.agora.rtm.RtmClient

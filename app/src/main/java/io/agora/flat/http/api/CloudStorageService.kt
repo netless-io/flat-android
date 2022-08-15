@@ -8,7 +8,7 @@ import retrofit2.http.Query
 
 interface CloudStorageService {
     @POST("v1/cloud-storage/list")
-    fun getFileList(
+    fun listFiles(
         @Query(value = "page") page: Int,
         @Query(value = "size") size: Int,
         @Query(value = "order") order: String,

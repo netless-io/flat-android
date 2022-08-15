@@ -9,7 +9,6 @@ import io.agora.flat.databinding.ComponentReplayToolBinding
 import io.agora.flat.ui.activity.play.BaseComponent
 import io.agora.flat.ui.view.ReplayExitDialog
 import io.agora.flat.ui.viewmodel.ReplayViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ReplayToolComponent(

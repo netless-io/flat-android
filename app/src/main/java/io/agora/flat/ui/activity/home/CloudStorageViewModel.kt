@@ -82,7 +82,7 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             refreshing.addLoader()
             runAtLeast {
-                val resp = cloudStorageRepository.getFileList(1)
+                val resp = cloudStorageRepository.listFiles(1)
                 if (resp is Success) {
                     totalUsage.value = resp.data.totalUsage
                     files.value = resp.data.files.map {
