@@ -1,6 +1,8 @@
 package io.agora.flat.util
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -96,6 +98,13 @@ fun ComponentActivity.isDarkMode(): Boolean = when (DarkModeManager.current()) {
     DarkModeManager.Mode.Dark -> true
 }
 
+fun Context.getActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> this.baseContext.getActivity()
+        else -> null
+    }
+}
 
 fun Context.contentInfo(uri: Uri): ContentInfo? {
     val mediaType = contentResolver.getType(uri) ?: "text/plain"
