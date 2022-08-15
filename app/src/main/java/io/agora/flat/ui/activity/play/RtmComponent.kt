@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,6 +15,7 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.FlatException
 import io.agora.flat.data.model.RoomStatus
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
@@ -32,11 +34,15 @@ class RtmComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
+    companion object {
+        val TAG = RtmComponent::class.simpleName
+    }
 
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
         fun userRepository(): UserRepository
+        fun miscRepository(): MiscRepository
         fun rtmApi(): RtmApi
     }
 
@@ -45,6 +51,7 @@ class RtmComponent(
     private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     private lateinit var userRepository: UserRepository
+    private lateinit var miscRepository: MiscRepository
     private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
@@ -52,6 +59,7 @@ class RtmComponent(
         super.onCreate(owner)
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
         userRepository = entryPoint.userRepository()
+        miscRepository = entryPoint.miscRepository()
         rtmApi = entryPoint.rtmApi()
 
         initView()
@@ -71,8 +79,8 @@ class RtmComponent(
             }
         })
 
-        keyboardHeightProvider =
-            KeyboardHeightProvider(activity).setHeightListener(object : KeyboardHeightProvider.HeightListener {
+        keyboardHeightProvider = KeyboardHeightProvider(activity)
+            .setHeightListener(object : KeyboardHeightProvider.HeightListener {
                 private var originBottomMargin: Int? = null
                 override fun onHeightChanged(height: Int) {
                     if (originBottomMargin == null && binding.messageLv.isVisible) {
@@ -87,7 +95,20 @@ class RtmComponent(
                         }, 100)
                     }
                 }
-            }).start()
+            })
+
+        lateStartKeyboardHeightProvider()
+    }
+
+    private fun lateStartKeyboardHeightProvider() {
+        lateinit var onWindowFocusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener
+        onWindowFocusChangeListener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+            if (hasFocus) {
+                keyboardHeightProvider?.start()
+                binding.root.viewTreeObserver.removeOnWindowFocusChangeListener(onWindowFocusChangeListener)
+            }
+        }
+        binding.root.viewTreeObserver.addOnWindowFocusChangeListener(onWindowFocusChangeListener)
     }
 
     private fun loadData() {

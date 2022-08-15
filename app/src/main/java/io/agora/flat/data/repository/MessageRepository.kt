@@ -42,28 +42,26 @@ class MessageRepository @Inject constructor(
         val start: String = dateFormat.get().format(startTime)
         val end: String = dateFormat.get().format(endTime)
         return withContext(Dispatchers.IO) {
-            if (rtmToken == null) {
-                val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
-                if (tokenResult is Success) {
-                    rtmToken = tokenResult.data.token
-                } else {
-                    return@withContext Failure(tokenResult.asFailure().exception)
-                }
-            }
-
-            val result = messageService.queryHistory(
-                appEnv.agoraAppId,
-                MessageQueryHistoryReq(
-                    filter = MessageQueryFilter(destination = channel, start_time = start, end_time = end),
-                    limit = limit,
-                    offset = offset,
-                    order = order,
-                ),
-                userRepository.getUserInfo()!!.uuid,
-                rtmToken!!
-            ).executeOnce()
-
             try {
+                if (rtmToken == null) {
+                    val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
+                    if (tokenResult is Success) {
+                        rtmToken = tokenResult.data.token
+                    }
+                }
+
+                val result = messageService.queryHistory(
+                    appEnv.agoraAppId,
+                    MessageQueryHistoryReq(
+                        filter = MessageQueryFilter(destination = channel, start_time = start, end_time = end),
+                        limit = limit,
+                        offset = offset,
+                        order = order,
+                    ),
+                    userRepository.getUserInfo()!!.uuid,
+                    rtmToken!!
+                ).executeOnce()
+
                 val location = result.bodyOrThrow().location
                 if (location.isNotEmpty()) {
                     val handle = location.replace(Regex("^.*/query/"), "")
@@ -79,14 +77,14 @@ class MessageRepository @Inject constructor(
 
     suspend fun getMessageList(handle: String): Result<List<RtmQueryMessage>> {
         return withContext(Dispatchers.IO) {
-            val result = messageService.getMessageList(
-                appEnv.agoraAppId,
-                handle,
-                userRepository.getUserInfo()!!.uuid,
-                rtmToken!!
-            ).executeOnce()
-
             try {
+                val result = messageService.getMessageList(
+                    appEnv.agoraAppId,
+                    handle,
+                    userRepository.getUserInfo()!!.uuid,
+                    rtmToken!!
+                ).executeOnce()
+
                 val code = result.bodyOrThrow().code
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
@@ -104,28 +102,24 @@ class MessageRepository @Inject constructor(
         val end: String = dateFormat.get().format(endTime)
 
         return withContext(Dispatchers.IO) {
-            if (rtmToken == null) {
-                try {
+            try {
+                if (rtmToken == null) {
                     val tokenResult = miscService.generateRtmToken().executeWithRetry().toResult()
                     if (tokenResult is Success) {
                         rtmToken = tokenResult.data.token
                     }
-                } catch (e: Exception) {
-                    return@withContext Failure(e)
                 }
-            }
 
-            val result = messageService.getMessageCount(
-                appEnv.agoraAppId,
-                source = null,
-                destination = channel,
-                startTime = start,
-                endTime = end,
-                userRepository.getUserInfo()!!.uuid,
-                rtmToken!!
-            ).executeOnce()
+                val result = messageService.getMessageCount(
+                    appEnv.agoraAppId,
+                    source = null,
+                    destination = channel,
+                    startTime = start,
+                    endTime = end,
+                    userRepository.getUserInfo()!!.uuid,
+                    rtmToken!!
+                ).executeOnce()
 
-            try {
                 val code = result.bodyOrThrow().code
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().count)

@@ -33,7 +33,7 @@ class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
 
         binding.centerButton.setOnClickListener {
             listener?.onFinish()
-            dismiss()
+            dismissAllowingStateLoss()
         }
 
         lifecycleScope.launchWhenStarted {
@@ -42,7 +42,7 @@ class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
                 binding.centerButton.text = getString(R.string.exit_room_i_known_format, second)
                 if (--second < 0) {
                     listener?.onFinish()
-                    dismiss()
+                    dismissAllowingStateLoss()
                 }
             }
         }

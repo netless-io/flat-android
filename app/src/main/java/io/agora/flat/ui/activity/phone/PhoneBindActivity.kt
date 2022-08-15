@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.phone
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -22,6 +21,7 @@ import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.PhoneAndCodeArea
 import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.util.getActivity
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showToast
@@ -64,7 +64,7 @@ fun PhoneBindScreen(
         when (action) {
             PhoneBindUiAction.Close -> {
                 Navigator.launchLoginActivity(context)
-                (context as Activity).finish()
+                context.getActivity()?.finish()
             }
             is PhoneBindUiAction.Bind -> viewModel.bindPhone(action.phone, action.code)
             is PhoneBindUiAction.SendCode -> viewModel.sendSmsCode(action.phone)
