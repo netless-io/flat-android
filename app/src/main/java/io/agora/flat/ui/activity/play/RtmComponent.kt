@@ -2,6 +2,7 @@ package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -83,8 +84,8 @@ class RtmComponent(
             }
         })
 
-        keyboardHeightProvider =
-            KeyboardHeightProvider(activity).setHeightListener(object : KeyboardHeightProvider.HeightListener {
+        keyboardHeightProvider = KeyboardHeightProvider(activity)
+            .setHeightListener(object : KeyboardHeightProvider.HeightListener {
                 private var originBottomMargin: Int? = null
                 override fun onHeightChanged(height: Int) {
                     if (originBottomMargin == null && binding.messageLv.isVisible) {
@@ -99,7 +100,20 @@ class RtmComponent(
                         }, 100)
                     }
                 }
-            }).start()
+            })
+
+        lateStartKeyboardHeightProvider()
+    }
+
+    private fun lateStartKeyboardHeightProvider() {
+        lateinit var onWindowFocusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener
+        onWindowFocusChangeListener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+            if (hasFocus) {
+                keyboardHeightProvider?.start()
+                binding.root.viewTreeObserver.removeOnWindowFocusChangeListener(onWindowFocusChangeListener)
+            }
+        }
+        binding.root.viewTreeObserver.addOnWindowFocusChangeListener(onWindowFocusChangeListener)
     }
 
     private fun loadData() {
