@@ -10,7 +10,6 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 
 /**
  * 用户列表

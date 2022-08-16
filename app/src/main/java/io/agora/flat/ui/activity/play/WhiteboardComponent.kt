@@ -12,7 +12,6 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.isDarkMode
 
 class WhiteboardComponent(

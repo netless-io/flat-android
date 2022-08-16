@@ -1,4 +1,4 @@
-package io.agora.flat.ui.viewmodel
+package io.agora.flat.ui.activity.play
 
 import android.graphics.BitmapFactory
 import androidx.lifecycle.SavedStateHandle
@@ -33,6 +33,7 @@ import io.agora.flat.event.RtmChannelJoined
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.UserManager
+import io.agora.flat.ui.viewmodel.ChatMessageManager
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

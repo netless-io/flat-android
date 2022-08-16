@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 
+// TODO try replace by LocalClipboardManager.current
 @Composable
 fun rememberAndroidClipboardController(
     context: Context = LocalContext.current,

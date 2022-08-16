@@ -30,7 +30,6 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.PaddingItemDecoration
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.showToast

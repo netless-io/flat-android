@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.databinding.ActivityRoomPlayBinding
 import io.agora.flat.ui.activity.base.BaseActivity
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 
 @AndroidEntryPoint
 class ClassRoomActivity : BaseActivity() {

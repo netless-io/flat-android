@@ -25,7 +25,6 @@ import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
 import io.agora.flat.util.toInviteCodeDisplay

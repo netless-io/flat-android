@@ -21,7 +21,6 @@ import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.view.RoomExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.KeyboardHeightProvider
@@ -156,6 +155,9 @@ class RtmComponent(
 
     // TODO remove to ExtComponent
     private fun showRoomExitDialog(message: String) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            return
+        }
         val dialog = RoomExitDialog().apply {
             arguments = Bundle().apply {
                 putString(RoomExitDialog.MESSAGE, message)
