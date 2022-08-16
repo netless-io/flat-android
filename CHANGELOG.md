@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.4.6] - August 16, 2022
+- Fix Bugs
+
 ## [1.4.2] - August 02, 2022
 
 - Add BoardRoom netlessUA
