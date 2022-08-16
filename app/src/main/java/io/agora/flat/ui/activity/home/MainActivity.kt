@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -157,22 +159,49 @@ fun MainScreen(viewState: MainViewState) {
 
     FlatPage {
         val navController = rememberAnimatedNavController()
-        var mainTab by remember { mutableStateOf(MainTab.Home) }
+        val selectTab by navController.currentTabAsState()
 
         if (viewState.loginState == LoginState.Login) {
             if (isTabletMode()) {
-                MainTablet(navController, mainTab) { mainTab = it }
+                MainTablet(navController, selectTab)
             } else {
-                Main(navController, mainTab) { mainTab = it }
+                Main(navController, selectTab)
             }
         }
     }
 }
 
+
+@Stable
 @Composable
-internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
-    Column(Modifier) {
-        AppNavigation(navController,
+private fun NavController.currentTabAsState(): State<MainTab> {
+    val currentTab = remember { mutableStateOf(MainTab.Home) }
+
+    DisposableEffect(this) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            when {
+                destination.hierarchy.any { it.route == Screen.Home.route || it.route == Screen.HomeExt.route } -> {
+                    currentTab.value = MainTab.Home
+                }
+                destination.hierarchy.any { it.route == Screen.Cloud.route || it.route == Screen.CloudExt.route } -> {
+                    currentTab.value = MainTab.Cloud
+                }
+            }
+        }
+        addOnDestinationChangedListener(listener)
+
+        onDispose {
+            removeOnDestinationChangedListener(listener)
+        }
+    }
+
+    return currentTab
+}
+
+@Composable
+internal fun Main(navController: NavHostController, mainTab: MainTab) {
+    Column {
+        AppNavHost(navController,
             Modifier
                 .weight(1f)
                 .fillMaxWidth())
@@ -181,7 +210,7 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
             MainBottomBar(mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.Home.route
-                    MainTab.CloudStorage -> Screen.Cloud.route
+                    MainTab.Cloud -> Screen.Cloud.route
                 }
 
                 navController.navigate(route) {
@@ -192,20 +221,19 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
                         saveState = true
                     }
                 }
-                onTabSelected(selectedTab)
             }
         }
     }
 }
 
 @Composable
-internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
     Row {
         Box(Modifier.width(56.dp)) {
             MainPadRail(selectedTab = mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.HomeExt.route
-                    MainTab.CloudStorage -> Screen.CloudExt.route
+                    MainTab.Cloud -> Screen.CloudExt.route
                 }
 
                 navController.navigate(route) {
@@ -216,14 +244,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         saveState = true
                     }
                 }
-
-                onTabSelected(selectedTab)
             }
         }
         Box(Modifier.weight(1f), Alignment.Center) {
             when (mainTab) {
                 MainTab.Home -> HomeScreen(
-                    navController,
                     onOpenRoomCreate = {
                         navController.navigate(LeafScreen.RoomCreate.createRoute(Screen.HomeExt)) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
@@ -235,9 +260,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         }
                     },
                     onOpenRoomDetail = { rUUID, pUUID ->
-                        navController.navigate(LeafScreen.RoomDetail.createRoute(Screen.HomeExt,
+                        navController.navigate(LeafScreen.RoomDetail.createRoute(
+                            Screen.HomeExt,
                             rUUID,
-                            pUUID)) {
+                            pUUID,
+                        )) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
                     },
@@ -252,7 +279,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         }
                     },
                 )
-                MainTab.CloudStorage -> CloudScreen(
+                MainTab.Cloud -> CloudScreen(
                     onOpenUploading = {
                         navController.navigate(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
                             launchSingleTop = true
@@ -267,7 +294,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
             }
         }
         Divider(MaxHeight.width(1.dp))
-        AppNavigation(
+        AppNavHost(
             navController,
             modifier = Modifier
                 .weight(2f)
@@ -284,10 +311,10 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
 internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.CloudStorage -> R.drawable.ic_home_main_normal
+        MainTab.Cloud -> R.drawable.ic_home_main_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.CloudStorage -> R.drawable.ic_home_cloudstorage_selected
+        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
         MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
     }
 
@@ -303,7 +330,7 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
         }
         Spacer(modifier = Modifier.height(24.dp))
         Box {
-            IconButton(onClick = { onTabSelected(MainTab.CloudStorage) }) {
+            IconButton(onClick = { onTabSelected(MainTab.Cloud) }) {
                 Image(painterResource(csResId), null)
             }
         }
@@ -314,10 +341,10 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
 private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.CloudStorage -> R.drawable.ic_home_main_normal
+        MainTab.Cloud -> R.drawable.ic_home_main_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.CloudStorage -> R.drawable.ic_home_cloudstorage_selected
+        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
         MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
     }
 
@@ -338,7 +365,7 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 56.dp),
-                    onClick = { onTabSelected(MainTab.CloudStorage) }
+                    onClick = { onTabSelected(MainTab.Cloud) }
                 ), Alignment.Center) {
                 Image(painterResource(csResId), null)
             }

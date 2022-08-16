@@ -48,7 +48,7 @@ class MainViewModel @Inject constructor(
     val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
     val error = MutableStateFlow<UiError?>(null)
 
-    private val roomUUID = savedStateHandle.get<String>(Constants.IntentKey.ROOM_UUID)
+    private val roomUUID: String? = savedStateHandle[Constants.IntentKey.ROOM_UUID]
 
     init {
         viewModelScope.launch {
@@ -133,7 +133,7 @@ enum class MainTab {
     Home,
 
     // 云盘
-    CloudStorage
+    Cloud
 }
 
 data class MainViewState(

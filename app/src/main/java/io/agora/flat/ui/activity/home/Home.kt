@@ -41,7 +41,6 @@ import io.agora.flat.util.FlatFormatter
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
     onOpenRoomCreate: () -> Unit,
     onOpenRoomJoin: () -> Unit,
     onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,

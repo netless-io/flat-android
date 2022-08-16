@@ -241,16 +241,11 @@ private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, 
 @Composable
 @Preview(device = PIXEL_C)
 @Preview(device = PIXEL_C, uiMode = 0x20)
+@Preview
 private fun CreateRoomPageTabletPreview() {
     FlatPage {
         CreateRoomContent(ViewState()) {}
     }
-}
-
-@Composable
-@Preview
-private fun CreateRoomPagePreview() {
-    CreateRoomContent(ViewState()) {}
 }
 
 internal sealed class CreateRoomAction {
