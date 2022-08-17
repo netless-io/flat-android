@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.home
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,14 +15,15 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -101,6 +103,12 @@ class MainActivity : BaseComposeActivity() {
                     Navigator.launchRoomPlayActivity(this@MainActivity, it)
                 }
             }
+
+            if (viewState.loginState == LoginState.Error) {
+                LaunchedEffect(true) {
+                    Navigator.launchLoginActivity(this@MainActivity)
+                }
+            }
         }
     }
 }
@@ -108,7 +116,7 @@ class MainActivity : BaseComposeActivity() {
 @Composable
 internal fun UpdateDialog(
     versionCheckResult: VersionCheckResult,
-    uploading: Boolean,
+    updating: Boolean,
     onUpdate: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -122,7 +130,7 @@ internal fun UpdateDialog(
                     FlatTextBodyOneSecondary(versionCheckResult.description)
                     FlatNormalVerticalSpacer()
 
-                    if (uploading) {
+                    if (updating) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.CenterHorizontally),
                             color = MaterialTheme.colors.primary,
@@ -149,14 +157,6 @@ internal fun UpdateDialog(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(viewState: MainViewState) {
-    val context = LocalContext.current
-
-    if (viewState.loginState == LoginState.Error) {
-        LaunchedEffect(true) {
-            Navigator.launchLoginActivity(context)
-        }
-    }
-
     FlatPage {
         val navController = rememberAnimatedNavController()
         val selectTab by navController.currentTabAsState()
@@ -196,6 +196,11 @@ private fun NavController.currentTabAsState(): State<MainTab> {
     }
 
     return currentTab
+}
+
+private fun NavController.currentIsRoute(route: String): Boolean {
+    return NavDestination.createRoute(route)
+        .toUri() == (currentBackStackEntry?.arguments?.get(NavController.KEY_DEEP_LINK_INTENT) as? Intent)?.data
 }
 
 @Composable
@@ -260,11 +265,15 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
                         }
                     },
                     onOpenRoomDetail = { rUUID, pUUID ->
-                        navController.navigate(LeafScreen.RoomDetail.createRoute(
+                        val route = LeafScreen.RoomDetail.createRoute(
                             Screen.HomeExt,
                             rUUID,
                             pUUID,
-                        )) {
+                        )
+                        if (navController.currentIsRoute(route)) {
+                            return@HomeScreen
+                        }
+                        navController.navigate(route) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
                     },
