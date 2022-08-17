@@ -67,8 +67,8 @@ fun AppNavHost(
         startDestination = startDestination,
         enterTransition = { defaultEnterTransition(this.initialState, this.targetState) },
         exitTransition = { defaultExitTransition(this.initialState, this.targetState) },
-        popEnterTransition = { defaultEnterTransition(this.initialState, this.targetState) },
-        popExitTransition = { defaultExitTransition(this.initialState, this.targetState) },
+        popEnterTransition = { defaultPopEnterTransition(this.initialState, this.targetState) },
+        popExitTransition = { defaultPopExitTransition(this.initialState, this.targetState) },
         modifier = modifier,
     ) {
         addHomeGraph(navController)
@@ -231,18 +231,36 @@ private fun AnimatedContentScope<*>.defaultExitTransition(
         return fadeOut()
     }
     // Otherwise we're in the same nav graph, we can imply a direction
-    return fadeOut() + slideOutOfContainer(AnimatedContentScope.SlideDirection.Start)
+    return fadeOut()
 }
 
 private val NavDestination.hostNavGraph: NavGraph
     get() = hierarchy.first { it is NavGraph } as NavGraph
 
 @ExperimentalAnimationApi
-private fun AnimatedContentScope<*>.defaultPopEnterTransition(): EnterTransition {
-    return fadeIn() + slideIntoContainer(AnimatedContentScope.SlideDirection.End)
+private fun AnimatedContentScope<*>.defaultPopEnterTransition(
+    initial: NavBackStackEntry,
+    target: NavBackStackEntry,
+): EnterTransition {
+    val initialNavGraph = initial.destination.hostNavGraph
+    val targetNavGraph = target.destination.hostNavGraph
+    // If we're crossing nav graphs (bottom navigation graphs), we crossfade
+    if (initialNavGraph.id != targetNavGraph.id) {
+        return fadeIn()
+    }
+    return fadeIn()
 }
 
 @ExperimentalAnimationApi
-private fun AnimatedContentScope<*>.defaultPopExitTransition(): ExitTransition {
+private fun AnimatedContentScope<*>.defaultPopExitTransition(
+    initial: NavBackStackEntry,
+    target: NavBackStackEntry,
+): ExitTransition {
+    val initialNavGraph = initial.destination.hostNavGraph
+    val targetNavGraph = target.destination.hostNavGraph
+    // If we're crossing nav graphs (bottom navigation graphs), we crossfade
+    if (initialNavGraph.id != targetNavGraph.id) {
+        return fadeOut()
+    }
     return fadeOut() + slideOutOfContainer(AnimatedContentScope.SlideDirection.End)
 }
