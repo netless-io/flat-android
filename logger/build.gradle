@@ -36,6 +36,6 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:5.0.1'
     implementation 'com.tencent.bugly:crashreport:4.0.4'
 
-    kapt "com.google.dagger:dagger-compiler:2.36"
+    kapt "com.google.dagger:dagger-compiler:2.43.2"
     kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
 }
