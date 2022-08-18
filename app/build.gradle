@@ -140,7 +140,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
 
     // LifeCycle
-    def lifecycle_version = "2.4.1"
+    def lifecycle_version = "2.5.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
