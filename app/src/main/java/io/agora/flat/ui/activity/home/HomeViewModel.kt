@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**
@@ -113,15 +112,13 @@ class HomeViewModel @Inject constructor(
 
     private fun reloadRooms() {
         viewModelScope.launch {
-            when (val response = roomRepository.getRoomListAll(page)) {
+            when (val result = roomRepository.getRoomListAll(page)) {
                 is Success -> {
-                    val list = ArrayList(response.data)
+                    val list = ArrayList(result.data)
                     roomList.value = addShowDayHeadFlag(list)
                 }
-                is Failure -> {
-                    when (response.error.status) {
-                        // handle error
-                    }
+                is Failure -> when (result.exception) {
+                    // handle error
                 }
             }
         }
@@ -137,15 +134,13 @@ class HomeViewModel @Inject constructor(
 
     private fun reloadHistoryRooms() {
         viewModelScope.launch {
-            when (val response = roomRepository.getRoomListHistory(historyPage)) {
+            when (val result = roomRepository.getRoomListHistory(historyPage)) {
                 is Success -> {
-                    val list = ArrayList(response.data)
+                    val list = ArrayList(result.data)
                     historyList.value = addShowDayHeadFlag(list)
                 }
-                is Failure -> {
-                    when (response.error.status) {
-                        // handle error
-                    }
+                is Failure -> when (result.exception) {
+                    // handle error
                 }
             }
         }

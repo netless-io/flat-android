@@ -72,7 +72,7 @@ fun RoomDetailScreen(
     navController: NavController,
     viewModel: RoomDetailViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as Activity
+    val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
@@ -87,7 +87,7 @@ fun RoomDetailScreen(
                 navController.popBackStack()
             }
             is DetailUiAction.EnterRoom -> {
-                Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
+                Navigator.launchRoomPlayActivity(context, action.roomUUID, action.periodicUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
@@ -96,7 +96,7 @@ fun RoomDetailScreen(
                 showInvite = true
             }
             is DetailUiAction.Playback -> {
-                Navigator.launchPlaybackActivity(activity, action.roomUUID)
+                Navigator.launchPlaybackActivity(context, action.roomUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
@@ -131,7 +131,7 @@ fun RoomDetailScreen(
             InviteDialog(viewState.roomInfo!!, { showInvite = false }) {
                 clipboard.putText(it)
                 showInvite = false
-                activity.showToast(R.string.copy_success)
+                context.showToast(R.string.copy_success)
             }
         }
     }

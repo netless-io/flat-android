@@ -1,16 +1,16 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.rtm.RTMListener
+import io.agora.flat.common.rtm.ClassRtmEvent
 import io.agora.flat.data.model.ORDER_ASC
-import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RtmQueryMessage
 import io.agora.rtm.RtmChannelMember
 import io.agora.rtm.RtmClient
+import kotlinx.coroutines.flow.Flow
 
 interface RtmApi {
     fun rtmEngine(): RtmClient
 
-    suspend fun initChannel(rtmToken: String, channelId: String, userUUID: String): Boolean
+    suspend fun login(rtmToken: String, channelId: String, userUUID: String): Boolean
 
     suspend fun logout(): Boolean
 
@@ -18,9 +18,9 @@ interface RtmApi {
 
     suspend fun sendChannelMessage(msg: String): Boolean
 
-    suspend fun sendChannelCommand(event: RTMEvent): Boolean
+    suspend fun sendChannelCommand(event: ClassRtmEvent): Boolean
 
-    suspend fun sendPeerCommand(event: RTMEvent, peerId: String): Boolean
+    suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String): Boolean
 
     /**
      * 获取历史聊天消息
@@ -40,9 +40,7 @@ interface RtmApi {
         endTime: Long,
     ): Int
 
-    fun addRtmListener(listener: RTMListener)
-
-    fun removeRtmListener(listener: RTMListener)
+    fun observeRtmEvent(): Flow<ClassRtmEvent>
 }
 
 

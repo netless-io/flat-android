@@ -15,7 +15,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 27
-        versionName "1.4.6"
+        versionName "1.5.0-preview"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -203,14 +203,14 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
-    // implementation("com.github.netless-io:whiteboard-android:2.16.23") {
-    //     force true
-    // }
+    implementation("com.github.netless-io:whiteboard-android:2.16.29") {
+        force true
+    }
     // for local fastboard debug
     if (findProject(":fastboard") != null) {
         implementation project(':fastboard')
     } else {
-        implementation 'com.github.netless-io:fastboard-android:1.2.2'
+        implementation 'com.github.netless-io:fastboard-android:1.2.3'
     }
 
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'

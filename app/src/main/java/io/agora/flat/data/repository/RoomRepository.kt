@@ -74,8 +74,7 @@ class RoomRepository @Inject constructor(
 
     suspend fun createOrdinary(title: String, type: RoomType): Result<RoomCreateRespData> {
         return withContext(Dispatchers.IO) {
-            roomService.createOrdinary(RoomCreateReq(title, type, System.currentTimeMillis()))
-                .toResult()
+            roomService.createOrdinary(RoomCreateReq(title, type, System.currentTimeMillis())).toResult()
         }
     }
 

@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.home
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,13 +15,16 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -33,7 +37,7 @@ import io.agora.flat.di.interfaces.Crashlytics
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.showToast
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,7 +55,6 @@ class MainActivity : BaseComposeActivity() {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
-            val error by viewModel.error.collectAsState()
 
             if (viewState.protocolAgreed) {
                 MainScreen(viewState)
@@ -73,9 +76,7 @@ class MainActivity : BaseComposeActivity() {
                 )
             } else {
                 GlobalAgreementDialog(
-                    onAgree = {
-                        viewModel.agreeProtocol()
-                    },
+                    onAgree = { viewModel.agreeProtocol() },
                     onRefuse = { finish() },
                 )
             }
@@ -85,18 +86,21 @@ class MainActivity : BaseComposeActivity() {
                     viewState.versionCheckResult,
                     viewState.updating,
                     viewModel::updateApp,
-                    viewModel::cancelUpdate)
+                    viewModel::cancelUpdate,
+                )
             }
 
-            LaunchedEffect(error) {
-                error?.let {
-                    showToast(it.message)
-                }
-            }
+            ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
 
             LaunchedEffect(roomPlayInfo) {
                 roomPlayInfo?.let {
                     Navigator.launchRoomPlayActivity(this@MainActivity, it)
+                }
+            }
+
+            if (viewState.loginState == LoginState.Error) {
+                LaunchedEffect(true) {
+                    Navigator.launchLoginActivity(this@MainActivity)
                 }
             }
         }
@@ -106,7 +110,7 @@ class MainActivity : BaseComposeActivity() {
 @Composable
 internal fun UpdateDialog(
     versionCheckResult: VersionCheckResult,
-    uploading: Boolean,
+    updating: Boolean,
     onUpdate: () -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -120,7 +124,7 @@ internal fun UpdateDialog(
                     FlatTextBodyOneSecondary(versionCheckResult.description)
                     FlatNormalVerticalSpacer()
 
-                    if (uploading) {
+                    if (updating) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.CenterHorizontally),
                             color = MaterialTheme.colors.primary,
@@ -146,42 +150,68 @@ internal fun UpdateDialog(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun MainScreen(viewState: MainViewState) {
-    val context = LocalContext.current
-
-    if (viewState.loginState == LoginState.Error) {
-        LaunchedEffect(true) {
-            Navigator.launchLoginActivity(context)
-        }
-    }
-
+fun MainScreen(viewState: MainUiState) {
     FlatPage {
         val navController = rememberAnimatedNavController()
-        var mainTab by remember { mutableStateOf(MainTab.Home) }
+        val selectTab by navController.currentTabAsState()
 
         if (viewState.loginState == LoginState.Login) {
             if (isTabletMode()) {
-                MainTablet(navController, mainTab) { mainTab = it }
+                MainTablet(navController, selectTab)
             } else {
-                Main(navController, mainTab) { mainTab = it }
+                Main(navController, selectTab)
             }
         }
     }
 }
 
+
+@Stable
 @Composable
-internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
-    Column(Modifier) {
-        AppNavigation(navController,
+private fun NavController.currentTabAsState(): State<MainTab> {
+    val currentTab = remember { mutableStateOf(MainTab.Home) }
+
+    DisposableEffect(this) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            when {
+                destination.hierarchy.any { it.route == Screen.Home.route || it.route == Screen.HomeExt.route } -> {
+                    currentTab.value = MainTab.Home
+                }
+                destination.hierarchy.any { it.route == Screen.Cloud.route || it.route == Screen.CloudExt.route } -> {
+                    currentTab.value = MainTab.Cloud
+                }
+            }
+        }
+        addOnDestinationChangedListener(listener)
+
+        onDispose {
+            removeOnDestinationChangedListener(listener)
+        }
+    }
+
+    return currentTab
+}
+
+private fun NavController.currentIsRoute(route: String): Boolean {
+    return NavDestination.createRoute(route)
+        .toUri() == (currentBackStackEntry?.arguments?.get(NavController.KEY_DEEP_LINK_INTENT) as? Intent)?.data
+}
+
+@Composable
+internal fun Main(navController: NavHostController, mainTab: MainTab) {
+    Column {
+        AppNavHost(
+            navController,
             Modifier
                 .weight(1f)
-                .fillMaxWidth())
+                .fillMaxWidth()
+        )
 
         if (needShowBottomBar(navController)) {
             MainBottomBar(mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.Home.route
-                    MainTab.CloudStorage -> Screen.Cloud.route
+                    MainTab.Cloud -> Screen.Cloud.route
                 }
 
                 navController.navigate(route) {
@@ -192,20 +222,19 @@ internal fun Main(navController: NavHostController, mainTab: MainTab, onTabSelec
                         saveState = true
                     }
                 }
-                onTabSelected(selectedTab)
             }
         }
     }
 }
 
 @Composable
-internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
     Row {
         Box(Modifier.width(56.dp)) {
             MainPadRail(selectedTab = mainTab) { selectedTab ->
                 val route = when (selectedTab) {
                     MainTab.Home -> Screen.HomeExt.route
-                    MainTab.CloudStorage -> Screen.CloudExt.route
+                    MainTab.Cloud -> Screen.CloudExt.route
                 }
 
                 navController.navigate(route) {
@@ -216,14 +245,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         saveState = true
                     }
                 }
-
-                onTabSelected(selectedTab)
             }
         }
         Box(Modifier.weight(1f), Alignment.Center) {
             when (mainTab) {
                 MainTab.Home -> HomeScreen(
-                    navController,
                     onOpenRoomCreate = {
                         navController.navigate(LeafScreen.RoomCreate.createRoute(Screen.HomeExt)) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
@@ -235,9 +261,15 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         }
                     },
                     onOpenRoomDetail = { rUUID, pUUID ->
-                        navController.navigate(LeafScreen.RoomDetail.createRoute(Screen.HomeExt,
+                        val route = LeafScreen.RoomDetail.createRoute(
+                            Screen.HomeExt,
                             rUUID,
-                            pUUID)) {
+                            pUUID,
+                        )
+                        if (navController.currentIsRoute(route)) {
+                            return@HomeScreen
+                        }
+                        navController.navigate(route) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
                     },
@@ -252,7 +284,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
                         }
                     },
                 )
-                MainTab.CloudStorage -> CloudScreen(
+                MainTab.Cloud -> CloudScreen(
                     onOpenUploading = {
                         navController.navigate(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
                             launchSingleTop = true
@@ -267,7 +299,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
             }
         }
         Divider(MaxHeight.width(1.dp))
-        AppNavigation(
+        AppNavHost(
             navController,
             modifier = Modifier
                 .weight(2f)
@@ -284,10 +316,10 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, onTa
 internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.CloudStorage -> R.drawable.ic_home_main_normal
+        MainTab.Cloud -> R.drawable.ic_home_main_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.CloudStorage -> R.drawable.ic_home_cloudstorage_selected
+        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
         MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
     }
 
@@ -303,7 +335,7 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
         }
         Spacer(modifier = Modifier.height(24.dp))
         Box {
-            IconButton(onClick = { onTabSelected(MainTab.CloudStorage) }) {
+            IconButton(onClick = { onTabSelected(MainTab.Cloud) }) {
                 Image(painterResource(csResId), null)
             }
         }
@@ -314,10 +346,10 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
 private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.CloudStorage -> R.drawable.ic_home_main_normal
+        MainTab.Cloud -> R.drawable.ic_home_main_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.CloudStorage -> R.drawable.ic_home_cloudstorage_selected
+        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
         MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
     }
 
@@ -338,7 +370,7 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 56.dp),
-                    onClick = { onTabSelected(MainTab.CloudStorage) }
+                    onClick = { onTabSelected(MainTab.Cloud) }
                 ), Alignment.Center) {
                 Image(painterResource(csResId), null)
             }
@@ -350,6 +382,6 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
 @Preview
 @Preview(device = Devices.PIXEL_C)
 private fun MainPagePreview() {
-    val mainViewState = MainViewState(true, loginState = LoginState.Login)
+    val mainViewState = MainUiState(true, loginState = LoginState.Login)
     MainScreen(mainViewState)
 }

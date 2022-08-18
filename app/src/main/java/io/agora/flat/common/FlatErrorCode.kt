@@ -1,13 +1,21 @@
 package io.agora.flat.common
 
 class FlatErrorCode {
-    companion object {
+
+    object Web
+
+    object RTM {
         /**
-         * RTM
+         * Agora RTM
          */
         const val RTM_LOGIN_ERROR_START = 0x11000
-        const val RTM_LOGOUT_ERROR_START = 0x12000
 
+        const val RTM_LOGOUT_ERROR_START = 0x12000
+    }
+
+    object RTC
+
+    companion object {
         /**
          * Flat Web 服务
          * https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
@@ -20,6 +28,9 @@ class FlatErrorCode {
         const val Web_UnsupportedPlatform = 100005// Unsupported login platform
         const val Web_JWTSignFailed = 100006// jwt sign failed
         const val Web_ExhaustiveAttack = 100007// exhaustive attack
+        const val Web_RequestSignatureIncorrect = 100008// exhaustive attack
+        const val Web_NonCompliant = 100009 // non compliant
+        const val Web_UnsupportedOperation = 100010 // operation not supported
 
         const val Web_RoomNotFound = 200000 // room not found
         const val Web_RoomIsEnded = 200001 // room has been ended

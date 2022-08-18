@@ -1,4 +1,4 @@
-package io.agora.flat.ui.viewmodel
+package io.agora.flat.ui.manager
 
 import android.util.Log
 import dagger.hilt.android.scopes.ActivityRetainedScoped

@@ -16,7 +16,7 @@ import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.NoticeMessageBody
 import io.agora.flat.common.rtm.TextMessageBody
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.ui.viewmodel.UserQuery
+import io.agora.flat.ui.manager.UserQuery
 
 /**
  * 消息列表适配器

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.data.AppDatabase
+import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomType
@@ -12,12 +13,11 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.UiMessage
+import io.agora.flat.ui.util.UiMessageManager
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,23 +28,28 @@ class CreateRoomViewModel @Inject constructor(
     private val database: AppDatabase,
     private val eventBus: EventBus,
 ) : ViewModel() {
+    private val username = userRepository.getUserInfo()!!.name
+
     private val roomUUID = MutableStateFlow("")
     private val loadingCounter = ObservableLoadingCounter()
+    private val uiMessageManager = UiMessageManager()
 
-    private val _state = MutableStateFlow(ViewState())
-    val state: StateFlow<ViewState>
-        get() = _state
-
-    init {
-        viewModelScope.launch {
-            combine(roomUUID, loadingCounter.observable) { roomUUID, loading ->
-                _state.value.copy(roomUUID = roomUUID, loading = loading)
-            }.collect {
-                _state.value = it
-            }
-        }
-        _state.value = _state.value.copy(username = "${userRepository.getUserInfo()?.name}")
-    }
+    val state: StateFlow<CreateRoomUiState> = combine(
+        roomUUID,
+        loadingCounter.observable,
+        uiMessageManager.message
+    ) { uuid, loading, message ->
+        CreateRoomUiState(
+            uuid,
+            loading,
+            username,
+            message
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = CreateRoomUiState.byUsername(username),
+    )
 
     fun createRoom(title: String, type: RoomType) {
         viewModelScope.launch {
@@ -53,6 +58,9 @@ class CreateRoomViewModel @Inject constructor(
                 is Success -> {
                     roomUUID.value = result.get().roomUUID
                     eventBus.produceEvent(RoomsUpdated)
+                }
+                is Failure -> {
+                    uiMessageManager.emitMessage(UiMessage("create ordinary room failure", result.exception))
                 }
             }
             loadingCounter.removeLoader()
@@ -64,18 +72,23 @@ class CreateRoomViewModel @Inject constructor(
             database.roomConfigDao().insertOrUpdate(RoomConfig(roomUUID.value, enable, enable))
         }
     }
+
+    fun clearMessage(id: Long) {
+        viewModelScope.launch {
+            uiMessageManager.clearMessage(id)
+        }
+    }
 }
 
-data class ViewState(
+data class CreateRoomUiState(
     val roomUUID: String = "",
     val loading: Boolean = false,
-    val state: Int = 0,
     val username: String = "",
+    val message: UiMessage? = null
 ) {
     companion object {
-        const val STATE_IDLE = 0
-        const val STATE_LOADING = 1
-        const val STATE_CREATE_SUCCESS = 1
-        const val STATE_CREATE_FAIL = 1
+        fun byUsername(username: String): CreateRoomUiState {
+            return CreateRoomUiState(username = username)
+        }
     }
 }

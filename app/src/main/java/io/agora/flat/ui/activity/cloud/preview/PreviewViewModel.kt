@@ -39,7 +39,7 @@ class PreviewViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadCourseware() {
+    private fun loadCourseware() {
         when (val type = file.fileURL.coursewareType()) {
             CoursewareType.Unknown -> {
                 loading = false

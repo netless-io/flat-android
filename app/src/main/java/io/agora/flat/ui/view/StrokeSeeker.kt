@@ -104,8 +104,8 @@ class StrokeSeeker @JvmOverloads constructor(
     }
 
     private fun currentBarHeight(): Float {
-        var wa = width - offsetLeftX - offsetRightX
-        var wp = currentX - offsetLeftX
+        val wa = width - offsetLeftX - offsetRightX
+        val wp = currentX - offsetLeftX
 
         return (rightBarHeight - leftBarHeight) * wp / wa + leftBarHeight
     }
@@ -130,8 +130,8 @@ class StrokeSeeker @JvmOverloads constructor(
         currentX = x.coerceIn(leftLimit, rightLimit)
         invalidate()
 
-        var per = (currentX - leftLimit) / (rightLimit - leftLimit)
-        var result = (rangeSize() * per + minStroke).coerceAtMost(maxStroke.toFloat()).toInt()
+        val per = (currentX - leftLimit) / (rightLimit - leftLimit)
+        val result = (rangeSize() * per + minStroke).coerceAtMost(maxStroke.toFloat()).toInt()
         if (result != currentStrokeWidth) {
             currentStrokeWidth = result
             onStrokeChangedListener?.onStroke(result)
@@ -140,9 +140,7 @@ class StrokeSeeker @JvmOverloads constructor(
 
     private fun rangeSize() = maxStroke - minStroke + 1
 
-    private fun Int.dp2px(): Float = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
-    )
+    private fun Int.dp2px(): Float = toFloat().dp2px()
 
     private fun Float.dp2px(): Float = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics
@@ -153,7 +151,7 @@ class StrokeSeeker @JvmOverloads constructor(
         this.maxStroke = maxStroke
     }
 
-    fun setStrokeWidth(strokeWidth: Int) {
+    private fun setStrokeWidth(strokeWidth: Int) {
         currentStrokeWidth = strokeWidth
         currentX = (strokeWidth - minStroke).toFloat() / rangeSize() * (rightLimit - leftLimit) + leftLimit
         invalidate()

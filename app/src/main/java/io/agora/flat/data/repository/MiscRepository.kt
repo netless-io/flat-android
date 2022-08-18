@@ -1,7 +1,6 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
-import io.agora.flat.data.model.LogErrorReq
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
 import io.agora.flat.data.model.RtmCensorReq
@@ -28,11 +27,11 @@ class MiscRepository @Inject constructor(
         }
     }
 
-    suspend fun logError(message: String) {
-        return withContext(Dispatchers.IO) {
-            miscService.logError(LogErrorReq(message)).toResult()
-        }
-    }
+    // suspend fun logError(message: String) {
+    //     return withContext(Dispatchers.IO) {
+    //         miscService.logError(LogErrorReq(message)).toResult()
+    //     }
+    // }
 
     suspend fun censorRtm(text: String): Boolean {
         return withContext(Dispatchers.IO) {

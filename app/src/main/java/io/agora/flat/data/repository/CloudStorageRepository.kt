@@ -16,13 +16,13 @@ class CloudStorageRepository @Inject constructor(
     private val cloudStorageService: CloudStorageService,
     private val appKVCenter: AppKVCenter,
 ) {
-    suspend fun getFileList(
+    suspend fun listFiles(
         page: Int = 1,
         size: Int = 50,
         order: String = "DESC",
     ): Result<CloudStorageFileListResp> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.getFileList(page, size, order).toResult()
+            cloudStorageService.listFiles(page, size, order).toResult()
         }
     }
 

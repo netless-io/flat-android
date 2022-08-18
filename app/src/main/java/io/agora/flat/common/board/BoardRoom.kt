@@ -2,7 +2,10 @@ package io.agora.flat.common.board
 
 import android.content.Context
 import android.util.Log
-import com.herewhite.sdk.domain.*
+import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.RoomPhase
+import com.herewhite.sdk.domain.WindowAppParam
+import com.herewhite.sdk.domain.WindowPrefersColorScheme
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
@@ -16,11 +19,11 @@ import io.agora.flat.Constants
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.util.getAppVersion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -28,6 +31,7 @@ class BoardRoom @Inject constructor(
     @ApplicationContext
     val context: Context,
     val userRepository: UserRepository,
+    val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,
 ) : IBoardRoom {
     companion object {
@@ -39,9 +43,6 @@ class BoardRoom @Inject constructor(
     private var fastRoom: FastRoom? = null
     private var darkMode: Boolean = false
     private var rootRoomController: RoomControllerGroup? = null
-    private var sceneState = MutableStateFlow<BoardSceneState?>(null)
-    private var memberState = MutableStateFlow<MemberState?>(null)
-    private var undoRedoState = MutableStateFlow(UndoRedoState(0, 0))
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
     private var flatNetlessUA = listOf(
         "fastboard/${Fastboard.VERSION}",
@@ -70,7 +71,8 @@ class BoardRoom @Inject constructor(
         val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isLog = true
             isUserCursor = true
-            setNetlessUA(flatNetlessUA)
+            netlessUA = flatNetlessUA
+            isEnableSyncedStore = true
         }
         fastRoomOptions.sdkConfiguration = sdkConfiguration
 
@@ -99,6 +101,13 @@ class BoardRoom @Inject constructor(
                     RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
                     RoomPhase.disconnected -> boardRoomPhase.value = BoardRoomPhase.Disconnected
                     else -> {}
+                }
+            }
+
+            override fun onRoomReadyChanged(fastRoom: FastRoom) {
+                super.onRoomReadyChanged(fastRoom)
+                if (syncedClassState is WhiteSyncedState) {
+                    syncedClassState.resetRoom(fastRoom)
                 }
             }
         })
@@ -144,10 +153,6 @@ class BoardRoom @Inject constructor(
         }
     }
 
-    override fun setDeviceInputEnable(enable: Boolean) {
-
-    }
-
     override fun hideAllOverlay() {
         fastRoom?.overlayManger?.hideAll()
     }
@@ -171,18 +176,6 @@ class BoardRoom @Inject constructor(
         fastRoom?.room?.addApp(param, null)
     }
 
-    override fun observeSceneState(): Flow<BoardSceneState> {
-        return sceneState.asStateFlow().filterNotNull()
-    }
-
-    override fun observeMemberState(): Flow<MemberState> {
-        return memberState.asStateFlow().filterNotNull()
-    }
-
-    override fun observeUndoRedoState(): Flow<UndoRedoState> {
-        return undoRedoState.asStateFlow()
-    }
-
     override fun observeRoomPhase(): Flow<BoardRoomPhase> {
         return boardRoomPhase.asStateFlow()
     }
@@ -203,7 +196,6 @@ class BoardRoom @Inject constructor(
         val cursorName: String,
         val avatar: String? = null,
     )
-
 
     private fun String.toFastRegion(): FastRegion {
         val region = FastRegion.values().find { it.name.lowercase().replace('_', '-') == this }

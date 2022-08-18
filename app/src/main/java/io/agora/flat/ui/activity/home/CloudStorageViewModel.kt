@@ -12,6 +12,7 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.upload.UploadFile
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
@@ -25,7 +26,10 @@ import io.agora.flat.util.ContentInfo
 import io.agora.flat.util.coursewareType
 import io.agora.flat.util.isDynamicDoc
 import io.agora.flat.util.runAtLeast
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -78,7 +82,7 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             refreshing.addLoader()
             runAtLeast {
-                val resp = cloudStorageRepository.getFileList(1)
+                val resp = cloudStorageRepository.listFiles(1)
                 if (resp is Success) {
                     totalUsage.value = resp.data.totalUsage
                     files.value = resp.data.files.map {
@@ -139,42 +143,37 @@ class CloudStorageViewModel @Inject constructor(
 
     fun uploadFile(action: CloudStorageUIAction.UploadFile) {
         viewModelScope.launch {
-            // val useProjector = action.info.filename.endsWith("pptx")
-            var result: CloudStorageUploadStartResp? = null
-            var resp =
-                cloudStorageRepository.updateStart(
-                    action.info.filename,
-                    action.info.size,
-                    // projector = if (useProjector) true else null
-                )
-            when (resp) {
-                is Success -> result = resp.data
+            // TODO move to cloudStorageRepository
+            var respData: CloudStorageUploadStartResp? = null
+            var result = cloudStorageRepository.updateStart(action.info.filename, action.info.size)
+            when (result) {
+                is Success -> respData = result.data
                 is Failure -> {
-                    if (resp.error.code == FlatErrorCode.Web_UploadConcurrentLimit) {
+                    val exception = result.exception as FlatNetException
+                    if (exception.code == FlatErrorCode.Web_UploadConcurrentLimit) {
                         cloudStorageRepository.cancel()
                         // retry
-                        resp = cloudStorageRepository.updateStart(
+                        result = cloudStorageRepository.updateStart(
                             action.info.filename,
                             action.info.size,
-                            // projector = if (useProjector) true else null,
                         )
-                        if (resp is Success) {
-                            result = resp.data
+                        if (result is Success) {
+                            respData = result.data
                         }
                     }
                 }
             }
 
-            if (result == null) {
+            if (respData == null) {
                 return@launch
             }
 
             val request = UploadRequest(
-                uuid = result.fileUUID,
-                filepath = result.filePath,
-                policy = result.policy,
-                policyURL = result.policyURL,
-                signature = result.signature,
+                uuid = respData.fileUUID,
+                filepath = respData.filePath,
+                policy = respData.policy,
+                policyURL = respData.policyURL,
+                signature = respData.signature,
 
                 filename = action.info.filename,
                 size = action.info.size,

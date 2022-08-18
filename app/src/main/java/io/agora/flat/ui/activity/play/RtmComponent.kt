@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.play
 
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -15,8 +14,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.FlatException
-import io.agora.flat.common.rtm.RTMListener
-import io.agora.flat.data.model.RTMEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
@@ -24,13 +21,11 @@ import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.view.RoomExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomState
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.KeyboardHeightProvider
 import io.agora.flat.util.delayAndFinish
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -117,15 +112,7 @@ class RtmComponent(
 
     private fun loadData() {
         lifecycleScope.launch {
-            viewModel.roomPlayInfo.collect {
-                it?.apply {
-                    enterChannel(channelId = roomUUID, rtmToken = rtmToken)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.state.filter { it != ClassRoomState.Init }.collect {
+            viewModel.state.filterNotNull().collect {
                 if (it.roomStatus == RoomStatus.Stopped) {
                     showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }
@@ -161,31 +148,12 @@ class RtmComponent(
         runBlocking {
             try {
                 rtmApi.logout()
-                rtmApi.removeRtmListener(flatRTMListener)
             } catch (e: FlatException) {
             }
         }
     }
 
-    private val flatRTMListener = object : RTMListener {
-        override fun onRTMEvent(event: RTMEvent, senderId: String) {
-            Log.d(TAG, "event is $event")
-            viewModel.onRTMEvent(event, senderId)
-        }
-
-        override fun onMemberJoined(userId: String, channelId: String) {
-            viewModel.addRtmMember(userId)
-        }
-
-        override fun onMemberLeft(userId: String, channelId: String) {
-            viewModel.removeRtmMember(userId)
-        }
-
-        override fun onRemoteLogin() {
-            showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
-        }
-    }
-
+    // TODO remove to ExtComponent
     private fun showRoomExitDialog(message: String) {
         if (activity.isFinishing || activity.isDestroyed) {
             return
@@ -197,21 +165,5 @@ class RtmComponent(
         }
         dialog.setListener { activity.delayAndFinish(250) }
         dialog.show(activity.supportFragmentManager, "RoomExitDialog")
-
-    }
-
-    private fun enterChannel(rtmToken: String, channelId: String) {
-        lifecycleScope.launch {
-            try {
-                rtmApi.addRtmListener(flatRTMListener)
-                rtmApi.initChannel(rtmToken, channelId, userRepository.getUserUUID())
-                viewModel.initChannelStatus()
-                viewModel.notifyRTMChannelJoined()
-                Log.d(TAG, "notify rtm joined success")
-            } catch (e: FlatException) {
-                miscRepository.logError(e.toString())
-                showRoomExitDialog(e.toString())
-            }
-        }
     }
 }
