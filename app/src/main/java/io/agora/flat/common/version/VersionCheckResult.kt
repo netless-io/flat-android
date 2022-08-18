@@ -9,6 +9,6 @@ data class VersionCheckResult(
     val forceUpdate: Boolean = false,
 ) {
     companion object {
-        val Default = VersionCheckResult()
+        val Empty = VersionCheckResult()
     }
 }

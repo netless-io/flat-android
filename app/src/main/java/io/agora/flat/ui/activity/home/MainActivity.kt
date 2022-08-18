@@ -37,7 +37,7 @@ import io.agora.flat.di.interfaces.Crashlytics
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.showToast
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -55,7 +55,6 @@ class MainActivity : BaseComposeActivity() {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
-            val error by viewModel.error.collectAsState()
 
             if (viewState.protocolAgreed) {
                 MainScreen(viewState)
@@ -77,9 +76,7 @@ class MainActivity : BaseComposeActivity() {
                 )
             } else {
                 GlobalAgreementDialog(
-                    onAgree = {
-                        viewModel.agreeProtocol()
-                    },
+                    onAgree = { viewModel.agreeProtocol() },
                     onRefuse = { finish() },
                 )
             }
@@ -89,14 +86,11 @@ class MainActivity : BaseComposeActivity() {
                     viewState.versionCheckResult,
                     viewState.updating,
                     viewModel::updateApp,
-                    viewModel::cancelUpdate)
+                    viewModel::cancelUpdate,
+                )
             }
 
-            LaunchedEffect(error) {
-                error?.let {
-                    showToast(it.message)
-                }
-            }
+            ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
 
             LaunchedEffect(roomPlayInfo) {
                 roomPlayInfo?.let {
@@ -156,7 +150,7 @@ internal fun UpdateDialog(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun MainScreen(viewState: MainViewState) {
+fun MainScreen(viewState: MainUiState) {
     FlatPage {
         val navController = rememberAnimatedNavController()
         val selectTab by navController.currentTabAsState()
@@ -206,10 +200,12 @@ private fun NavController.currentIsRoute(route: String): Boolean {
 @Composable
 internal fun Main(navController: NavHostController, mainTab: MainTab) {
     Column {
-        AppNavHost(navController,
+        AppNavHost(
+            navController,
             Modifier
                 .weight(1f)
-                .fillMaxWidth())
+                .fillMaxWidth()
+        )
 
         if (needShowBottomBar(navController)) {
             MainBottomBar(mainTab) { selectedTab ->
@@ -386,6 +382,6 @@ private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, o
 @Preview
 @Preview(device = Devices.PIXEL_C)
 private fun MainPagePreview() {
-    val mainViewState = MainViewState(true, loginState = LoginState.Login)
+    val mainViewState = MainUiState(true, loginState = LoginState.Login)
     MainScreen(mainViewState)
 }

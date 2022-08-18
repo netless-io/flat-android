@@ -7,8 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.Constants
 import io.agora.flat.R
-import io.agora.flat.common.FlatErrorCode
-import io.agora.flat.common.FlatNetException
+import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
@@ -41,8 +40,7 @@ class LoginActivityHandler(
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
                 LoginType.Github -> callGithubLogin()
-                else -> {
-                }
+                else -> {}
             }
         }
     }
@@ -68,10 +66,9 @@ class LoginActivityHandler(
             }
 
             if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(Intent.createChooser(
-                    intent,
-                    context.getString(R.string.intent_browser_choose_title),
-                ))
+                context.startActivity(
+                    Intent.createChooser(intent, context.getString(R.string.intent_browser_choose_title))
+                )
             } else {
                 showUiMessage(context.getString(R.string.intent_no_browser))
             }
@@ -155,21 +152,16 @@ class LoginActivityHandler(
 
     fun loginWithPhone(phone: String, code: String) {
         scope.launch {
-            val loginResult = userRepository.loginWithPhone(phone, code)
-            if (loginResult is Success) {
-                notifySuccess()
-            } else {
-                val exception = (loginResult as Failure).exception as FlatNetException
-                when (exception.code) {
-                    FlatErrorCode.Web_SMSVerificationCodeInvalid -> {
-                        showUiMessage(context.getString(R.string.login_verification_code_invalid))
-                    }
-                    FlatErrorCode.Web_ExhaustiveAttack -> {
-                        showUiMessage(context.getString(R.string.error_request_too_frequently))
-                    }
-                    else -> {
-                        showUiMessage(context.getString(R.string.error_request_common_fail))
-                    }
+            when (val loginResult = userRepository.loginWithPhone(phone, code)) {
+                is Success -> notifySuccess()
+                is Failure -> {
+                    showUiMessage(
+                        FlatErrorHandler.getStringByError(
+                            context,
+                            loginResult.exception,
+                            context.getString(R.string.error_request_common_fail)
+                        )
+                    )
                 }
             }
         }

@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val miscRepository: MiscRepository,
     private val messageManager: ChatMessageManager,

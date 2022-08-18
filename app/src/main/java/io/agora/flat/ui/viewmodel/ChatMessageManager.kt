@@ -31,6 +31,4 @@ class ChatMessageManager @Inject constructor() {
         }
         _messages.value = list
     }
-
-
 }

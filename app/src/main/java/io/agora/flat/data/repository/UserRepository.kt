@@ -5,6 +5,7 @@ import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatNetException
 import io.agora.flat.data.*
 import io.agora.flat.data.model.*
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -16,16 +17,21 @@ import javax.inject.Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService,
     private val appKVCenter: AppKVCenter,
+    private val logger: Logger,
 ) {
     private var bindings: UserBindings? = null
 
     suspend fun loginCheck(): Result<Boolean> {
+        if (AppKVCenter.MockData.mockEnable) {
+            return Success(true)
+        }
         val result = withContext(Dispatchers.IO) {
             userService.loginCheck().toResult()
         }
         return when (result) {
             is Success -> {
                 appKVCenter.setUserInfo(result.data)
+                logger.setUserId(result.data.uuid)
                 Success(true)
             }
             is Failure -> Failure(result.exception)

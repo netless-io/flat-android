@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.setting
 
-import android.app.Activity
 import android.os.Bundle
 import android.os.CountDownTimer
 import androidx.activity.compose.setContent
@@ -31,9 +30,10 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.AccountSecurityUiState
 import io.agora.flat.ui.viewmodel.AccountSecurityViewModel
-import io.agora.flat.util.showToast
+import io.agora.flat.util.getActivity
 
 @AndroidEntryPoint
 class AccountSecurityActivity : BaseComposeActivity() {
@@ -49,13 +49,15 @@ class AccountSecurityActivity : BaseComposeActivity() {
 private fun AccountSecurityScreen(viewModel: AccountSecurityViewModel = hiltViewModel()) {
     val viewState by viewModel.state.collectAsState()
 
-    AccountSecurityScreen(viewState = viewState)
+    AccountSecurityScreen(viewState = viewState) {
+        viewModel.clearMessage(it)
+    }
 }
 
 @Composable
-private fun AccountSecurityScreen(viewState: AccountSecurityUiState) {
+private fun AccountSecurityScreen(viewState: AccountSecurityUiState, onMessageShown: (Long) -> Unit) {
     var showCancelDialog by rememberSaveable { mutableStateOf(false) }
-    val activity = LocalContext.current as Activity
+    val context = LocalContext.current
     var detail: String? = null
     if (viewState.roomCount != 0) {
         detail = stringResource(R.string.account_security_cancel_limited_tip, viewState.roomCount)
@@ -63,16 +65,15 @@ private fun AccountSecurityScreen(viewState: AccountSecurityUiState) {
 
     LaunchedEffect(viewState) {
         if (viewState.deleteAccount) {
-            Navigator.launchHomeActivity(activity)
-        }
-        viewState.uiMessage?.let {
-            activity.showToast(it.text)
+            Navigator.launchHomeActivity(context)
         }
     }
 
+    ShowUiMessageEffect(viewState.message, onMessageShown)
+
     FlatColumnPage {
         BackTopAppBar(stringResource(R.string.account_security), {
-            activity.finish()
+            context.getActivity()?.finish()
         })
         SettingItem(
             id = R.drawable.ic_settings_close_account,
@@ -90,7 +91,6 @@ private fun AccountSecurityScreen(viewState: AccountSecurityUiState) {
         })
     }
 }
-
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -207,8 +207,7 @@ private fun CancelAgreeButton(text: String, enabled: Boolean, onClick: () -> Uni
 @Composable
 @Preview
 private fun AccountSecurityScreenPreview() {
-    AccountSecurityScreen(AccountSecurityUiState(
-        roomCount = 1,
-        loading = true
-    ))
+    AccountSecurityScreen(
+        viewState = AccountSecurityUiState(roomCount = 1, loading = true)
+    ) {}
 }
