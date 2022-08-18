@@ -26,7 +26,6 @@
         android:id="@+id/tools_layout"
         android:layout_width="@dimen/room_class_button_size"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="-10dp"
         android:background="@drawable/shape_gray_border_left_round_bg"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
