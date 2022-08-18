@@ -213,7 +213,7 @@ dependencies {
         implementation 'com.github.netless-io:fastboard-android:1.2.3'
     }
 
-    implementation 'io.agora.rtc:full-sdk:3.5.1.2'
+    implementation 'io.agora.rtc:full-sdk:3.7.1'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
 
     // Exoplayer
