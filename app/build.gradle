@@ -217,7 +217,7 @@ dependencies {
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
 
     // Exoplayer
-    def exoplayer_version = "2.14.1"
+    def exoplayer_version = "2.18.1"
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
