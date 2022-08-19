@@ -25,15 +25,16 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.Event
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.Logger
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.NoOptPermission
-import io.agora.flat.event.RtmChannelJoined
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
+import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -54,6 +55,8 @@ class ClassRoomViewModel @Inject constructor(
     private val messageManager: ChatMessageManager,
     private val roomErrorManager: RoomErrorManager,
     private val rtmApi: RtmApi,
+    private val rtcApi: RtcApi,
+    private val rtcVideoController: RtcVideoController,
     private val boardRoom: BoardRoom,
     private val syncedClassState: SyncedClassState,
     private val eventbus: EventBus,
@@ -70,8 +73,6 @@ class ClassRoomViewModel @Inject constructor(
 
     // cloud record state
     val recordState get() = recordManager.observeRecordState()
-
-    val rtmSuccess get() = eventbus.events.filterIsInstance<RtmChannelJoined>().take(1)
 
     val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
@@ -98,7 +99,7 @@ class ClassRoomViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             try {
-                loadRoomState()
+                loadAndInitRoomState()
             } catch (e: Exception) {
                 roomErrorManager.notifyError("fetch class room state error", e)
             }
@@ -106,23 +107,12 @@ class ClassRoomViewModel @Inject constructor(
 
         viewModelScope.launch {
             takeInitState().collect { state ->
-                logger.i("start joining rtm channel")
-                try {
-                    rtmApi.login(rtmToken = state.rtmToken, channelId = roomUUID, userUUID = currentUserUUID)
-                    observerRtmEvent()
-                    userManager.initUsers(rtmApi.getMembers().map { it.userId })
-                    observerUserState()
-                    logger.i("join rtm success")
-                    notifyRTMChannelJoined()
-                } catch (e: FlatException) {
-                    roomErrorManager.notifyError("rtm join exception", e)
+                joinRtm(state.rtmToken, roomUUID, currentUserUUID)
+                joinRtc()
+                observerUserState()
+                if (quickStart) {
+                    startClass()
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            rtmSuccess.collect {
-                if (quickStart) startClass()
             }
         }
 
@@ -132,16 +122,15 @@ class ClassRoomViewModel @Inject constructor(
         observeSyncedState()
     }
 
-    // any of the job’s children leads to an immediate failure of its parent.
-    private suspend fun loadRoomState() = coroutineScope {
+    private suspend fun loadAndInitRoomState() = coroutineScope {
         val deferredOne = async { roomRepository.getOrdinaryRoomInfo(roomUUID).getOrThrow().roomInfo }
         val deferredTwo = async {
             return@async playInfo ?: roomRepository.joinRoom(periodicUUID ?: roomUUID).getOrThrow()
         }
-        initClassRoomState(deferredOne.await(), deferredTwo.await())
+        initRoomState(deferredOne.await(), deferredTwo.await())
     }
 
-    private suspend fun initClassRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
+    private suspend fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
         val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
         val isSpeak = when (roomInfo.roomType) {
             RoomType.OneToOne -> true
@@ -200,6 +189,27 @@ class ClassRoomViewModel @Inject constructor(
         _state.value = initState
     }
 
+    private suspend fun joinRtm(rtmToken: String, channelId: String, userUUID: String) {
+        logger.i("start join rtm channel")
+        try {
+            rtmApi.login(rtmToken = rtmToken, channelId = channelId, userUUID = userUUID)
+            observerRtmEvent()
+            userManager.initUsers(rtmApi.getMembers().map { it.userId })
+            logger.i("join rtm success")
+        } catch (e: FlatException) {
+            roomErrorManager.notifyError("rtm join exception", e)
+        }
+    }
+
+    private fun joinRtc() {
+        logger.i("start join rtc")
+        state.value?.apply {
+            rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
+            rtcVideoController.localUid = rtcUID
+            rtcVideoController.shareScreenUid = rtcShareScreen.uid
+        }
+    }
+
     fun onWhiteboardInit() {
         viewModelScope.launch {
             takeInitState().collect {
@@ -212,17 +222,13 @@ class ClassRoomViewModel @Inject constructor(
     private fun observeSyncedState() {
         viewModelScope.launch {
             syncedClassState.observeDeviceState().collect {
-                it.forEach { entry ->
-                    userManager.updateDeviceState(entry.key, entry.value.camera, entry.value.mic)
-                }
+                userManager.updateDeviceState(it)
             }
         }
 
         viewModelScope.launch {
             syncedClassState.observeClassroomState().collect {
-                it.raiseHandUsers?.run {
-                    userManager.updateRaiseHandStatus(this)
-                }
+                userManager.updateRaiseHandStatus(it.raiseHandUsers)
                 if (_state.value != null) {
                     _state.value = _state.value!!.copy(ban = it.ban)
                 }
@@ -238,7 +244,9 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun observerRtmEvent() {
         viewModelScope.launch {
-            rtmApi.observeRtmEvent().collect { handleRtmEvent(it) }
+            rtmApi.observeRtmEvent().collect {
+                handleRtmEvent(it)
+            }
         }
     }
 
@@ -249,7 +257,7 @@ class ClassRoomViewModel @Inject constructor(
                 val state = state.value ?: return
                 if (state.isOwner) {
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
-                    userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
+                    // userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
                 }
             }
             is OnMemberJoined -> {
@@ -257,13 +265,6 @@ class ClassRoomViewModel @Inject constructor(
             }
             is OnMemberLeft -> {
                 userManager.removeUser(event.userId)
-                // when user left, owner clear state;
-                state.value?.let {
-                    if (it.isOwner) {
-                        syncedClassState.deleteDeviceState(event.userId)
-                        syncedClassState.updateOnStage(event.userId, false)
-                    }
-                }
             }
             is RoomBanEvent -> {
                 appendMessage(MessageFactory.createNotice(ban = event.status))
@@ -329,7 +330,7 @@ class ClassRoomViewModel @Inject constructor(
                 } else if (state.isOwner && !enableVideo) {
                     updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
                 } else {
-                    notifyNoOptPermission()
+                    sendGlobalEvent(NoOptPermission())
                 }
             }
         }
@@ -344,7 +345,7 @@ class ClassRoomViewModel @Inject constructor(
                 } else if (state.isOwner && !enableAudio) {
                     updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
                 } else {
-                    notifyNoOptPermission()
+                    sendGlobalEvent(NoOptPermission())
                 }
             }
         }
@@ -357,18 +358,6 @@ class ClassRoomViewModel @Inject constructor(
     fun sendGlobalEvent(event: Event) {
         viewModelScope.launch {
             eventbus.produceEvent(event)
-        }
-    }
-
-    private fun notifyRTMChannelJoined() {
-        viewModelScope.launch {
-            eventbus.produceEvent(RtmChannelJoined)
-        }
-    }
-
-    private fun notifyNoOptPermission() {
-        viewModelScope.launch {
-            eventbus.produceEvent(NoOptPermission())
         }
     }
 
@@ -386,17 +375,14 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun sendRaiseHand() {
+    fun raiseHand() {
         val state = state.value ?: return
         viewModelScope.launch {
             userManager.currentUser?.run {
                 if (this.isSpeak) {
                     return@run
                 }
-                val event = RaiseHandEvent(
-                    roomUUID = roomUUID,
-                    raiseHand = !isRaiseHand,
-                )
+                val event = RaiseHandEvent(roomUUID = roomUUID, raiseHand = !isRaiseHand)
                 rtmApi.sendPeerCommand(event, state.ownerUUID)
                 userManager.updateRaiseHandStatus(userUUID, event.raiseHand)
             }
@@ -564,7 +550,7 @@ class ClassRoomViewModel @Inject constructor(
             val state = _state.value ?: return@launch
             if (state.isOwner) {
                 syncedClassState.updateOnStage(userUUID, true)
-                userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
+                // userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
             }
         }
     }
@@ -574,12 +560,7 @@ class ClassRoomViewModel @Inject constructor(
             val state = _state.value ?: return@launch
             if (state.isOwner) {
                 syncedClassState.updateBan(muted)
-                rtmApi.sendChannelCommand(
-                    RoomBanEvent(
-                        roomUUID = roomUUID,
-                        status = muted,
-                    )
-                )
+                rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
             }
         }
     }
@@ -595,19 +576,18 @@ class ClassRoomViewModel @Inject constructor(
 
 data class ClassRoomState(
     // users
-    // 当前用户
     val userUUID: String,
     val userName: String = "",
-    // 房间所有者
     val ownerUUID: String,
-    // 房间所有者的名称
     val ownerName: String? = ownerUUID.substring(ownerUUID.length - 6),
 
+    // current user state
     val isSpeak: Boolean,
     val isRaiseHand: Boolean,
     val videoOpen: Boolean,
     val audioOpen: Boolean,
 
+    // current user interaction params
     val boardUUID: String,
     val boardToken: String,
     val rtcUID: Int,
@@ -615,7 +595,7 @@ data class ClassRoomState(
     val rtcShareScreen: RtcShareScreen,
     val rtmToken: String,
 
-    // class info
+    // class room info
     // 房间标题
     val title: String,
     // 房间的 uuid
@@ -626,21 +606,21 @@ data class ClassRoomState(
     val endTime: Long = 0L,
     // 房间邀请码
     val inviteCode: String,
-    // class state
-    // 禁用
+    // 房间类型
+    val roomType: RoomType,
+    // 房间区域
+    val region: String,
+
+    // class room state
+    // 禁言
     val ban: Boolean = false,
     // 交互模式
     val classMode: ClassModeType,
-    // 房间类型
-    val roomType: RoomType,
     // 房间状态
     val roomStatus: RoomStatus,
-    // 房间区域
-    val region: String,
 ) {
     val isWritable: Boolean
         get() {
-            if (ban) return isOwner
             return when (roomType) {
                 RoomType.BigClass -> {
                     isOwner || isSpeak
@@ -658,9 +638,8 @@ data class ClassRoomState(
     val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
 
-    val showRaiseHand: Boolean
+    val shouldShowRaiseHand: Boolean
         get() {
-            if (ban) return false
             return !isWritable and when (roomType) {
                 RoomType.OneToOne -> false
                 RoomType.BigClass -> !isOwner
@@ -668,7 +647,7 @@ data class ClassRoomState(
             }
         }
 
-    val needShowExitDialog: Boolean
+    val shouldShowExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
 
     fun isCreator(userId: String): Boolean {

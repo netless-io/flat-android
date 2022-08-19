@@ -122,7 +122,7 @@ class ToolComponent(
                 }
                 binding.cloudservice.isVisible = it.isWritable
 
-                binding.handup.isVisible = it.showRaiseHand
+                binding.handup.isVisible = it.shouldShowRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
 
                 binding.layoutSettings.switchVideo.isEnabled = it.isWritable
@@ -274,7 +274,7 @@ class ToolComponent(
                 }
             },
             binding.handup to {
-                viewModel.sendRaiseHand()
+                viewModel.raiseHand()
             }
         )
 
@@ -337,7 +337,7 @@ class ToolComponent(
 
     private fun handleExit() {
         val state = viewModel.state.value ?: return
-        if (state.needShowExitDialog) {
+        if (state.shouldShowExitDialog) {
             showOwnerExitDialog()
         } else {
             updateRoomsAndFinish()

@@ -22,7 +22,6 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.rtc.RTCEventListener
 import io.agora.flat.data.model.RtcUser
-import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.Logger
@@ -51,7 +50,6 @@ class RtcComponent(
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface RtcComponentEntryPoint {
-        fun userRepository(): UserRepository
         fun rtcApi(): RtcApi
         fun rtcVideoController(): RtcVideoController
         fun logger(): Logger
@@ -60,7 +58,6 @@ class RtcComponent(
     private lateinit var fullScreenBinding: ComponentFullscreenBinding
     private lateinit var videoListBinding: ComponentVideoListBinding
 
-    private lateinit var userRepository: UserRepository
     private lateinit var rtcApi: RtcApi
     private lateinit var rtcVideoController: RtcVideoController
     private lateinit var logger: Logger
@@ -80,7 +77,6 @@ class RtcComponent(
 
     private fun injectApi() {
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtcComponentEntryPoint::class.java)
-        userRepository = entryPoint.userRepository()
         rtcApi = entryPoint.rtcApi()
         rtcVideoController = entryPoint.rtcVideoController()
         logger = entryPoint.logger()
@@ -103,10 +99,6 @@ class RtcComponent(
                     }
                 }
             }
-        }
-
-        lifecycleScope.launch {
-            viewModel.rtmSuccess.collect { joinRtcChannel() }
         }
 
         lifecycleScope.launchWhenResumed {
@@ -146,17 +138,6 @@ class RtcComponent(
         videoListBinding.root.layoutParams = layoutParams
     }
 
-    private fun joinRtcChannel() {
-        logger.i("start join rtc")
-        viewModel.state.value?.apply {
-            rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
-
-            rtcVideoController.localUid = rtcUID
-            rtcVideoController.shareScreenUid = rtcShareScreen.uid
-            rtcVideoController.shareScreenContainer = shareScreenContainer
-        }
-    }
-
     private val onClickListener = View.OnClickListener {
         when (it) {
             fullScreenBinding.fullAudioOpt, videoListBinding.audioOpt -> userCallOut?.run {
@@ -189,6 +170,7 @@ class RtcComponent(
         videoListBinding.enterFullScreen.setOnClickListener(onClickListener)
 
         shareScreenContainer.setOnClickListener { /* disable click pass through */ }
+        rtcVideoController.shareScreenContainer = shareScreenContainer
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
         adapter.listener = object : UserVideoAdapter.Listener {
@@ -227,9 +209,9 @@ class RtcComponent(
                 fullScreenBinding.fullVideoView.isVisible = true
                 userCallOut?.run {
                     rtcVideoController.enterFullScreen(rtcUID)
+                    rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
 
                     fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
-                    rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
                     fullScreenBinding.fullScreenAvatar.load(avatarURL) {
                         crossfade(true)
                         transformations(CircleCropTransformation())
@@ -250,7 +232,6 @@ class RtcComponent(
                 userCallOut?.run {
                     adapter.updateVideoView(rtcUID)
                 }
-                // userCallOut = null
                 clearCallOutAndNotify()
             }
         )

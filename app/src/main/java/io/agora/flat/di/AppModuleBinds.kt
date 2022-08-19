@@ -37,7 +37,4 @@ abstract class AppModuleBinds {
 
     @Binds
     abstract fun providerNetworkObserver(bind: FlatNetworkObserver): NetworkObserver
-
-    @Binds
-    abstract fun providerSyncedState(bind: WhiteSyncedState): SyncedClassState
 }

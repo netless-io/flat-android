@@ -197,20 +197,18 @@ class RtmApiImpl @Inject constructor(
     }
 
     override suspend fun sendChannelCommand(event: ClassRtmEvent) = suspendCoroutine<Boolean> { cont ->
-        run {
-            val message = rtmClient.createMessage()
-            message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
+        val message = rtmClient.createMessage()
+        message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
 
-            messageChannel?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
-                override fun onSuccess(v: Void?) {
-                    cont.resume(true)
-                }
+        messageChannel?.sendMessage(message, sendMessageOptions, object : ResultCallback<Void?> {
+            override fun onSuccess(v: Void?) {
+                cont.resume(true)
+            }
 
-                override fun onFailure(error: ErrorInfo) {
-                    cont.resume(false)
-                }
-            }) ?: cont.resume(false)
-        }
+            override fun onFailure(error: ErrorInfo) {
+                cont.resume(false)
+            }
+        }) ?: cont.resume(false)
     }
 
     override suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->

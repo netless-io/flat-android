@@ -6,6 +6,7 @@ import com.google.gson.JsonObject
 import com.herewhite.sdk.SyncedStore
 import com.herewhite.sdk.domain.Promise
 import com.herewhite.sdk.domain.SDKError
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
 import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.di.interfaces.Logger
@@ -15,9 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScoped
 class WhiteSyncedState @Inject constructor(
     val logger: Logger,
 ) : SyncedClassState {
@@ -31,9 +31,7 @@ class WhiteSyncedState @Inject constructor(
         const val KEY_BAN = "ban"
     }
 
-    private lateinit var fastRoom: FastRoom
     private lateinit var syncedStore: SyncedStore
-
     private val gson = Gson()
     private val gsonWithNull = GsonBuilder()
         .serializeNulls()
@@ -44,7 +42,6 @@ class WhiteSyncedState @Inject constructor(
     private var _classroomStateFlow = MutableStateFlow<ClassroomStorageState?>(null)
 
     fun resetRoom(fastRoom: FastRoom) {
-        this.fastRoom = fastRoom
         syncedStore = fastRoom.room.syncedStore
         syncedStore.connectStorage(DEVICE_STATE_STORAGE, "{}", object : Promise<String> {
             override fun then(state: String) {
@@ -66,7 +63,7 @@ class WhiteSyncedState @Inject constructor(
                 val state = gson.fromJson(value, ClassroomStorageState::class.java)
                 _classroomStateFlow.value = ClassroomStorageState(
                     classMode = state.classMode ?: ClassModeType.Lecture,
-                    raiseHandUsers = state.raiseHandUsers ?: listOf(),
+                    raiseHandUsers = state.raiseHandUsers,
                     ban = state.ban,
                 )
             }
@@ -79,7 +76,7 @@ class WhiteSyncedState @Inject constructor(
             val state = gson.fromJson(value, ClassroomStorageState::class.java)
             _classroomStateFlow.value = ClassroomStorageState(
                 classMode = state.classMode ?: ClassModeType.Lecture,
-                raiseHandUsers = state.raiseHandUsers ?: listOf(),
+                raiseHandUsers = state.raiseHandUsers,
                 ban = state.ban,
             )
         }
@@ -98,6 +95,7 @@ class WhiteSyncedState @Inject constructor(
             _onStagesFlow.value = getOnStageUsers(value)
         }
     }
+
 
     private fun getDevicesStates(state: String): Map<String, DeviceState> {
         val deviceStates = mutableMapOf<String, DeviceState>()
@@ -139,6 +137,15 @@ class WhiteSyncedState @Inject constructor(
 
     override fun observeClassroomState(): Flow<ClassroomStorageState> {
         return _classroomStateFlow.asStateFlow().filterNotNull()
+    }
+
+    override fun clean() {
+        _devicesFlow.value = null
+        _onStagesFlow.value = null
+        _classroomStateFlow.value = null
+        syncedStore.disconnectStorage(DEVICE_STATE_STORAGE)
+        syncedStore.disconnectStorage(ONSTAGE_USERS_STORAGE)
+        syncedStore.disconnectStorage(CLASSROOM_STORAGE)
     }
 
     override fun updateDeviceState(userId: String, camera: Boolean, mic: Boolean) {

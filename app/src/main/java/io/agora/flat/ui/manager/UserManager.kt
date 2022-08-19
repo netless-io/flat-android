@@ -2,6 +2,7 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.di.interfaces.RtcApi
 import kotlinx.coroutines.flow.Flow
@@ -54,54 +55,83 @@ class UserManager @Inject constructor(
         speakingJoiners.clear()
         handRaisingJoiners.clear()
         otherJoiners.clear()
-        sortUser(currentUser)
+        sortUser(mapOf(currentUser.userUUID to currentUser))
     }
 
     suspend fun initUsers(uuids: List<String>) {
-        val userMap = userQuery.loadUsers(uuids).mapValues {
-            RtcUser(
-                it.value.userUUID,
-                it.value.rtcUID,
-                it.value.name,
-                it.value.avatarURL
+        val usersInfo = userQuery.loadUsers(uuids)
+        usersInfo.forEach { (uuid, roomUser) ->
+            usersCache[uuid] = usersCache[uuid]?.copy(
+                rtcUID = roomUser.rtcUID,
+                name = roomUser.name,
+                avatarURL = roomUser.avatarURL
+            ) ?: RtcUser(
+                roomUser.userUUID,
+                roomUser.rtcUID,
+                roomUser.name,
+                roomUser.avatarURL
             )
         }
-        userMap.forEach { (uuid, user) ->
-            usersCache[uuid] = usersCache[uuid]?.copy(
-                rtcUID = user.rtcUID,
-                name = user.name,
-                avatarURL = user.avatarURL
-            ) ?: user
-        }
-        sortAndNotify(userMap.values.toList())
+        sortAndNotify(usersCache)
     }
 
     private fun sortAndNotify(users: List<RtcUser>) {
-        users.forEach(this::sortUser)
+        sortAndNotify(users.associateBy { it.userUUID })
+    }
+
+    private fun sortAndNotify(users: Map<String, RtcUser>) {
+        sortUser(users)
         notifyUsers()
     }
 
-    private fun sortUser(rtcUser: RtcUser) {
-        if (rtcUser.userUUID == currentUserUUID) {
-            _currentUser.value = rtcUser.copy()
+//    private fun sortUser(rtcUser: RtcUser) {
+//        if (rtcUser.userUUID == currentUserUUID) {
+//            _currentUser.value = rtcUser.copy()
+//        }
+//
+//        speakingJoiners.removeAll { it.userUUID == rtcUser.userUUID }
+//        handRaisingJoiners.removeAll { it.userUUID == rtcUser.userUUID }
+//        otherJoiners.removeAll { it.userUUID == rtcUser.userUUID }
+//
+//        when {
+//            rtcUser.userUUID == ownerUUID -> {
+//                creator = rtcUser
+//            }
+//            rtcUser.isSpeak -> {
+//                speakingJoiners.add(rtcUser)
+//            }
+//            rtcUser.isRaiseHand -> {
+//                handRaisingJoiners.add(rtcUser)
+//            }
+//            else -> {
+//                otherJoiners.add(rtcUser)
+//            }
+//        }
+//    }
+
+    private fun sortUser(users: Map<String, RtcUser>) {
+        if (users.containsKey(currentUserUUID)) {
+            _currentUser.value = users[currentUserUUID]
         }
 
-        speakingJoiners.removeAll { it.userUUID == rtcUser.userUUID }
-        handRaisingJoiners.removeAll { it.userUUID == rtcUser.userUUID }
-        otherJoiners.removeAll { it.userUUID == rtcUser.userUUID }
+        speakingJoiners.removeAll { users.containsKey(it.userUUID) }
+        handRaisingJoiners.removeAll { users.containsKey(it.userUUID) }
+        otherJoiners.removeAll { users.containsKey(it.userUUID) }
 
-        when {
-            rtcUser.userUUID == ownerUUID -> {
-                creator = rtcUser
-            }
-            rtcUser.isSpeak -> {
-                speakingJoiners.add(rtcUser)
-            }
-            rtcUser.isRaiseHand -> {
-                handRaisingJoiners.add(rtcUser)
-            }
-            else -> {
-                otherJoiners.add(rtcUser)
+        users.forEach { (_, rtcUser) ->
+            when {
+                rtcUser.userUUID == ownerUUID -> {
+                    creator = rtcUser
+                }
+                rtcUser.isSpeak -> {
+                    speakingJoiners.add(rtcUser)
+                }
+                rtcUser.isRaiseHand -> {
+                    handRaisingJoiners.add(rtcUser)
+                }
+                else -> {
+                    otherJoiners.add(rtcUser)
+                }
             }
         }
     }
@@ -127,8 +157,7 @@ class UserManager @Inject constructor(
 
     private fun updateUser(user: RtcUser) {
         usersCache[user.userUUID] = user
-        sortUser(user)
-        notifyUsers()
+        sortAndNotify(mapOf(user.userUUID to user))
     }
 
     private fun notifyUsers() {
@@ -161,14 +190,27 @@ class UserManager @Inject constructor(
         }
     }
 
+    fun updateDeviceState(devicesState: Map<String, DeviceState>) {
+        val updateUsers = mutableListOf<RtcUser>()
+        devicesState.forEach { (uuid, state) ->
+            usersCache[uuid]?.run {
+                val user = this.copy(audioOpen = state.mic, videoOpen = state.camera)
+                updateUsers.add(user)
+                usersCache[uuid] = user
+                updateRtcStream(this.rtcUID, state.mic, state.camera)
+            }
+        }
+        sortAndNotify(updateUsers)
+    }
+
     fun updateOnStage(onStages: Map<String, Boolean>) {
-        val usersList = users.map {
+        val updateUsers = users.map {
             it.copy(isSpeak = onStages[it.userUUID] ?: false)
         }
-        usersList.forEach {
+        updateUsers.forEach {
             usersCache[it.userUUID] = it
         }
-        sortAndNotify(usersList)
+        sortAndNotify(updateUsers)
     }
 
     fun updateRaiseHandStatus(uuid: String, isRaiseHand: Boolean) {
@@ -176,23 +218,23 @@ class UserManager @Inject constructor(
     }
 
     fun updateRaiseHandStatus(status: List<String>) {
-        val usersList = users.map {
+        val updateUsers = users.map {
             it.copy(isRaiseHand = status.contains(it.userUUID))
         }
-        usersList.forEach {
+        updateUsers.forEach {
             usersCache[it.userUUID] = it
         }
-        sortAndNotify(usersList)
+        sortAndNotify(updateUsers)
     }
 
-    fun updateSpeakAndRaise(uuid: String, isSpeak: Boolean, isRaiseHand: Boolean) {
-        usersCache[uuid]?.run {
-            updateUser(copy(isSpeak = isSpeak, isRaiseHand = isRaiseHand))
-        }
-    }
+    // fun updateSpeakAndRaise(uuid: String, isSpeak: Boolean, isRaiseHand: Boolean) {
+    //     usersCache[uuid]?.run {
+    //         updateUser(copy(isSpeak = isSpeak, isRaiseHand = isRaiseHand))
+    //     }
+    // }
 
     fun handleAllOffStage() {
-        val updateUsers = users.filter { it.userUUID != ownerUUID }.toMutableList().map { rtcUser ->
+        val updateUsers = users.filter { it.userUUID != ownerUUID }.map { rtcUser ->
             rtcUser.copy(
                 videoOpen = false,
                 audioOpen = false,
@@ -201,11 +243,11 @@ class UserManager @Inject constructor(
             )
         }
         updateUsers.forEach {
+            usersCache[it.userUUID] = it
             updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
         }
-        boardRoom.setWritable(false)
-        updateUsers.forEach {
-            usersCache[it.userUUID] = it
+        if (currentUserUUID != ownerUUID) {
+            boardRoom.setWritable(false)
         }
         sortAndNotify(updateUsers)
     }

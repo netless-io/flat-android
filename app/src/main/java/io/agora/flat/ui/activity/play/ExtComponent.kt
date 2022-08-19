@@ -90,16 +90,15 @@ class ExtComponent(
 
 
     private fun showRoomExitDialog(message: String) {
-        try {
-            val dialog = RoomExitDialog().apply {
-                arguments = Bundle().apply {
-                    putString(RoomExitDialog.MESSAGE, message)
-                }
-            }
-            dialog.setListener { activity.delayAndFinish(250) }
-            dialog.show(activity.supportFragmentManager, "RoomExitDialog")
-        } catch (e: Throwable) {
-
+        if (activity.isFinishing || activity.isDestroyed) {
+            return
         }
+        val dialog = RoomExitDialog().apply {
+            arguments = Bundle().apply {
+                putString(RoomExitDialog.MESSAGE, message)
+            }
+        }
+        dialog.setListener { activity.delayAndFinish(250) }
+        dialog.show(activity.supportFragmentManager, "RoomExitDialog")
     }
 }

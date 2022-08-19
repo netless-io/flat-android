@@ -9,6 +9,6 @@ data class DeviceState(
 
 data class ClassroomStorageState(
     val classMode: ClassModeType? = null,
-    val raiseHandUsers: List<String>? = null,
+    val raiseHandUsers: List<String> = listOf(),
     val ban: Boolean = false
 )
