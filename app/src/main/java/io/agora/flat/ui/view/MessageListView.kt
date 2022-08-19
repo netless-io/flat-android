@@ -73,15 +73,26 @@ class MessageListView @JvmOverloads constructor(
             }
         }
 
+        binding.mute.setOnClickListener {
+            val targetMuted = !binding.mute.isSelected
+            binding.mute.isSelected = targetMuted
+            listener?.onMute(targetMuted)
+        }
+
         // Consume events to prevent edittext focus loss
         binding.sendLayout.setOnClickListener {}
     }
 
     fun setBan(ban: Boolean) {
         binding.send.isEnabled = !ban
+        binding.mute.isSelected = ban
         binding.messageEdit.isEnabled = !ban
         binding.messageEdit.hint =
             if (ban) context.getString(R.string.class_room_message_muted) else context.getString(R.string.say_something)
+    }
+
+    fun showBanBtn(shown: Boolean) {
+        binding.mute.isVisible = shown
     }
 
     fun setEditable(enable: Boolean) {
@@ -123,6 +134,8 @@ class MessageListView @JvmOverloads constructor(
 
     interface Listener {
         fun onSendMessage(msg: String)
+
+        fun onMute(muted: Boolean)
 
         fun onLoadMore() {}
     }

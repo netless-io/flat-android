@@ -219,8 +219,13 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            syncedClassState.observeRaiseHand().collect {
-                userManager.updateRaiseHandStatus(it)
+            syncedClassState.observeClassroomState().collect {
+                it.raiseHandUsers?.run {
+                    userManager.updateRaiseHandStatus(this)
+                }
+                if (_state.value != null) {
+                    _state.value = _state.value!!.copy(ban = it.ban)
+                }
             }
         }
 
@@ -259,6 +264,9 @@ class ClassRoomViewModel @Inject constructor(
                         syncedClassState.updateOnStage(event.userId, false)
                     }
                 }
+            }
+            is RoomBanEvent -> {
+                appendMessage(MessageFactory.createNotice(ban = event.status))
             }
             is ChatMessage -> {
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
@@ -543,11 +551,9 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (state.isOwner) {
-                // sendOnStageCommand(userUUID, false)
                 syncedClassState.updateOnStage(userUUID, false)
             }
             if (state.isCurrentUser(userUUID)) {
-                // sendOnStageCommand(state.ownerUUID, onStage = false)
                 syncedClassState.updateOnStage(userUUID, false)
             }
         }
@@ -559,6 +565,21 @@ class ClassRoomViewModel @Inject constructor(
             if (state.isOwner) {
                 syncedClassState.updateOnStage(userUUID, true)
                 userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
+            }
+        }
+    }
+
+    fun muteChat(muted: Boolean) {
+        viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                syncedClassState.updateBan(muted)
+                rtmApi.sendChannelCommand(
+                    RoomBanEvent(
+                        roomUUID = roomUUID,
+                        status = muted,
+                    )
+                )
             }
         }
     }
@@ -592,7 +613,6 @@ data class ClassRoomState(
     val rtcUID: Int,
     val rtcToken: String,
     val rtcShareScreen: RtcShareScreen,
-
     val rtmToken: String,
 
     // class info

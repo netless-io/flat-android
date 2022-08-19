@@ -73,6 +73,10 @@ class RtmComponent(
                 messageViewModel.sendChatMessage(msg)
             }
 
+            override fun onMute(muted: Boolean) {
+                viewModel.muteChat(muted)
+            }
+
             override fun onLoadMore() {
                 messageViewModel.loadHistoryMessage()
             }
@@ -116,6 +120,7 @@ class RtmComponent(
                 if (it.roomStatus == RoomStatus.Stopped) {
                     showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }
+                binding.messageLv.showBanBtn(it.isOwner)
                 binding.messageLv.setBan(it.ban)
             }
         }

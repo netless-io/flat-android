@@ -28,6 +28,7 @@ class WhiteSyncedState @Inject constructor(
 
         const val KEY_RAISE_HAND_USERS = "raiseHandUsers"
         const val KEY_CLASS_MODE = "classMode"
+        const val KEY_BAN = "ban"
     }
 
     private lateinit var fastRoom: FastRoom
@@ -40,8 +41,7 @@ class WhiteSyncedState @Inject constructor(
 
     private var _devicesFlow = MutableStateFlow<Map<String, DeviceState>?>(null)
     private var _onStagesFlow = MutableStateFlow<Map<String, Boolean>?>(null)
-    private var _raiseHandsFlow = MutableStateFlow<List<String>?>(null)
-    private var _classModeFlow = MutableStateFlow<ClassModeType?>(null)
+    private var _classroomStateFlow = MutableStateFlow<ClassroomStorageState?>(null)
 
     fun resetRoom(fastRoom: FastRoom) {
         this.fastRoom = fastRoom
@@ -61,12 +61,14 @@ class WhiteSyncedState @Inject constructor(
         }
 
         syncedStore.connectStorage(CLASSROOM_STORAGE, gson.toJson(ClassroomStorageState()), object : Promise<String> {
-            override fun then(state: String) {
-                logger.d("[classroom] initial state: $state")
-                val classRoomState = gson.fromJson(state, ClassroomStorageState::class.java)
-                _raiseHandsFlow.value = classRoomState.raiseHandUsers ?: listOf()
-                // TODO by init user and type
-                _classModeFlow.value = classRoomState.classMode ?: ClassModeType.Lecture
+            override fun then(value: String) {
+                logger.d("[classroom] initial state: $value")
+                val state = gson.fromJson(value, ClassroomStorageState::class.java)
+                _classroomStateFlow.value = ClassroomStorageState(
+                    classMode = state.classMode ?: ClassModeType.Lecture,
+                    raiseHandUsers = state.raiseHandUsers ?: listOf(),
+                    ban = state.ban,
+                )
             }
 
             override fun catchEx(t: SDKError) {
@@ -75,13 +77,11 @@ class WhiteSyncedState @Inject constructor(
         syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
             logger.d("[classroom] updated: value: $value diff: $diff")
             val state = gson.fromJson(value, ClassroomStorageState::class.java)
-
-            state.classMode?.let {
-
-            }
-            state.raiseHandUsers?.let {
-                _raiseHandsFlow.value = it
-            }
+            _classroomStateFlow.value = ClassroomStorageState(
+                classMode = state.classMode ?: ClassModeType.Lecture,
+                raiseHandUsers = state.raiseHandUsers ?: listOf(),
+                ban = state.ban,
+            )
         }
 
         syncedStore.connectStorage(ONSTAGE_USERS_STORAGE, "{}", object : Promise<String> {
@@ -137,8 +137,8 @@ class WhiteSyncedState @Inject constructor(
         return _onStagesFlow.asStateFlow().filterNotNull()
     }
 
-    override fun observeRaiseHand(): Flow<List<String>> {
-        return _raiseHandsFlow.asStateFlow().filterNotNull()
+    override fun observeClassroomState(): Flow<ClassroomStorageState> {
+        return _classroomStateFlow.asStateFlow().filterNotNull()
     }
 
     override fun updateDeviceState(userId: String, camera: Boolean, mic: Boolean) {
@@ -157,7 +157,8 @@ class WhiteSyncedState @Inject constructor(
     }
 
     override fun updateRaiseHand(userId: String, raiseHand: Boolean) {
-        val users = _raiseHandsFlow.value?.toMutableSet() ?: mutableSetOf()
+        val raiseHandUsers = _classroomStateFlow.value?.raiseHandUsers
+        val users = raiseHandUsers?.toMutableSet() ?: mutableSetOf()
         if (raiseHand) {
             users.add(userId)
         } else {
@@ -169,6 +170,11 @@ class WhiteSyncedState @Inject constructor(
 
     override fun updateClassModeType(classModeType: ClassModeType) {
         val jsonObj = mapOf(KEY_CLASS_MODE to classModeType)
+        syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
+    }
+
+    override fun updateBan(ban: Boolean) {
+        val jsonObj = mapOf(KEY_BAN to ban)
         syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
     }
 }

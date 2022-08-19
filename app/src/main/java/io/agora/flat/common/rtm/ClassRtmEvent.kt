@@ -17,6 +17,7 @@ sealed class ClassRtmEvent {
         private val eventClasses = mapOf(
             "raise-hand" to RaiseHandEvent::class.java,
             "update-room-status" to RoomStateEvent::class.java,
+            "ban" to RoomBanEvent::class.java
         )
 
         private val eventTypes = eventClasses.map { it.value to it.key }.toMap()
@@ -66,6 +67,12 @@ data class RoomStateEvent(
     override var sender: String? = null,
     val roomUUID: String,
     val state: RoomStatus,
+) : ClassRtmEvent(), EventWithSender
+
+data class RoomBanEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val status: Boolean,
 ) : ClassRtmEvent(), EventWithSender
 
 data class OnMemberJoined(
