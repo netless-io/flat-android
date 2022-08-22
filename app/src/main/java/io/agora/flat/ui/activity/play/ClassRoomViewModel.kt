@@ -153,11 +153,6 @@ class ClassRoomViewModel @Inject constructor(
             roomStatus = roomInfo.roomStatus,
             region = roomInfo.region,
 
-            classMode = when (roomInfo.roomType) {
-                RoomType.BigClass -> ClassModeType.Lecture
-                else -> ClassModeType.Interaction
-            },
-
             isSpeak = isSpeak,
             isRaiseHand = false,
             videoOpen = isSpeak && config.enableVideo,
@@ -303,7 +298,7 @@ class ClassRoomViewModel @Inject constructor(
                 val state = _state.value ?: return@collect
                 val users = it.filter { user ->
                     when (state.roomType) {
-                        RoomType.BigClass -> (state.isCreator(user.userUUID) || user.isSpeak)
+                        RoomType.BigClass, RoomType.SmallClass -> (state.isCreator(user.userUUID) || user.isSpeak)
                         else -> true
                     }
                 }.toMutableList()
@@ -550,7 +545,7 @@ class ClassRoomViewModel @Inject constructor(
             val state = _state.value ?: return@launch
             if (state.isOwner) {
                 syncedClassState.updateOnStage(userUUID, true)
-                // userManager.updateSpeakAndRaise(userUUID, isSpeak = true, isRaiseHand = false)
+                syncedClassState.updateRaiseHand(userUUID, false)
             }
         }
     }
@@ -562,14 +557,6 @@ class ClassRoomViewModel @Inject constructor(
                 syncedClassState.updateBan(muted)
                 rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
             }
-        }
-    }
-
-    fun updateClassMode(classMode: ClassModeType) {
-        viewModelScope.launch {
-            val state = _state.value ?: return@launch
-            _state.value = state.copy(classMode = classMode)
-            syncedClassState.updateClassModeType(classMode)
         }
     }
 }
@@ -615,7 +602,7 @@ data class ClassRoomState(
     // 禁言
     val ban: Boolean = false,
     // 交互模式
-    val classMode: ClassModeType,
+    // val classMode: ClassModeType,
     // 房间状态
     val roomStatus: RoomStatus,
 ) {
@@ -626,7 +613,7 @@ data class ClassRoomState(
                     isOwner || isSpeak
                 }
                 RoomType.SmallClass -> {
-                    isOwner || isSpeak || classMode == ClassModeType.Interaction
+                    isOwner || isSpeak
                 }
                 RoomType.OneToOne -> true
             }
@@ -643,7 +630,7 @@ data class ClassRoomState(
             return !isWritable and when (roomType) {
                 RoomType.OneToOne -> false
                 RoomType.BigClass -> !isOwner
-                RoomType.SmallClass -> !isOwner && classMode == ClassModeType.Lecture
+                RoomType.SmallClass -> !isOwner
             }
         }
 

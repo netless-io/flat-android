@@ -8,7 +8,6 @@ import com.herewhite.sdk.domain.Promise
 import com.herewhite.sdk.domain.SDKError
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
-import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.SyncedClassState
 import kotlinx.coroutines.flow.Flow
@@ -62,7 +61,6 @@ class WhiteSyncedState @Inject constructor(
                 logger.d("[classroom] initial state: $value")
                 val state = gson.fromJson(value, ClassroomStorageState::class.java)
                 _classroomStateFlow.value = ClassroomStorageState(
-                    classMode = state.classMode ?: ClassModeType.Lecture,
                     raiseHandUsers = state.raiseHandUsers,
                     ban = state.ban,
                 )
@@ -75,7 +73,6 @@ class WhiteSyncedState @Inject constructor(
             logger.d("[classroom] updated: value: $value diff: $diff")
             val state = gson.fromJson(value, ClassroomStorageState::class.java)
             _classroomStateFlow.value = ClassroomStorageState(
-                classMode = state.classMode ?: ClassModeType.Lecture,
                 raiseHandUsers = state.raiseHandUsers,
                 ban = state.ban,
             )
@@ -172,11 +169,6 @@ class WhiteSyncedState @Inject constructor(
             users.remove(userId)
         }
         val jsonObj = mapOf(KEY_RAISE_HAND_USERS to users.toList())
-        syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
-    }
-
-    override fun updateClassModeType(classModeType: ClassModeType) {
-        val jsonObj = mapOf(KEY_CLASS_MODE to classModeType)
         syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
     }
 

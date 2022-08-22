@@ -2,7 +2,6 @@ package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.board.ClassroomStorageState
 import io.agora.flat.common.board.DeviceState
-import io.agora.flat.data.model.ClassModeType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -16,6 +15,7 @@ interface SyncedClassState {
     fun observeClassroomState(): Flow<ClassroomStorageState>
 
     fun clean()
+
     /**
      * 更新设备状态
      */
@@ -37,11 +37,7 @@ interface SyncedClassState {
     fun updateRaiseHand(userId: String, raiseHand: Boolean)
 
     /**
-     * 更新 ClassModeType
-     * TODO
+     * 更新禁言状态
      */
-    fun updateClassModeType(classModeType: ClassModeType)
-
-    // 更新禁言状态
     fun updateBan(ban: Boolean)
 }

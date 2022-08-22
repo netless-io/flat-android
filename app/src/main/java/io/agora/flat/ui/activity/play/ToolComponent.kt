@@ -16,7 +16,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
-import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.IBoardRoom
@@ -118,7 +117,7 @@ class ToolComponent(
                     if (it.roomStatus == RoomStatus.Started) {
                         binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
                     }
-                    updateClassMode(it.classMode)
+                    // updateClassMode(it.classMode)
                 }
                 binding.cloudservice.isVisible = it.isWritable
 
@@ -262,16 +261,10 @@ class ToolComponent(
                 viewModel.stopRecord()
             },
             binding.layoutRoomStateSettings.classModeInteraction to {
-                if (!it.isSelected) {
-                    viewModel.updateClassMode(ClassModeType.Interaction)
-                    updateClassMode(ClassModeType.Interaction)
-                }
+                // ignore
             },
             binding.layoutRoomStateSettings.classModeLecture to {
-                if (!it.isSelected) {
-                    updateClassMode(ClassModeType.Lecture)
-                    viewModel.updateClassMode(ClassModeType.Lecture)
-                }
+                // ignore
             },
             binding.handup to {
                 viewModel.raiseHand()
@@ -328,11 +321,6 @@ class ToolComponent(
         binding.layoutUserList.root.setOnClickListener {
             // block event
         }
-    }
-
-    private fun updateClassMode(classMode: ClassModeType) {
-        binding.layoutRoomStateSettings.classModeInteraction.isSelected = classMode == ClassModeType.Interaction
-        binding.layoutRoomStateSettings.classModeLecture.isSelected = classMode == ClassModeType.Lecture
     }
 
     private fun handleExit() {
