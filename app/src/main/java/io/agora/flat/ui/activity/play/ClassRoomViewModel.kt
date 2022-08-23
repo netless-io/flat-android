@@ -132,11 +132,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private suspend fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
         val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
-        val isSpeak = when (roomInfo.roomType) {
-            RoomType.OneToOne -> true
-            RoomType.SmallClass -> true
-            RoomType.BigClass -> roomInfo.ownerUUID == currentUserUUID
-        }
+        val isSpeak = roomInfo.ownerUUID == currentUserUUID
 
         val initState = ClassRoomState(
             userUUID = currentUserUUID,
@@ -209,7 +205,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             takeInitState().collect {
                 logger.i("start joining board room")
-                boardRoom.join(it.boardUUID, it.boardToken, it.region, it.isWritable)
+                boardRoom.join(it.boardUUID, it.boardToken, it.region, it.allowDraw)
             }
         }
     }
@@ -285,9 +281,9 @@ class ClassRoomViewModel @Inject constructor(
                     audioOpen = it.audioOpen,
                 )
 
-                logger.d("change board writable ${_state.value!!.isWritable}")
+                logger.d("change board writable ${_state.value!!.allowDraw}")
                 viewModelScope.launch {
-                    boardRoom.setWritable(_state.value!!.isWritable)
+                    boardRoom.setWritable(_state.value!!.allowDraw)
                 }
             }
         }
@@ -419,7 +415,7 @@ class ClassRoomViewModel @Inject constructor(
         recordManager.stopRecord()
     }
 
-    fun onCopyText(text: String) {
+    fun setClipboard(text: String) {
         clipboard.putText(text)
     }
 
@@ -601,23 +597,16 @@ data class ClassRoomState(
     // class room state
     // 禁言
     val ban: Boolean = false,
-    // 交互模式
-    // val classMode: ClassModeType,
     // 房间状态
     val roomStatus: RoomStatus,
 ) {
-    val isWritable: Boolean
+    val allowDraw: Boolean
         get() {
-            return when (roomType) {
-                RoomType.BigClass -> {
-                    isOwner || isSpeak
-                }
-                RoomType.SmallClass -> {
-                    isOwner || isSpeak
-                }
-                RoomType.OneToOne -> true
-            }
+            return isOwner || isSpeak
         }
+
+    val isOnStage: Boolean
+        get() = isOwner || isSpeak
 
     val isOwner: Boolean
         get() = ownerUUID == userUUID
@@ -625,14 +614,7 @@ data class ClassRoomState(
     val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
 
-    val shouldShowRaiseHand: Boolean
-        get() {
-            return !isWritable and when (roomType) {
-                RoomType.OneToOne -> false
-                RoomType.BigClass -> !isOwner
-                RoomType.SmallClass -> !isOwner
-            }
-        }
+    val shouldShowRaiseHand: Boolean = !isOnStage
 
     val shouldShowExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus

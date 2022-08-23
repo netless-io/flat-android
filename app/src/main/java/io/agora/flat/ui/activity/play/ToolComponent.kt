@@ -119,13 +119,13 @@ class ToolComponent(
                     }
                     // updateClassMode(it.classMode)
                 }
-                binding.cloudservice.isVisible = it.isWritable
+                binding.cloudservice.isVisible = it.allowDraw
 
                 binding.handup.isVisible = it.shouldShowRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
 
-                binding.layoutSettings.switchVideo.isEnabled = it.isWritable
-                binding.layoutSettings.switchAudio.isEnabled = it.isWritable
+                binding.layoutSettings.switchVideo.isEnabled = it.isOnStage
+                binding.layoutSettings.switchAudio.isEnabled = it.isOnStage
 
                 binding.layoutSettings.switchVideo.isChecked = it.videoOpen
                 binding.layoutSettings.switchAudio.isChecked = it.audioOpen
@@ -380,7 +380,7 @@ class ToolComponent(
             "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
         val inviteLink = appEnv.baseInviteUrl + "/join/" + state.roomUUID
 
-        val copyText = """
+        val inviteText = """
             |${activity.getString(R.string.invite_title_format, state.userName)}
             |
             |${activity.getString(R.string.invite_room_name_format, state.title)}
@@ -400,7 +400,7 @@ class ToolComponent(
         }
         dialog.setListener(object : InviteDialog.Listener {
             override fun onCopy() {
-                viewModel.onCopyText(copyText)
+                viewModel.setClipboard(inviteText)
                 activity.showToast(R.string.copy_success)
             }
 
