@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.agora.flat.di.interfaces.LogConfig
 import javax.inject.Inject
 
 /**
@@ -31,6 +32,13 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             "9821657775fbc74773f1",
             "https://flat-web-dev.whiteboard.agora.io",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/beta/android/checkVersion.json",
+            logConfig = LogConfig(
+                ak = "LTAI5tQ3L1BaBPZWvEknza5K",
+                sk = "FwLMpNJtWvxjzzXFqe7ZFOKrCgOypR",
+                project = "hz-flat-dev",
+                logstore = "android",
+                endpoint = "cn-hangzhou.log.aliyuncs.com",
+            )
         )
         envMap[ENV_PROD] = EnvItem(
             AGORA_APP_ID,
@@ -38,6 +46,13 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             "71a29285a437998bdfe0",
             "https://flat-web.whiteboard.agora.io",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/checkVersion.json",
+            logConfig = LogConfig(
+                ak = "LTAI5tMjAGonmeiKfRhJAAo7",
+                sk = "T11jfuwrCSTOY8YmeYJUFoHWMeDMMz",
+                project = "flat-prod",
+                logstore = "android",
+                endpoint = "cn-hangzhou.log.aliyuncs.com",
+            )
         )
     }
 
@@ -73,11 +88,14 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val versionCheckUrl get() = currentEnvItem.versionCheckUrl
 
+    val logConfig get() = currentEnvItem.logConfig
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
         val githubClientId: String,
         val baseInviteUrl: String,
         val versionCheckUrl: String,
+        val logConfig: LogConfig,
     )
 }

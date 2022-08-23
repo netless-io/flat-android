@@ -75,7 +75,7 @@ class RtmApiImpl @Inject constructor(
         try {
             rtmClient = RtmClient.createInstance(context, appEnv.agoraAppId, rtmClientListener)
         } catch (e: Exception) {
-            logger.e(e, "RTM SDK init fatal error!")
+            logger.e(e, "[RTM] agora rtm SDK init fatal error!")
         }
     }
 
@@ -171,7 +171,7 @@ class RtmApiImpl @Inject constructor(
             }
 
             override fun onFailure(e: ErrorInfo) {
-                logger.d("get member failure $e")
+                logger.w("get member failure $e")
                 cont.resume(listOf())
             }
         }) ?: cont.resume(listOf())

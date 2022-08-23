@@ -3,6 +3,7 @@ package io.agora.flat.logger
 import android.os.Build
 import android.util.Log
 import io.agora.flat.di.interfaces.Crashlytics
+import io.agora.flat.di.interfaces.LogReporter
 import io.agora.flat.di.interfaces.Logger
 import timber.log.Timber
 import java.util.regex.Pattern
@@ -10,6 +11,7 @@ import javax.inject.Inject
 
 internal class FlatLogger @Inject constructor(
     private val crashlytics: Crashlytics,
+    private val logReporter: LogReporter,
 ) : Logger {
     override fun setup(debugMode: Boolean) {
         if (debugMode) {
@@ -17,6 +19,7 @@ internal class FlatLogger @Inject constructor(
         }
         try {
             Timber.plant(CrashlyticsTree(crashlytics))
+            Timber.plant(LogReporterTree(logReporter))
         } catch (e: IllegalStateException) {
             // Crashlytics is likely not setup in this project. Ignore the exception
         }
@@ -25,6 +28,7 @@ internal class FlatLogger @Inject constructor(
     override fun setUserId(id: String) {
         try {
             crashlytics.setUserId(id)
+            logReporter.setUserId(id)
         } catch (e: IllegalStateException) {
             // Crashlytics is likely not setup in this project. Ignore the exception
         }
@@ -145,6 +149,24 @@ private class CrashlyticsTree(
     }
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        crashlytics.log(tag, message, t)
+        crashlytics.log(priority, tag, message, t)
+    }
+}
+
+private class LogReporterTree(
+    private val logReporter: LogReporter,
+) : Timber.Tree() {
+    override fun isLoggable(tag: String?, priority: Int): Boolean {
+        return priority >= Log.INFO
+    }
+
+    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        logReporter.report(
+            mapOf(
+                "message" to message,
+                "priority" to priority.toString(),
+                "t" to t?.stackTraceToString(),
+            )
+        )
     }
 }

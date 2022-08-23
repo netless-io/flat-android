@@ -4,20 +4,25 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
-import io.agora.flat.di.interfaces.Crashlytics
-import io.agora.flat.di.interfaces.Logger
-import io.agora.flat.di.interfaces.StartupInitializer
+import io.agora.flat.di.interfaces.*
 import javax.inject.Singleton
 
 @Module
 object LoggerModule {
     @Singleton
     @Provides
+    fun providerLogReporter(logConfig: LogConfig): LogReporter = AliyunLogReporter(logConfig)
+
+    @Singleton
+    @Provides
     fun providerCrashlytics(): Crashlytics = BuglyCrashlytics()
 
     @Singleton
     @Provides
-    fun providerLogger(crashlytics: Crashlytics): Logger = FlatLogger(crashlytics)
+    fun providerLogger(
+        crashlytics: Crashlytics,
+        logReporter: LogReporter
+    ): Logger = FlatLogger(crashlytics, logReporter)
 }
 
 @Module

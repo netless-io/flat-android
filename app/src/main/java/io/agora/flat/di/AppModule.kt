@@ -16,6 +16,7 @@ import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.impl.EventBus
+import io.agora.flat.di.interfaces.LogConfig
 import io.agora.flat.logger.LoggerModule
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
@@ -57,6 +58,12 @@ object AppModule {
     @Provides
     fun providerAppEnv(@ApplicationContext context: Context): AppEnv {
         return AppEnv(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providerLogConfig(appEnv: AppEnv): LogConfig {
+        return appEnv.logConfig
     }
 
     @Singleton
