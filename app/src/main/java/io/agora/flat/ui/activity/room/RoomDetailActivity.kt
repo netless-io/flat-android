@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.room
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -482,20 +481,17 @@ private fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
 
 @Composable
 private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
-    val timeDuring =
+    val datetime =
         "${FlatFormatter.date(roomInfo.beginTime)} ${FlatFormatter.timeDuring(roomInfo.beginTime, roomInfo.endTime)}"
     val inviteLink = roomInfo.baseInviteUrl + "/join/" + roomInfo.roomUUID
-
-    val context = LocalContext.current
-    val copyText = """
-        |${context.getString(R.string.invite_title_format, roomInfo.username)}
-        |
-        |${context.getString(R.string.invite_room_name_format, roomInfo.title)}
-        |${context.getString(R.string.invite_begin_time_format, timeDuring)}
-        |
-        |${context.getString(R.string.invite_room_number_format, roomInfo.inviteCode.toInviteCodeDisplay())}
-        |${context.getString(R.string.invite_join_link_format, inviteLink)}
-        """.trimMargin()
+    val inviteText = stringResource(
+        R.string.invite_text_format,
+        roomInfo.username,
+        roomInfo.title,
+        datetime,
+        roomInfo.inviteCode.toInviteCodeDisplay(),
+        inviteLink
+    )
 
     Dialog(onDismissRequest) {
         Surface(shape = Shapes.large) {
@@ -520,10 +516,10 @@ private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onC
                     Text(stringResource(R.string.time_start))
                     Spacer(Modifier.width(16.dp))
                     Spacer(Modifier.weight(1f))
-                    Text(timeDuring, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(datetime, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 FlatLargeVerticalSpacer()
-                FlatPrimaryTextButton(stringResource(R.string.copy_link_to_invite), onClick = { onCopy(copyText) })
+                FlatPrimaryTextButton(stringResource(R.string.copy_link_to_invite), onClick = { onCopy(inviteText) })
             }
         }
     }

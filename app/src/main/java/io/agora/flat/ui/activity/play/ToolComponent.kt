@@ -26,7 +26,6 @@ import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
-import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -374,28 +373,30 @@ class ToolComponent(
     }
 
     private fun showInviteDialog() {
-        val state = viewModel.state.value ?: return
-        val inviteTitle = activity.getString(R.string.invite_title_format, state.userName)
-        val roomTime =
-            "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
-        val inviteLink = appEnv.baseInviteUrl + "/join/" + state.roomUUID
+        val inviteInfo = viewModel.getInviteInfo() ?: return
+        val inviteTitle = activity.getString(R.string.invite_title_format, inviteInfo.username)
+        val inviteLink = inviteInfo.link
+        val datetime = "${FlatFormatter.date(inviteInfo.beginTime)} ${
+            FlatFormatter.timeDuring(inviteInfo.beginTime, inviteInfo.endTime)
+        }"
+        val roomTitle = inviteInfo.roomTitle
+        val roomUuid = inviteInfo.roomUuid
 
-        val inviteText = """
-            |${activity.getString(R.string.invite_title_format, state.userName)}
-            |
-            |${activity.getString(R.string.invite_room_name_format, state.title)}
-            |${activity.getString(R.string.invite_begin_time_format, roomTime)}
-            |
-            |${activity.getString(R.string.invite_room_number_format, state.inviteCode.toInviteCodeDisplay())}
-            |${activity.getString(R.string.invite_join_link_format, inviteLink)}
-            """.trimMargin()
+        val inviteText = activity.getString(
+            R.string.invite_text_format,
+            inviteInfo.username,
+            roomTitle,
+            datetime,
+            roomUuid,
+            inviteLink
+        )
 
         val dialog = InviteDialog().apply {
             arguments = Bundle().apply {
                 putString(InviteDialog.INVITE_TITLE, inviteTitle)
-                putString(InviteDialog.ROOM_TITLE, state.title)
-                putString(InviteDialog.ROOM_NUMBER, state.inviteCode.toInviteCodeDisplay())
-                putString(InviteDialog.ROOM_TIME, roomTime)
+                putString(InviteDialog.ROOM_NUMBER, roomUuid)
+                putString(InviteDialog.ROOM_TITLE, roomTitle)
+                putString(InviteDialog.ROOM_TIME, datetime)
             }
         }
         dialog.setListener(object : InviteDialog.Listener {

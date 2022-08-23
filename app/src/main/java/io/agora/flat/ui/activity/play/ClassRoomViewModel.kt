@@ -18,6 +18,7 @@ import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.common.rtm.*
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomConfigRepository
@@ -37,6 +38,7 @@ import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
 import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.coursewareType
+import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
@@ -62,6 +64,7 @@ class ClassRoomViewModel @Inject constructor(
     private val syncedClassState: SyncedClassState,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
+    private val appEnv: AppEnv,
     private val logger: Logger,
 ) : ViewModel() {
     private var _state = MutableStateFlow<ClassRoomState?>(null)
@@ -559,6 +562,18 @@ class ClassRoomViewModel @Inject constructor(
                 rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
             }
         }
+    }
+
+    fun getInviteInfo(): InviteInfo? {
+        val state = state.value ?: return null
+        return InviteInfo(
+            username = currentUserName,
+            roomTitle = state.title,
+            link = appEnv.baseInviteUrl + "/join/" + state.roomUUID,
+            roomUuid = state.inviteCode.toInviteCodeDisplay(),
+            beginTime = state.beginTime,
+            endTime = state.endTime,
+        )
     }
 }
 

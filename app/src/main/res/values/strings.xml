@@ -179,11 +179,8 @@
     <string name="privacy_agreement">Privacy Agreement</string>
     <string name="network_error">Please check the network settings.</string>
     <string name="copy_success">Copy successfully</string>
+    <string name="invite_text_format">%1$s invites you to join the Flat room\n\nRoom Theme: %2$s\nRoom ID: %3$s\n\nStart Time: %4$s\nJoin Link: %5$s</string>
     <string name="invite_title_format">%1$s invites you to join the Flat room</string>
-    <string name="invite_room_name_format">Room Theme: %1$s</string>
-    <string name="invite_room_number_format">Room ID: %1$s</string>
-    <string name="invite_begin_time_format">Start Time: %1$s</string>
-    <string name="invite_join_link_format">Join Link: %1$s</string>
     <string name="replay">Replay</string>
     <string name="exit_replay">Exit playback</string>
     <string name="exit_replay_tip">Are you sure to exit playback?</string>

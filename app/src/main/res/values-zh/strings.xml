@@ -194,11 +194,8 @@
     <string name="network_error">网络异常，请检查网络设置</string>
     <string name="copy_success">复制成功</string>
 
+    <string name="invite_text_format">%1$s 邀请你加入 Flat 房间\n\n房间主题：%2$s\n房间号：%3$s\n\n开始时间：%4$s\n加入链接：%5$s</string>
     <string name="invite_title_format">%1$s 邀请你加入 Flat 房间</string>
-    <string name="invite_room_name_format">房间主题：%1$s</string>
-    <string name="invite_room_number_format">房间号：%1$s</string>
-    <string name="invite_begin_time_format">开始时间：%1$s</string>
-    <string name="invite_join_link_format">加入链接：%1$s</string>
 
     <string name="replay">回放</string>
     <string name="exit_replay">退出回放</string>
