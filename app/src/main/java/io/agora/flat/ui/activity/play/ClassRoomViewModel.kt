@@ -139,7 +139,7 @@ class ClassRoomViewModel @Inject constructor(
             userUUID = currentUserUUID,
             userName = currentUserName,
             ownerUUID = roomInfo.ownerUUID,
-            ownerName = roomInfo.ownerUserName,
+            isOwner = isOwner,
 
             roomUUID = roomUUID,
             title = roomInfo.title,
@@ -199,7 +199,15 @@ class ClassRoomViewModel @Inject constructor(
     private fun joinRtc() {
         logger.i("start join rtc")
         state.value?.apply {
-            rtcApi.joinChannel(RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen))
+            rtcApi.joinChannel(
+                RtcJoinOptions(
+                    token = rtcToken,
+                    channel = roomUUID,
+                    uid = rtcUID,
+                    audioOpen = audioOpen,
+                    videoOpen = videoOpen
+                )
+            )
             rtcVideoController.localUid = rtcUID
             rtcVideoController.shareScreenUid = rtcShareScreen.uid
         }
@@ -224,9 +232,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             syncedClassState.observeClassroomState().collect {
                 userManager.updateRaiseHandStatus(it.raiseHandUsers)
-                if (_state.value != null) {
-                    _state.value = _state.value!!.copy(ban = it.ban)
-                }
+                updateBanState(it.ban)
             }
         }
 
@@ -234,6 +240,12 @@ class ClassRoomViewModel @Inject constructor(
             syncedClassState.observeOnStage().collect {
                 userManager.updateOnStage(it)
             }
+        }
+    }
+
+    private fun updateBanState(ban: Boolean) {
+        if (_state.value != null) {
+            _state.value = _state.value!!.copy(ban = ban)
         }
     }
 
@@ -310,7 +322,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
-                if (state.isCurrentUser(uuid)) {
+                if (userManager.isUserSelf(uuid)) {
                     updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
                 } else if (state.isOwner && !enableVideo) {
                     updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
@@ -325,7 +337,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
-                if (state.isCurrentUser(uuid)) {
+                if (userManager.isUserSelf(uuid)) {
                     updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
                 } else if (state.isOwner && !enableAudio) {
                     updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
@@ -518,32 +530,31 @@ class ClassRoomViewModel @Inject constructor(
         projectorQuery.startQuery()
     }
 
-    fun closeSpeak(userUUID: String) {
+    fun closeSpeak(uuid: String) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (state.isOwner) {
-                syncedClassState.updateOnStage(userUUID, false)
+                syncedClassState.updateOnStage(uuid, false)
             }
-            if (state.isCurrentUser(userUUID)) {
-                syncedClassState.updateOnStage(userUUID, false)
+            if (userManager.isUserSelf(uuid)) {
+                syncedClassState.updateOnStage(uuid, false)
             }
         }
     }
 
-    fun acceptRaiseHand(userUUID: String) {
+    fun acceptRaiseHand(uuid: String) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (state.isOwner) {
-                syncedClassState.updateOnStage(userUUID, true)
-                syncedClassState.updateRaiseHand(userUUID, false)
+                syncedClassState.updateOnStage(uuid, true)
+                syncedClassState.updateRaiseHand(uuid, false)
             }
         }
     }
 
     fun muteChat(muted: Boolean) {
         viewModelScope.launch {
-            val state = _state.value ?: return@launch
-            if (state.isOwner) {
+            if (userManager.isOwner()) {
                 syncedClassState.updateBan(muted)
                 rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
             }
@@ -556,7 +567,7 @@ data class ClassRoomState(
     val userUUID: String,
     val userName: String = "",
     val ownerUUID: String,
-    val ownerName: String? = ownerUUID.substring(ownerUUID.length - 6),
+    val isOwner: Boolean,
 
     // current user state
     val isSpeak: Boolean,
@@ -595,15 +606,10 @@ data class ClassRoomState(
     val roomStatus: RoomStatus,
 ) {
     val allowDraw: Boolean
-        get() {
-            return isOwner || isSpeak
-        }
+        get() = isOwner || isSpeak
 
     val isOnStage: Boolean
         get() = isOwner || isSpeak
-
-    val isOwner: Boolean
-        get() = ownerUUID == userUUID
 
     val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
@@ -612,10 +618,6 @@ data class ClassRoomState(
 
     val shouldShowExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
-
-    fun isCurrentUser(userId: String): Boolean {
-        return userId == this.userUUID
-    }
 }
 
 data class ImageSize(val width: Int, val height: Int)

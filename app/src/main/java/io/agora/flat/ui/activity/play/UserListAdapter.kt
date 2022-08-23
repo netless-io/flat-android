@@ -36,9 +36,8 @@ class UserListAdapter(
 
         // state
         viewHolder.state.run {
-            val classState = viewModel.state.value ?: return
             when {
-                classState.isCreator(itemData.userUUID) -> {
+                itemData.isOwner -> {
                     setText(R.string.room_class_userlist_state_teacher)
                     setTextColor(ContextCompat.getColor(context, R.color.flat_text_secondary))
                 }
@@ -58,10 +57,9 @@ class UserListAdapter(
 
         // handup
         viewHolder.handup.run {
-            val state = viewModel.state.value ?: return
-            if (state.isOwner) {
+            if (itemData.isOwner) {
                 when {
-                    state.isCreator(itemData.userUUID) -> {
+                    itemData.isOwner -> {
                         isVisible = false
                     }
                     itemData.isSpeak -> {
@@ -81,7 +79,7 @@ class UserListAdapter(
                     else -> isVisible = false
                 }
             } else {
-                if (itemData.isSpeak && state.isCurrentUser(itemData.userUUID)) {
+                if (itemData.isSpeak && itemData.isSelf) {
                     isVisible = true
                     setImageResource(R.drawable.ic_room_userlist_handup_close)
                     setOnClickListener {

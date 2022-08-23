@@ -142,6 +142,7 @@
     <string name="room_class_message_empty_hit">Say something…</string>
     <string name="room_class_cloudstorage_empty_hit">No files</string>
     <string name="room_class_teacher_leave">Teacher has left</string>
+    <string name="room_class_student_left">Student has left</string>
     <string name="room_dialog_exit_title">Close Options</string>
 
     <string name="user_list">User List</string>

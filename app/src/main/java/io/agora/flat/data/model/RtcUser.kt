@@ -2,24 +2,24 @@ package io.agora.flat.data.model
 
 // a class for record user in room. may be named as ClassUser / RoomUser etc.
 data class RtcUser(
-    var userUUID: String,
-    var rtcUID: Int = NOT_FETCHED,
-    var name: String? = null,
-    var avatarURL: String = "",
+    val userUUID: String,
+    val rtcUID: Int = NOT_JOIN_RTC_UID,
+    val name: String? = null,
+    val avatarURL: String = "",
 
-    var isSpeak: Boolean = false,
-    var audioOpen: Boolean = false,
-    var videoOpen: Boolean = false,
-    var isRaiseHand: Boolean = false,
+    val isSpeak: Boolean = false,
+    val audioOpen: Boolean = false,
+    val videoOpen: Boolean = false,
+    val isRaiseHand: Boolean = false,
+
+    val isOwner: Boolean = false,
+    val isSelf: Boolean = false
 ) {
 
     companion object {
-        const val NOT_FETCHED = -1
         const val NOT_JOIN_RTC_UID = 0
     }
 
     val isNotJoin: Boolean
-        get() {
-            return rtcUID == NOT_JOIN_RTC_UID
-        }
+        get() = rtcUID == NOT_JOIN_RTC_UID
 }

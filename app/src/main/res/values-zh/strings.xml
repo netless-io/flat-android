@@ -156,6 +156,7 @@
     <string name="room_class_message_empty_hit">说点什么吧…</string>
     <string name="room_class_cloudstorage_empty_hit">暂无文件</string>
     <string name="room_class_teacher_leave">老师暂时离开</string>
+    <string name="room_class_student_left">学生暂时离开</string>
     <string name="room_dialog_exit_title">关闭选项</string>
 
     <string name="user_list">用户列表</string>

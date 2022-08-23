@@ -41,24 +41,16 @@ class UserVideoAdapter(
         return ViewHolder(view)
     }
 
-    val avatars = listOf(
-        R.drawable.default_avatars_0,
-        R.drawable.default_avatars_1,
-        R.drawable.default_avatars_2,
-        R.drawable.default_avatars_3,
-        R.drawable.default_avatars_4,
-    )
-
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val itemData = dataSet[position]
 
         viewHolder.avatar.load(itemData.avatarURL) {
-            // placeholder(avatars[itemData.rtcUID % avatars.size])
             crossfade(true)
             transformations(CircleCropTransformation())
         }
 
-        viewHolder.teacherLeaveLy.isVisible = itemData.isNotJoin
+        viewHolder.teacherLeaveLy.isVisible = itemData.isNotJoin && itemData.isOwner
+        viewHolder.studentLeaveLy.isVisible = itemData.isNotJoin && !itemData.isOwner
         viewHolder.micClosed.isVisible = !itemData.audioOpen
 
         if (itemData.rtcUID != 0 && itemData.rtcUID != rtcVideoController.fullScreenUid) {
@@ -98,6 +90,7 @@ class UserVideoAdapter(
         val username: TextView = view.findViewById(R.id.username)
         val micClosed: View = view.findViewById(R.id.mic_closed)
         val teacherLeaveLy: ViewGroup = view.findViewById(R.id.teacher_leave_ly)
+        val studentLeaveLy: ViewGroup = view.findViewById(R.id.student_leave_ly)
     }
 
     var listener: Listener? = null

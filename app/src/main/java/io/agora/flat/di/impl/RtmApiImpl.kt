@@ -157,7 +157,7 @@ class RtmApiImpl @Inject constructor(
             }
 
             override fun onFailure(e: ErrorInfo) {
-                logger.i("rtm join channel fail")
+                logger.w("rtm join channel fail")
                 it.resumeWithException(e.toFlatException())
             }
         })
