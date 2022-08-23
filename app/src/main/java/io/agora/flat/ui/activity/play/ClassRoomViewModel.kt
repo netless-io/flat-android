@@ -16,6 +16,7 @@ import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.common.rtm.*
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
@@ -132,7 +133,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private suspend fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
         val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
-        val isSpeak = roomInfo.ownerUUID == currentUserUUID
+        val isOwner = roomInfo.ownerUUID == currentUserUUID
 
         val initState = ClassRoomState(
             userUUID = currentUserUUID,
@@ -149,10 +150,10 @@ class ClassRoomViewModel @Inject constructor(
             roomStatus = roomInfo.roomStatus,
             region = roomInfo.region,
 
-            isSpeak = isSpeak,
+            isSpeak = isOwner,
             isRaiseHand = false,
-            videoOpen = isSpeak && config.enableVideo,
-            audioOpen = isSpeak && config.enableAudio,
+            videoOpen = isOwner && config.enableVideo,
+            audioOpen = isOwner && config.enableAudio,
 
             boardUUID = joinRoomInfo.whiteboardRoomUUID,
             boardToken = joinRoomInfo.whiteboardRoomToken,
@@ -172,6 +173,9 @@ class ClassRoomViewModel @Inject constructor(
                 isRaiseHand = initState.isRaiseHand,
                 videoOpen = initState.videoOpen,
                 audioOpen = initState.audioOpen,
+
+                isOwner = isOwner,
+                isSelf = true
             ),
             ownerUUID = roomInfo.ownerUUID
         )
@@ -195,7 +199,7 @@ class ClassRoomViewModel @Inject constructor(
     private fun joinRtc() {
         logger.i("start join rtc")
         state.value?.apply {
-            rtcApi.joinChannel(rtcToken, roomUUID, rtcUID)
+            rtcApi.joinChannel(RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen))
             rtcVideoController.localUid = rtcUID
             rtcVideoController.shareScreenUid = rtcShareScreen.uid
         }
@@ -248,7 +252,6 @@ class ClassRoomViewModel @Inject constructor(
                 val state = state.value ?: return
                 if (state.isOwner) {
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
-                    // userManager.updateRaiseHandStatus(uuid = event.sender!!, isRaiseHand = event.raiseHand)
                 }
             }
             is OnMemberJoined -> {
@@ -264,7 +267,7 @@ class ClassRoomViewModel @Inject constructor(
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
             }
             else -> {
-                logger.e("rtm event not handled: $event")
+                logger.w("rtm event not handled: $event")
             }
         }
     }
@@ -273,17 +276,20 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userManager.observeSelf().filterNotNull().collect {
                 logger.d("on current user collected $it")
-                val state = _state.value ?: return@collect
-                _state.value = state.copy(
+                _state.value = _state.value?.copy(
                     isSpeak = it.isSpeak,
                     isRaiseHand = it.isRaiseHand,
                     videoOpen = it.videoOpen,
                     audioOpen = it.audioOpen,
                 )
 
-                logger.d("change board writable ${_state.value!!.allowDraw}")
+                val state = _state.value!!
                 viewModelScope.launch {
-                    boardRoom.setWritable(_state.value!!.allowDraw)
+                    boardRoom.setWritable(state.allowDraw)
+                    rtcApi.updateLocalStream(
+                        audio = state.isOnStage && state.audioOpen,
+                        video = state.isOnStage && state.videoOpen
+                    )
                 }
             }
         }
@@ -291,25 +297,13 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userManager.observeUsers().collect {
                 logger.d("on all users collected")
-                val state = _state.value ?: return@collect
                 val users = it.filter { user ->
-                    when (state.roomType) {
-                        RoomType.BigClass, RoomType.SmallClass -> (state.isCreator(user.userUUID) || user.isSpeak)
-                        else -> true
-                    }
+                    user.isOwner || user.isSpeak
                 }.toMutableList()
-
-                if (!users.containOwner()) {
-                    users.add(0, RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = state.ownerUUID))
-                }
 
                 _videoUsers.value = users
             }
         }
-    }
-
-    private fun List<RtcUser>.containOwner(): Boolean {
-        return this.find { _state.value!!.ownerUUID == it.userUUID } != null
     }
 
     fun enableVideo(enableVideo: Boolean, uuid: String = currentUserUUID) {
@@ -618,10 +612,6 @@ data class ClassRoomState(
 
     val shouldShowExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
-
-    fun isCreator(userId: String): Boolean {
-        return userId == this.ownerUUID
-    }
 
     fun isCurrentUser(userId: String): Boolean {
         return userId == this.userUUID

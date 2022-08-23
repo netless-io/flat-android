@@ -3,10 +3,12 @@ package io.agora.flat.di.impl
 import android.content.Context
 import io.agora.flat.common.rtc.RTCEventHandler
 import io.agora.flat.common.rtc.RTCEventListener
+import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
+import io.agora.rtc.models.ChannelMediaOptions
 import io.agora.rtc.video.VideoCanvas
 import io.agora.rtc.video.VideoEncoderConfiguration
 import javax.inject.Inject
@@ -45,8 +47,11 @@ class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitia
         return rtcEngine
     }
 
-    override fun joinChannel(token: String, channelName: String, optionalUid: Int): Int {
-        return rtcEngine.joinChannel(token, channelName, "{}", optionalUid)
+    override fun joinChannel(options: RtcJoinOptions): Int {
+        val channelMediaOptions = ChannelMediaOptions()
+        channelMediaOptions.publishLocalVideo = options.videoOpen
+        channelMediaOptions.publishLocalAudio = options.audioOpen
+        return rtcEngine.joinChannel(options.token, options.channel, "{}", options.uid, channelMediaOptions)
     }
 
     override fun leaveChannel() {
@@ -63,8 +68,8 @@ class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitia
 
     override fun updateLocalStream(audio: Boolean, video: Boolean) {
         // 使用 enableLocalAudio 关闭或开启本地采集后，本地听远端播放会有短暂中断。
-        rtcEngine.enableLocalAudio(audio)
-        rtcEngine.enableLocalVideo(video)
+        rtcEngine.muteLocalAudioStream(!audio)
+        rtcEngine.muteLocalVideoStream(!video)
     }
 
     override fun updateRemoteStream(rtcUid: Int, audio: Boolean, video: Boolean) {
