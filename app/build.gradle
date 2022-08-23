@@ -203,7 +203,7 @@ dependencies {
     api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
 
     // Agora
-    implementation("com.github.netless-io:whiteboard-android:2.16.29") {
+    implementation("com.github.netless-io:whiteboard-android:2.16.33") {
         force true
     }
     // for local fastboard debug
