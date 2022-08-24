@@ -77,6 +77,10 @@ android {
             }
 
             buildConfigField "String", "CHANNEL", "\"release\""
+            buildConfigField "String", "ALIYUN_LOG_DEV_AK", "\"ALIYUN_LOG_DEV_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_DEV_SK", "\"ALIYUN_LOG_DEV_SK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_PROD_AK", "\"ALIYUN_LOG_PROD_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_PROD_SK", "\"ALIYUN_LOG_PROD_SK_VALUE\""
         }
 
         debug {
@@ -84,6 +88,10 @@ android {
             signingConfig signingConfigs.debug
 
             buildConfigField "String", "CHANNEL", "\"debug\""
+            buildConfigField "String", "ALIYUN_LOG_DEV_AK", "\"ALIYUN_LOG_DEV_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_DEV_SK", "\"ALIYUN_LOG_DEV_SK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_PROD_AK", "\"ALIYUN_LOG_PROD_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_PROD_SK", "\"ALIYUN_LOG_PROD_SK_VALUE\""
         }
 
         applicationVariants.all {

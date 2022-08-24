@@ -1,0 +1,6 @@
+#!/bin/sh
+
+sed -i "s/ALIYUN_LOG_DEV_AK_VALUE/$ALIYUN_LOG_DEV_AK/g" "$GITHUB_WORKSPACE/app/build.gradle"
+sed -i "s/ALIYUN_LOG_DEV_SK_VALUE/$ALIYUN_LOG_DEV_SK/g" "$GITHUB_WORKSPACE/app/build.gradle"
+sed -i "s/ALIYUN_LOG_PROD_AK_VALUE/$ALIYUN_LOG_PROD_AK/g" "$GITHUB_WORKSPACE/app/build.gradle"
+sed -i "s/ALIYUN_LOG_PROD_SK_VALUE/$ALIYUN_LOG_PROD_SK/g" "$GITHUB_WORKSPACE/app/build.gradle"
