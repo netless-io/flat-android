@@ -400,15 +400,15 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun raiseHand() {
-        val state = state.value ?: return
         viewModelScope.launch {
             userManager.currentUser?.run {
-                if (this.isSpeak) {
-                    return@run
-                }
-                val event = RaiseHandEvent(roomUUID = roomUUID, raiseHand = !isRaiseHand)
-                rtmApi.sendPeerCommand(event, state.ownerUUID)
-                userManager.updateRaiseHandStatus(userUUID, event.raiseHand)
+                if (isSpeak || !userManager.isOwnerOnStage()) return@run
+                val raiseHand = !isRaiseHand
+                rtmApi.sendPeerCommand(
+                    RaiseHandEvent(roomUUID = roomUUID, raiseHand = raiseHand),
+                    userManager.ownerUUID
+                )
+                userManager.updateRaiseHandStatus(userUUID, raiseHand)
             }
         }
     }

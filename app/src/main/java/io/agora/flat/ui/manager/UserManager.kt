@@ -32,8 +32,8 @@ class UserManager @Inject constructor(
     // current all users
     private var usersCache = mutableMapOf<String, RtcUser>()
 
-    private lateinit var selfUUID: String
-    private lateinit var ownerUUID: String
+    lateinit var selfUUID: String
+    lateinit var ownerUUID: String
 
     fun observeUsers(): Flow<List<RtcUser>> {
         return _users.asStateFlow()
@@ -260,6 +260,10 @@ class UserManager @Inject constructor(
 
     fun isOwner(uuid: String = selfUUID): Boolean {
         return uuid == ownerUUID
+    }
+
+    fun isOwnerOnStage(): Boolean {
+        return creator?.isOnStage ?: false
     }
 
     fun getOnStageCount(): Int {
