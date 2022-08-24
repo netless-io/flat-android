@@ -89,7 +89,7 @@ class RtcComponent(
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
-                    val findUser = users.find { it.userUUID == userCallOut!!.userUUID }
+                    val findUser = users.find { it.isOnStage && it.userUUID == userCallOut!!.userUUID }
                     if (findUser == null) {
                         clearCallOutAndNotify()
                         fullScreenAnimator.hide()
@@ -173,22 +173,18 @@ class RtcComponent(
         rtcVideoController.shareScreenContainer = shareScreenContainer
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adapter.listener = object : UserVideoAdapter.Listener {
-            override fun onItemClick(position: Int, view: ViewGroup, rtcUser: RtcUser) {
-                start.set(getViewRect(view, fullScreenLayout))
-                end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
+        adapter.onItemClickListener = UserVideoAdapter.OnItemClickListener { _, view, rtcUser ->
+            if (!viewModel.canShowCallOut(rtcUser.userUUID)) return@OnItemClickListener
 
-                if (userCallOut == null || userCallOut != rtcUser) {
-                    userCallOut = rtcUser
-                    showVideoListOptArea(start)
-                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
-                } else {
-                    clearCallOutAndNotify()
-                }
-            }
+            start.set(getViewRect(view, fullScreenLayout))
+            end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
 
-            override fun onCloseSpeak(position: Int, itemData: RtcUser) {
-                viewModel.closeSpeak(itemData.userUUID)
+            if (userCallOut != rtcUser) {
+                userCallOut = rtcUser
+                showVideoListOptArea(start)
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
+            } else {
+                clearCallOutAndNotify()
             }
         }
 
@@ -256,6 +252,7 @@ class RtcComponent(
         videoListBinding.videoListOptArea.isVisible = false
     }
 
+    // show operation float view
     private fun showVideoListOptArea(videoArea: Rect) {
         videoListBinding.videoListOptArea.run {
             val lp = layoutParams as FrameLayout.LayoutParams

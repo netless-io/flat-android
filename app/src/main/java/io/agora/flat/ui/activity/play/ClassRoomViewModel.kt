@@ -419,7 +419,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun startClass() {
-        viewModelScope.launch { 
+        viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
                 rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, state = RoomStatus.Started))
@@ -613,6 +613,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun isOnStageAllowable(): Boolean {
         return userManager.getOnStageCount() < onStageLimit
+    }
+
+    fun canShowCallOut(userId: String): Boolean {
+        return userManager.isOwner() || userManager.isUserSelf(userId)
     }
 }
 

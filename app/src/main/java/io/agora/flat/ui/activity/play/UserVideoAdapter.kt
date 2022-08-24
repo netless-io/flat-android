@@ -60,7 +60,7 @@ class UserVideoAdapter(
         viewHolder.itemView.setOnClickListener {
             if (itemData.isNotJoin)
                 return@setOnClickListener
-            listener?.onItemClick(position, viewHolder.videoContainer, itemData)
+            onItemClickListener?.onItemClick(position, viewHolder.videoContainer, itemData)
         }
         viewHolder.videoClosedLayout.isVisible = !itemData.isNotJoin && !itemData.videoOpen
     }
@@ -93,11 +93,9 @@ class UserVideoAdapter(
         val studentLeaveLy: ViewGroup = view.findViewById(R.id.student_leave_ly)
     }
 
-    var listener: Listener? = null
+    var onItemClickListener: OnItemClickListener? = null
 
-    interface Listener {
+    fun interface OnItemClickListener {
         fun onItemClick(position: Int, view: ViewGroup, rtcUser: RtcUser)
-
-        fun onCloseSpeak(position: Int, itemData: RtcUser)
     }
 }
