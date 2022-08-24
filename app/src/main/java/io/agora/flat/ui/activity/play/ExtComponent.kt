@@ -14,12 +14,14 @@ import coil.decode.ImageDecoderDecoder
 import coil.load
 import io.agora.flat.R
 import io.agora.flat.common.error.FlatErrorHandler
+import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentExtensionBinding
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.view.RoomExitDialog
 import io.agora.flat.util.delayAndFinish
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * display common loading, toast, dialog, global layout change.
@@ -31,6 +33,7 @@ class ExtComponent(
     private lateinit var extensionBinding: ComponentExtensionBinding
 
     private val viewModel: ExtensionViewModel by activity.viewModels()
+    private val classRoomViewModel: ClassRoomViewModel by activity.viewModels()
 
     override fun onCreate(owner: LifecycleOwner) {
         initView()
@@ -52,6 +55,14 @@ class ExtComponent(
                 showLoading(it.loading)
                 it.error?.run {
                     handleErrorMessage(it.error)
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            classRoomViewModel.state.filterNotNull().collect {
+                if (it.roomStatus == RoomStatus.Stopped) {
+                    showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }
             }
         }
@@ -87,7 +98,6 @@ class ExtComponent(
             }
         }
     }.build()
-
 
     private fun showRoomExitDialog(message: String) {
         if (activity.isFinishing || activity.isDestroyed) {

@@ -7,15 +7,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.MessageFactory
+import io.agora.flat.common.rtm.RoomBanEvent
 import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmApi
+import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.ui.manager.RoomErrorManager
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
+import io.agora.flat.ui.manager.RoomOverlayManager
+import io.agora.flat.ui.manager.UserManager
+import io.agora.flat.ui.util.ObservableLoadingCounter
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,22 +29,41 @@ class MessageViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val miscRepository: MiscRepository,
     private val messageManager: ChatMessageManager,
+    private val syncedClassState: SyncedClassState,
     private val errorManager: RoomErrorManager,
+    private val userManager: UserManager,
     private val messageQuery: MessageQuery,
     private val rtmApi: RtmApi,
     private val eventbus: EventBus,
 ) : ViewModel() {
-    val roomUUID: String = savedStateHandle.get(Constants.IntentKey.ROOM_UUID)!!
+    val roomUUID: String = savedStateHandle[Constants.IntentKey.ROOM_UUID]!!
 
     private val _messageUpdate = MutableStateFlow(MessagesUpdate())
     val messageUpdate = _messageUpdate.asStateFlow()
 
-    private var _messageLoading = MutableStateFlow(false)
-    val messageLoading = _messageLoading.asStateFlow()
+    private val messageLoading = ObservableLoadingCounter()
+    private val messageAreaShown = RoomOverlayManager.observeShowId().map { it == RoomOverlayManager.AREA_ID_MESSAGE }
+
+    val messageUiState: StateFlow<MessageUiState?> = combine(
+        syncedClassState.observeClassroomState(),
+        messageLoading.observable,
+        messageAreaShown,
+    ) { classState, loading, messageAreaShown ->
+        MessageUiState(
+            ban = classState.ban,
+            isOwner = userManager.isOwner(),
+            loading = loading,
+            messageAreaShown = messageAreaShown,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null,
+    )
+
 
     init {
-        viewModelScope.launch {
-            // TODO
+        viewModelScope.launch(SupervisorJob()) {
             try {
                 initMessageQuery()
                 loadHistoryMessage()
@@ -63,11 +86,11 @@ class MessageViewModel @Inject constructor(
     }
 
     fun loadHistoryMessage() {
-        if (messageLoading.value || !messageQuery.hasMore) {
+        if (messageUiState.value?.loading == true || !messageQuery.hasMore) {
             return
         }
         viewModelScope.launch {
-            _messageLoading.value = true
+            messageLoading.addLoader()
             if (messageManager.isEmpty()) {
                 val msgs = messageQuery.loadMore().asReversed()
                 appendMessages(msgs)
@@ -75,13 +98,12 @@ class MessageViewModel @Inject constructor(
                 val msgs = messageQuery.loadMore().asReversed()
                 prependMessages(msgs)
             }
-            _messageLoading.value = false
+            messageLoading.removeLoader()
         }
     }
 
     private fun appendMessages(msgs: List<Message>) {
         messageManager.appendMessages(msgs)
-
         _messageUpdate.value = _messageUpdate.value.copy(
             updateOp = MessagesUpdate.APPEND,
             messages = msgs,
@@ -105,6 +127,15 @@ class MessageViewModel @Inject constructor(
             }
         }
     }
+
+    fun muteChat(muted: Boolean) {
+        viewModelScope.launch {
+            if (userManager.isOwner()) {
+                syncedClassState.updateBan(muted)
+                rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
+            }
+        }
+    }
 }
 
 data class MessagesUpdate(
@@ -117,3 +148,10 @@ data class MessagesUpdate(
         const val PREPEND = 2
     }
 }
+
+data class MessageUiState(
+    val ban: Boolean = false,
+    val isOwner: Boolean = false,
+    val loading: Boolean = false,
+    val messageAreaShown: Boolean = false,
+)

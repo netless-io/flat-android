@@ -1,6 +1,6 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.board.ClassroomStorageState
+import io.agora.flat.common.board.ClassroomState
 import io.agora.flat.common.board.DeviceState
 import kotlinx.coroutines.flow.Flow
 
@@ -12,7 +12,7 @@ interface SyncedClassState {
 
     fun observeOnStage(): Flow<Map<String, Boolean>>
 
-    fun observeClassroomState(): Flow<ClassroomStorageState>
+    fun observeClassroomState(): Flow<ClassroomState>
 
     /**
      * 更新设备状态

@@ -34,6 +34,7 @@ import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.NoOptPermission
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
 import io.agora.flat.ui.viewmodel.RtcVideoController
@@ -88,10 +89,8 @@ class ClassRoomViewModel @Inject constructor(
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
 
-    private var _messageAreaShown = MutableStateFlow(false)
-    val messageAreaShown = _messageAreaShown.asStateFlow()
-
-    val messageCount = messageManager.messages.map { it.size }
+    val messageAreaShown = RoomOverlayManager.observeShowId().map { it == RoomOverlayManager.AREA_ID_MESSAGE }
+    val messageCount = messageManager.messages.map { it.size }.distinctUntilChanged()
 
     private val roomUUID: String = checkNotNull(savedStateHandle[Constants.IntentKey.ROOM_UUID])
     private val periodicUUID: String? = savedStateHandle[Constants.IntentKey.PERIODIC_UUID]
@@ -196,7 +195,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private suspend fun joinRtm(rtmToken: String, channelId: String, userUUID: String) {
-        logger.i("start join rtm channel")
+        logger.i("[RTM] start join channel")
         try {
             rtmApi.login(rtmToken = rtmToken, channelId = channelId, userUUID = userUUID)
             observerRtmEvent()
@@ -270,11 +269,11 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private suspend fun handleRtmEvent(event: ClassRtmEvent) {
-        logger.d("handleClassEvent $event")
+        logger.d("[RTM] handle event $event")
         when (event) {
             is RaiseHandEvent -> {
                 val state = state.value ?: return
-                if (state.isOwner) {
+                if (state.isOwner && syncedStoreInited) {
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
                 }
             }
@@ -291,7 +290,7 @@ class ClassRoomViewModel @Inject constructor(
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
             }
             else -> {
-                logger.w("rtm event not handled: $event")
+                logger.w("[RTM] event not handled: $event")
             }
         }
     }
@@ -299,7 +298,7 @@ class ClassRoomViewModel @Inject constructor(
     private fun observerUserState() {
         viewModelScope.launch {
             userManager.observeSelf().filterNotNull().collect {
-                logger.d("on current user collected $it")
+                logger.d("[RTM] current user state changed $it")
                 _state.value = _state.value?.copy(
                     isSpeak = it.isSpeak,
                     isRaiseHand = it.isRaiseHand,
@@ -320,7 +319,7 @@ class ClassRoomViewModel @Inject constructor(
 
         viewModelScope.launch {
             userManager.observeUsers().collect {
-                logger.d("on all users collected")
+                logger.d("[USERS] users changed")
                 val users = it.filter { user ->
                     user.isOwner || user.isSpeak
                 }.toMutableList()
@@ -334,7 +333,7 @@ class ClassRoomViewModel @Inject constructor(
                 userManager.observeUsers()
                     .map { it.filter { user -> user.rtcUID > 0 && !user.isOwner } }
                     .onCompletion {
-                        logger.d("[users] one to one observeUsers done")
+                        logger.d("[USERS] one to one observeUsers done")
                     }
                     .collect {
                         if (!syncedStoreInited) return@collect
@@ -392,10 +391,6 @@ class ClassRoomViewModel @Inject constructor(
 
     fun setVideoAreaShown(shown: Boolean) {
         _videoAreaShown.value = shown
-    }
-
-    fun setMessageAreaShown(shown: Boolean) {
-        _messageAreaShown.value = shown
     }
 
     private fun appendMessage(message: Message) {

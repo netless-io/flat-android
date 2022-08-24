@@ -66,10 +66,6 @@ class ToolComponent(
     private fun observeState() {
         lifecycleScope.launch {
             RoomOverlayManager.observeShowId().collect { areaId ->
-                if (areaId != RoomOverlayManager.AREA_ID_MESSAGE) {
-                    viewModel.setMessageAreaShown(false)
-                }
-
                 if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
                     hideSettingLayout()
                 }
@@ -146,7 +142,8 @@ class ToolComponent(
 
         lifecycleScope.launch {
             viewModel.messageCount.collect {
-                binding.messageDot.isVisible = it > 0 && !viewModel.messageAreaShown.value
+                binding.messageDot.isVisible =
+                    it > 0 && RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
             }
         }
     }
@@ -197,8 +194,7 @@ class ToolComponent(
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.message to {
                 binding.messageDot.isVisible = false
-                val shown = !viewModel.messageAreaShown.value
-                viewModel.setMessageAreaShown(shown)
+                val shown = RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
                 RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_MESSAGE, shown)
             },
             binding.cloudservice to {

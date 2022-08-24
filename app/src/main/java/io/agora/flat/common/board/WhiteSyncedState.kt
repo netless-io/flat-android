@@ -37,7 +37,7 @@ class WhiteSyncedState @Inject constructor(
 
     private var _devicesFlow = MutableStateFlow<Map<String, DeviceState>?>(null)
     private var _onStagesFlow = MutableStateFlow<Map<String, Boolean>?>(null)
-    private var _classroomStateFlow = MutableStateFlow<ClassroomStorageState?>(null)
+    private var _classroomStateFlow = MutableStateFlow<ClassroomState?>(null)
 
     private var inited = false
 
@@ -60,11 +60,11 @@ class WhiteSyncedState @Inject constructor(
             _devicesFlow.value = getDevicesStates(value)
         }
 
-        syncedStore.connectStorage(CLASSROOM_STORAGE, gson.toJson(ClassroomStorageState()), object : Promise<String> {
+        syncedStore.connectStorage(CLASSROOM_STORAGE, gson.toJson(ClassroomState()), object : Promise<String> {
             override fun then(value: String) {
                 logger.d("[classroom] initial state: $value")
-                val state = gson.fromJson(value, ClassroomStorageState::class.java)
-                _classroomStateFlow.value = ClassroomStorageState(
+                val state = gson.fromJson(value, ClassroomState::class.java)
+                _classroomStateFlow.value = ClassroomState(
                     raiseHandUsers = state.raiseHandUsers,
                     ban = state.ban,
                 )
@@ -75,8 +75,8 @@ class WhiteSyncedState @Inject constructor(
         })
         syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
             logger.d("[classroom] updated: value: $value diff: $diff")
-            val state = gson.fromJson(value, ClassroomStorageState::class.java)
-            _classroomStateFlow.value = ClassroomStorageState(
+            val state = gson.fromJson(value, ClassroomState::class.java)
+            _classroomStateFlow.value = ClassroomState(
                 raiseHandUsers = state.raiseHandUsers,
                 ban = state.ban,
             )
@@ -138,7 +138,7 @@ class WhiteSyncedState @Inject constructor(
         return _onStagesFlow.asStateFlow().filterNotNull()
     }
 
-    override fun observeClassroomState(): Flow<ClassroomStorageState> {
+    override fun observeClassroomState(): Flow<ClassroomState> {
         return _classroomStateFlow.asStateFlow().filterNotNull()
     }
 

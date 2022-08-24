@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.play
 
-import android.os.Bundle
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -12,53 +11,36 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
-import io.agora.flat.R
 import io.agora.flat.common.FlatException
-import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.data.repository.MiscRepository
-import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.ui.view.MessageListView
-import io.agora.flat.ui.view.RoomExitDialog
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
 import io.agora.flat.util.KeyboardHeightProvider
-import io.agora.flat.util.delayAndFinish
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class RtmComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = RtmComponent::class.simpleName
-    }
 
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface RtmComponentEntryPoint {
-        fun userRepository(): UserRepository
-        fun miscRepository(): MiscRepository
         fun rtmApi(): RtmApi
     }
 
-    private val viewModel: ClassRoomViewModel by activity.viewModels()
     private val messageViewModel: MessageViewModel by activity.viewModels()
     private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
-    private lateinit var userRepository: UserRepository
-    private lateinit var miscRepository: MiscRepository
     private lateinit var rtmApi: RtmApi
     private lateinit var binding: ComponentMessageBinding
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
-        userRepository = entryPoint.userRepository()
-        miscRepository = entryPoint.miscRepository()
         rtmApi = entryPoint.rtmApi()
 
         initView()
@@ -67,6 +49,7 @@ class RtmComponent(
 
     private fun initView() {
         binding = ComponentMessageBinding.inflate(activity.layoutInflater, rootView, true)
+        binding.root.isVisible = false
 
         binding.messageLv.setListener(object : MessageListView.Listener {
             override fun onSendMessage(msg: String) {
@@ -74,13 +57,14 @@ class RtmComponent(
             }
 
             override fun onMute(muted: Boolean) {
-                viewModel.muteChat(muted)
+                messageViewModel.muteChat(muted)
             }
 
             override fun onLoadMore() {
                 messageViewModel.loadHistoryMessage()
             }
         })
+
 
         keyboardHeightProvider = KeyboardHeightProvider(activity)
             .setHeightListener(object : KeyboardHeightProvider.HeightListener {
@@ -115,34 +99,22 @@ class RtmComponent(
     }
 
     private fun loadData() {
-        lifecycleScope.launch {
-            viewModel.state.filterNotNull().collect {
-                if (it.roomStatus == RoomStatus.Stopped) {
-                    showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
-                }
+        lifecycleScope.launchWhenResumed {
+            messageViewModel.messageUiState.filterNotNull().collect {
                 binding.messageLv.showBanBtn(it.isOwner)
                 binding.messageLv.setBan(it.ban)
+                binding.messageLv.showLoading(it.loading)
+
+                binding.root.isVisible = it.messageAreaShown
             }
         }
 
-        lifecycleScope.launch {
-            messageViewModel.messageLoading.collect {
-                binding.messageLv.showLoading(it)
-            }
-        }
-
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             messageViewModel.messageUpdate.collect {
                 when (it.updateOp) {
                     MessagesUpdate.APPEND -> binding.messageLv.addMessagesAtTail(it.messages)
                     MessagesUpdate.PREPEND -> binding.messageLv.addMessagesAtHead(it.messages)
                 }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.messageAreaShown.collect { areaShown ->
-                binding.root.isVisible = areaShown
             }
         }
     }
@@ -154,21 +126,8 @@ class RtmComponent(
             try {
                 rtmApi.logout()
             } catch (e: FlatException) {
-            }
-        }
-    }
 
-    // TODO remove to ExtComponent
-    private fun showRoomExitDialog(message: String) {
-        if (activity.isFinishing || activity.isDestroyed) {
-            return
-        }
-        val dialog = RoomExitDialog().apply {
-            arguments = Bundle().apply {
-                putString(RoomExitDialog.MESSAGE, message)
             }
         }
-        dialog.setListener { activity.delayAndFinish(250) }
-        dialog.show(activity.supportFragmentManager, "RoomExitDialog")
     }
 }

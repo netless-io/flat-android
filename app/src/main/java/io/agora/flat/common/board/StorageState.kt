@@ -5,7 +5,7 @@ data class DeviceState(
     val mic: Boolean,
 )
 
-data class ClassroomStorageState(
+data class ClassroomState(
     val raiseHandUsers: List<String> = listOf(),
     val ban: Boolean = false
 )
