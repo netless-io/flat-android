@@ -100,6 +100,7 @@ class ClassRoomViewModel @Inject constructor(
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
     private var syncedStoreInited = false
+    private var onStageLimit = RtcApi.MAX_CAPACITY
 
     init {
         viewModelScope.launch {
@@ -184,6 +185,12 @@ class ClassRoomViewModel @Inject constructor(
             ownerUUID = roomInfo.ownerUUID
         )
         recordManager.reset(roomUUID, viewModelScope)
+
+        onStageLimit = when (roomInfo.roomType) {
+            RoomType.OneToOne -> 2
+            RoomType.SmallClass -> RtcApi.MAX_CAPACITY
+            RoomType.BigClass -> 2
+        }
 
         _state.value = initState
     }
@@ -412,7 +419,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun startClass() {
-        viewModelScope.launch {
+        viewModelScope.launch { 
             val state = _state.value ?: return@launch
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
                 rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, state = RoomStatus.Started))
@@ -569,9 +576,12 @@ class ClassRoomViewModel @Inject constructor(
 
     fun acceptRaiseHand(uuid: String) {
         viewModelScope.launch {
-            if (userManager.isOwner()) {
+            if (!userManager.isOwner()) return@launch
+            if (userManager.getOnStageCount() < onStageLimit) {
                 syncedClassState.updateOnStage(uuid, true)
                 syncedClassState.updateRaiseHand(uuid, false)
+            } else {
+                // notify
             }
         }
     }
@@ -599,6 +609,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun isOwner(): Boolean {
         return userManager.isOwner()
+    }
+
+    fun isOnStageAllowable(): Boolean {
+        return userManager.getOnStageCount() < onStageLimit
     }
 }
 

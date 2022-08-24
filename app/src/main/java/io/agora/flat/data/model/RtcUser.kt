@@ -16,6 +16,9 @@ data class RtcUser(
     val isSelf: Boolean = false
 ) {
 
+    val isOnStage: Boolean
+        get() = rtcUID > 0 && (isSpeak || isOwner)
+
     companion object {
         const val NOT_JOIN_RTC_UID = 0
     }

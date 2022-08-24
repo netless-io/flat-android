@@ -27,4 +27,8 @@ interface RtcApi {
     fun addEventListener(listener: RTCEventListener)
 
     fun removeEventListener(listener: RTCEventListener)
+
+    companion object {
+        const val MAX_CAPACITY = 17
+    }
 }

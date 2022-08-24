@@ -1,6 +1,6 @@
 package io.agora.flat.ui.activity.play
 
-import android.view.LayoutInflater
+import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.RtcUser
+import io.agora.flat.util.inflate
 
 /**
  * 用户列表
@@ -23,9 +24,10 @@ class UserListAdapter(
         setHasStableIds(true)
     }
 
+    private var handUpDrawable: Drawable? = null
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(viewGroup.context)
-        val view = inflater.inflate(R.layout.item_room_user_list, viewGroup, false)
+        val view = viewGroup.inflate(R.layout.item_room_user_list, viewGroup, false)
         return ViewHolder(view)
     }
 
@@ -71,9 +73,22 @@ class UserListAdapter(
                     }
                     itemData.isRaiseHand -> {
                         isVisible = true
-                        setImageResource(R.drawable.ic_room_userlist_handup_agree)
+                        if (handUpDrawable == null) {
+                            handUpDrawable = ContextCompat.getDrawable(
+                                context,
+                                R.drawable.ic_room_userlist_handup_agree
+                            )
+                        }
+                        if (viewModel.isOnStageAllowable()) {
+                            handUpDrawable?.setTint(ContextCompat.getColor(context, R.color.flat_blue_6))
+                        } else {
+                            handUpDrawable?.setTint(ContextCompat.getColor(context, R.color.flat_gray))
+                        }
+                        setImageDrawable(handUpDrawable)
                         setOnClickListener {
-                            viewModel.acceptRaiseHand(itemData.userUUID)
+                            if (viewModel.isOnStageAllowable()) {
+                                viewModel.acceptRaiseHand(itemData.userUUID)
+                            }
                         }
                     }
                     else -> isVisible = false

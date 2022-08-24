@@ -18,15 +18,11 @@ class UserManager @Inject constructor(
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users: List<RtcUser>
-        get() {
-            return _users.value
-        }
+        get() = _users.value
 
     private var _currentUser = MutableStateFlow<RtcUser?>(null)
     val currentUser: RtcUser?
-        get() {
-            return _currentUser.value
-        }
+        get() = _currentUser.value
 
     private var creator: RtcUser? = null
     private var speakingJoiners: MutableList<RtcUser> = mutableListOf()
@@ -262,7 +258,11 @@ class UserManager @Inject constructor(
         return userId == selfUUID
     }
 
-    fun isOwner(): Boolean {
-        return selfUUID == ownerUUID
+    fun isOwner(uuid: String = selfUUID): Boolean {
+        return uuid == ownerUUID
+    }
+
+    fun getOnStageCount(): Int {
+        return users.count { it.isOnStage }
     }
 }
