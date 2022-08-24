@@ -26,7 +26,6 @@ class WhiteSyncedState @Inject constructor(
         const val ONSTAGE_USERS_STORAGE = "onStageUsers"
 
         const val KEY_RAISE_HAND_USERS = "raiseHandUsers"
-        const val KEY_CLASS_MODE = "classMode"
         const val KEY_BAN = "ban"
     }
 
@@ -40,7 +39,12 @@ class WhiteSyncedState @Inject constructor(
     private var _onStagesFlow = MutableStateFlow<Map<String, Boolean>?>(null)
     private var _classroomStateFlow = MutableStateFlow<ClassroomStorageState?>(null)
 
+    private var inited = false
+
     fun resetRoom(fastRoom: FastRoom) {
+        if (inited) {
+            clean()
+        }
         syncedStore = fastRoom.room.syncedStore
         syncedStore.connectStorage(DEVICE_STATE_STORAGE, "{}", object : Promise<String> {
             override fun then(state: String) {
@@ -91,6 +95,8 @@ class WhiteSyncedState @Inject constructor(
             logger.d("[onStageUsers] updated: value: $value diff: $diff")
             _onStagesFlow.value = getOnStageUsers(value)
         }
+
+        inited = true
     }
 
 
@@ -136,13 +142,15 @@ class WhiteSyncedState @Inject constructor(
         return _classroomStateFlow.asStateFlow().filterNotNull()
     }
 
-    override fun clean() {
+    private fun clean() {
+        if (!inited) return
         _devicesFlow.value = null
         _onStagesFlow.value = null
         _classroomStateFlow.value = null
         syncedStore.disconnectStorage(DEVICE_STATE_STORAGE)
         syncedStore.disconnectStorage(ONSTAGE_USERS_STORAGE)
         syncedStore.disconnectStorage(CLASSROOM_STORAGE)
+        inited = false
     }
 
     override fun updateDeviceState(userId: String, camera: Boolean, mic: Boolean) {

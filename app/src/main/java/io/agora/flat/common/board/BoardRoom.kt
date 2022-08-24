@@ -106,7 +106,7 @@ class BoardRoom @Inject constructor(
 
             override fun onRoomReadyChanged(fastRoom: FastRoom) {
                 super.onRoomReadyChanged(fastRoom)
-                if (syncedClassState is WhiteSyncedState) {
+                if (syncedClassState is WhiteSyncedState && fastRoom.isReady) {
                     syncedClassState.resetRoom(fastRoom)
                 }
             }

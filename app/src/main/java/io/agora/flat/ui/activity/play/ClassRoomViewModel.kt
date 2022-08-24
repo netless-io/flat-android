@@ -99,6 +99,7 @@ class ClassRoomViewModel @Inject constructor(
     private val quickStart: Boolean = savedStateHandle[Constants.IntentKey.ROOM_QUICK_START] ?: false
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
+    private var syncedStoreInited = false
 
     init {
         viewModelScope.launch {
@@ -242,6 +243,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             syncedClassState.observeOnStage().collect {
                 userManager.updateOnStage(it)
+                syncedStoreInited = true
             }
         }
     }
@@ -317,6 +319,26 @@ class ClassRoomViewModel @Inject constructor(
                 }.toMutableList()
 
                 _videoUsers.value = users
+            }
+        }
+
+        viewModelScope.launch {
+            if (userManager.isOwner() && state.value!!.roomType == RoomType.OneToOne) {
+                userManager.observeUsers()
+                    .map { it.filter { user -> user.rtcUID > 0 && !user.isOwner } }
+                    .onCompletion {
+                        logger.d("[users] one to one observeUsers done")
+                    }
+                    .collect {
+                        if (!syncedStoreInited) return@collect
+                        val count = it.count { user -> user.isSpeak }
+                        if (count == 0) {
+                            it.filter { user -> !user.isSpeak }.randomOrNull()?.run {
+                                syncedClassState.updateOnStage(userUUID, true)
+                            }
+                        }
+                        cancel()
+                    }
             }
         }
     }
@@ -547,8 +569,7 @@ class ClassRoomViewModel @Inject constructor(
 
     fun acceptRaiseHand(uuid: String) {
         viewModelScope.launch {
-            val state = _state.value ?: return@launch
-            if (state.isOwner) {
+            if (userManager.isOwner()) {
                 syncedClassState.updateOnStage(uuid, true)
                 syncedClassState.updateRaiseHand(uuid, false)
             }
@@ -574,6 +595,10 @@ class ClassRoomViewModel @Inject constructor(
             beginTime = state.beginTime,
             endTime = state.endTime,
         )
+    }
+
+    fun isOwner(): Boolean {
+        return userManager.isOwner()
     }
 }
 

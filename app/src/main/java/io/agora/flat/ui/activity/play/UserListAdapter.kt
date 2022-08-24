@@ -57,7 +57,7 @@ class UserListAdapter(
 
         // handup
         viewHolder.handup.run {
-            if (itemData.isOwner) {
+            if (viewModel.isOwner()) {
                 when {
                     itemData.isOwner -> {
                         isVisible = false

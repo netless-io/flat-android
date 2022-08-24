@@ -14,8 +14,6 @@ interface SyncedClassState {
 
     fun observeClassroomState(): Flow<ClassroomStorageState>
 
-    fun clean()
-
     /**
      * 更新设备状态
      */
