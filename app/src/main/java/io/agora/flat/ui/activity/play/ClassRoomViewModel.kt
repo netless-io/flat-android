@@ -298,7 +298,7 @@ class ClassRoomViewModel @Inject constructor(
     private fun observerUserState() {
         viewModelScope.launch {
             userManager.observeSelf().filterNotNull().collect {
-                logger.d("[RTM] current user state changed $it")
+                logger.d("[USERS] current user state changed $it")
                 _state.value = _state.value?.copy(
                     isSpeak = it.isSpeak,
                     isRaiseHand = it.isRaiseHand,
@@ -319,7 +319,7 @@ class ClassRoomViewModel @Inject constructor(
 
         viewModelScope.launch {
             userManager.observeUsers().collect {
-                logger.d("[USERS] users changed")
+                logger.d("[USERS] users changed $it")
                 val users = it.filter { user ->
                     user.isOwner || user.isSpeak
                 }.toMutableList()

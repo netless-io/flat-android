@@ -200,12 +200,13 @@ class UserManager @Inject constructor(
 
     suspend fun updateOnStage(onStages: Map<String, Boolean>) {
         val updateUuids = speakingJoiners.map { it.userUUID }.toMutableSet() + onStages.keys
-        val updateUsers = updateUuids.map {
-            usersCache[it]?.copy(isSpeak = onStages[it] ?: false) ?: RtcUser(
-                userUUID = it,
-                name = userQuery.loadUser(it)?.name,
-                isSpeak = onStages[it] ?: false
-            )
+        val updateUsers = mutableListOf<RtcUser>()
+        updateUuids.forEach {
+            var user = usersCache[it]?.copy(isSpeak = onStages[it] ?: false)
+            if (onStages[it] == true && user == null) {
+                user = RtcUser(userUUID = it, name = userQuery.loadUser(it)?.name, isSpeak = onStages[it] ?: false)
+            }
+            if (user != null) updateUsers.add(user)
         }
         updateUsers.forEach {
             usersCache[it.userUUID] = it
