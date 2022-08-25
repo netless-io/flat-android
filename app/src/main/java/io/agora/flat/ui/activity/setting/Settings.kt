@@ -153,8 +153,10 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
 
 @Composable
 private fun BottomOptArea(onLogoutClick: () -> Unit) {
-    Box(Modifier
-        .padding(horizontal = 16.dp, vertical = 32.dp)) {
+    Box(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 32.dp)
+    ) {
         FlatHighlightTextButton(
             stringResource(R.string.login_exit),
             icon = R.drawable.ic_login_out,
@@ -191,9 +193,11 @@ internal fun SettingItem(
                 Image(painterResource(id), contentDescription = null)
                 Spacer(Modifier.width(4.dp))
             }
-            Column(Modifier
-                .weight(1f)
-                .padding(vertical = 8.dp)) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .padding(vertical = 8.dp)
+            ) {
                 FlatTextBodyOne(text = tip)
                 if (detail != null) {
                     FlatTextCaption(text = detail)

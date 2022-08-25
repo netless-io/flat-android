@@ -122,7 +122,8 @@ fun RoomDetailScreen(
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
-            exit = fadeOut(animationSpec = tween())) {
+            exit = fadeOut(animationSpec = tween())
+        ) {
             PeriodicDetailScreen(viewState, actioner = actioner)
         }
 
@@ -155,7 +156,8 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                     if (viewState.isPeriodicRoom) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
                         Column(MaxWidth.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
+                            Text(
+                                stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
                                 Modifier
                                     .padding(4.dp)
                                     .clickable { actioner(DetailUiAction.ShowAllRooms) },
@@ -303,9 +305,11 @@ private fun PeriodicSubRoomItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FlatTextBodyTwo(dayText, Modifier
-            .padding(horizontal = 16.dp)
-            .widthIn(min = 16.dp))
+        FlatTextBodyTwo(
+            dayText, Modifier
+                .padding(horizontal = 16.dp)
+                .widthIn(min = 16.dp)
+        )
         Spacer(modifier = Modifier.weight(1f))
         FlatTextBodyTwo(dayOfWeekText, Modifier.padding(horizontal = 8.dp))
         Spacer(modifier = Modifier.weight(1f))
@@ -406,7 +410,8 @@ private fun BottomOperations(
                 Modifier
                     .align(Alignment.TopEnd)
                     .padding(16.dp),
-                actioner = actioner)
+                actioner = actioner
+            )
         } else {
             Operations(
                 roomInfo,

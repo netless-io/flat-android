@@ -101,7 +101,9 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
         }
     }
 
-    ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) })
+    ShowUiMessageEffect(
+        uiMessage = viewState.message,
+        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) })
 
     Column {
         CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })

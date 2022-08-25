@@ -1,7 +1,6 @@
 package io.agora.flat.di.impl
 
 import android.content.Context
-import android.util.Log
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.FlatRtmException
 import io.agora.flat.common.rtm.*
@@ -29,25 +28,6 @@ class RtmApiImpl @Inject constructor(
     private val appEnv: AppEnv,
     private val logger: Logger
 ) : RtmApi, StartupInitializer {
-    companion object {
-        val TAG = RtmApiImpl::class.simpleName
-
-        const val CONNECTION_STATE_DISCONNECTED = 1
-        const val CONNECTION_STATE_CONNECTING = 2
-        const val CONNECTION_STATE_CONNECTED = 3
-        const val CONNECTION_STATE_RECONNECTING = 4
-        const val CONNECTION_STATE_ABORTED = 5
-
-        const val CONNECTION_CHANGE_REASON_LOGIN = 1
-        const val CONNECTION_CHANGE_REASON_LOGIN_SUCCESS = 2
-        const val CONNECTION_CHANGE_REASON_LOGIN_FAILURE = 3
-        const val CONNECTION_CHANGE_REASON_LOGIN_TIMEOUT = 4
-        const val CONNECTION_CHANGE_REASON_INTERRUPTED = 5
-        const val CONNECTION_CHANGE_REASON_LOGOUT = 6
-        const val CONNECTION_CHANGE_REASON_BANNED_BY_SERVER = 7
-        const val CONNECTION_CHANGE_REASON_REMOTE_LOGIN = 8
-    }
-
     private lateinit var rtmClient: RtmClient
     private var rtmClientListener: RtmClientListener
     private var rtmListeners = mutableListOf<RTMListener>()
@@ -56,14 +36,14 @@ class RtmApiImpl @Inject constructor(
     init {
         rtmClientListener = object : EmptyRtmClientListener {
             override fun onConnectionStateChanged(state: Int, reason: Int) {
-                logger.i("Connection state changes to $state reason:$reason")
-                if (reason == CONNECTION_CHANGE_REASON_REMOTE_LOGIN) {
+                logger.i("[RTM] connection state changes to $state reason:$reason")
+                if (reason == Codes.CONNECTION_CHANGE_REASON_REMOTE_LOGIN) {
                     rtmListeners.forEach { it.onRemoteLogin() }
                 }
             }
 
             override fun onMessageReceived(message: RtmMessage, peerId: String) {
-                logger.d("Message received from $peerId ${String(message.rawMessage)}")
+                logger.d("[RTM] message received from $peerId message:${String(message.rawMessage)}")
                 rtmListeners.forEach {
                     it.onClassEvent(ClassRtmEvent.parse(String(message.rawMessage), peerId))
                 }
@@ -114,7 +94,7 @@ class RtmApiImpl @Inject constructor(
         }
     }
 
-    override fun rtmEngine(): RtmClient {
+    fun rtmEngine(): RtmClient {
         return rtmClient
     }
 
@@ -163,11 +143,11 @@ class RtmApiImpl @Inject constructor(
         })
     }
 
-    override suspend fun getMembers(): List<RtmChannelMember> = suspendCoroutine { cont ->
+    override suspend fun getMembers(): List<RtmMember> = suspendCoroutine { cont ->
         messageChannel?.getMembers(object : ResultCallback<List<RtmChannelMember>> {
             override fun onSuccess(members: List<RtmChannelMember>) {
                 logger.d("get member success $members")
-                cont.resume(members)
+                cont.resume(members.map { RtmMember(it.userId, it.channelId) })
             }
 
             override fun onFailure(e: ErrorInfo) {
@@ -212,7 +192,7 @@ class RtmApiImpl @Inject constructor(
     }
 
     override suspend fun sendPeerCommand(event: ClassRtmEvent, peerId: String) = suspendCoroutine<Boolean> { cont ->
-        Log.d(TAG, "sendPeerCommand ${ClassRtmEvent.toText(event)}")
+        logger.d("[RTM] sendPeerCommand ${ClassRtmEvent.toText(event)}")
         val message = rtmClient.createMessage()
         message.rawMessage = ClassRtmEvent.toText(event).toByteArray()
 
@@ -287,7 +267,7 @@ class RtmApiImpl @Inject constructor(
         }
         rtmListeners.add(listener)
         awaitClose {
-            logger.d("rtm event flow close called")
+            logger.d("[RTM] rtm event flow closed")
             rtmListeners.remove(listener)
         }
     }

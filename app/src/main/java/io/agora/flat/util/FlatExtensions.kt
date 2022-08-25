@@ -30,7 +30,7 @@ fun String.coursewareType(): CoursewareType {
     }
 }
 
-fun String.isDynamicDoc() : Boolean {
+fun String.isDynamicDoc(): Boolean {
     return this.coursewareType() == CoursewareType.DocDynamic
 }
 

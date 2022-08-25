@@ -12,11 +12,7 @@ abstract class BaseComponent(
     val rootView: FrameLayout,
 ) : LifecycleOwner, DefaultLifecycleObserver {
 
-    override fun getLifecycle(): Lifecycle {
-        return activity.lifecycle
-    }
+    override fun getLifecycle(): Lifecycle = activity.lifecycle
 
-    open fun onConfigurationChanged(newConfig: Configuration) {
-
-    }
+    open fun onConfigurationChanged(newConfig: Configuration) {}
 }

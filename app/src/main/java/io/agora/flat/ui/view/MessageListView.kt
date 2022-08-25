@@ -28,10 +28,9 @@ class MessageListView @JvmOverloads constructor(
         true,
     )
 
-    private var messageAdapter: MessageAdapter = MessageAdapter()
+    private var messageAdapter: MessageAdapter = MessageAdapter(context)
     private var listener: Listener? = null
-
-    var firstVisible = -1
+    private var firstVisible = -1
 
     init {
         binding.messageList.adapter = messageAdapter

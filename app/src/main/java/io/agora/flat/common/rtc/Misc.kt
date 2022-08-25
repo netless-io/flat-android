@@ -2,7 +2,7 @@ package io.agora.flat.common.rtc
 
 import io.agora.rtc.IRtcEngineEventHandler
 
-class RTCEventHandler : IRtcEngineEventHandler() {
+internal class RTCEventHandler : IRtcEngineEventHandler() {
     private val listeners = ArrayList<RTCEventListener>()
 
     fun addListener(listener: RTCEventListener) {
@@ -84,4 +84,30 @@ class RTCEventHandler : IRtcEngineEventHandler() {
             listener.onLastmileProbeResult(result)
         }
     }
+}
+
+internal interface RTCEventListener {
+    fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {}
+
+    fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {}
+
+    fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {}
+
+    fun onUserOffline(uid: Int, reason: Int) {}
+
+    fun onUserJoined(uid: Int, elapsed: Int) {}
+
+    fun onLastmileQuality(quality: Int) {}
+
+    fun onLastmileProbeResult(result: IRtcEngineEventHandler.LastmileProbeResult?) {}
+
+    fun onLocalVideoStats(stats: IRtcEngineEventHandler.LocalVideoStats?) {}
+
+    fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats?) {}
+
+    fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {}
+
+    fun onRemoteVideoStats(stats: IRtcEngineEventHandler.RemoteVideoStats?) {}
+
+    fun onRemoteAudioStats(stats: IRtcEngineEventHandler.RemoteAudioStats?) {}
 }

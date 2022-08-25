@@ -98,7 +98,7 @@ class ClassRoomViewModel @Inject constructor(
     private val quickStart: Boolean = savedStateHandle[Constants.IntentKey.ROOM_QUICK_START] ?: false
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
-    private var syncedStoreInited = false
+    private var syncedStoreReady = false
     private var onStageLimit = RtcApi.MAX_CAPACITY
 
     init {
@@ -111,16 +111,14 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            takeInitState().collect { state ->
-                joinRtm(state.rtmToken, roomUUID, currentUserUUID)
+            takeInitState().collect {
+                joinBoard()
+                joinRtm()
                 joinRtc()
                 observerUserState()
-                if (quickStart) {
-                    startClass()
-                }
+                if (quickStart) startClass()
             }
         }
-
         /**
          * It can be determined that the status callback is made after the successful joining of the room
          */
@@ -194,41 +192,34 @@ class ClassRoomViewModel @Inject constructor(
         _state.value = initState
     }
 
-    private suspend fun joinRtm(rtmToken: String, channelId: String, userUUID: String) {
+    private fun joinBoard() {
+        logger.i("[BOARD] start joining board room")
+        state.value?.let {
+            boardRoom.join(it.boardUUID, it.boardToken, it.region, it.allowDraw)
+        }
+    }
+
+    private suspend fun joinRtm() {
         logger.i("[RTM] start join channel")
-        try {
-            rtmApi.login(rtmToken = rtmToken, channelId = channelId, userUUID = userUUID)
-            observerRtmEvent()
-            userManager.initUsers(rtmApi.getMembers().map { it.userId })
-            logger.i("join rtm success")
-        } catch (e: FlatException) {
-            roomErrorManager.notifyError("rtm join exception", e)
+        state.value?.run {
+            try {
+                rtmApi.login(rtmToken = rtmToken, channelId = roomUUID, userUUID = userUUID)
+                observerRtmEvent()
+                val userIds = rtmApi.getMembers().map { it.userId }
+                userManager.initUsers(userIds)
+            } catch (e: FlatException) {
+                roomErrorManager.notifyError("rtm join exception", e)
+            }
         }
     }
 
     private fun joinRtc() {
-        logger.i("start join rtc")
+        logger.i("[RTC] start join rtc")
         state.value?.apply {
+            rtcVideoController.setupUid(uid = rtcUID, ssUid = rtcShareScreen.uid)
             rtcApi.joinChannel(
-                RtcJoinOptions(
-                    token = rtcToken,
-                    channel = roomUUID,
-                    uid = rtcUID,
-                    audioOpen = audioOpen,
-                    videoOpen = videoOpen
-                )
+                RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen)
             )
-            rtcVideoController.localUid = rtcUID
-            rtcVideoController.shareScreenUid = rtcShareScreen.uid
-        }
-    }
-
-    fun onWhiteboardInit() {
-        viewModelScope.launch {
-            takeInitState().collect {
-                logger.i("start joining board room")
-                boardRoom.join(it.boardUUID, it.boardToken, it.region, it.allowDraw)
-            }
         }
     }
 
@@ -249,7 +240,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             syncedClassState.observeOnStage().collect {
                 userManager.updateOnStage(it)
-                syncedStoreInited = true
+                syncedStoreReady = true
             }
         }
     }
@@ -273,7 +264,7 @@ class ClassRoomViewModel @Inject constructor(
         when (event) {
             is RaiseHandEvent -> {
                 val state = state.value ?: return
-                if (state.isOwner && syncedStoreInited) {
+                if (state.isOwner && syncedStoreReady) {
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
                 }
             }
@@ -336,7 +327,7 @@ class ClassRoomViewModel @Inject constructor(
                         logger.d("[USERS] one to one observeUsers done")
                     }
                     .collect {
-                        if (!syncedStoreInited) return@collect
+                        if (!syncedStoreReady) return@collect
                         val count = it.count { user -> user.isSpeak }
                         if (count == 0) {
                             it.filter { user -> !user.isSpeak }.randomOrNull()?.run {

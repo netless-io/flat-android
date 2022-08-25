@@ -65,7 +65,7 @@ class ToolComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
                 if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
                     hideSettingLayout()
@@ -85,26 +85,26 @@ class ToolComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.messageUsers.collect {
                 userListAdapter.setData(it)
                 binding.userlistDot.isVisible = it.find { user -> user.isRaiseHand } != null
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.recordState.collect {
-                val isRecording = it != null
+        lifecycleScope.launchWhenResumed {
+            viewModel.recordState.collect { recordState ->
+                val isRecording = recordState != null
                 binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = isRecording
                 binding.layoutRoomStateSettings.startRecord.isVisible = !isRecording
                 binding.layoutRoomStateSettings.stopRecord.isVisible = isRecording
-                if (it != null) {
-                    binding.layoutRoomStateSettings.recordTime.text = FlatFormatter.timeMS(it.recordTime * 1000)
+                recordState?.run {
+                    binding.layoutRoomStateSettings.recordTime.text = FlatFormatter.timeMS(recordTime * 1000)
                 }
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.state.filterNotNull().collect {
                 binding.roomCtrlTool.isVisible = it.isOwner
                 if (it.isOwner) {
@@ -113,7 +113,6 @@ class ToolComponent(
                     if (it.roomStatus == RoomStatus.Started) {
                         binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
                     }
-                    // updateClassMode(it.classMode)
                 }
                 binding.cloudservice.isVisible = it.allowDraw
 
@@ -142,9 +141,9 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageCount.collect {
-                binding.messageDot.isVisible =
-                    it > 0 && RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
+            viewModel.messageCount.collect { count ->
+                binding.messageDot.isVisible = count > 0 &&
+                        RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
             }
         }
     }

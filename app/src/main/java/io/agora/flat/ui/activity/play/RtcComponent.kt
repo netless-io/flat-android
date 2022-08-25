@@ -20,7 +20,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
-import io.agora.flat.common.rtc.RTCEventListener
+import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.data.model.RtcUser
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
@@ -71,7 +71,6 @@ class RtcComponent(
     override fun onCreate(owner: LifecycleOwner) {
         injectApi()
         initView()
-        initListener()
         checkPermission(::observeState)
     }
 
@@ -83,9 +82,9 @@ class RtcComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.videoUsers.collect { users ->
-                logger.d("videoUsers changed to $users")
+                logger.d("[RTC] videoUsers changed to $users")
                 adapter.setDataSet(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
@@ -119,12 +118,25 @@ class RtcComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.videoAreaShown.collect { shown ->
                 if (shown) {
                     videoAreaAnimator.show()
                 } else {
                     videoAreaAnimator.hide()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            rtcApi.observeRtcEvent().collect { event ->
+                when (event) {
+                    is RtcEvent.UserJoined -> lifecycleScope.launch {
+                        rtcVideoController.handleOffline(event.uid)
+                    }
+                    is RtcEvent.UserOffline -> lifecycleScope.launch {
+                        rtcVideoController.handlerJoined(event.uid)
+                    }
                 }
             }
         }
@@ -332,7 +344,6 @@ class RtcComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         rtcApi.leaveChannel()
-        rtcApi.removeEventListener(eventListener)
     }
 
     private fun checkPermission(actionAfterPermission: () -> Unit) {
@@ -348,7 +359,7 @@ class RtcComponent(
             return
         }
 
-        logger.d("checkPermission request $permissions")
+        logger.d("[RTC] checkPermission request $permissions")
         activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { it ->
             val allGranted = it.mapNotNull { it.key }.size == it.size
             if (allGranted) {
@@ -357,25 +368,5 @@ class RtcComponent(
                 activity.showToast("Permission Not Granted")
             }
         }.launch(permissions)
-    }
-
-    private fun initListener() {
-        rtcApi.addEventListener(eventListener)
-    }
-
-    private var eventListener = object : RTCEventListener {
-        override fun onUserOffline(uid: Int, reason: Int) {
-            logger.d("rtc user left. uid: $uid reason: $reason")
-            lifecycleScope.launch {
-                rtcVideoController.handleOffline(uid)
-            }
-        }
-
-        override fun onUserJoined(uid: Int, elapsed: Int) {
-            logger.d("rtc user joined. uid: $uid elapsed: $elapsed")
-            lifecycleScope.launch {
-                rtcVideoController.handlerJoined(uid)
-            }
-        }
     }
 }

@@ -19,7 +19,7 @@ class AndroidClipboardController(context: Context) : ClipboardController {
     private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     override fun putText(text: CharSequence) {
-        val clip: ClipData = ClipData.newPlainText("FlatInvite", text)
+        val clip: ClipData = ClipData.newPlainText("Flat", text)
         clipboard.setPrimaryClip(clip)
     }
 

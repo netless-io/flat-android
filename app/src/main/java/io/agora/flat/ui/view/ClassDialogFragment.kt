@@ -19,8 +19,10 @@ open class ClassDialogFragment constructor(
     }
 
     private fun markNotFocusable() {
-        dialog?.window?.setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        dialog?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        )
     }
 
     private fun unmarkNotFocusable() {

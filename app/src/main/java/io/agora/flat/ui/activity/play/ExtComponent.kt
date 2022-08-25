@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.play
 
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.widget.FrameLayout
@@ -42,11 +41,6 @@ class ExtComponent(
 
     private fun initView() {
         extensionBinding = ComponentExtensionBinding.inflate(activity.layoutInflater, rootView, true)
-
-        rootView.viewTreeObserver.addOnGlobalLayoutListener {
-            val rect = Rect()
-            rootView.getWindowVisibleDisplayFrame(rect)
-        }
     }
 
     private fun observeState() {

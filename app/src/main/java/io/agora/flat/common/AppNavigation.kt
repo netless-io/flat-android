@@ -97,7 +97,8 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
         composable(LeafScreen.RoomDetail.createRoute(screenRoot),
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
-            })) {
+            })
+        ) {
             RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {
@@ -182,7 +183,8 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             JoinRoomPage(navController)
         }
         composable(LeafScreen.RoomDetail.createRoute(screenRoot),
-            arguments = listOf(navArgument("room_uuid") { type = NavType.StringType })) {
+            arguments = listOf(navArgument("room_uuid") { type = NavType.StringType })
+        ) {
             RoomDetailScreen(navController)
         }
         composable(LeafScreen.Settings.createRoute(screenRoot)) {

@@ -1,20 +1,17 @@
 package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.rtm.ClassRtmEvent
+import io.agora.flat.common.rtm.RtmMember
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.RtmQueryMessage
-import io.agora.rtm.RtmChannelMember
-import io.agora.rtm.RtmClient
 import kotlinx.coroutines.flow.Flow
 
 interface RtmApi {
-    fun rtmEngine(): RtmClient
-
     suspend fun login(rtmToken: String, channelId: String, userUUID: String): Boolean
 
     suspend fun logout(): Boolean
 
-    suspend fun getMembers(): List<RtmChannelMember>
+    suspend fun getMembers(): List<RtmMember>
 
     suspend fun sendChannelMessage(msg: String): Boolean
 

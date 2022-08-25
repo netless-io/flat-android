@@ -192,18 +192,20 @@ class CloudStorageViewModel @Inject constructor(
                 // delayRemoveSuccess(fileUUID)
                 totalUsage.value = totalUsage.value + size
                 files.value = files.value.toMutableList().apply {
-                    add(0, CloudStorageUIFile(
-                        CloudStorageFile(
-                            fileUUID = fileUUID,
-                            fileName = filename,
-                            fileSize = size,
-                            fileURL = filename,
-                            convertStep = FileConvertStep.None,
-                            taskUUID = "",
-                            taskToken = "",
-                            createAt = System.currentTimeMillis(),
+                    add(
+                        0, CloudStorageUIFile(
+                            CloudStorageFile(
+                                fileUUID = fileUUID,
+                                fileName = filename,
+                                fileSize = size,
+                                fileURL = filename,
+                                convertStep = FileConvertStep.None,
+                                taskUUID = "",
+                                taskToken = "",
+                                createAt = System.currentTimeMillis(),
+                            )
                         )
-                    ))
+                    )
                 }
                 checkAndStartConvert(filename, fileUUID)
             }

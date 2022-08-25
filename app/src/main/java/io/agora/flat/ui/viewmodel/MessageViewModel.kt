@@ -14,7 +14,6 @@ import io.agora.flat.di.impl.EventBus
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.MessagesAppended
-import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.util.ObservableLoadingCounter
@@ -30,7 +29,6 @@ class MessageViewModel @Inject constructor(
     private val miscRepository: MiscRepository,
     private val messageManager: ChatMessageManager,
     private val syncedClassState: SyncedClassState,
-    private val errorManager: RoomErrorManager,
     private val userManager: UserManager,
     private val messageQuery: MessageQuery,
     private val rtmApi: RtmApi,
@@ -61,17 +59,9 @@ class MessageViewModel @Inject constructor(
         initialValue = null,
     )
 
-
     init {
-        viewModelScope.launch(SupervisorJob()) {
-            try {
-                initMessageQuery()
-                loadHistoryMessage()
-            } catch (e: Exception) {
-                errorManager.notifyError("fetch message error", e)
-            }
-        }
-
+        initMessageQuery()
+        loadHistoryMessage()
         viewModelScope.launch {
             eventbus.events.filterIsInstance<MessagesAppended>().collect {
                 appendMessages(it.messages)
@@ -89,7 +79,7 @@ class MessageViewModel @Inject constructor(
         if (messageUiState.value?.loading == true || !messageQuery.hasMore) {
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(SupervisorJob()) {
             messageLoading.addLoader()
             if (messageManager.isEmpty()) {
                 val msgs = messageQuery.loadMore().asReversed()

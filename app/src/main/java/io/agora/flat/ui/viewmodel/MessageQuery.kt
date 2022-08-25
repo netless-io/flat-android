@@ -88,7 +88,8 @@ class MessageQuery @Inject constructor(
                 endTime,
                 PAGE_LIMIT,
                 offset,
-                if (orderAsc) ORDER_ASC else ORDER_DESC)
+                if (orderAsc) ORDER_ASC else ORDER_DESC
+            )
             if (msgs.size < PAGE_LIMIT) {
                 hasMore = false
             } else {

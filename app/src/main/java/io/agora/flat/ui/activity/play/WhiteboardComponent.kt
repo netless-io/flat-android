@@ -53,8 +53,6 @@ class WhiteboardComponent(
     }
 
     private fun observeState() {
-        viewModel.onWhiteboardInit()
-
         lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
                 if (areaId != RoomOverlayManager.AREA_ID_FASTBOARD) {

@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.google.gson.Gson
@@ -114,12 +113,13 @@ private fun HomeScreen(viewState: HomeViewState, actioner: (HomeViewAction) -> U
 
 @Composable
 fun FlatNetworkError(onClick: () -> Unit) {
-    Box(Modifier
-        .fillMaxWidth()
-        .height(40.dp)
-        .clickable(onClick = onClick)
-        .background(FlatColorRedLight)
-        .padding(horizontal = 16.dp)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .clickable(onClick = onClick)
+            .background(FlatColorRedLight)
+            .padding(horizontal = 16.dp)
     ) {
         FlatTextBodyOne(stringResource(R.string.network_error), Modifier.align(Alignment.CenterStart), FlatColorRed)
         Image(painterResource(R.drawable.ic_arrow_right_red), "", Modifier.align(Alignment.CenterEnd))
@@ -146,13 +146,14 @@ private fun TopOperations(actioner: (HomeViewAction) -> Unit) {
 @Composable
 private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, onClick: () -> Unit) {
     Box(Modifier.weight(1f), Alignment.TopCenter) {
-        Column(Modifier
-            .padding(top = 16.dp, bottom = 24.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false, radius = 48.dp),
-                onClick = onClick,
-            ),
+        Column(
+            Modifier
+                .padding(top = 16.dp, bottom = 24.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(bounded = false, radius = 48.dp),
+                    onClick = onClick,
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(painterResource(id), null)
@@ -228,7 +229,8 @@ private fun HomeRoomTabs(
         selectedTabIndex = selectedIndex,
         modifier = modifier,
         indicator = indicator,
-        backgroundColor = MaterialTheme.colors.background) {
+        backgroundColor = MaterialTheme.colors.background
+    ) {
         categories.forEachIndexed { index, category ->
             val text = when (category) {
                 RoomCategory.Current -> stringResource(R.string.home_room_list)
@@ -251,10 +253,12 @@ private fun HomeTabIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onSurface,
 ) {
-    Spacer(modifier
-        .height(2.dp)
-        .padding(horizontal = 5.dp)
-        .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100)))
+    Spacer(
+        modifier
+            .height(2.dp)
+            .padding(horizontal = 5.dp)
+            .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100))
+    )
 }
 
 @Composable
@@ -288,9 +292,11 @@ private fun HomeRoomList(
                     })
             }
             item {
-                Box(Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp), Alignment.TopCenter) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp), Alignment.TopCenter
+                ) {
                     FlatTextCaption(stringResource(R.string.loaded_all))
                 }
             }
@@ -302,8 +308,10 @@ private fun HomeRoomList(
 private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
     Column(modifier) {
         if (roomInfo.showDayHead) {
-            Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Image(painterResource(R.drawable.ic_home_calendar), contentDescription = "")
                 Spacer(modifier = Modifier.size(4.dp))
                 FlatTextBodyOne(FlatFormatter.dateMisc(roomInfo.beginTime))

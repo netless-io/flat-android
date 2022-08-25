@@ -152,22 +152,26 @@ private fun BoxScope.AddFileLayoutPad(actioner: (CloudStorageUIAction) -> Unit) 
 @Composable
 private fun UpdatePickLayout(aniValue: Float, actioner: (CloudStorageUIAction) -> Unit, onCoverClick: () -> Unit) {
     Column {
-        Box(Modifier
-            .fillMaxWidth()
-            .weight(1f)
-            .graphicsLayer(alpha = aniValue)
-            .background(Color(0x52000000))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onCoverClick() }) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .graphicsLayer(alpha = aniValue)
+                .background(Color(0x52000000))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onCoverClick() }) {
         }
-        Box(MaxWidth
-            .height(160.dp * aniValue)
-            .background(MaterialTheme.colors.surface)) {
-            Box(Modifier
-                .align(Alignment.TopCenter)
-                .clickable { onCoverClick() }) {
+        Box(
+            MaxWidth
+                .height(160.dp * aniValue)
+                .background(MaterialTheme.colors.surface)
+        ) {
+            Box(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .clickable { onCoverClick() }) {
                 Image(
                     painterResource(R.drawable.ic_record_arrow_down),
                     "",
@@ -212,11 +216,13 @@ internal fun BoxScope.UploadPickRow(onUploadFile: (CloudStorageUIAction.UploadFi
 
 @Composable
 private fun RowScope.UpdatePickItem(@DrawableRes id: Int, @StringRes text: Int, onClick: () -> Unit) {
-    Column(Modifier
-        .weight(1F)
-        .clickable(onClick = onClick),
+    Column(
+        Modifier
+            .weight(1F)
+            .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
+        verticalArrangement = Arrangement.Center
+    ) {
         Image(painter = painterResource(id), contentDescription = "", Modifier.size(48.dp))
         FlatTextButton(text = stringResource(text))
     }
@@ -294,9 +300,11 @@ private fun CloudFileList(
         }
 
         item {
-            Box(Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 30.dp), Alignment.TopCenter
+            ) {
                 FlatTextCaption(stringResource(R.string.loaded_all))
             }
         }
@@ -319,9 +327,11 @@ private fun CloudStorageItem(
         "mp3", "aac" -> R.drawable.ic_cloud_storage_music
         else -> R.drawable.ic_cloud_storage_doc
     }
-    Column(Modifier
-        .height(68.dp)
-        .clickable(onClick = onClick)) {
+    Column(
+        Modifier
+            .height(68.dp)
+            .clickable(onClick = onClick)
+    ) {
         Row(MaxWidthSpread, verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(12.dp))
             Box {
@@ -366,10 +376,12 @@ fun ConvertingImage(modifier: Modifier = Modifier) {
         )
     )
 
-    Icon(painter = painterResource(R.drawable.ic_cloud_storage_converting),
+    Icon(
+        painter = painterResource(R.drawable.ic_cloud_storage_converting),
         contentDescription = "",
         modifier.rotate(angle),
-        tint = Color.Unspecified)
+        tint = Color.Unspecified
+    )
 }
 
 @Composable

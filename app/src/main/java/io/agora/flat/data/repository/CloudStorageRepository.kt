@@ -107,7 +107,8 @@ class CloudStorageRepository @Inject constructor(
                     fileUUID,
                     region,
                     null
-                )).toResult()
+                )
+            ).toResult()
             // update local avatar.
             // there is a doubt here that CloudRepository may update userinfo.
             if (result is Success) {

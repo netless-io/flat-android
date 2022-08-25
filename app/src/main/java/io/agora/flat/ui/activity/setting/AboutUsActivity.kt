@@ -83,7 +83,8 @@ private fun AboutUsPage(actioner: (AboutUiAction) -> Unit) {
                 )
                 TextButton(
                     onClick = { actioner(AboutUiAction.OpenPrivacyProtocol) },
-                    modifier = Modifier.padding(horizontal = 16.dp)) {
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
                     Text(stringResource(R.string.privacy_agreement), style = ProtocolTextStyle)
                 }
             }

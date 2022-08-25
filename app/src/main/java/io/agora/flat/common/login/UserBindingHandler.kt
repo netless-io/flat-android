@@ -64,10 +64,12 @@ class UserBindingHandler @Inject constructor(
             }
 
             if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(Intent.createChooser(
-                    intent,
-                    context.getString(R.string.intent_browser_choose_title),
-                ))
+                context.startActivity(
+                    Intent.createChooser(
+                        intent,
+                        context.getString(R.string.intent_browser_choose_title),
+                    )
+                )
             } else {
                 showUiMessage(context.getString(R.string.intent_no_browser))
             }

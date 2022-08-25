@@ -148,8 +148,10 @@ private class UploadTask(
             addFormDataPart("success_action_status", "200")
             addFormDataPart("callback", "")
             addFormDataPart("signature", request.signature)
-            addFormDataPart("Content-Disposition",
-                "attachment; filename=\"${encodeFileName}\"; filename*=UTF-8''${encodeFileName}")
+            addFormDataPart(
+                "Content-Disposition",
+                "attachment; filename=\"${encodeFileName}\"; filename*=UTF-8''${encodeFileName}"
+            )
             addFormDataPart("file", encodeFileName, fileBody)
         }.build()
 

@@ -3,19 +3,24 @@ package io.agora.flat.di.impl
 import android.content.Context
 import io.agora.flat.common.rtc.RTCEventHandler
 import io.agora.flat.common.rtc.RTCEventListener
+import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.data.AppEnv
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.models.ChannelMediaOptions
 import io.agora.rtc.video.VideoCanvas
 import io.agora.rtc.video.VideoEncoderConfiguration
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitializer {
+class RtcApiImpl @Inject constructor(val appEnv: AppEnv, val logger: Logger) : RtcApi, StartupInitializer {
     private lateinit var rtcEngine: RtcEngine
     private val mHandler: RTCEventHandler = RTCEventHandler()
 
@@ -77,11 +82,20 @@ class RtcApiImpl @Inject constructor(val appEnv: AppEnv) : RtcApi, StartupInitia
         rtcEngine.muteRemoteVideoStream(rtcUid, !video)
     }
 
-    override fun addEventListener(listener: RTCEventListener) {
-        mHandler.addListener(listener)
-    }
+    override fun observeRtcEvent(): Flow<RtcEvent> = callbackFlow {
+        val listener = object : RTCEventListener {
+            override fun onUserOffline(uid: Int, reason: Int) {
+                trySend(RtcEvent.UserOffline(uid, reason))
+            }
 
-    override fun removeEventListener(listener: RTCEventListener) {
-        mHandler.removeListener(listener)
+            override fun onUserJoined(uid: Int, elapsed: Int) {
+                trySend(RtcEvent.UserJoined(uid, elapsed))
+            }
+        }
+        mHandler.addListener(listener)
+        awaitClose {
+            logger.d("[RTC] rtc event flow closed")
+            mHandler.removeListener(listener)
+        }
     }
 }

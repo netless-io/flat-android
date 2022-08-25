@@ -20,6 +20,11 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     var localUid: Int = 0
     var shareScreenUid: Int = 0
 
+    fun setupUid(uid: Int, ssUid: Int) {
+        localUid = uid
+        shareScreenUid = ssUid
+    }
+
     fun enterFullScreen(uid: Int) {
         this.fullScreenUid = uid
     }

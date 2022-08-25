@@ -62,9 +62,11 @@ fun GreetingCompose() {
 
     LazyColumn(Modifier.fillMaxHeight()) {
         item {
-            ComposeVideoPlayerTest(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp))
+            ComposeVideoPlayerTest(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
             Box(modifier = Modifier.padding(16.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.img_home_no_history),
@@ -175,10 +177,12 @@ fun SwipeDeleteItem(modifier: Modifier = Modifier) = BoxWithConstraints(modifier
             Text(text = "SSSSSSSSSHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         }
         Row(Modifier.offset { IntOffset((swipeableState.offset.value).roundToInt(), 0) }) {
-            Box(Modifier
-                .width(72.dp)
-                .fillMaxHeight()
-                .background(Color.White), Alignment.Center) {
+            Box(
+                Modifier
+                    .width(72.dp)
+                    .fillMaxHeight()
+                    .background(Color.White), Alignment.Center
+            ) {
                 IconButton(onClick = { }) {
                     Icon(Icons.Outlined.Delete, contentDescription = "")
                 }

@@ -40,11 +40,14 @@ class RtmComponent(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
-        rtmApi = entryPoint.rtmApi()
-
+        injectApi()
         initView()
         loadData()
+    }
+
+    private fun injectApi() {
+        val entryPoint = EntryPointAccessors.fromActivity(activity, RtmComponentEntryPoint::class.java)
+        rtmApi = entryPoint.rtmApi()
     }
 
     private fun initView() {
