@@ -83,12 +83,17 @@ class MessageListView @JvmOverloads constructor(
         binding.sendLayout.setOnClickListener {}
     }
 
-    fun setBan(ban: Boolean) {
-        binding.send.isEnabled = !ban
+    fun setBan(ban: Boolean, isOwner: Boolean) {
         binding.mute.isSelected = ban
-        binding.messageEdit.isEnabled = !ban
-        binding.messageEdit.hint =
-            if (ban) context.getString(R.string.class_room_message_muted) else context.getString(R.string.say_something)
+
+        val canSend = isOwner || !ban
+        binding.send.isEnabled = canSend
+        binding.messageEdit.isEnabled = canSend
+        binding.messageEdit.hint = if (canSend) {
+            context.getString(R.string.say_something)
+        } else {
+            context.getString(R.string.class_room_message_muted)
+        }
     }
 
     fun showBanBtn(shown: Boolean) {

@@ -133,6 +133,7 @@ class MessageViewModel @Inject constructor(
             if (userManager.isOwner()) {
                 syncedClassState.updateBan(muted)
                 rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
+                appendMessages(listOf(MessageFactory.createNotice(ban = muted)))
             }
         }
     }

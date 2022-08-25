@@ -102,7 +102,7 @@ class RtmComponent(
         lifecycleScope.launchWhenResumed {
             messageViewModel.messageUiState.filterNotNull().collect {
                 binding.messageLv.showBanBtn(it.isOwner)
-                binding.messageLv.setBan(it.ban)
+                binding.messageLv.setBan(it.ban, it.isOwner)
                 binding.messageLv.showLoading(it.loading)
 
                 binding.root.isVisible = it.messageAreaShown

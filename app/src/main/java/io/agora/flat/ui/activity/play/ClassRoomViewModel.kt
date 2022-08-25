@@ -667,7 +667,7 @@ data class ClassRoomState(
     val showChangeClassMode: Boolean
         get() = roomType == RoomType.SmallClass
 
-    val shouldShowRaiseHand: Boolean = !isOnStage
+    val shouldShowRaiseHand: Boolean = !isOnStage && !ban
 
     val shouldShowExitDialog: Boolean
         get() = isOwner && RoomStatus.Idle != roomStatus
