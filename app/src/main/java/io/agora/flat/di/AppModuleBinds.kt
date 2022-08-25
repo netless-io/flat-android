@@ -5,8 +5,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.agora.flat.common.rtc.RtcApiImpl
-import io.agora.flat.common.rtm.RtmApiImpl
+import io.agora.flat.common.rtc.AgoraRtc
+import io.agora.flat.common.rtm.AgoraRtm
 import io.agora.flat.di.interfaces.*
 import io.agora.flat.logger.LoggerModuleBinds
 
@@ -18,21 +18,21 @@ import io.agora.flat.logger.LoggerModuleBinds
 abstract class AppModuleBinds {
     @Binds
     @IntoSet
-    abstract fun provideRtcInitializer(bind: RtcApiImpl): StartupInitializer
+    abstract fun provideRtcInitializer(bind: AgoraRtc): StartupInitializer
 
     @Binds
     @IntoSet
-    abstract fun provideRtmInitializer(bind: RtmApiImpl): StartupInitializer
+    abstract fun provideRtmInitializer(bind: AgoraRtm): StartupInitializer
 
     @Binds
     @IntoSet
     abstract fun providerNetworkObserverInitializer(bind: FlatNetworkObserver): StartupInitializer
 
     @Binds
-    abstract fun providerRtcApi(bind: RtcApiImpl): RtcApi
+    abstract fun providerRtcApi(bind: AgoraRtc): RtcApi
 
     @Binds
-    abstract fun providerRtmApi(bind: RtmApiImpl): RtmApi
+    abstract fun providerRtmApi(bind: AgoraRtm): RtmApi
 
     @Binds
     abstract fun providerNetworkObserver(bind: FlatNetworkObserver): NetworkObserver

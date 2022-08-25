@@ -22,7 +22,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Singleton
-class RtmApiImpl @Inject constructor(
+class AgoraRtm @Inject constructor(
     private val messageRepository: MessageRepository,
     private val appEnv: AppEnv,
     private val logger: Logger

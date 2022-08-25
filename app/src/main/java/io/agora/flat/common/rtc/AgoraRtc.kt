@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RtcApiImpl @Inject constructor(val appEnv: AppEnv, val logger: Logger) : RtcApi, StartupInitializer {
+class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : RtcApi, StartupInitializer {
     private lateinit var rtcEngine: RtcEngine
     private val mHandler: RTCEventHandler = RTCEventHandler()
 
