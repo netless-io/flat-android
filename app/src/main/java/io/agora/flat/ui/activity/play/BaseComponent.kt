@@ -19,8 +19,4 @@ abstract class BaseComponent(
     open fun onConfigurationChanged(newConfig: Configuration) {
 
     }
-
-    open fun handleBackPressed(): Boolean {
-        return false
-    }
 }

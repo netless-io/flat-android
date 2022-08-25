@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -357,6 +358,8 @@ class ToolComponent(
         })
         dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
         RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_OWNER_EXIT_DIALOG, true)
+
+        activity.onBackPressedDispatcher.addCallback(onBackPressedCallback)
     }
 
     private fun updateRoomsAndFinish() {
@@ -432,8 +435,9 @@ class ToolComponent(
         binding.extTools.layoutParams = layoutParams
     }
 
-    override fun handleBackPressed(): Boolean {
-        handleExit()
-        return true
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            handleExit()
+        }
     }
 }

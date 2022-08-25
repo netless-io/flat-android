@@ -47,13 +47,4 @@ class ClassRoomActivity : BaseActivity() {
         super.onPause()
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
-
-    override fun onBackPressed() {
-        componentSet.forEach {
-            if (it.handleBackPressed()) {
-                return
-            }
-        }
-        super.onBackPressed()
-    }
 }
