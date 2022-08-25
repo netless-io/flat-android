@@ -24,8 +24,8 @@ import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.Event
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.Event
+import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi

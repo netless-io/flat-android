@@ -15,7 +15,7 @@ import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.event.UserUpdated
 import io.agora.flat.util.ContentInfo

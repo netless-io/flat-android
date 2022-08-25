@@ -1,9 +1,8 @@
-package io.agora.flat.di.impl
+package io.agora.flat.common.rtm
 
 import android.content.Context
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.FlatRtmException
-import io.agora.flat.common.rtm.*
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RtmQueryMessage

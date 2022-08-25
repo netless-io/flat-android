@@ -13,7 +13,7 @@ import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import kotlinx.coroutines.flow.MutableStateFlow

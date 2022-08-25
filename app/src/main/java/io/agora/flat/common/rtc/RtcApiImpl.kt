@@ -1,4 +1,4 @@
-package io.agora.flat.di.impl
+package io.agora.flat.common.rtc
 
 import android.content.Context
 import io.agora.flat.common.rtc.RTCEventHandler

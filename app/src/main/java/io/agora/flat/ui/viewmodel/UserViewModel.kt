@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserUpdated
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

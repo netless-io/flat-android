@@ -9,7 +9,7 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.RoomsUpdated
