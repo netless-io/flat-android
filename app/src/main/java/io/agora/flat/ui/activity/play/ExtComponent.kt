@@ -60,6 +60,11 @@ class ExtComponent(
                 }
             }
         }
+
+
+        lifecycleScope.launchWhenCreated {
+            classRoomViewModel.loginThirdParty()
+        }
     }
 
     private fun handleErrorMessage(error: UiMessage) {

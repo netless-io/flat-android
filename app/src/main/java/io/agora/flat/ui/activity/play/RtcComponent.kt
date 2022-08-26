@@ -128,7 +128,7 @@ class RtcComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             rtcApi.observeRtcEvent().collect { event ->
                 when (event) {
                     is RtcEvent.UserJoined -> lifecycleScope.launch {

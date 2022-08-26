@@ -111,6 +111,13 @@ class ClassRoomViewModel @Inject constructor(
             }
         }
 
+        /**
+         * It can be determined that the status callback is made after the successful joining of the room
+         */
+        observeSyncedState()
+    }
+
+    fun loginThirdParty() {
         viewModelScope.launch {
             takeInitState().collect {
                 joinBoard()
@@ -120,10 +127,6 @@ class ClassRoomViewModel @Inject constructor(
                 if (quickStart) startClass()
             }
         }
-        /**
-         * It can be determined that the status callback is made after the successful joining of the room
-         */
-        observeSyncedState()
     }
 
     private suspend fun loadAndInitRoomState() = coroutineScope {
