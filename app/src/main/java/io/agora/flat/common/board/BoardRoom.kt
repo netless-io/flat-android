@@ -134,6 +134,7 @@ class BoardRoom @Inject constructor(
 
     override fun release() {
         fastRoom?.destroy()
+        fastRoom = null
     }
 
     override fun setWritable(writable: Boolean) {

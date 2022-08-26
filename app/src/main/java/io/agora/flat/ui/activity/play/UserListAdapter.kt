@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -40,16 +42,21 @@ class UserListAdapter(
         viewHolder.state.run {
             when {
                 itemData.isOwner -> {
-                    setText(R.string.room_class_userlist_state_teacher)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_text_secondary))
+                    if (itemData.isOnStage) {
+                        setTextAndColor(R.string.room_class_userlist_state_teacher, R.color.flat_text_secondary)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_teacher_left, R.color.flat_red)
+                    }
                 }
                 itemData.isSpeak -> {
-                    setText(R.string.room_class_userlist_state_speaking)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_light_green))
+                    if (itemData.isOnStage) {
+                        setTextAndColor(R.string.room_class_userlist_state_speaking, R.color.flat_light_green)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_speaking_left, R.color.flat_red)
+                    }
                 }
                 itemData.isRaiseHand -> {
-                    setText(R.string.room_class_userlist_state_handup)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_blue))
+                    setTextAndColor(R.string.room_class_userlist_state_handup, R.color.flat_blue)
                 }
                 else -> {
                     text = ""
@@ -105,6 +112,11 @@ class UserListAdapter(
                 }
             }
         }
+    }
+
+    private fun TextView.setTextAndColor(@StringRes textId: Int, @ColorRes colorId: Int) {
+        setText(textId)
+        setTextColor(ContextCompat.getColor(context, colorId))
     }
 
     override fun getItemId(position: Int): Long {

@@ -17,12 +17,13 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CallTestViewModel @Inject constructor(
-    private val rtcApi: RtcApi,
+    rtcApi: RtcApi,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CallTestState())
     val state: StateFlow<CallTestState>
         get() = _state
-    var rtcEngine: RtcEngine? = (rtcApi as AgoraRtc).rtcEngine()
+
+    var rtcEngine: RtcEngine = (rtcApi as AgoraRtc).rtcEngine()
 
     private val eventListener: IRtcEngineEventHandler = object : IRtcEngineEventHandler() {
         override fun onLastmileQuality(quality: Int) {
@@ -30,23 +31,23 @@ class CallTestViewModel @Inject constructor(
         }
 
         override fun onLastmileProbeResult(lastMileProbeResult: LastmileProbeResult) {
-            rtcEngine?.stopLastmileProbeTest()
+            rtcEngine.stopLastmileProbeTest()
 
             _state.value = _state.value.copy(lastMileProbeResult = lastMileProbeResult)
         }
     }
 
     init {
-        rtcEngine?.addHandler(eventListener)
+        rtcEngine.addHandler(eventListener)
     }
 
     fun startEchoTest() {
-        rtcEngine?.startEchoTest(5)
+        rtcEngine.startEchoTest(5)
         _state.value = _state.value.copy(echoStarted = true)
     }
 
     fun stopEchoTest() {
-        rtcEngine?.stopEchoTest()
+        rtcEngine.stopEchoTest()
         _state.value = _state.value.copy(echoStarted = false)
     }
 
@@ -57,11 +58,11 @@ class CallTestViewModel @Inject constructor(
             expectedUplinkBitrate = 100000
             expectedDownlinkBitrate = 100000
         }
-        rtcEngine?.startLastmileProbeTest(config)
+        rtcEngine.startLastmileProbeTest(config)
     }
 
     override fun onCleared() {
-        rtcEngine?.removeHandler(eventListener)
+        rtcEngine.removeHandler(eventListener)
     }
 }
 

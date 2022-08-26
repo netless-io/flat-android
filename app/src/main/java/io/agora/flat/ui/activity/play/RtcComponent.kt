@@ -132,10 +132,10 @@ class RtcComponent(
             rtcApi.observeRtcEvent().collect { event ->
                 when (event) {
                     is RtcEvent.UserJoined -> lifecycleScope.launch {
-                        rtcVideoController.handleOffline(event.uid)
+                        rtcVideoController.handlerJoined(event.uid)
                     }
                     is RtcEvent.UserOffline -> lifecycleScope.launch {
-                        rtcVideoController.handlerJoined(event.uid)
+                        rtcVideoController.handleOffline(event.uid)
                     }
                 }
             }

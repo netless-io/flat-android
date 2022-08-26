@@ -1,10 +1,8 @@
 package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import io.agora.flat.common.board.BoardRoom
 import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RtcUser
-import io.agora.flat.di.interfaces.RtcApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,8 +11,6 @@ import javax.inject.Inject
 @ActivityRetainedScoped
 class UserManager @Inject constructor(
     private val userQuery: UserQuery,
-    private val rtcApi: RtcApi,
-    private val boardRoom: BoardRoom,
 ) {
     private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
     val users: List<RtcUser>
@@ -31,6 +27,9 @@ class UserManager @Inject constructor(
 
     // current all users
     private var usersCache = mutableMapOf<String, RtcUser>()
+
+    private var devicesState: Map<String, DeviceState> = emptyMap()
+    private var raiseHandState: List<String> = emptyList()
 
     lateinit var selfUUID: String
     lateinit var ownerUUID: String
@@ -64,7 +63,7 @@ class UserManager @Inject constructor(
         usersCache[updateUser.userUUID] = updateUser
     }
 
-    private fun updateUserCache(updateUsers: MutableMap<String, RtcUser>) {
+    private fun updateUserCache(updateUsers: Map<String, RtcUser>) {
         usersCache.putAll(updateUsers)
     }
 
@@ -79,7 +78,8 @@ class UserManager @Inject constructor(
                 roomUser.userUUID,
                 roomUser.rtcUID,
                 roomUser.name,
-                roomUser.avatarURL
+                roomUser.avatarURL,
+                // TODO
             )
             updateUserCache(user)
         }
@@ -131,8 +131,15 @@ class UserManager @Inject constructor(
             usersCache[userUUID] = RtcUser(userUUID = userUUID)
         }
         userQuery.loadUser(userUUID)?.let {
-            val user = usersCache[userUUID] ?: return
-            updateAndNotifyUser(user.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL))
+            val user = usersCache[userUUID]?.copy(
+                rtcUID = it.rtcUID,
+                name = it.name,
+                avatarURL = it.avatarURL,
+                videoOpen = devicesState[it.userUUID]?.camera ?: false,
+                audioOpen = devicesState[it.userUUID]?.mic ?: false,
+                isRaiseHand = raiseHandState.contains(it.userUUID)
+            ) ?: return
+            updateAndNotifyUser(user)
         }
     }
 
@@ -152,8 +159,12 @@ class UserManager @Inject constructor(
     }
 
     private fun updateAndNotifyUser(user: RtcUser) {
-        updateUserCache(user)
-        sortAndNotify(user)
+        updateAndNotifyUser(listOf(user))
+    }
+
+    private fun updateAndNotifyUser(users: List<RtcUser>) {
+        updateUserCache(users.associateBy { it.userUUID })
+        sortAndNotify(users)
     }
 
     private fun notifyUsers() {
@@ -172,46 +183,45 @@ class UserManager @Inject constructor(
         return users.find { it.userUUID == uuid }
     }
 
-    fun cancelHandRaising() {
-        val updateUsers = handRaisingJoiners.map { it.copy(isRaiseHand = false) }
-        handRaisingJoiners.clear()
-        sortAndNotify(updateUsers)
-    }
-
-    fun updateDeviceState(uuid: String, videoOpen: Boolean, audioOpen: Boolean) {
-        usersCache[uuid]?.apply {
-            updateAndNotifyUser(copy(audioOpen = audioOpen, videoOpen = videoOpen))
-            updateRtcStream(rtcUID, audioOpen, videoOpen)
-        }
-    }
-
     fun updateDeviceState(devicesState: Map<String, DeviceState>) {
+        this.devicesState = devicesState
         val updateUsers = mutableListOf<RtcUser>()
         devicesState.forEach { (uuid, state) ->
-            usersCache[uuid]?.run {
-                val user = this.copy(audioOpen = state.mic, videoOpen = state.camera)
+            val user = usersCache[uuid]?.copy(
+                audioOpen = state.mic,
+                videoOpen = state.camera
+            )
+            if (user != null) {
                 updateUsers.add(user)
-                usersCache[uuid] = user
-                updateRtcStream(this.rtcUID, state.mic, state.camera)
             }
         }
-        sortAndNotify(updateUsers)
+        updateAndNotifyUser(updateUsers)
     }
 
     suspend fun updateOnStage(onStages: Map<String, Boolean>) {
         val updateUuids = speakingJoiners.map { it.userUUID }.toMutableSet() + onStages.keys
         val updateUsers = mutableListOf<RtcUser>()
         updateUuids.forEach {
-            var user = usersCache[it]?.copy(isSpeak = onStages[it] ?: false)
+            var user = usersCache[it]?.copy(
+                isSpeak = onStages[it] ?: false,
+                videoOpen = devicesState[it]?.camera ?: false,
+                audioOpen = devicesState[it]?.mic ?: false,
+                isRaiseHand = raiseHandState.contains(it)
+            )
             if (onStages[it] == true && user == null) {
-                user = RtcUser(userUUID = it, name = userQuery.loadUser(it)?.name, isSpeak = onStages[it] ?: false)
+                user = RtcUser(
+                    userUUID = it,
+                    name = userQuery.loadUser(it)?.name,
+                    isSpeak = onStages[it] ?: false,
+                    videoOpen = devicesState[it]?.camera ?: false,
+                    audioOpen = devicesState[it]?.mic ?: false,
+                    isRaiseHand = raiseHandState.contains(it)
+                )
             }
             if (user != null) updateUsers.add(user)
         }
-        updateUsers.forEach {
-            usersCache[it.userUUID] = it
-        }
-        sortAndNotify(updateUsers)
+
+        updateAndNotifyUser(updateUsers)
     }
 
     fun updateRaiseHandStatus(uuid: String, isRaiseHand: Boolean) {
@@ -219,13 +229,11 @@ class UserManager @Inject constructor(
     }
 
     fun updateRaiseHandStatus(status: List<String>) {
+        this.raiseHandState = status
         val updateUsers = users.map {
             it.copy(isRaiseHand = status.contains(it.userUUID))
         }
-        updateUsers.forEach {
-            usersCache[it.userUUID] = it
-        }
-        sortAndNotify(updateUsers)
+        updateAndNotifyUser(updateUsers)
     }
 
     fun handleAllOffStage() {
@@ -237,22 +245,7 @@ class UserManager @Inject constructor(
                 isRaiseHand = false,
             )
         }
-        updateUsers.forEach {
-            usersCache[it.userUUID] = it
-            updateRtcStream(rtcUID = it.rtcUID, audioOpen = it.audioOpen, videoOpen = it.videoOpen)
-        }
-        if (selfUUID != ownerUUID) {
-            boardRoom.setWritable(false)
-        }
-        sortAndNotify(updateUsers)
-    }
-
-    private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
-        if (rtcUID == currentUser?.rtcUID) {
-            rtcApi.updateLocalStream(audio = audioOpen, video = videoOpen)
-        } else {
-            rtcApi.updateRemoteStream(rtcUid = rtcUID, audio = audioOpen, video = videoOpen)
-        }
+        updateAndNotifyUser(updateUsers)
     }
 
     fun isUserSelf(userId: String): Boolean {

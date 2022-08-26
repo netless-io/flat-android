@@ -161,8 +161,10 @@
 
     <string name="user_list">用户列表</string>
     <string name="room_class_userlist_state_speaking">(发言中)</string>
+    <string name="room_class_userlist_state_speaking_left">(已离开)</string>
     <string name="room_class_userlist_state_handup">(已举手)</string>
     <string name="room_class_userlist_state_teacher">(老师)</string>
+    <string name="room_class_userlist_state_teacher_left">(老师已离开)</string>
     <string name="room_recording_hit">课程录制中…</string>
     <string name="start_room">开始上课</string>
     <string name="stop_record">停止录制</string>

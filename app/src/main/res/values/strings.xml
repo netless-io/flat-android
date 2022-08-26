@@ -147,8 +147,10 @@
 
     <string name="user_list">User List</string>
     <string name="room_class_userlist_state_speaking">(Speaking)</string>
+    <string name="room_class_userlist_state_speaking_left">(Left)</string>
     <string name="room_class_userlist_state_handup">(Hands raised)</string>
     <string name="room_class_userlist_state_teacher">(Teacher)</string>
+    <string name="room_class_userlist_state_teacher_left">(Teacher Left)</string>
     <string name="room_recording_hit">Course recording…</string>
     <string name="start_room">Classes begin</string>
     <string name="stop_record">Stop recording</string>

@@ -26,8 +26,6 @@ class WhiteboardComponent(
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
-    private val viewModel: ClassRoomViewModel by activity.viewModels()
-
     private lateinit var boardRoom: IBoardRoom
 
     override fun onCreate(owner: LifecycleOwner) {

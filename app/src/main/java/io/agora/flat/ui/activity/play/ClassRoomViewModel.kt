@@ -16,6 +16,7 @@ import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.board.DeviceState
 import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.common.rtm.*
 import io.agora.flat.data.AppEnv
@@ -24,12 +25,12 @@ import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.event.Event
-import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
+import io.agora.flat.event.Event
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.event.NoOptPermission
 import io.agora.flat.ui.manager.RecordManager
@@ -296,15 +297,12 @@ class ClassRoomViewModel @Inject constructor(
                     videoOpen = it.videoOpen,
                     audioOpen = it.audioOpen,
                 )
+            }
+        }
 
-                val state = _state.value!!
-                viewModelScope.launch {
-                    boardRoom.setWritable(state.allowDraw)
-                    rtcApi.updateLocalStream(
-                        audio = state.isOnStage && state.audioOpen,
-                        video = state.isOnStage && state.videoOpen
-                    )
-                }
+        viewModelScope.launch {
+            userManager.observeSelf().filterNotNull().collect {
+                boardRoom.setWritable(it.allowDraw)
             }
         }
 
@@ -315,6 +313,25 @@ class ClassRoomViewModel @Inject constructor(
                     user.isOwner || user.isSpeak
                 }.toMutableList()
 
+                val oldUsers = videoUsers.value.associateBy { user -> user.userUUID }
+                val newUsers = it.associateBy { user -> user.userUUID }
+                val devicesMap = mutableMapOf<Int, DeviceState>()
+                newUsers.forEach { (_, user) ->
+                    if (user.rtcUID > 0) {
+                        devicesMap[user.rtcUID] = DeviceState(
+                            camera = user.isOnStage && user.videoOpen,
+                            mic = user.isOnStage && user.audioOpen
+                        )
+                    }
+                }
+                oldUsers.forEach { (uuid, user) ->
+                    if (!newUsers.contains(uuid) && user.rtcUID > 0) {
+                        devicesMap[user.rtcUID] = DeviceState(camera = false, mic = false)
+                    }
+                }
+                devicesMap.forEach { (rtcUID, state) ->
+                    updateRtcStream(rtcUID, audioOpen = state.mic, videoOpen = state.camera)
+                }
                 _videoUsers.value = users
             }
         }
@@ -337,6 +354,14 @@ class ClassRoomViewModel @Inject constructor(
                         cancel()
                     }
             }
+        }
+    }
+
+    private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
+        if (rtcUID == userManager.currentUser?.rtcUID) {
+            rtcApi.updateLocalStream(audio = audioOpen, video = videoOpen)
+        } else {
+            rtcApi.updateRemoteStream(rtcUid = rtcUID, audio = audioOpen, video = videoOpen)
         }
     }
 

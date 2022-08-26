@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="flat_red">@color/flat_red_4</color>
+    <color name="flat_red">@color/flat_red_6</color>
     <color name="flat_blue">@color/flat_blue_6</color>
     <color name="flat_light_green">@color/flat_green_6</color>
     <color name="flat_yellow">@color/flat_yellow_6</color>
