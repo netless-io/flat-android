@@ -2,14 +2,10 @@ package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.common.rtc.RtcJoinOptions
-import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
 import kotlinx.coroutines.flow.Flow
 
 interface RtcApi {
-    // Reserved for interface collection
-    fun rtcEngine(): RtcEngine
-
     fun joinChannel(options: RtcJoinOptions): Int
 
     fun leaveChannel()

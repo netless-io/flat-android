@@ -1,10 +1,6 @@
 package io.agora.flat.common.rtc
 
 import android.content.Context
-import io.agora.flat.common.rtc.RTCEventHandler
-import io.agora.flat.common.rtc.RTCEventListener
-import io.agora.flat.common.rtc.RtcEvent
-import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
@@ -48,7 +44,7 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
         rtcEngine.adjustRecordingSignalVolume(200)
     }
 
-    override fun rtcEngine(): RtcEngine {
+    fun rtcEngine(): RtcEngine {
         return rtcEngine
     }
 

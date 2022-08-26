@@ -2,9 +2,11 @@ package io.agora.flat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.common.rtc.AgoraRtc
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.IRtcEngineEventHandler.LastmileProbeResult
+import io.agora.rtc.RtcEngine
 import io.agora.rtc.internal.LastmileProbeConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +22,7 @@ class CallTestViewModel @Inject constructor(
     private val _state = MutableStateFlow(CallTestState())
     val state: StateFlow<CallTestState>
         get() = _state
+    var rtcEngine: RtcEngine? = (rtcApi as AgoraRtc).rtcEngine()
 
     private val eventListener: IRtcEngineEventHandler = object : IRtcEngineEventHandler() {
         override fun onLastmileQuality(quality: Int) {
@@ -27,23 +30,23 @@ class CallTestViewModel @Inject constructor(
         }
 
         override fun onLastmileProbeResult(lastMileProbeResult: LastmileProbeResult) {
-            rtcApi.rtcEngine().stopLastmileProbeTest()
+            rtcEngine?.stopLastmileProbeTest()
 
             _state.value = _state.value.copy(lastMileProbeResult = lastMileProbeResult)
         }
     }
 
     init {
-        rtcApi.rtcEngine().addHandler(eventListener)
+        rtcEngine?.addHandler(eventListener)
     }
 
     fun startEchoTest() {
-        rtcApi.rtcEngine().startEchoTest(5)
+        rtcEngine?.startEchoTest(5)
         _state.value = _state.value.copy(echoStarted = true)
     }
 
     fun stopEchoTest() {
-        rtcApi.rtcEngine().stopEchoTest()
+        rtcEngine?.stopEchoTest()
         _state.value = _state.value.copy(echoStarted = false)
     }
 
@@ -54,11 +57,11 @@ class CallTestViewModel @Inject constructor(
             expectedUplinkBitrate = 100000
             expectedDownlinkBitrate = 100000
         }
-        rtcApi.rtcEngine().startLastmileProbeTest(config)
+        rtcEngine?.startLastmileProbeTest(config)
     }
 
     override fun onCleared() {
-        rtcApi.rtcEngine().removeHandler(eventListener)
+        rtcEngine?.removeHandler(eventListener)
     }
 }
 
