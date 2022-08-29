@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -80,6 +82,27 @@ class MainActivity : BaseComposeActivity() {
                         loginManager.unregisterReceiver(this)
                     },
                 )
+
+                LaunchedEffect(roomPlayInfo) {
+                    roomPlayInfo?.let {
+                        Navigator.launchRoomPlayActivity(this@MainActivity, it)
+                    }
+                }
+
+                if (viewState.loginState == LoginState.Error) {
+                    LaunchedEffect(true) {
+                        Navigator.launchLoginActivity(this@MainActivity)
+                    }
+                }
+
+                if (viewState.versionCheckResult.showUpdate) {
+                    UpdateDialog(
+                        viewState.versionCheckResult,
+                        viewState.updating,
+                        viewModel::updateApp,
+                        viewModel::cancelUpdate,
+                    )
+                }
             } else {
                 GlobalAgreementDialog(
                     onAgree = { viewModel.agreeProtocol() },
@@ -87,28 +110,7 @@ class MainActivity : BaseComposeActivity() {
                 )
             }
 
-            if (viewState.versionCheckResult.showUpdate) {
-                UpdateDialog(
-                    viewState.versionCheckResult,
-                    viewState.updating,
-                    viewModel::updateApp,
-                    viewModel::cancelUpdate,
-                )
-            }
-
             ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
-
-            LaunchedEffect(roomPlayInfo) {
-                roomPlayInfo?.let {
-                    Navigator.launchRoomPlayActivity(this@MainActivity, it)
-                }
-            }
-
-            if (viewState.loginState == LoginState.Error) {
-                LaunchedEffect(true) {
-                    Navigator.launchLoginActivity(this@MainActivity)
-                }
-            }
         }
     }
 }
@@ -205,6 +207,11 @@ private fun NavController.currentIsRoute(route: String): Boolean {
 
 @Composable
 internal fun Main(navController: NavHostController, mainTab: MainTab) {
+    var bottomBarState by rememberSaveable { (mutableStateOf(true)) }
+
+    bottomBarState = needShowBottomBar(navController = navController)
+    val height: Int by animateIntAsState(if (bottomBarState) 56 else 0)
+
     Column {
         AppNavHost(
             navController,
@@ -213,20 +220,18 @@ internal fun Main(navController: NavHostController, mainTab: MainTab) {
                 .fillMaxWidth()
         )
 
-        if (needShowBottomBar(navController)) {
-            MainBottomBar(mainTab) { selectedTab ->
-                val route = when (selectedTab) {
-                    MainTab.Home -> Screen.Home.route
-                    MainTab.Cloud -> Screen.Cloud.route
-                }
+        MainBottomBar(mainTab, Modifier.height(height.dp)) { selectedTab ->
+            val route = when (selectedTab) {
+                MainTab.Home -> Screen.Home.route
+                MainTab.Cloud -> Screen.Cloud.route
+            }
 
-                navController.navigate(route) {
-                    launchSingleTop = true
-                    restoreState = true
+            navController.navigate(route) {
+                launchSingleTop = true
+                restoreState = true
 
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
                 }
             }
         }
@@ -349,7 +354,11 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
 }
 
 @Composable
-private fun MainBottomBar(selectedTab: MainTab, modifier: Modifier = Modifier, onTabSelected: (MainTab) -> Unit) {
+private fun MainBottomBar(
+    selectedTab: MainTab,
+    modifier: Modifier = Modifier,
+    onTabSelected: (MainTab) -> Unit
+) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_home_main_selected
         MainTab.Cloud -> R.drawable.ic_home_main_normal

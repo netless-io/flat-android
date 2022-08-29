@@ -32,10 +32,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatColorRed
-import io.agora.flat.ui.theme.FlatColorRedLight
-import io.agora.flat.ui.theme.MaxWidthSpread
+import io.agora.flat.ui.theme.*
 import io.agora.flat.util.FlatFormatter
 
 @Composable
@@ -177,7 +174,12 @@ fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp, 24.dp)
-                        .clip(shape = RoundedCornerShape(12.dp)),
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .border(
+                            1.dp,
+                            if (isDarkTheme()) FlatColorDividerDark else FlatColorDivider,
+                            RoundedCornerShape(50)
+                        ),
                     contentScale = ContentScale.Crop
                 )
             }
