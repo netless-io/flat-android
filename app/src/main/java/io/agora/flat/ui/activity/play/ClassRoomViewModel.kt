@@ -74,7 +74,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun takeInitState() = state.filterNotNull().take(1)
 
-    private var _videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
+    private var _videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
     val videoUsers = _videoUsers.asStateFlow()
 
     // cloud record state
@@ -170,7 +170,7 @@ class ClassRoomViewModel @Inject constructor(
         )
 
         userManager.reset(
-            currentUser = RtcUser(
+            currentUser = RoomUser(
                 userUUID = currentUserUUID,
                 name = currentUserName,
                 avatarURL = userRepository.getUserInfo()!!.avatar,
@@ -181,7 +181,6 @@ class ClassRoomViewModel @Inject constructor(
                 audioOpen = initState.audioOpen,
 
                 isOwner = isOwner,
-                isSelf = true
             ),
             ownerUUID = roomInfo.ownerUUID
         )
@@ -312,29 +311,13 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userManager.observeUsers().collect {
                 logger.d("[USERS] users changed $it")
-                val users = it.filter { user ->
-                    user.isOwner || user.isSpeak
-                }.toMutableList()
+                val users = it.filter { user -> user.isOwner || user.isSpeak }.toMutableList()
 
-                val oldUsers = videoUsers.value.associateBy { user -> user.userUUID }
-                val newUsers = it.associateBy { user -> user.userUUID }
-                val devicesMap = mutableMapOf<Int, DeviceState>()
-                newUsers.forEach { (_, user) ->
-                    if (user.rtcUID > 0) {
-                        devicesMap[user.rtcUID] = DeviceState(
-                            camera = user.isOnStage && user.videoOpen,
-                            mic = user.isOnStage && user.audioOpen
-                        )
-                    }
-                }
-                oldUsers.forEach { (uuid, user) ->
-                    if (!newUsers.contains(uuid) && user.rtcUID > 0) {
-                        devicesMap[user.rtcUID] = DeviceState(camera = false, mic = false)
-                    }
-                }
+                val devicesMap = getUpdateDevices(videoUsers.value, users)
                 devicesMap.forEach { (rtcUID, state) ->
                     updateRtcStream(rtcUID, audioOpen = state.mic, videoOpen = state.camera)
                 }
+
                 _videoUsers.value = users
             }
         }
@@ -358,6 +341,30 @@ class ClassRoomViewModel @Inject constructor(
                     }
             }
         }
+    }
+
+    private fun getUpdateDevices(
+        newUsers: List<RoomUser>,
+        oldUsers: List<RoomUser>
+    ): MutableMap<Int, DeviceState> {
+        val oldUsersMap = newUsers.associateBy { user -> user.userUUID }
+        val newUsersMap = oldUsers.associateBy { user -> user.userUUID }
+
+        val devicesMap = mutableMapOf<Int, DeviceState>()
+        newUsersMap.forEach { (_, user) ->
+            if (user.isJoined) {
+                devicesMap[user.rtcUID] = DeviceState(
+                    camera = user.isOnStage && user.videoOpen,
+                    mic = user.isOnStage && user.audioOpen
+                )
+            }
+        }
+        oldUsersMap.forEach { (uuid, user) ->
+            if (!newUsersMap.contains(uuid) && user.isJoined) {
+                devicesMap[user.rtcUID] = DeviceState(camera = false, mic = false)
+            }
+        }
+        return devicesMap
     }
 
     private fun updateRtcStream(rtcUID: Int, audioOpen: Boolean, videoOpen: Boolean) {
@@ -623,6 +630,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun isOwner(): Boolean {
         return userManager.isOwner()
+    }
+
+    fun isSelf(userId: String): Boolean {
+        return userManager.isUserSelf(userId)
     }
 
     fun isOnStageAllowable(): Boolean {

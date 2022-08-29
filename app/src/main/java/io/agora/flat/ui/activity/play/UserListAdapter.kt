@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
-import io.agora.flat.data.model.RtcUser
+import io.agora.flat.data.model.RoomUser
 import io.agora.flat.util.inflate
 
 /**
@@ -19,7 +19,7 @@ import io.agora.flat.util.inflate
  */
 class UserListAdapter(
     private val viewModel: ClassRoomViewModel,
-    private val dataSet: MutableList<RtcUser> = mutableListOf(),
+    private val dataSet: MutableList<RoomUser> = mutableListOf(),
 ) : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
 
     init {
@@ -42,17 +42,17 @@ class UserListAdapter(
         viewHolder.state.run {
             when {
                 itemData.isOwner -> {
-                    if (itemData.isOnStage) {
-                        setTextAndColor(R.string.room_class_userlist_state_teacher, R.color.flat_text_secondary)
-                    } else {
+                    if (itemData.isLeft) {
                         setTextAndColor(R.string.room_class_userlist_state_teacher_left, R.color.flat_red)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_teacher, R.color.flat_text_secondary)
                     }
                 }
                 itemData.isSpeak -> {
-                    if (itemData.isOnStage) {
-                        setTextAndColor(R.string.room_class_userlist_state_speaking, R.color.flat_light_green)
-                    } else {
+                    if (itemData.isLeft) {
                         setTextAndColor(R.string.room_class_userlist_state_speaking_left, R.color.flat_red)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_speaking, R.color.flat_light_green)
                     }
                 }
                 itemData.isRaiseHand -> {
@@ -101,7 +101,7 @@ class UserListAdapter(
                     else -> isVisible = false
                 }
             } else {
-                if (itemData.isSpeak && itemData.isSelf) {
+                if (itemData.isSpeak && viewModel.isSelf(itemData.userUUID)) {
                     isVisible = true
                     setImageResource(R.drawable.ic_room_userlist_handup_close)
                     setOnClickListener {
@@ -125,7 +125,7 @@ class UserListAdapter(
 
     override fun getItemCount() = dataSet.size
 
-    fun setData(data: List<RtcUser>) {
+    fun setData(data: List<RoomUser>) {
         dataSet.clear()
         dataSet.addAll(data.distinctBy { it.rtcUID })
         notifyDataSetChanged()

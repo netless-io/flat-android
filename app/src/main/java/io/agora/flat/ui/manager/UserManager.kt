@@ -2,7 +2,7 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.DeviceState
-import io.agora.flat.data.model.RtcUser
+import io.agora.flat.data.model.RoomUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,21 +12,21 @@ import javax.inject.Inject
 class UserManager @Inject constructor(
     private val userQuery: UserQuery,
 ) {
-    private var _users = MutableStateFlow<List<RtcUser>>(emptyList())
-    val users: List<RtcUser>
+    private var _users = MutableStateFlow<List<RoomUser>>(emptyList())
+    val users: List<RoomUser>
         get() = _users.value
 
-    private var _currentUser = MutableStateFlow<RtcUser?>(null)
-    val currentUser: RtcUser?
+    private var _currentUser = MutableStateFlow<RoomUser?>(null)
+    val currentUser: RoomUser?
         get() = _currentUser.value
 
-    private var creator: RtcUser? = null
-    private var speakingJoiners: MutableList<RtcUser> = mutableListOf()
-    private var handRaisingJoiners: MutableList<RtcUser> = mutableListOf()
-    private var otherJoiners: MutableList<RtcUser> = mutableListOf()
+    private var creator: RoomUser? = null
+    private var speakingJoiners: MutableList<RoomUser> = mutableListOf()
+    private var handRaisingJoiners: MutableList<RoomUser> = mutableListOf()
+    private var otherJoiners: MutableList<RoomUser> = mutableListOf()
 
     // current all users
-    private var usersCache = mutableMapOf<String, RtcUser>()
+    private var usersCache = mutableMapOf<String, RoomUser>()
 
     private var devicesState: Map<String, DeviceState> = emptyMap()
     private var raiseHandState: List<String> = emptyList()
@@ -34,15 +34,15 @@ class UserManager @Inject constructor(
     lateinit var selfUUID: String
     lateinit var ownerUUID: String
 
-    fun observeUsers(): Flow<List<RtcUser>> {
+    fun observeUsers(): Flow<List<RoomUser>> {
         return _users.asStateFlow()
     }
 
-    fun observeSelf(): Flow<RtcUser?> {
+    fun observeSelf(): Flow<RoomUser?> {
         return _currentUser.asStateFlow()
     }
 
-    fun reset(currentUser: RtcUser, ownerUUID: String) {
+    fun reset(currentUser: RoomUser, ownerUUID: String) {
         this.selfUUID = currentUser.userUUID
         this.ownerUUID = ownerUUID
 
@@ -53,17 +53,17 @@ class UserManager @Inject constructor(
 
         val updateUsers = mutableMapOf(selfUUID to currentUser)
         if (selfUUID != ownerUUID) {
-            updateUsers[ownerUUID] = RtcUser(rtcUID = RtcUser.NOT_JOIN_RTC_UID, userUUID = ownerUUID, isOwner = true)
+            updateUsers[ownerUUID] = RoomUser(rtcUID = RoomUser.NOT_JOIN_RTC_UID, userUUID = ownerUUID, isOwner = true)
         }
         updateUserCache(updateUsers)
         sortUser(updateUsers)
     }
 
-    private fun updateUserCache(updateUser: RtcUser) {
+    private fun updateUserCache(updateUser: RoomUser) {
         usersCache[updateUser.userUUID] = updateUser
     }
 
-    private fun updateUserCache(updateUsers: Map<String, RtcUser>) {
+    private fun updateUserCache(updateUsers: Map<String, RoomUser>) {
         usersCache.putAll(updateUsers)
     }
 
@@ -74,32 +74,27 @@ class UserManager @Inject constructor(
                 rtcUID = roomUser.rtcUID,
                 name = roomUser.name,
                 avatarURL = roomUser.avatarURL
-            ) ?: RtcUser(
+            ) ?: RoomUser(
                 roomUser.userUUID,
                 roomUser.rtcUID,
                 roomUser.name,
                 roomUser.avatarURL,
-                // TODO
             )
             updateUserCache(user)
         }
         sortAndNotify(usersCache)
     }
 
-    private fun sortAndNotify(user: RtcUser) {
-        sortAndNotify(mapOf(user.userUUID to user))
-    }
-
-    private fun sortAndNotify(users: List<RtcUser>) {
+    private fun sortAndNotify(users: List<RoomUser>) {
         sortAndNotify(users.associateBy { it.userUUID })
     }
 
-    private fun sortAndNotify(users: Map<String, RtcUser>) {
+    private fun sortAndNotify(users: Map<String, RoomUser>) {
         sortUser(users)
         notifyUsers()
     }
 
-    private fun sortUser(users: Map<String, RtcUser>) {
+    private fun sortUser(users: Map<String, RoomUser>) {
         if (users.containsKey(selfUUID)) {
             _currentUser.value = users[selfUUID]
         }
@@ -128,7 +123,7 @@ class UserManager @Inject constructor(
 
     suspend fun addUser(userUUID: String) {
         if (usersCache[userUUID] == null) {
-            usersCache[userUUID] = RtcUser(userUUID = userUUID)
+            usersCache[userUUID] = RoomUser(userUUID = userUUID)
         }
         userQuery.loadUser(userUUID)?.let {
             val user = usersCache[userUUID]?.copy(
@@ -146,7 +141,7 @@ class UserManager @Inject constructor(
     fun removeUser(userUUID: String) {
         val user = usersCache[userUUID] ?: return
         if (user.isOwner || user.isSpeak) {
-            val updateUser = user.copy(rtcUID = RtcUser.NOT_JOIN_RTC_UID)
+            val updateUser = user.copy(rtcUID = RoomUser.NOT_JOIN_RTC_UID)
             updateAndNotifyUser(updateUser)
         } else {
             usersCache.remove(userUUID)
@@ -158,17 +153,17 @@ class UserManager @Inject constructor(
         }
     }
 
-    private fun updateAndNotifyUser(user: RtcUser) {
+    private fun updateAndNotifyUser(user: RoomUser) {
         updateAndNotifyUser(listOf(user))
     }
 
-    private fun updateAndNotifyUser(users: List<RtcUser>) {
+    private fun updateAndNotifyUser(users: List<RoomUser>) {
         updateUserCache(users.associateBy { it.userUUID })
         sortAndNotify(users)
     }
 
     private fun notifyUsers() {
-        val ranked = mutableListOf<RtcUser>()
+        val ranked = mutableListOf<RoomUser>()
         ranked += speakingJoiners
         ranked += handRaisingJoiners
         creator?.run {
@@ -179,13 +174,13 @@ class UserManager @Inject constructor(
         _users.value = ranked
     }
 
-    fun findFirstUser(uuid: String): RtcUser? {
+    fun findFirstUser(uuid: String): RoomUser? {
         return users.find { it.userUUID == uuid }
     }
 
     fun updateDeviceState(devicesState: Map<String, DeviceState>) {
         this.devicesState = devicesState
-        val updateUsers = mutableListOf<RtcUser>()
+        val updateUsers = mutableListOf<RoomUser>()
         devicesState.forEach { (uuid, state) ->
             val user = usersCache[uuid]?.copy(
                 audioOpen = state.mic,
@@ -200,7 +195,7 @@ class UserManager @Inject constructor(
 
     suspend fun updateOnStage(onStages: Map<String, Boolean>) {
         val updateUuids = speakingJoiners.map { it.userUUID }.toMutableSet() + onStages.keys
-        val updateUsers = mutableListOf<RtcUser>()
+        val updateUsers = mutableListOf<RoomUser>()
         updateUuids.forEach {
             var user = usersCache[it]?.copy(
                 isSpeak = onStages[it] ?: false,
@@ -209,7 +204,7 @@ class UserManager @Inject constructor(
                 isRaiseHand = raiseHandState.contains(it)
             )
             if (onStages[it] == true && user == null) {
-                user = RtcUser(
+                user = RoomUser(
                     userUUID = it,
                     name = userQuery.loadUser(it)?.name,
                     isSpeak = onStages[it] ?: false,

@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
 import io.agora.flat.R
-import io.agora.flat.data.model.RtcUser
+import io.agora.flat.data.model.RoomUser
 import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.inflate
 
@@ -18,7 +18,7 @@ import io.agora.flat.util.inflate
  * 用户视频区域
  */
 class UserVideoAdapter(
-    private val dataSet: MutableList<RtcUser>,
+    private val dataSet: MutableList<RoomUser>,
     private val rtcVideoController: RtcVideoController,
 ) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
@@ -49,20 +49,20 @@ class UserVideoAdapter(
             transformations(CircleCropTransformation())
         }
 
-        viewHolder.teacherLeaveLy.isVisible = itemData.isNotJoin && itemData.isOwner
-        viewHolder.studentLeaveLy.isVisible = itemData.isNotJoin && !itemData.isOwner
+        viewHolder.teacherLeaveLy.isVisible = itemData.isLeft && itemData.isOwner
+        viewHolder.studentLeaveLy.isVisible = itemData.isLeft && !itemData.isOwner
         viewHolder.micClosed.isVisible = !itemData.audioOpen
 
-        if (itemData.rtcUID != 0 && itemData.rtcUID != rtcVideoController.fullScreenUid) {
+        if (itemData.isLeft && itemData.rtcUID != rtcVideoController.fullScreenUid) {
             rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
         }
 
         viewHolder.itemView.setOnClickListener {
-            if (itemData.isNotJoin)
+            if (itemData.isLeft)
                 return@setOnClickListener
             onItemClickListener?.onItemClick(position, viewHolder.videoContainer, itemData)
         }
-        viewHolder.videoClosedLayout.isVisible = !itemData.isNotJoin && !itemData.videoOpen
+        viewHolder.videoClosedLayout.isVisible = !itemData.isLeft && !itemData.videoOpen
     }
 
     override fun getItemId(position: Int): Long {
@@ -71,7 +71,7 @@ class UserVideoAdapter(
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataSet(data: List<RtcUser>) {
+    fun setDataSet(data: List<RoomUser>) {
         dataSet.clear()
         dataSet.addAll(data.distinctBy { it.rtcUID })
         notifyDataSetChanged()
@@ -96,6 +96,6 @@ class UserVideoAdapter(
     var onItemClickListener: OnItemClickListener? = null
 
     fun interface OnItemClickListener {
-        fun onItemClick(position: Int, view: ViewGroup, rtcUser: RtcUser)
+        fun onItemClick(position: Int, view: ViewGroup, rtcUser: RoomUser)
     }
 }

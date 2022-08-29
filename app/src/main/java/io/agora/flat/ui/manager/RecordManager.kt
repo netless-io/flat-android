@@ -28,7 +28,7 @@ class RecordManager @Inject constructor(
     private var startRecordJob: Job? = null
 
     private var recordState = MutableStateFlow<RecordState?>(null)
-    private var videoUsers = MutableStateFlow<List<RtcUser>>(emptyList())
+    private var videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
 
     fun reset(roomUUID: String, scope: CoroutineScope) {
         this.roomUUID = roomUUID
@@ -129,13 +129,13 @@ class RecordManager @Inject constructor(
     }
 
     private fun getBackgroundConfig(): List<BackgroundConfig> {
-        return videoUsers.value.map { user: RtcUser ->
+        return videoUsers.value.map { user: RoomUser ->
             BackgroundConfig(uid = user.rtcUID.toString(), image_url = user.avatarURL)
         }
     }
 
     private fun getLayoutConfig(): List<LayoutConfig> {
-        return videoUsers.value.mapIndexed { index: Int, user: RtcUser ->
+        return videoUsers.value.mapIndexed { index: Int, user: RoomUser ->
             LayoutConfig(
                 uid = user.rtcUID.toString(),
                 x_axis = 12f / 120,

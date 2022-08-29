@@ -21,7 +21,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.common.rtc.RtcEvent
-import io.agora.flat.data.model.RtcUser
+import io.agora.flat.data.model.RoomUser
 import io.agora.flat.databinding.ComponentFullscreenBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.Logger
@@ -304,7 +304,7 @@ class RtcComponent(
 
     private var start = Rect()
     private var end = Rect()
-    private var userCallOut: RtcUser? = null
+    private var userCallOut: RoomUser? = null
 
     private fun updateView(value: Float) {
         val left = start.left + (end.left - start.left) * value
