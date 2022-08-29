@@ -1,6 +1,6 @@
 package io.agora.flat.data.repository
 
-import io.agora.flat.common.FlatException
+import io.agora.flat.common.FlatRtmException
 import io.agora.flat.data.*
 import io.agora.flat.data.model.MessageQueryFilter
 import io.agora.flat.data.model.MessageQueryHistoryReq
@@ -63,11 +63,11 @@ class MessageRepository @Inject constructor(
                 ).executeOnce()
 
                 val location = result.bodyOrThrow().location
-                if (!location.isNullOrEmpty()) {
+                if (location.isNotEmpty()) {
                     val handle = location.replace(Regex("^.*/query/"), "")
                     Success(data = handle)
                 } else {
-                    Failure(FlatException("query history handle error"))
+                    Failure(FlatRtmException("query history handle error"))
                 }
             } catch (e: Exception) {
                 Failure(e)
@@ -89,7 +89,7 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().messages)
                 } else {
-                    Failure(FlatException("get messages error"))
+                    Failure(FlatRtmException("get messages error"))
                 }
             } catch (e: Exception) {
                 Failure(e)
@@ -124,7 +124,7 @@ class MessageRepository @Inject constructor(
                 if (code == "ok") {
                     return@withContext Success(data = result.bodyOrThrow().count)
                 } else {
-                    Failure(FlatException("get messages count error"))
+                    Failure(FlatRtmException("get messages count error"))
                 }
             } catch (e: Exception) {
                 Failure(e)

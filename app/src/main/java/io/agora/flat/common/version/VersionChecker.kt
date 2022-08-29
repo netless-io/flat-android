@@ -48,7 +48,7 @@ class VersionChecker constructor(
 
     suspend fun check(): VersionCheckResult {
         if (System.currentTimeMillis() - lastCheckerTime < Config.callVersionCheckInterval) {
-            return VersionCheckResult.Default
+            return VersionCheckResult.Empty
         }
         lastCheckerTime = System.currentTimeMillis()
 
@@ -70,7 +70,7 @@ class VersionChecker constructor(
             } catch (e: Exception) {
                 // ignore
                 e.printStackTrace()
-                return@withContext VersionCheckResult.Default
+                return@withContext VersionCheckResult.Empty
             }
         }
     }

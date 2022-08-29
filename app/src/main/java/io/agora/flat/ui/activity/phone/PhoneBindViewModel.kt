@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
@@ -12,7 +13,6 @@ import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -48,7 +48,8 @@ class PhoneBindViewModel @Inject constructor(
             if (sendResult is Success) {
                 showUiMessage(stringFetcher.loginCodeSend())
             } else {
-                when ((sendResult as Failure).error.code) {
+                val exception = (sendResult as Failure).exception as FlatNetException
+                when (exception.code) {
                     FlatErrorCode.Web_SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
@@ -71,7 +72,8 @@ class PhoneBindViewModel @Inject constructor(
             if (bindResult is Success) {
                 notifyBindSuccess()
             } else {
-                when ((bindResult as Failure).error.code) {
+                val exception = (bindResult as Failure).exception as FlatNetException
+                when (exception.code) {
                     FlatErrorCode.Web_SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.alreadyHasPhone())
                     }

@@ -9,7 +9,7 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.NetworkObserver
 import io.agora.flat.event.RoomsUpdated
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**
@@ -113,15 +112,13 @@ class HomeViewModel @Inject constructor(
 
     private fun reloadRooms() {
         viewModelScope.launch {
-            when (val response = roomRepository.getRoomListAll(page)) {
+            when (val result = roomRepository.getRoomListAll(page)) {
                 is Success -> {
-                    val list = ArrayList(response.data)
+                    val list = ArrayList(result.data)
                     roomList.value = addShowDayHeadFlag(list)
                 }
-                is Failure -> {
-                    when (response.error.status) {
-                        // handle error
-                    }
+                is Failure -> when (result.exception) {
+                    // handle error
                 }
             }
         }
@@ -137,15 +134,13 @@ class HomeViewModel @Inject constructor(
 
     private fun reloadHistoryRooms() {
         viewModelScope.launch {
-            when (val response = roomRepository.getRoomListHistory(historyPage)) {
+            when (val result = roomRepository.getRoomListHistory(historyPage)) {
                 is Success -> {
-                    val list = ArrayList(response.data)
+                    val list = ArrayList(result.data)
                     historyList.value = addShowDayHeadFlag(list)
                 }
-                is Failure -> {
-                    when (response.error.status) {
-                        // handle error
-                    }
+                is Failure -> when (result.exception) {
+                    // handle error
                 }
             }
         }

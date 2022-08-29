@@ -156,12 +156,15 @@
     <string name="room_class_message_empty_hit">说点什么吧…</string>
     <string name="room_class_cloudstorage_empty_hit">暂无文件</string>
     <string name="room_class_teacher_leave">老师暂时离开</string>
+    <string name="room_class_student_left">学生暂时离开</string>
     <string name="room_dialog_exit_title">关闭选项</string>
 
     <string name="user_list">用户列表</string>
     <string name="room_class_userlist_state_speaking">(发言中)</string>
+    <string name="room_class_userlist_state_speaking_left">(已离开)</string>
     <string name="room_class_userlist_state_handup">(已举手)</string>
     <string name="room_class_userlist_state_teacher">(老师)</string>
+    <string name="room_class_userlist_state_teacher_left">(老师已离开)</string>
     <string name="room_recording_hit">课程录制中…</string>
     <string name="start_room">开始上课</string>
     <string name="stop_record">停止录制</string>
@@ -193,11 +196,8 @@
     <string name="network_error">网络异常，请检查网络设置</string>
     <string name="copy_success">复制成功</string>
 
+    <string name="invite_text_format">%1$s 邀请你加入 Flat 房间\n\n房间主题：%2$s\n房间号：%3$s\n\n开始时间：%4$s\n加入链接：%5$s</string>
     <string name="invite_title_format">%1$s 邀请你加入 Flat 房间</string>
-    <string name="invite_room_name_format">房间主题：%1$s</string>
-    <string name="invite_room_number_format">房间号：%1$s</string>
-    <string name="invite_begin_time_format">开始时间：%1$s</string>
-    <string name="invite_join_link_format">加入链接：%1$s</string>
 
     <string name="replay">回放</string>
     <string name="exit_replay">退出回放</string>
@@ -254,4 +254,6 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="error_request_too_frequently">请求太过频繁</string>
     <string name="error_request_common_fail">请求失败</string>
     <string name="request_common_success">操作成功</string>
+
+    <string name="error_string_network">请求失败，请检查网络</string>
 </resources>

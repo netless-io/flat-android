@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
 import io.agora.flat.data.Failure
@@ -14,7 +15,7 @@ import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.event.UserUpdated
 import io.agora.flat.util.ContentInfo
@@ -92,7 +93,7 @@ class UserInfoViewModel @Inject constructor(
             when (resp) {
                 is Success -> result = resp.data
                 is Failure -> {
-                    if (resp.error.code == FlatErrorCode.Web_UploadConcurrentLimit) {
+                    if ((resp.exception as FlatNetException).code == FlatErrorCode.Web_UploadConcurrentLimit) {
                         cloudStorageRepository.cancel()
                         // retry
                         resp = cloudStorageRepository.updateAvatarStart(

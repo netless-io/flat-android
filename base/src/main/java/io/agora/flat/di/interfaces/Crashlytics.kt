@@ -7,5 +7,5 @@ interface Crashlytics {
 
     fun setUserId(id: String) {}
 
-    fun log(tag: String?, message: String, t: Throwable?) {}
+    fun log(priority: Int, tag: String?, message: String, t: Throwable?) {}
 }

@@ -88,10 +88,12 @@ private fun UploadListItem(uploadFile: UploadFile, actioner: (UploadingUIAction)
     val progressColor = if (uploadFile.uploadState == UploadState.Failure) FlatColorRed else FlatColorBlue
 
     Box(Modifier.height(50.dp)) {
-        Row(Modifier
-            .fillMaxWidth()
-            .align(Alignment.Center)
-            .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
             FlatTextBodyTwo(
                 uploadFile.filename,
                 Modifier.weight(1f),

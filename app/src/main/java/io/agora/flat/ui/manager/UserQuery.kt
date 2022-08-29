@@ -1,10 +1,10 @@
-package io.agora.flat.ui.viewmodel
+package io.agora.flat.ui.manager
 
 import android.util.Log
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.RoomUser
+import io.agora.flat.data.model.NetworkRoomUser
 import io.agora.flat.data.repository.RoomRepository
 import javax.inject.Inject
 
@@ -13,17 +13,17 @@ class UserQuery @Inject constructor(
     private val roomRepository: RoomRepository,
 ) {
     private lateinit var roomUUID: String
-    private var userMap = mutableMapOf<String, RoomUser>()
+    private var userMap = mutableMapOf<String, NetworkRoomUser>()
 
     fun update(roomUUID: String) {
         this.roomUUID = roomUUID
     }
 
-    suspend fun loadUser(uuid: String): RoomUser? {
+    suspend fun loadUser(uuid: String): NetworkRoomUser? {
         return loadUsers(listOf(uuid))[uuid]
     }
 
-    suspend fun loadUsers(uuids: List<String>): Map<String, RoomUser> {
+    suspend fun loadUsers(uuids: List<String>): Map<String, NetworkRoomUser> {
         val filter = uuids.filter { !userMap.containsKey(it) }
         if (filter.isNotEmpty()) {
             Log.d("UserQuery", "loadUsers more $filter")
@@ -40,7 +40,7 @@ class UserQuery @Inject constructor(
         return userMap.filter { uuids.contains(it.key) }
     }
 
-    fun queryUser(uuid: String): RoomUser? {
+    fun queryUser(uuid: String): NetworkRoomUser? {
         val user = userMap[uuid]
         if (user == null) {
             Log.e("UserQuery", "should not hint here")

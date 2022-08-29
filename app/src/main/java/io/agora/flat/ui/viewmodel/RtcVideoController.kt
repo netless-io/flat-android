@@ -20,6 +20,11 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     var localUid: Int = 0
     var shareScreenUid: Int = 0
 
+    fun setupUid(uid: Int, ssUid: Int) {
+        localUid = uid
+        shareScreenUid = ssUid
+    }
+
     fun enterFullScreen(uid: Int) {
         this.fullScreenUid = uid
     }
@@ -34,28 +39,22 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
         }
     }
 
-    fun setupUserVideo(videoContainer: FrameLayout, uid: Int) {
+    fun setupUserVideo(container: FrameLayout, uid: Int) {
         if (textureMap[uid] == null) {
-            textureMap[uid] = RtcEngine.CreateTextureView(videoContainer.context)
-        } else {
-            if (textureMap[uid]!!.parent == videoContainer) {
-                setupVideo(textureMap[uid]!!, uid)
-                return
-            }
-
-            textureMap[uid]!!.parent?.run {
-                this as FrameLayout
-                removeAllViews()
-            }
+            textureMap[uid] = RtcEngine.CreateTextureView(container.context)
         }
-        videoContainer.run {
-            if (childCount >= 1) {
-                removeAllViews()
-            }
 
-            val textureView = textureMap[uid]!!
-            addView(textureView, generateLayoutParams())
+        val textureView = textureMap[uid]!!
+        if (textureView.parent == container) {
             setupVideo(textureView, uid)
+        } else {
+            (textureView.parent as? FrameLayout)?.removeAllViews()
+
+            with(container) {
+                removeAllViews()
+                addView(textureView, generateLayoutParams())
+                setupVideo(textureView, uid)
+            }
         }
     }
 

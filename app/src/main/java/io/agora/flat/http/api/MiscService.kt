@@ -21,11 +21,11 @@ interface MiscService {
         @Body empty: BaseReq = BaseReq.EMPTY,
     ): Call<BaseResp<PureToken>>
 
-    @POST("v1/log")
-    fun logError(
-        @Body req: LogErrorReq,
-    ): Call<BaseResp<RespNoData>>
-    
+    // @POST("v1/log")
+    // fun logError(
+    //     @Body req: LogErrorReq,
+    // ): Call<BaseResp<RespNoData>>
+
     // 消息审核
     @POST("v1/agora/rtm/censor")
     fun censorRtm(

@@ -24,4 +24,6 @@
 
     <dimen name="room_replay_sub_tools_margin">72dp</dimen>
     <dimen name="room_replay_seek_bar_width">240dp</dimen>
+
+    <dimen name="room_message_send_height">60dp</dimen>
 </resources>

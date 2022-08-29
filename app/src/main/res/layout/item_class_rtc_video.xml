@@ -71,7 +71,8 @@
         <FrameLayout
             android:id="@+id/teacher_leave_ly"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -88,5 +89,25 @@
                 android:textSize="12sp" />
         </FrameLayout>
 
+        <FrameLayout
+            android:id="@+id/student_leave_ly"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_room_teacher_leave" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_marginBottom="4dp"
+                android:text="@string/room_class_student_left"
+                android:textColor="#7A7B7C"
+                android:textSize="12sp" />
+        </FrameLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

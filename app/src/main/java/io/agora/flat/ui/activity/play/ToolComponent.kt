@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -16,7 +17,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
-import io.agora.flat.data.model.ClassModeType
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.IBoardRoom
@@ -25,23 +25,15 @@ import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
-import io.agora.flat.ui.viewmodel.ClassRoomEvent
-import io.agora.flat.ui.viewmodel.ClassRoomState
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
-import io.agora.flat.util.toInviteCodeDisplay
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class ToolComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
 ) : BaseComponent(activity, rootView) {
-    companion object {
-        val TAG = ToolComponent::class.simpleName
-    }
-
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {
@@ -73,20 +65,8 @@ class ToolComponent(
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
-            viewModel.roomEvent.collect {
-                when (it) {
-                    is ClassRoomEvent.StartRoomResult -> {; }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
-                if (areaId != RoomOverlayManager.AREA_ID_MESSAGE) {
-                    viewModel.setMessageAreaShown(false)
-                }
-
                 if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
                     hideSettingLayout()
                 }
@@ -105,48 +85,45 @@ class ToolComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.messageUsers.collect {
-                userListAdapter.setDataSet(it)
+                userListAdapter.setData(it)
                 binding.userlistDot.isVisible = it.find { user -> user.isRaiseHand } != null
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.roomConfig.collect {
-                binding.layoutSettings.switchVideo.isChecked = it.enableVideo
-                binding.layoutSettings.switchAudio.isChecked = it.enableAudio
+        lifecycleScope.launchWhenResumed {
+            viewModel.recordState.collect { recordState ->
+                val isRecording = recordState != null
+                binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = isRecording
+                binding.layoutRoomStateSettings.startRecord.isVisible = !isRecording
+                binding.layoutRoomStateSettings.stopRecord.isVisible = isRecording
+                recordState?.run {
+                    binding.layoutRoomStateSettings.recordTime.text = FlatFormatter.timeMS(recordTime * 1000)
+                }
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.state.filter { it != ClassRoomState.Init }.collect {
+        lifecycleScope.launchWhenResumed {
+            viewModel.state.filterNotNull().collect {
                 binding.roomCtrlTool.isVisible = it.isOwner
                 if (it.isOwner) {
                     binding.roomStart.isVisible = it.roomStatus == RoomStatus.Idle
                     binding.roomStateSetting.isVisible = it.roomStatus != RoomStatus.Idle
-
                     if (it.roomStatus == RoomStatus.Started) {
-                        binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = it.isRecording
-                        binding.layoutRoomStateSettings.startRecord.isVisible = !it.isRecording
-                        binding.layoutRoomStateSettings.stopRecord.isVisible = it.isRecording
-                        if (it.recordState != null) {
-                            binding.layoutRoomStateSettings.recordTime.text =
-                                FlatFormatter.timeMS(it.recordState.recordTime * 1000)
-                        }
                         binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
                     }
-
-                    updateClassMode(it.classMode)
                 }
+                binding.cloudservice.isVisible = it.allowDraw
 
-                binding.cloudservice.isVisible = it.isWritable
-
-                binding.handup.isVisible = it.showRaiseHand
+                binding.handup.isVisible = it.shouldShowRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
 
-                binding.layoutSettings.switchVideo.isEnabled = it.isWritable
-                binding.layoutSettings.switchAudio.isEnabled = it.isWritable
+                binding.layoutSettings.switchVideo.isEnabled = it.isOnStage
+                binding.layoutSettings.switchAudio.isEnabled = it.isOnStage
+
+                binding.layoutSettings.switchVideo.isChecked = it.videoOpen
+                binding.layoutSettings.switchAudio.isChecked = it.audioOpen
             }
         }
 
@@ -164,8 +141,9 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageCount.collect {
-                binding.messageDot.isVisible = it > 0 && !viewModel.messageAreaShown.value
+            viewModel.messageCount.collect { count ->
+                binding.messageDot.isVisible = count > 0 &&
+                        RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
             }
         }
     }
@@ -216,8 +194,7 @@ class ToolComponent(
         val map: Map<View, (View) -> Unit> = mapOf(
             binding.message to {
                 binding.messageDot.isVisible = false
-                val shown = !viewModel.messageAreaShown.value
-                viewModel.setMessageAreaShown(shown)
+                val shown = RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
                 RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_MESSAGE, shown)
             },
             binding.cloudservice to {
@@ -279,19 +256,13 @@ class ToolComponent(
                 viewModel.stopRecord()
             },
             binding.layoutRoomStateSettings.classModeInteraction to {
-                if (!it.isSelected) {
-                    viewModel.updateClassMode(ClassModeType.Interaction)
-                    updateClassMode(ClassModeType.Interaction)
-                }
+                // ignore
             },
             binding.layoutRoomStateSettings.classModeLecture to {
-                if (!it.isSelected) {
-                    updateClassMode(ClassModeType.Lecture)
-                    viewModel.updateClassMode(ClassModeType.Lecture)
-                }
+                // ignore
             },
             binding.handup to {
-                viewModel.sendRaiseHand()
+                viewModel.raiseHand()
             }
         )
 
@@ -316,12 +287,16 @@ class ToolComponent(
             hideSettingLayout()
         }
 
-        binding.layoutSettings.switchVideo.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.enableVideo(isChecked)
+        binding.layoutSettings.switchVideo.setOnCheckedChangeListener { it, isChecked ->
+            if (it.isPressed) {
+                viewModel.enableVideo(isChecked)
+            }
         }
 
-        binding.layoutSettings.switchAudio.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.enableAudio(isChecked)
+        binding.layoutSettings.switchAudio.setOnCheckedChangeListener { it, isChecked ->
+            if (it.isPressed) {
+                viewModel.enableAudio(isChecked)
+            }
         }
 
         cloudStorageAdapter = CloudStorageAdapter()
@@ -343,17 +318,12 @@ class ToolComponent(
         }
     }
 
-    private fun updateClassMode(classMode: ClassModeType) {
-        binding.layoutRoomStateSettings.classModeInteraction.isSelected = classMode == ClassModeType.Interaction
-        binding.layoutRoomStateSettings.classModeLecture.isSelected = classMode == ClassModeType.Lecture
-    }
-
     private fun handleExit() {
-        if (viewModel.state.value.needOwnerExitDialog) {
+        val state = viewModel.state.value ?: return
+        if (state.shouldShowExitDialog) {
             showOwnerExitDialog()
         } else {
-            viewModel.sendGlobalEvent(RoomsUpdated)
-            activity.finish()
+            updateRoomsAndFinish()
             // showAudienceExitDialog()
         }
     }
@@ -367,16 +337,14 @@ class ToolComponent(
 
             // 挂起房间
             override fun onLeftButtonClick() {
-                viewModel.sendGlobalEvent(RoomsUpdated)
-                activity.finish()
+                updateRoomsAndFinish()
             }
 
             // 结束房间
             override fun onRightButtonClick() {
                 lifecycleScope.launch {
                     if (viewModel.stopClass()) {
-                        viewModel.sendGlobalEvent(RoomsUpdated)
-                        activity.finish()
+                        updateRoomsAndFinish()
                     } else {
                         activity.showToast(R.string.room_class_stop_class_fail)
                     }
@@ -389,6 +357,13 @@ class ToolComponent(
         })
         dialog.show(activity.supportFragmentManager, "OwnerExitDialog")
         RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_OWNER_EXIT_DIALOG, true)
+
+        activity.onBackPressedDispatcher.addCallback(onBackPressedCallback)
+    }
+
+    private fun updateRoomsAndFinish() {
+        viewModel.sendGlobalEvent(RoomsUpdated)
+        activity.finish()
     }
 
     private fun showAudienceExitDialog() {
@@ -396,33 +371,35 @@ class ToolComponent(
     }
 
     private fun showInviteDialog() {
-        val state = viewModel.state.value
-        val inviteTitle = activity.getString(R.string.invite_title_format, state.userName)
-        val roomTime =
-            "${FlatFormatter.date(state.beginTime)} ${FlatFormatter.timeDuring(state.beginTime, state.endTime)}"
-        val inviteLink = appEnv.baseInviteUrl + "/join/" + state.roomUUID
+        val inviteInfo = viewModel.getInviteInfo() ?: return
+        val inviteTitle = activity.getString(R.string.invite_title_format, inviteInfo.username)
+        val inviteLink = inviteInfo.link
+        val datetime = "${FlatFormatter.date(inviteInfo.beginTime)} ${
+            FlatFormatter.timeDuring(inviteInfo.beginTime, inviteInfo.endTime)
+        }"
+        val roomTitle = inviteInfo.roomTitle
+        val roomUuid = inviteInfo.roomUuid
 
-        val copyText = """
-            |${activity.getString(R.string.invite_title_format, state.userName)}
-            |
-            |${activity.getString(R.string.invite_room_name_format, state.title)}
-            |${activity.getString(R.string.invite_begin_time_format, roomTime)}
-            |
-            |${activity.getString(R.string.invite_room_number_format, state.inviteCode.toInviteCodeDisplay())}
-            |${activity.getString(R.string.invite_join_link_format, inviteLink)}
-            """.trimMargin()
+        val inviteText = activity.getString(
+            R.string.invite_text_format,
+            inviteInfo.username,
+            roomTitle,
+            datetime,
+            roomUuid,
+            inviteLink
+        )
 
         val dialog = InviteDialog().apply {
             arguments = Bundle().apply {
                 putString(InviteDialog.INVITE_TITLE, inviteTitle)
-                putString(InviteDialog.ROOM_TITLE, state.title)
-                putString(InviteDialog.ROOM_NUMBER, state.inviteCode.toInviteCodeDisplay())
-                putString(InviteDialog.ROOM_TIME, roomTime)
+                putString(InviteDialog.ROOM_NUMBER, roomUuid)
+                putString(InviteDialog.ROOM_TITLE, roomTitle)
+                putString(InviteDialog.ROOM_TIME, datetime)
             }
         }
         dialog.setListener(object : InviteDialog.Listener {
             override fun onCopy() {
-                viewModel.onCopyText(copyText)
+                viewModel.setClipboard(inviteText)
                 activity.showToast(R.string.copy_success)
             }
 
@@ -457,8 +434,9 @@ class ToolComponent(
         binding.extTools.layoutParams = layoutParams
     }
 
-    override fun handleBackPressed(): Boolean {
-        handleExit()
-        return true
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            handleExit()
+        }
     }
 }

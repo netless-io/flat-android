@@ -16,13 +16,13 @@ class CloudStorageRepository @Inject constructor(
     private val cloudStorageService: CloudStorageService,
     private val appKVCenter: AppKVCenter,
 ) {
-    suspend fun getFileList(
+    suspend fun listFiles(
         page: Int = 1,
         size: Int = 50,
         order: String = "DESC",
     ): Result<CloudStorageFileListResp> {
         return withContext(Dispatchers.IO) {
-            cloudStorageService.getFileList(page, size, order).toResult()
+            cloudStorageService.listFiles(page, size, order).toResult()
         }
     }
 
@@ -107,7 +107,8 @@ class CloudStorageRepository @Inject constructor(
                     fileUUID,
                     region,
                     null
-                )).toResult()
+                )
+            ).toResult()
             // update local avatar.
             // there is a doubt here that CloudRepository may update userinfo.
             if (result is Success) {

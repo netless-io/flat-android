@@ -1,8 +1,11 @@
-package io.agora.flat.di.impl
+package io.agora.flat.event
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
+/**
+ * a event bus to manager app events
+ */
 class EventBus {
     private val _events = MutableSharedFlow<Event>()
     val events = _events.asSharedFlow()

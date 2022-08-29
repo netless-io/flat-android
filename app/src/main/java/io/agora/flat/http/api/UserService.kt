@@ -88,7 +88,7 @@ interface UserService {
         @Query("state") state: String,
         @Query("code") code: String,
     ): Call<BaseResp<RespNoData>>
-    
+
     @POST("v1/user/binding/remove")
     fun removeBinding(
         @Body req: RemoveBindingReq,

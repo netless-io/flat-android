@@ -6,6 +6,7 @@ import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.data.model.ORDER_ASC
 import io.agora.flat.data.model.ORDER_DESC
 import io.agora.flat.di.interfaces.RtmApi
+import io.agora.flat.ui.manager.UserQuery
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -87,7 +88,8 @@ class MessageQuery @Inject constructor(
                 endTime,
                 PAGE_LIMIT,
                 offset,
-                if (orderAsc) ORDER_ASC else ORDER_DESC)
+                if (orderAsc) ORDER_ASC else ORDER_DESC
+            )
             if (msgs.size < PAGE_LIMIT) {
                 hasMore = false
             } else {

@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.room
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -72,7 +71,7 @@ fun RoomDetailScreen(
     navController: NavController,
     viewModel: RoomDetailViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as Activity
+    val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
     val cancelSuccess = viewModel.cancelSuccess.collectAsState()
     var visible by remember { mutableStateOf(false) }
@@ -87,7 +86,7 @@ fun RoomDetailScreen(
                 navController.popBackStack()
             }
             is DetailUiAction.EnterRoom -> {
-                Navigator.launchRoomPlayActivity(activity, action.roomUUID, action.periodicUUID)
+                Navigator.launchRoomPlayActivity(context, action.roomUUID, action.periodicUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
@@ -96,7 +95,7 @@ fun RoomDetailScreen(
                 showInvite = true
             }
             is DetailUiAction.Playback -> {
-                Navigator.launchPlaybackActivity(activity, action.roomUUID)
+                Navigator.launchPlaybackActivity(context, action.roomUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
@@ -123,7 +122,8 @@ fun RoomDetailScreen(
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(initialAlpha = 0.3F, animationSpec = tween()),
-            exit = fadeOut(animationSpec = tween())) {
+            exit = fadeOut(animationSpec = tween())
+        ) {
             PeriodicDetailScreen(viewState, actioner = actioner)
         }
 
@@ -131,7 +131,7 @@ fun RoomDetailScreen(
             InviteDialog(viewState.roomInfo!!, { showInvite = false }) {
                 clipboard.putText(it)
                 showInvite = false
-                activity.showToast(R.string.copy_success)
+                context.showToast(R.string.copy_success)
             }
         }
     }
@@ -156,7 +156,8 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                     if (viewState.isPeriodicRoom) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
                         Column(MaxWidth.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
+                            Text(
+                                stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
                                 Modifier
                                     .padding(4.dp)
                                     .clickable { actioner(DetailUiAction.ShowAllRooms) },
@@ -304,9 +305,11 @@ private fun PeriodicSubRoomItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FlatTextBodyTwo(dayText, Modifier
-            .padding(horizontal = 16.dp)
-            .widthIn(min = 16.dp))
+        FlatTextBodyTwo(
+            dayText, Modifier
+                .padding(horizontal = 16.dp)
+                .widthIn(min = 16.dp)
+        )
         Spacer(modifier = Modifier.weight(1f))
         FlatTextBodyTwo(dayOfWeekText, Modifier.padding(horizontal = 8.dp))
         Spacer(modifier = Modifier.weight(1f))
@@ -407,7 +410,8 @@ private fun BottomOperations(
                 Modifier
                     .align(Alignment.TopEnd)
                     .padding(16.dp),
-                actioner = actioner)
+                actioner = actioner
+            )
         } else {
             Operations(
                 roomInfo,
@@ -482,20 +486,17 @@ private fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
 
 @Composable
 private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
-    val timeDuring =
+    val datetime =
         "${FlatFormatter.date(roomInfo.beginTime)} ${FlatFormatter.timeDuring(roomInfo.beginTime, roomInfo.endTime)}"
     val inviteLink = roomInfo.baseInviteUrl + "/join/" + roomInfo.roomUUID
-
-    val context = LocalContext.current
-    val copyText = """
-        |${context.getString(R.string.invite_title_format, roomInfo.username)}
-        |
-        |${context.getString(R.string.invite_room_name_format, roomInfo.title)}
-        |${context.getString(R.string.invite_begin_time_format, timeDuring)}
-        |
-        |${context.getString(R.string.invite_room_number_format, roomInfo.inviteCode.toInviteCodeDisplay())}
-        |${context.getString(R.string.invite_join_link_format, inviteLink)}
-        """.trimMargin()
+    val inviteText = stringResource(
+        R.string.invite_text_format,
+        roomInfo.username,
+        roomInfo.title,
+        datetime,
+        roomInfo.inviteCode.toInviteCodeDisplay(),
+        inviteLink
+    )
 
     Dialog(onDismissRequest) {
         Surface(shape = Shapes.large) {
@@ -520,10 +521,10 @@ private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onC
                     Text(stringResource(R.string.time_start))
                     Spacer(Modifier.width(16.dp))
                     Spacer(Modifier.weight(1f))
-                    Text(timeDuring, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(datetime, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 FlatLargeVerticalSpacer()
-                FlatPrimaryTextButton(stringResource(R.string.copy_link_to_invite), onClick = { onCopy(copyText) })
+                FlatPrimaryTextButton(stringResource(R.string.copy_link_to_invite), onClick = { onCopy(inviteText) })
             }
         }
     }

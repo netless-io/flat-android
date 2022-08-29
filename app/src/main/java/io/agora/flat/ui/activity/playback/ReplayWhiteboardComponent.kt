@@ -20,11 +20,9 @@ import io.agora.flat.data.model.RecordItem
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
-import io.agora.flat.ui.activity.play.WhiteboardComponent
 import io.agora.flat.ui.activity.playback.syncplayer.*
 import io.agora.flat.ui.viewmodel.ReplayViewModel
 import io.agora.flat.util.FlatFormatter
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -136,23 +134,23 @@ class ReplayWhiteboardComponent(
             }
 
             override fun onMessage(message: JSONObject) {
-                Log.d(WhiteboardComponent.TAG, message.toString())
+                Log.d(TAG, message.toString())
             }
 
             override fun sdkSetupFail(error: SDKError) {
-                Log.e(WhiteboardComponent.TAG, "sdkSetupFail $error")
+                Log.e(TAG, "sdkSetupFail $error")
             }
 
             override fun throwError(args: Any) {
-                Log.e(WhiteboardComponent.TAG, "throwError $args")
+                Log.e(TAG, "throwError $args")
             }
 
             override fun onPPTMediaPlay() {
-                Log.d(WhiteboardComponent.TAG, "onPPTMediaPlay")
+                Log.d(TAG, "onPPTMediaPlay")
             }
 
             override fun onPPTMediaPause() {
-                Log.d(WhiteboardComponent.TAG, "onPPTMediaPause")
+                Log.d(TAG, "onPPTMediaPause")
             }
         })
     }

@@ -43,10 +43,12 @@ object DarkModeManager {
     }
 
     private fun setDarkMode(mode: Mode) {
-        AppCompatDelegate.setDefaultNightMode(when (mode) {
-            Mode.Auto -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            Mode.Light -> AppCompatDelegate.MODE_NIGHT_NO
-            Mode.Dark -> AppCompatDelegate.MODE_NIGHT_YES
-        })
+        AppCompatDelegate.setDefaultNightMode(
+            when (mode) {
+                Mode.Auto -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                Mode.Light -> AppCompatDelegate.MODE_NIGHT_NO
+                Mode.Dark -> AppCompatDelegate.MODE_NIGHT_YES
+            }
+        )
     }
 }

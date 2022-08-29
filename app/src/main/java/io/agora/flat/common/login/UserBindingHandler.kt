@@ -13,7 +13,7 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.impl.EventBus
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.ui.activity.setting.UserInfoActivity
 import io.agora.flat.util.showToast
@@ -64,10 +64,12 @@ class UserBindingHandler @Inject constructor(
             }
 
             if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(Intent.createChooser(
-                    intent,
-                    context.getString(R.string.intent_browser_choose_title),
-                ))
+                context.startActivity(
+                    Intent.createChooser(
+                        intent,
+                        context.getString(R.string.intent_browser_choose_title),
+                    )
+                )
             } else {
                 showUiMessage(context.getString(R.string.intent_no_browser))
             }

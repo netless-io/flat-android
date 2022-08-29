@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.room
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
@@ -35,8 +34,9 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatColorBlue
 import io.agora.flat.ui.theme.FlatColorGray
+import io.agora.flat.ui.util.ShowUiMessageEffect
+import io.agora.flat.ui.viewmodel.CreateRoomUiState
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
-import io.agora.flat.ui.viewmodel.ViewState
 import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.isTabletMode
 
@@ -57,7 +57,7 @@ fun CreateRoomScreen(
     navController: NavController,
     viewModel: CreateRoomViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as Activity
+    val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
 
@@ -68,13 +68,16 @@ fun CreateRoomScreen(
             }
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.openVideo)
-                Navigator.launchRoomPlayActivity(activity, viewState.roomUUID, quickStart = true)
+                Navigator.launchRoomPlayActivity(context, viewState.roomUUID, quickStart = true)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
             }
             is CreateRoomAction.CreateRoom -> {
                 viewModel.createRoom(action.title, action.roomType)
+            }
+            is CreateRoomAction.OnMessageShown -> {
+                viewModel.clearMessage(action.id)
             }
         }
     }
@@ -83,7 +86,7 @@ fun CreateRoomScreen(
 }
 
 @Composable
-private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction) -> Unit) {
+private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoomAction) -> Unit) {
     val defaultTheme = LocalContext.current.getString(
         R.string.join_room_default_time_format,
         viewState.username
@@ -98,11 +101,17 @@ private fun CreateRoomContent(viewState: ViewState, actioner: (CreateRoomAction)
         }
     }
 
+    ShowUiMessageEffect(
+        uiMessage = viewState.message,
+        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) })
+
     Column {
         CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })
-        Column(Modifier
-            .weight(1f)
-            .padding(horizontal = 16.dp)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        ) {
             FlatNormalVerticalSpacer()
             FlatTextBodyTwo(stringResource(R.string.room_theme))
             FlatSmallVerticalSpacer()
@@ -241,20 +250,16 @@ private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, 
 @Composable
 @Preview(device = PIXEL_C)
 @Preview(device = PIXEL_C, uiMode = 0x20)
+@Preview
 private fun CreateRoomPageTabletPreview() {
     FlatPage {
-        CreateRoomContent(ViewState()) {}
+        CreateRoomContent(CreateRoomUiState()) {}
     }
-}
-
-@Composable
-@Preview
-private fun CreateRoomPagePreview() {
-    CreateRoomContent(ViewState()) {}
 }
 
 internal sealed class CreateRoomAction {
     object Close : CreateRoomAction()
     data class JoinRoom(val roomUUID: String, val openVideo: Boolean) : CreateRoomAction()
     data class CreateRoom(val title: String, val roomType: RoomType) : CreateRoomAction()
+    data class OnMessageShown(val id: Long) : CreateRoomAction()
 }

@@ -20,6 +20,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
 import io.agora.flat.util.showToast
@@ -40,17 +41,14 @@ fun JoinRoomPage(
     navController: NavController,
     viewModel: JoinRoomViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as BaseComposeActivity
-    val error by viewModel.error.collectAsState()
-    val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+    val context = LocalContext.current
+    val viewState by viewModel.state.collectAsState()
 
-    LaunchedEffect(error) {
-        error?.message?.let { activity.showToast(it) }
-    }
+    ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
 
-    LaunchedEffect(roomPlayInfo) {
-        if (roomPlayInfo != null) {
-            Navigator.launchRoomPlayActivity(activity, roomPlayInfo!!)
+    viewState.roomPlayInfo?.let { roomPlayInfo ->
+        LaunchedEffect(roomPlayInfo) {
+            Navigator.launchRoomPlayActivity(context, roomPlayInfo)
             navController.popBackStack()
         }
     }
@@ -90,9 +88,11 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
 
     Column {
         CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
-        Column(Modifier
-            .weight(1f)
-            .padding(horizontal = 16.dp)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        ) {
             FlatNormalVerticalSpacer()
             FlatTextBodyTwo(stringResource(R.string.room_id))
             FlatSmallVerticalSpacer()

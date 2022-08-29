@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 
+// TODO try replace by LocalClipboardManager.current
 @Composable
 fun rememberAndroidClipboardController(
     context: Context = LocalContext.current,
@@ -18,7 +19,7 @@ class AndroidClipboardController(context: Context) : ClipboardController {
     private val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     override fun putText(text: CharSequence) {
-        val clip: ClipData = ClipData.newPlainText("FlatInvite", text)
+        val clip: ClipData = ClipData.newPlainText("Flat", text)
         clipboard.setPrimaryClip(clip)
     }
 

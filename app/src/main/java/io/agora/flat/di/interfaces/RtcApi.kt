@@ -1,14 +1,12 @@
 package io.agora.flat.di.interfaces
 
-import io.agora.flat.common.rtc.RTCEventListener
-import io.agora.rtc.RtcEngine
+import io.agora.flat.common.rtc.RtcEvent
+import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.rtc.video.VideoCanvas
+import kotlinx.coroutines.flow.Flow
 
 interface RtcApi {
-    // Reserved for interface collection
-    fun rtcEngine(): RtcEngine
-
-    fun joinChannel(token: String, channelName: String, optionalUid: Int): Int
+    fun joinChannel(options: RtcJoinOptions): Int
 
     fun leaveChannel()
 
@@ -23,7 +21,9 @@ interface RtcApi {
 
     fun updateRemoteStream(rtcUid: Int, audio: Boolean, video: Boolean)
 
-    fun addEventListener(listener: RTCEventListener)
+    fun observeRtcEvent(): Flow<RtcEvent>
 
-    fun removeEventListener(listener: RTCEventListener)
+    companion object {
+        const val MAX_CAPACITY = 17
+    }
 }

@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.app.Activity
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,17 +17,18 @@ import io.agora.flat.common.rtm.Message
 import io.agora.flat.common.rtm.NoticeMessageBody
 import io.agora.flat.common.rtm.TextMessageBody
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.ui.viewmodel.UserQuery
+import io.agora.flat.ui.manager.UserQuery
 
 /**
  * 消息列表适配器
  */
 class MessageAdapter constructor(
+    context: Context,
     private val dataSet: MutableList<Message> = mutableListOf(),
 ) : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
-    private lateinit var userQuery: UserQuery
-    private lateinit var userUUID: String
+    private var userQuery: UserQuery
+    private var userUUID: String
 
     @EntryPoint
     @InstallIn(ActivityComponent::class)
@@ -35,10 +37,9 @@ class MessageAdapter constructor(
         fun userQuery(): UserQuery
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
+    init {
         val entryPoint = EntryPointAccessors.fromActivity(
-            recyclerView.context as Activity,
+            context as Activity,
             MessageAdapterEntryPoint::class.java
         )
         userQuery = entryPoint.userQuery()

@@ -96,8 +96,7 @@ class LoginActivity : BaseComposeActivity() {
                     is LoginState.Process -> {
                         showToast((loginState as LoginState.Process).message.text)
                     }
-                    LoginState.Init -> {
-                    }
+                    LoginState.Init -> {}
                     LoginState.Success -> {
                         if (viewModel.needBindPhone()) {
                             if (isPhoneMode()) {
@@ -115,6 +114,7 @@ class LoginActivity : BaseComposeActivity() {
             }
 
             LoginPage(actioner = actioner)
+
             if (showPhoneBind) {
                 PhoneBindDialog(
                     onBindSuccess = {
@@ -264,17 +264,21 @@ private fun LoginButtonsArea(
     actioner: (LoginUiAction) -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .weight(1f)
-            .height(0.5.dp)
-            .background(Gray_1))
+        Spacer(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .weight(1f)
+                .height(0.5.dp)
+                .background(Gray_1)
+        )
         FlatTextBodyOneSecondary(stringResource(id = R.string.login_others_tip))
-        Spacer(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .weight(1f)
-            .height(0.5.dp)
-            .background(Gray_1))
+        Spacer(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .weight(1f)
+                .height(0.5.dp)
+                .background(Gray_1)
+        )
     }
     Spacer(Modifier.height(32.dp))
     Row {

@@ -142,12 +142,15 @@
     <string name="room_class_message_empty_hit">Say something…</string>
     <string name="room_class_cloudstorage_empty_hit">No files</string>
     <string name="room_class_teacher_leave">Teacher has left</string>
+    <string name="room_class_student_left">Student has left</string>
     <string name="room_dialog_exit_title">Close Options</string>
 
     <string name="user_list">User List</string>
     <string name="room_class_userlist_state_speaking">(Speaking)</string>
+    <string name="room_class_userlist_state_speaking_left">(Left)</string>
     <string name="room_class_userlist_state_handup">(Hands raised)</string>
     <string name="room_class_userlist_state_teacher">(Teacher)</string>
+    <string name="room_class_userlist_state_teacher_left">(Teacher Left)</string>
     <string name="room_recording_hit">Course recording…</string>
     <string name="start_room">Classes begin</string>
     <string name="stop_record">Stop recording</string>
@@ -178,11 +181,8 @@
     <string name="privacy_agreement">Privacy Agreement</string>
     <string name="network_error">Please check the network settings.</string>
     <string name="copy_success">Copy successfully</string>
+    <string name="invite_text_format">%1$s invites you to join the Flat room\n\nRoom Theme: %2$s\nRoom ID: %3$s\n\nStart Time: %4$s\nJoin Link: %5$s</string>
     <string name="invite_title_format">%1$s invites you to join the Flat room</string>
-    <string name="invite_room_name_format">Room Theme: %1$s</string>
-    <string name="invite_room_number_format">Room ID: %1$s</string>
-    <string name="invite_begin_time_format">Start Time: %1$s</string>
-    <string name="invite_join_link_format">Join Link: %1$s</string>
     <string name="replay">Replay</string>
     <string name="exit_replay">Exit playback</string>
     <string name="exit_replay_tip">Are you sure to exit playback?</string>
@@ -242,4 +242,6 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>
     <string name="request_common_success">success</string>
+
+    <string name="error_string_network">please check your network</string>
 </resources>

@@ -1,32 +1,35 @@
 package io.agora.flat.ui.activity.play
 
-import android.view.LayoutInflater
+import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
-import io.agora.flat.data.model.RtcUser
-import io.agora.flat.ui.viewmodel.ClassRoomViewModel
+import io.agora.flat.data.model.RoomUser
+import io.agora.flat.util.inflate
 
 /**
  * 用户列表
  */
 class UserListAdapter(
     private val viewModel: ClassRoomViewModel,
-    private val dataSet: MutableList<RtcUser> = mutableListOf(),
+    private val dataSet: MutableList<RoomUser> = mutableListOf(),
 ) : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
 
     init {
         setHasStableIds(true)
     }
 
+    private var handUpDrawable: Drawable? = null
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(viewGroup.context)
-        val view = inflater.inflate(R.layout.item_room_user_list, viewGroup, false)
+        val view = viewGroup.inflate(R.layout.item_room_user_list, viewGroup, false)
         return ViewHolder(view)
     }
 
@@ -38,17 +41,22 @@ class UserListAdapter(
         // state
         viewHolder.state.run {
             when {
-                viewModel.isCreator(itemData.userUUID) -> {
-                    setText(R.string.room_class_userlist_state_teacher)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_text_secondary))
+                itemData.isOwner -> {
+                    if (itemData.isLeft) {
+                        setTextAndColor(R.string.room_class_userlist_state_teacher_left, R.color.flat_red)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_teacher, R.color.flat_text_secondary)
+                    }
                 }
                 itemData.isSpeak -> {
-                    setText(R.string.room_class_userlist_state_speaking)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_light_green))
+                    if (itemData.isLeft) {
+                        setTextAndColor(R.string.room_class_userlist_state_speaking_left, R.color.flat_red)
+                    } else {
+                        setTextAndColor(R.string.room_class_userlist_state_speaking, R.color.flat_light_green)
+                    }
                 }
                 itemData.isRaiseHand -> {
-                    setText(R.string.room_class_userlist_state_handup)
-                    setTextColor(ContextCompat.getColor(context, R.color.flat_blue))
+                    setTextAndColor(R.string.room_class_userlist_state_handup, R.color.flat_blue)
                 }
                 else -> {
                     text = ""
@@ -58,9 +66,9 @@ class UserListAdapter(
 
         // handup
         viewHolder.handup.run {
-            if (viewModel.state.value.isOwner) {
+            if (viewModel.isOwner()) {
                 when {
-                    viewModel.isCreator(itemData.userUUID) -> {
+                    itemData.isOwner -> {
                         isVisible = false
                     }
                     itemData.isSpeak -> {
@@ -72,15 +80,28 @@ class UserListAdapter(
                     }
                     itemData.isRaiseHand -> {
                         isVisible = true
-                        setImageResource(R.drawable.ic_room_userlist_handup_agree)
+                        if (handUpDrawable == null) {
+                            handUpDrawable = ContextCompat.getDrawable(
+                                context,
+                                R.drawable.ic_room_userlist_handup_agree
+                            )
+                        }
+                        if (viewModel.isOnStageAllowable()) {
+                            handUpDrawable?.setTint(ContextCompat.getColor(context, R.color.flat_blue_6))
+                        } else {
+                            handUpDrawable?.setTint(ContextCompat.getColor(context, R.color.flat_gray))
+                        }
+                        setImageDrawable(handUpDrawable)
                         setOnClickListener {
-                            viewModel.acceptRaiseHand(itemData.userUUID)
+                            if (viewModel.isOnStageAllowable()) {
+                                viewModel.acceptRaiseHand(itemData.userUUID)
+                            }
                         }
                     }
                     else -> isVisible = false
                 }
             } else {
-                if (itemData.isSpeak && itemData.userUUID == viewModel.state.value.userUUID) {
+                if (itemData.isSpeak && viewModel.isSelf(itemData.userUUID)) {
                     isVisible = true
                     setImageResource(R.drawable.ic_room_userlist_handup_close)
                     setOnClickListener {
@@ -93,13 +114,18 @@ class UserListAdapter(
         }
     }
 
+    private fun TextView.setTextAndColor(@StringRes textId: Int, @ColorRes colorId: Int) {
+        setText(textId)
+        setTextColor(ContextCompat.getColor(context, colorId))
+    }
+
     override fun getItemId(position: Int): Long {
         return dataSet[position].rtcUID.toLong()
     }
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataSet(data: List<RtcUser>) {
+    fun setData(data: List<RoomUser>) {
         dataSet.clear()
         dataSet.addAll(data.distinctBy { it.rtcUID })
         notifyDataSetChanged()

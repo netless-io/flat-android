@@ -21,7 +21,15 @@ jobs:
           KEYSTORE_SECRET_PASSPHRASE: ${{ secrets.KEYSTORE_SECRET_PASSPHRASE }}
           GRADLE_SECRET_PASSPHRASE: ${{ secrets.GRADLE_SECRET_PASSPHRASE }}
 
-      - name: Set up JDK 11
+      - name: Config
+        run: ./.github/scripts/project_config.sh
+        env:
+          ALIYUN_LOG_DEV_AK: ${{ secrets.ALIYUN_LOG_DEV_AK }}
+          ALIYUN_LOG_DEV_SK: ${{ secrets.ALIYUN_LOG_DEV_SK }}
+          ALIYUN_LOG_PROD_AK: ${{ secrets.ALIYUN_LOG_PROD_AK }}
+          ALIYUN_LOG_PROD_SK: ${{ secrets.ALIYUN_LOG_PROD_SK }}
+
+      - name: JDK Setup
         uses: actions/setup-java@v1
         with:
           java-version: 11

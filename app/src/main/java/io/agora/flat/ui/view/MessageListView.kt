@@ -28,10 +28,9 @@ class MessageListView @JvmOverloads constructor(
         true,
     )
 
-    private var messageAdapter: MessageAdapter = MessageAdapter()
+    private var messageAdapter: MessageAdapter = MessageAdapter(context)
     private var listener: Listener? = null
-
-    var firstVisible = -1
+    private var firstVisible = -1
 
     init {
         binding.messageList.adapter = messageAdapter
@@ -73,15 +72,31 @@ class MessageListView @JvmOverloads constructor(
             }
         }
 
+        binding.mute.setOnClickListener {
+            val targetMuted = !binding.mute.isSelected
+            binding.mute.isSelected = targetMuted
+            listener?.onMute(targetMuted)
+        }
+
         // Consume events to prevent edittext focus loss
         binding.sendLayout.setOnClickListener {}
     }
 
-    fun setBan(ban: Boolean) {
-        binding.send.isEnabled = !ban
-        binding.messageEdit.isEnabled = !ban
-        binding.messageEdit.hint =
-            if (ban) context.getString(R.string.class_room_message_muted) else context.getString(R.string.say_something)
+    fun setBan(ban: Boolean, isOwner: Boolean) {
+        binding.mute.isSelected = ban
+
+        val canSend = isOwner || !ban
+        binding.send.isEnabled = canSend
+        binding.messageEdit.isEnabled = canSend
+        binding.messageEdit.hint = if (canSend) {
+            context.getString(R.string.say_something)
+        } else {
+            context.getString(R.string.class_room_message_muted)
+        }
+    }
+
+    fun showBanBtn(shown: Boolean) {
+        binding.mute.isVisible = shown
     }
 
     fun setEditable(enable: Boolean) {
@@ -123,6 +138,8 @@ class MessageListView @JvmOverloads constructor(
 
     interface Listener {
         fun onSendMessage(msg: String)
+
+        fun onMute(muted: Boolean)
 
         fun onLoadMore() {}
     }

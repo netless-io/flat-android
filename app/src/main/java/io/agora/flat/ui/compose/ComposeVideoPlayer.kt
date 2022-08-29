@@ -40,8 +40,10 @@ fun ComposeVideoPlayer(
     }
 
     LaunchedEffect(uriString) {
-        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context,
-            Util.getUserAgent(context, context.packageName))
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
+            context,
+            Util.getUserAgent(context, context.packageName)
+        )
 
         val mediaItem = MediaItem
             .Builder()
