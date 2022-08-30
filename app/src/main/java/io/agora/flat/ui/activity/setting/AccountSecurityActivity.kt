@@ -96,7 +96,7 @@ private fun AccountSecurityScreen(viewState: AccountSecurityUiState, onMessageSh
 @Composable
 private fun CancelAccountDialog(onDismissRequest: () -> Unit, viewModel: AccountSecurityViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
-    FlatAndroidTheme {
+    FlatTheme {
         Dialog(
             onDismissRequest = onDismissRequest,
             properties = DialogProperties(usePlatformDefaultWidth = false),

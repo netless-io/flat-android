@@ -9,11 +9,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.agora.flat.Constants
 import io.agora.flat.R
-import io.agora.flat.ui.theme.FlatTitleTextStyle
+import io.agora.flat.ui.theme.FlatColorTextPrimary
 import io.agora.flat.ui.theme.Shapes
 
 @Composable
@@ -111,3 +115,10 @@ private fun GlobalRecheckAgreementMessage() {
 
     FlatClickableText(text = text, items = items)
 }
+
+private val FlatTitleTextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+    color = FlatColorTextPrimary,
+)

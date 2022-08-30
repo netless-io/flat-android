@@ -9,6 +9,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import io.agora.flat.ui.activity.history.HistoryScreen
 import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomScreen
 import io.agora.flat.ui.activity.room.JoinRoomPage
@@ -52,6 +53,7 @@ sealed class LeafScreen(private val route: String) {
 
     object UserProfile : LeafScreen("user_profile")
     object Settings : LeafScreen("settings")
+    object History : LeafScreen("history")
 }
 
 
@@ -94,7 +96,8 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
             JoinRoomPage(navController)
         }
-        composable(LeafScreen.RoomDetail.createRoute(screenRoot),
+        composable(
+            LeafScreen.RoomDetail.createRoute(screenRoot),
             arguments = listOf(navArgument("room_uuid") {
                 type = NavType.StringType
             })
@@ -174,6 +177,9 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
                 onOpenSetting = {
                     navController.navigate(LeafScreen.Settings.createRoute(screenRoot))
                 },
+                onOpenHistory = {
+                    navController.navigate(LeafScreen.History.createRoute(screenRoot))
+                }
             )
         }
         composable(LeafScreen.RoomCreate.createRoute(screenRoot)) {
@@ -182,7 +188,8 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
             JoinRoomPage(navController)
         }
-        composable(LeafScreen.RoomDetail.createRoute(screenRoot),
+        composable(
+            LeafScreen.RoomDetail.createRoute(screenRoot),
             arguments = listOf(navArgument("room_uuid") { type = NavType.StringType })
         ) {
             RoomDetailScreen(navController)
@@ -192,6 +199,16 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
         }
         composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
             UserProfile(navController)
+        }
+        composable(LeafScreen.History.createRoute(screenRoot)) {
+            HistoryScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                onOpenRoomDetail = { roomUUID, periodicUUID ->
+                    navController.navigate(LeafScreen.RoomDetail.createRoute(screenRoot, roomUUID, periodicUUID))
+                }
+            )
         }
     }
 }

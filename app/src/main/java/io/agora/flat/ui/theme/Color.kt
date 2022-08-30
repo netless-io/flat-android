@@ -1,5 +1,7 @@
 package io.agora.flat.ui.theme
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 // 颜色系统为一套配色表，一般情况下无语义颜色

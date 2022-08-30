@@ -7,8 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material.IconButton
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,23 +16,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
-import com.google.gson.Gson
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.FlatFormatter
 
 @Composable
 fun HomeScreen(
@@ -42,68 +36,47 @@ fun HomeScreen(
     onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,
     onOpenSetting: () -> Unit,
     onOpenUserProfile: () -> Unit,
+    onOpenHistory: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    val viewState by viewModel.state.collectAsState()
     HomeScreen(
-        viewModel = hiltViewModel(),
+        viewState = viewState,
         onOpenRoomCreate = onOpenRoomCreate,
         onOpenRoomJoin = onOpenRoomJoin,
         onOpenRoomDetail = onOpenRoomDetail,
         onOpenSetting = onOpenSetting,
-        onOpenUserProfile = onOpenUserProfile,
+        onOpenHistory = onOpenHistory,
+        onReloadRooms = viewModel::reloadRooms,
+        onSetNetwork = { Navigator.gotoNetworkSetting(context) }
     )
 }
 
 @Composable
 private fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewState: HomeUiState,
     onOpenRoomCreate: () -> Unit,
     onOpenRoomJoin: () -> Unit,
     onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,
     onOpenSetting: () -> Unit,
-    onOpenUserProfile: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onReloadRooms: () -> Unit,
+    onSetNetwork: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val viewState by viewModel.state.collectAsState()
-
-    val actioner: (HomeViewAction) -> Unit = { action ->
-        when (action) {
-            is HomeViewAction.Reload -> viewModel.reloadRoomList()
-            is HomeViewAction.SelectCategory -> viewModel.onRoomCategorySelected(action.category)
-
-            is HomeViewAction.GotoSetNetwork -> Navigator.gotoNetworkSetting(context)
-            is HomeViewAction.GotoRoomCreate -> onOpenRoomCreate()
-            is HomeViewAction.GotoRoomJoin -> onOpenRoomJoin()
-            is HomeViewAction.GotoRoomDetail -> onOpenRoomDetail(action.roomUUID, action.periodicUUID)
-            is HomeViewAction.GotoUserProfile -> onOpenUserProfile()
-            is HomeViewAction.GotoSetting -> onOpenSetting()
-        }
-    }
-
-    HomeScreen(viewState, actioner)
-}
-
-@Composable
-private fun HomeScreen(viewState: HomeViewState, actioner: (HomeViewAction) -> Unit) {
     Column(Modifier.fillMaxSize()) {
         // 顶部栏
-        FlatHomeTopBar(userAvatar = viewState.userInfo.avatar, actioner = actioner)
-        if (!viewState.networkActive) FlatNetworkError {
-            actioner(HomeViewAction.GotoSetNetwork)
-        }
+        FlatHomeTopBar(
+            userAvatar = viewState.userInfo.avatar,
+            onOpenSetting = onOpenSetting,
+            onOpenHistory = onOpenHistory
+        )
+        if (!viewState.networkActive) FlatNetworkError { onSetNetwork() }
         // 操作区
-        TopOperations(actioner)
+        TopOperations(onOpenRoomCreate = onOpenRoomCreate, onOpenRoomJoin = onOpenRoomJoin)
         // 房间列表区
-        FlatSwipeRefresh(refreshing = viewState.refreshing, onRefresh = { actioner(HomeViewAction.Reload) }) {
-            HomeRoomContent(
-                modifier = MaxWidthSpread,
-                selectedHomeCategory = viewState.category,
-                onCategorySelected = { actioner(HomeViewAction.SelectCategory(it)) },
-                roomList = viewState.roomList,
-                roomHistory = viewState.historyList,
-                onGotoRoom = { rUUID, pUUID ->
-                    actioner(HomeViewAction.GotoRoomDetail(rUUID, pUUID))
-                }
-            )
+        FlatSwipeRefresh(refreshing = viewState.refreshing, onRefresh = onReloadRooms) {
+            HomeRoomList(Modifier.fillMaxSize(), viewState.roomList, onGotoRoomDetail = onOpenRoomDetail)
         }
     }
 }
@@ -118,34 +91,36 @@ fun FlatNetworkError(onClick: () -> Unit) {
             .background(FlatColorRedLight)
             .padding(horizontal = 16.dp)
     ) {
-        FlatTextBodyOne(stringResource(R.string.network_error), Modifier.align(Alignment.CenterStart), FlatColorRed)
+        FlatTextBodyOne(
+            stringResource(R.string.network_error),
+            Modifier.align(Alignment.CenterStart),
+            FlatColorRed
+        )
         Image(painterResource(R.drawable.ic_arrow_right_red), "", Modifier.align(Alignment.CenterEnd))
     }
 }
 
 @Composable
-private fun TopOperations(actioner: (HomeViewAction) -> Unit) {
+private fun TopOperations(onOpenRoomCreate: () -> Unit, onOpenRoomJoin: () -> Unit) {
     Row(Modifier.fillMaxWidth()) {
-        OperationItem(R.drawable.ic_home_create_room, R.string.quick_start_room) {
-            actioner(HomeViewAction.GotoRoomCreate)
-        }
-        OperationItem(R.drawable.ic_home_join_room, R.string.join_room) {
-            actioner(HomeViewAction.GotoRoomJoin)
-        }
-        // Perhaps, the future will support
-        // OperationItem(R.drawable.ic_home_subscribe_room, R.string.subscribe_room) {
-        //     // Navigator.launchSubscribeRoomActivity(context)
-        //     context.showDebugToast(R.string.toast_in_development)
-        // }
+        OperationItem(Modifier.weight(1f), R.drawable.ic_home_join_room, R.string.join_room, onOpenRoomJoin)
+        OperationItem(Modifier.weight(1f), R.drawable.ic_home_quick_start, R.string.quick_start_room, onOpenRoomCreate)
     }
 }
 
 @Composable
-private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, onClick: () -> Unit) {
-    Box(Modifier.weight(1f), Alignment.TopCenter) {
+private fun OperationItem(
+    modifier: Modifier = Modifier,
+    @DrawableRes id: Int,
+    @StringRes tip: Int,
+    onClick: () -> Unit
+) {
+    val bgColor = if (isDarkTheme()) Blue_10 else Blue_0
+    val icColor = if (isDarkTheme()) Blue_2 else Blue_6
+    Box(modifier, Alignment.TopCenter) {
         Column(
             Modifier
-                .padding(top = 16.dp, bottom = 24.dp)
+                .padding(vertical = 16.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 48.dp),
@@ -153,151 +128,72 @@ private fun RowScope.OperationItem(@DrawableRes id: Int, @StringRes tip: Int, on
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(painterResource(id), null)
-            Spacer(Modifier.height(8.dp))
-            FlatTextBodyTwo(text = stringResource(tip))
-        }
-    }
-}
-
-@OptIn(ExperimentalCoilApi::class)
-@Composable
-fun FlatHomeTopBar(userAvatar: String, actioner: (HomeViewAction) -> Unit) {
-    FlatTopAppBar(
-        title = stringResource(R.string.title_home),
-        actions = {
-            IconButton(onClick = {
-                actioner(HomeViewAction.GotoSetting)
-            }) {
+            Box(
+                Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(bgColor),
+                contentAlignment = Alignment.Center
+            ) {
                 Image(
-                    painter = rememberImagePainter(userAvatar),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(24.dp, 24.dp)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .border(
-                            1.dp,
-                            if (isDarkTheme()) FlatColorDividerDark else FlatColorDivider,
-                            RoundedCornerShape(50)
-                        ),
-                    contentScale = ContentScale.Crop
+                    painterResource(id),
+                    null,
+                    colorFilter = ColorFilter.tint(icColor)
                 )
             }
-        }
-    )
-}
-
-@Composable
-private fun HomeRoomContent(
-    modifier: Modifier,
-    selectedHomeCategory: RoomCategory,
-    onCategorySelected: (RoomCategory) -> Unit,
-    roomList: List<RoomInfo>,
-    roomHistory: List<RoomInfo>,
-    onGotoRoom: (String, String?) -> Unit,
-) {
-    Column(modifier) {
-        HomeRoomTabs(
-            listOf(RoomCategory.Current, RoomCategory.History),
-            selectedHomeCategory,
-            onCategorySelected,
-            Modifier.fillMaxWidth()
-        )
-
-        when (selectedHomeCategory) {
-            RoomCategory.Current -> {
-                HomeRoomList(Modifier.fillMaxSize(), roomList, RoomCategory.Current, onGotoRoom)
-            }
-            RoomCategory.History -> {
-                HomeRoomList(Modifier.fillMaxSize(), roomHistory, RoomCategory.History, onGotoRoom)
-            }
+            Spacer(Modifier.height(8.dp))
+            FlatTextCaption(stringResource(tip))
         }
     }
 }
 
+
 @Composable
-private fun HomeRoomTabs(
-    categories: List<RoomCategory>,
-    selectedCategory: RoomCategory,
-    onCategorySelected: (RoomCategory) -> Unit,
-    modifier: Modifier = Modifier,
+fun FlatHomeTopBar(
+    userAvatar: String,
+    onOpenSetting: () -> Unit,
+    onOpenHistory: () -> Unit,
 ) {
-    val selectedIndex = categories.indexOfFirst { it == selectedCategory }
-    val indicator = @Composable { tabPositions: List<TabPosition> ->
-        HomeTabIndicator(Modifier.tabIndicatorOffset(tabPositions[selectedIndex]), FlatColorBlue)
-    }
-
-    TabRow(
-        selectedTabIndex = selectedIndex,
-        modifier = modifier,
-        indicator = indicator,
-        backgroundColor = MaterialTheme.colors.background
-    ) {
-        categories.forEachIndexed { index, category ->
-            val text = when (category) {
-                RoomCategory.Current -> stringResource(R.string.home_room_list)
-                RoomCategory.History -> stringResource(R.string.home_room_history)
-            }
-
-            Tab(
-                selected = index == selectedIndex,
-                onClick = { onCategorySelected(category) },
-                text = {
-                    FlatTextBodyTwo(text)
-                }
+    FlatMainTopAppBar(stringResource(R.string.title_home)) {
+        IconButton(onClick = onOpenHistory) {
+            Image(
+                painter = painterResource(R.drawable.ic_history),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp, 24.dp)
             )
         }
+        IconButton(onClick = onOpenSetting) {
+            FlatAvatar(userAvatar, size = 24.dp)
+        }
     }
-}
-
-@Composable
-private fun HomeTabIndicator(
-    modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onSurface,
-) {
-    Spacer(
-        modifier
-            .height(2.dp)
-            .padding(horizontal = 5.dp)
-            .background(color, RoundedCornerShape(topStartPercent = 100, topEndPercent = 100))
-    )
 }
 
 @Composable
 private fun HomeRoomList(
     modifier: Modifier,
     roomList: List<RoomInfo>,
-    category: RoomCategory,
-    onGotoRoom: (String, String?) -> Unit,
+    onGotoRoomDetail: (String, String?) -> Unit,
 ) {
     if (roomList.isEmpty()) {
-        val imgRes = when (category) {
-            RoomCategory.Current -> R.drawable.img_home_no_room
-            RoomCategory.History -> R.drawable.img_home_no_history
-        }
-        val message = when (category) {
-            RoomCategory.Current -> R.string.home_no_room_tip
-            RoomCategory.History -> R.string.home_no_history_room_tip
-        }
-        EmptyView(imgRes, message, modifier.verticalScroll(rememberScrollState()))
+        EmptyView(
+            modifier = modifier.verticalScroll(rememberScrollState()),
+            imgRes = R.drawable.img_room_list_empty,
+            message = R.string.home_no_history_room_tip
+        )
     } else {
         LazyColumn(modifier) {
             items(count = roomList.size, key = { index: Int ->
                 roomList[index].roomUUID
             }) {
-                RoomListItem(
-                    roomList[it],
-                    Modifier.clickable(
-                        indication = LocalIndication.current,
-                        interactionSource = remember { CustomInteractionSource() }) {
-                        onGotoRoom(roomList[it].roomUUID, roomList[it].periodicUUID)
-                    })
+                RoomItem(roomList[it], Modifier.clickable {
+                    onGotoRoomDetail(roomList[it].roomUUID, roomList[it].periodicUUID)
+                })
             }
             item {
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp), Alignment.TopCenter
+                        .padding(vertical = 12.dp), Alignment.TopCenter
                 ) {
                     FlatTextCaption(stringResource(R.string.loaded_all))
                 }
@@ -307,58 +203,13 @@ private fun HomeRoomList(
 }
 
 @Composable
-private fun RoomListItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
-    Column(modifier) {
-        if (roomInfo.showDayHead) {
-            Row(
-                Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(painterResource(R.drawable.ic_home_calendar), contentDescription = "")
-                Spacer(modifier = Modifier.size(4.dp))
-                FlatTextBodyOne(FlatFormatter.dateMisc(roomInfo.beginTime))
-            }
-        }
-        Row(Modifier.padding(16.dp, 12.dp)) {
-            Column(Modifier.weight(1f)) {
-                FlatTextBodyOne(roomInfo.title)
-                Spacer(modifier = Modifier.height(12.dp))
-                FlatTextBodyTwo("${FlatFormatter.time(roomInfo.beginTime)} ~ ${FlatFormatter.time(roomInfo.endTime)}")
-            }
-            Spacer(Modifier.width(12.dp))
-            FlatRoomStatusText(roomInfo.roomStatus, Modifier.align(Alignment.Bottom))
-        }
-        FlatDivider(startIndent = 16.dp, endIndent = 16.dp)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RoomListItemPreview() {
-    val roomStr = "{\n" +
-            "            \"roomUUID\": \"c97348d5-87e4-4154-8e10-c939ed9cb041\",\n" +
-            "            \"periodicUUID\": null,\n" +
-            "            \"ownerUUID\": \"722f7f6d-cc0f-4e63-a543-446a3b7bd659\",\n" +
-            "            \"roomType\": \"OneToOne\",\n" +
-            "            \"title\": \"XXX创建的房间\",\n" +
-            "            \"beginTime\": 1615371918318,\n" +
-            "            \"endTime\": 1615371955296,\n" +
-            "            \"roomStatus\": \"Stopped\",\n" +
-            "            \"ownerName\": \"XXX\",\n" +
-            "            \"hasRecord\": true\n" +
-            "        }"
-    val roomInfo = Gson().fromJson(roomStr, RoomInfo::class.java)
-    roomInfo.showDayHead = true
-    RoomListItem(roomInfo, Modifier)
-}
-
-@Preview(showBackground = true, uiMode = 0x30)
-@Composable
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 fun HomePreview() {
-    val viewState = HomeViewState(
+    val viewState = HomeUiState(
         networkActive = false
     )
-    HomeScreen(viewState) {
-
+    FlatPage {
+        HomeScreen(viewState, {}, {}, { _, _ -> }, {}, {}, {}, {})
     }
 }

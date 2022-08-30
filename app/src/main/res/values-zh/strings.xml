@@ -21,6 +21,10 @@
     <string name="relative_time_mm">%d分</string>
     <string name="relative_time_hh">%d小时</string>
     <string name="relative_time_dd">%d天</string>
+    <string name="home_room_info_today_format">今天 %s</string>
+    <string name="home_room_info_yesterday_format">昨天 %s</string>
+    <string name="home_room_info_tomorrow_format">明天 %s</string>
+    <string name="home_room_info_started_format">已经开始 %s</string>
 
     <!-- title -->
     <string name="title_home">Home</string>

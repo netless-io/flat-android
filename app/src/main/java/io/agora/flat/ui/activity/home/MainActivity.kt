@@ -122,7 +122,7 @@ internal fun UpdateDialog(
     onUpdate: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    FlatAndroidTheme {
+    FlatTheme {
         val dismissBlocked = {}
         Dialog(onDismissRequest = if (versionCheckResult.forceUpdate) dismissBlocked else onCancel) {
             Surface(shape = Shapes.large) {
@@ -294,6 +294,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
                             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
                         }
                     },
+                    onOpenHistory = {
+                        navController.navigate(LeafScreen.History.createRoute(Screen.HomeExt)) {
+                            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+                        }
+                    }
                 )
                 MainTab.Cloud -> CloudScreen(
                     onOpenUploading = {

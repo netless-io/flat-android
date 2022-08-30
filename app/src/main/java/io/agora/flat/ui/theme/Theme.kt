@@ -6,6 +6,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.util.isTabletMode
@@ -13,8 +17,8 @@ import io.agora.flat.util.isTabletMode
 
 @SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
-    primary = FlatColorBlue,
-    primaryVariant = FlatColorBlue,
+    primary = Blue_7,
+    primaryVariant = Blue_7,
 
     secondary = FlatColorBlue,
     secondaryVariant = FlatColorBlue,
@@ -37,8 +41,8 @@ private val DarkColorPalette = darkColors(
  */
 @SuppressLint("ConflictingOnColor")
 private val LightColorPalette = lightColors(
-    primary = FlatColorBlue,
-    primaryVariant = FlatColorBlue,
+    primary = Blue_6,
+    primaryVariant = Blue_6,
     secondary = FlatColorBlue,
     secondaryVariant = FlatColorBlue,
 
@@ -55,22 +59,49 @@ private val LightColorPalette = lightColors(
     onError = FlatColorWhite
 )
 
+private val LightExtendedColors = ExtendedColors(
+    textPrimary = Blue_12,
+    textSecondary = Gray_6,
+)
+
+private val DarkExtendedColors = ExtendedColors(
+    textPrimary = Blue_0,
+    textSecondary = Gray_3,
+)
+
 @Composable
-fun FlatAndroidTheme(
+fun FlatTheme(
     darkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+    val colors = if (darkTheme) DarkColorPalette else LightColorPalette
+    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
+    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes,
+            content = content
+        )
     }
+}
 
-    MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
+object FlatTheme {
+    val colors: ExtendedColors
+        @Composable
+        get() = LocalExtendedColors.current
+}
+
+@Immutable
+data class ExtendedColors(
+    val textPrimary: Color,
+    val textSecondary: Color,
+)
+
+val LocalExtendedColors = staticCompositionLocalOf {
+    ExtendedColors(
+        textPrimary = Color.Unspecified,
+        textSecondary = Color.Unspecified
     )
 }
 

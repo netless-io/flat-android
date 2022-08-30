@@ -67,7 +67,7 @@ fun CloudScreen(
 @Composable
 internal fun CloudScreen(viewState: CloudStorageViewState, actioner: (CloudStorageUIAction) -> Unit) {
     Column {
-        FlatTopAppBar(stringResource(R.string.title_cloud_storage)) {
+        FlatMainTopAppBar(stringResource(R.string.title_cloud_storage)) {
             UploadIcon(viewState) {
                 actioner(CloudStorageUIAction.OpenUploading)
             }
@@ -238,7 +238,7 @@ internal fun CloudContent(
 
     Column {
         if (files.isEmpty()) {
-            EmptyView(
+            LastEmptyView(
                 R.drawable.img_cloud_storage_no_file,
                 R.string.cloud_storage_no_files,
                 MaxWidthSpread.verticalScroll(rememberScrollState()),
@@ -352,7 +352,7 @@ private fun CloudStorageItem(
                 FlatTextBodyTwo(file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Row {
-                    FlatTextCaption(FlatFormatter.dateDash(file.createAt))
+                    FlatTextCaption(FlatFormatter.date(file.createAt))
                     Spacer(Modifier.width(16.dp))
                     FlatTextCaption(FlatFormatter.size(file.fileSize))
                 }

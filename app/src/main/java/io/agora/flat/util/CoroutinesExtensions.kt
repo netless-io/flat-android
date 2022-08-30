@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
  * 存在动画的交互请求，有助于视觉体验的提升
  * 例如：点击 loading 后跳转
  */
-suspend fun <T> CoroutineScope.runAtLeast(time: Long = 2000, block: suspend () -> T): T {
+suspend fun <T> CoroutineScope.runAtLeast(time: Long = 1000, block: suspend () -> T): T {
     val start = System.currentTimeMillis()
     val result = block()
     if (System.currentTimeMillis() - start < time) {

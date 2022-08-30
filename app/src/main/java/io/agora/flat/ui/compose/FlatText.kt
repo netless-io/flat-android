@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
@@ -61,7 +63,7 @@ fun FlatTextLargeTitle(
 fun FlatTextTitle(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
+    color: Color = FlatTheme.colors.textPrimary,
 ) {
     Text(
         text = text,
@@ -78,9 +80,9 @@ fun FlatTextSubtitle(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    overflow: TextOverflow = TextOverflow.Clip,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE,
+    maxLines: Int = 1,
 ) {
     Text(
         text = text,
@@ -89,7 +91,9 @@ fun FlatTextSubtitle(
         overflow = overflow,
         softWrap = softWrap,
         maxLines = maxLines,
-        style = MaterialTheme.typography.subtitle1,
+        style = MaterialTheme.typography.subtitle1.copy(
+            fontWeight = FontWeight.W600
+        ),
     )
 }
 
@@ -142,6 +146,7 @@ fun FlatTextBodyTwo(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
+    style: TextStyle = MaterialTheme.typography.body2,
 ) {
     Text(
         text = text,
@@ -150,7 +155,7 @@ fun FlatTextBodyTwo(
         overflow = overflow,
         softWrap = softWrap,
         maxLines = maxLines,
-        style = MaterialTheme.typography.body2,
+        style = style,
     )
 }
 
@@ -178,7 +183,7 @@ fun FlatTextButton(
 fun FlatTextCaption(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = if (isDarkTheme()) FlatColorTextSecondaryDark else FlatColorTextSecondary,
+    color: Color = FlatTheme.colors.textSecondary,
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,

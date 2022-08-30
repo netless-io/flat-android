@@ -1,18 +1,17 @@
 package io.agora.flat.ui.compose
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
-import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.agora.flat.R
+import io.agora.flat.ui.theme.FlatTheme
 
 @Composable
 fun FlatTopAppBar(
@@ -46,13 +45,26 @@ fun FlatTopAppBar(
     }
 }
 
+/**
+ * HomeScreen and CloudScreen TopAppbar Style
+ */
 @Composable
-fun FlatTopAppBar(
+fun FlatMainTopAppBar(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     FlatTopAppBar(
-        title = { FlatTextTitle(text = title) },
+        title = {
+            Text(
+                text = title,
+                color = FlatTheme.colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.h6.copy(
+                    fontWeight = FontWeight.W600
+                ),
+            )
+        },
         actions = actions
     )
 }
@@ -67,7 +79,7 @@ fun BackTopAppBar(
         title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
-                Icon(Icons.Rounded.ArrowBackIosNew, contentDescription = null)
+                Icon(painterResource(R.drawable.ic_arrow_left), contentDescription = null)
             }
         },
         actions = actions
@@ -84,7 +96,7 @@ fun CloseTopAppBar(
         title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onClose) {
-                Icon(Icons.Rounded.Close, contentDescription = null)
+                Icon(painterResource(R.drawable.ic_title_close), contentDescription = null)
             }
         },
         actions = actions

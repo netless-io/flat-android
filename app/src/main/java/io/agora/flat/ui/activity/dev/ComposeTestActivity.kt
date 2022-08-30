@@ -32,7 +32,7 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.ComposeVideoPlayer
 import io.agora.flat.ui.compose.MediaPlayback
-import io.agora.flat.ui.theme.FlatAndroidTheme
+import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.FlatColorWhite
 import kotlin.math.roundToInt
 
@@ -40,7 +40,7 @@ class ComposeTestActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlatAndroidTheme {
+            FlatTheme {
                 val controller = rememberSystemUiController()
                 controller.setStatusBarColor(FlatColorWhite)
                 ComposeTestScreen()
@@ -215,7 +215,7 @@ fun HelloContent(name: String, onNameChange: (String) -> Unit) {
 @Preview(showBackground = true, device = Devices.PIXEL_2)
 @Composable
 fun DefaultPreview2() {
-    FlatAndroidTheme {
+    FlatTheme {
         val controller = rememberSystemUiController()
         controller.setStatusBarColor(FlatColorWhite)
 

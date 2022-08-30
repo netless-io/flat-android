@@ -599,7 +599,7 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         Column(horizontalAlignment = Alignment.End) {
             FlatTextLargeTitle(FlatFormatter.time(begin))
             FlatSmallVerticalSpacer()
-            FlatTextBodyOne(FlatFormatter.formatLongDate(begin))
+            FlatTextBodyOne(FlatFormatter.longDate(begin))
         }
         FlatLargeHorizontalSpacer()
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -622,7 +622,7 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
         Column(horizontalAlignment = Alignment.Start) {
             FlatTextLargeTitle(FlatFormatter.time(end))
             FlatSmallVerticalSpacer()
-            FlatTextBodyTwo(FlatFormatter.formatLongDate(end))
+            FlatTextBodyTwo(FlatFormatter.longDate(end))
         }
     }
 }
