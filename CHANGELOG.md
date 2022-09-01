@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.4.8] - September 1, 2022
+- Fix Bugs
+
 ## [1.4.6] - August 16, 2022
 - Fix Bugs
 
