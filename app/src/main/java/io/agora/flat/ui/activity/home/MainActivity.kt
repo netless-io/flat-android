@@ -71,6 +71,25 @@ class MainActivity : BaseComposeActivity() {
                         loginManager.unregisterReceiver(this)
                     },
                 )
+                if (viewState.versionCheckResult.showUpdate) {
+                    UpdateDialog(
+                        viewState.versionCheckResult,
+                        viewState.updating,
+                        viewModel::updateApp,
+                        viewModel::cancelUpdate)
+                }
+
+                LaunchedEffect(error) {
+                    error?.let {
+                        showToast(it.message)
+                    }
+                }
+
+                LaunchedEffect(roomPlayInfo) {
+                    roomPlayInfo?.let {
+                        Navigator.launchRoomPlayActivity(this@MainActivity, it)
+                    }
+                }
             } else {
                 GlobalAgreementDialog(
                     onAgree = {
@@ -78,26 +97,6 @@ class MainActivity : BaseComposeActivity() {
                     },
                     onRefuse = { finish() },
                 )
-            }
-
-            if (viewState.versionCheckResult.showUpdate) {
-                UpdateDialog(
-                    viewState.versionCheckResult,
-                    viewState.updating,
-                    viewModel::updateApp,
-                    viewModel::cancelUpdate)
-            }
-
-            LaunchedEffect(error) {
-                error?.let {
-                    showToast(it.message)
-                }
-            }
-
-            LaunchedEffect(roomPlayInfo) {
-                roomPlayInfo?.let {
-                    Navigator.launchRoomPlayActivity(this@MainActivity, it)
-                }
             }
         }
     }

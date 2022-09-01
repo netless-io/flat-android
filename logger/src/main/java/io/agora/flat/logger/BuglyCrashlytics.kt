@@ -28,8 +28,7 @@ internal class BuglyCrashlytics : Crashlytics {
     }
 
     override fun log(tag: String?, message: String, t: Throwable?) {
-        BuglyLog.e(tag, message, t)
-        if (t != null) {
+        if (CrashModule.getInstance().hasInitialized() && t != null) {
             CrashReport.postCatchedException(t)
         }
     }
