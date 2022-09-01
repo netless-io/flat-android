@@ -65,7 +65,7 @@ private fun HistoryList(modifier: Modifier, histories: List<RoomInfo>, onOpenRoo
     if (histories.isEmpty()) {
         EmptyView(
             modifier = modifier.verticalScroll(rememberScrollState()),
-            imgRes = R.drawable.img_room_list_empty,
+            imgRes = R.drawable.img_history_list_empty,
             message = R.string.home_no_history_room_tip
         )
     } else {
@@ -92,7 +92,7 @@ private fun HistoryList(modifier: Modifier, histories: List<RoomInfo>, onOpenRoo
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp), Alignment.TopCenter
+                        .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter
                 ) {
                     FlatTextCaption(stringResource(R.string.loaded_all))
                 }

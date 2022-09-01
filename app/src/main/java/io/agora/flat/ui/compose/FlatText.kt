@@ -63,7 +63,7 @@ fun FlatTextLargeTitle(
 fun FlatTextTitle(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = FlatTheme.colors.textPrimary,
+    color: Color = FlatTheme.colors.textTitle,
 ) {
     Text(
         text = text,

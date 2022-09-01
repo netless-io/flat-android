@@ -52,7 +52,7 @@ fun RoomItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
 @Composable
 private fun RoomItemTitle(roomInfo: RoomInfo) {
     Row {
-        FlatTextSubtitle(roomInfo.title, color = FlatTheme.colors.textPrimary)
+        FlatTextSubtitle(roomInfo.title, color = FlatTheme.colors.textTitle)
         if (roomInfo.roomStatus != RoomStatus.Stopped && roomInfo.isPeriodic) {
             Spacer(Modifier.width(4.dp))
             Image(
@@ -87,7 +87,7 @@ private fun RoomItemTime(roomStatus: RoomStatus, beginTime: Long, endTime: Long)
         else -> {
             FlatTextBodyTwo(
                 getDisplayTime(context, beginTime, endTime),
-                color = FlatTheme.colors.textSecondary
+                color = FlatTheme.colors.textPrimary
             )
         }
     }

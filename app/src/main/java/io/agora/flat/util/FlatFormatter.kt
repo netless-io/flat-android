@@ -10,7 +10,7 @@ object FlatFormatter {
     private val timeFormatter = SimpleDateFormat("HH:mm")
     private val timeMsFormatter = SimpleDateFormat("mm:ss")
     private val dateFormat = SimpleDateFormat("MM-dd")
-    private val longDateFormat = SimpleDateFormat("yyyy-MM-dd")
+    private val longDateFormat = SimpleDateFormat("yyyy/MM/dd")
     private val longDateWithWeekFormat = SimpleDateFormat("yyyy/MM/dd EE", Locale.CHINA)
 
     fun time(utcMs: Long): String {

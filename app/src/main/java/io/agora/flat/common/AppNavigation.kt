@@ -9,6 +9,9 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import io.agora.flat.ui.activity.cloud.list.CloudScreen
+import io.agora.flat.ui.activity.cloud.list.CloudUploadPick
+import io.agora.flat.ui.activity.cloud.uploading.Uploading
 import io.agora.flat.ui.activity.history.HistoryScreen
 import io.agora.flat.ui.activity.home.*
 import io.agora.flat.ui.activity.room.CreateRoomScreen
@@ -129,7 +132,7 @@ fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
             )
         }
         composable(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
-            UploadList(
+            Uploading(
                 onCloseUploading = navController::popBackStack
             )
         }
@@ -151,7 +154,7 @@ fun NavGraphBuilder.addCloudGraph(navController: NavHostController) {
         }
 
         composable(LeafScreen.CloudUploading.createRoute(screenRoot)) {
-            UploadList(onCloseUploading = { navController.popBackStack() })
+            Uploading(onCloseUploading = { navController.popBackStack() })
         }
     }
 }

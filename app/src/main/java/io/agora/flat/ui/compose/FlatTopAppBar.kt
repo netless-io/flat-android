@@ -57,7 +57,7 @@ fun FlatMainTopAppBar(
         title = {
             Text(
                 text = title,
-                color = FlatTheme.colors.textPrimary,
+                color = FlatTheme.colors.textTitle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.h6.copy(

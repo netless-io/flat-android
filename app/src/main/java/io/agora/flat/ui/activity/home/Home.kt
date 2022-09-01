@@ -193,7 +193,7 @@ private fun HomeRoomList(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp), Alignment.TopCenter
+                        .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter
                 ) {
                     FlatTextCaption(stringResource(R.string.loaded_all))
                 }

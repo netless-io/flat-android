@@ -16,6 +16,8 @@
     <string name="start">开始</string>
     <string name="enter">加入</string>
     <string name="update">升级</string>
+    <string name="retry">重试</string>
+    <string name="done">完成</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -27,7 +29,7 @@
     <string name="home_room_info_started_format">已经开始 %s</string>
 
     <!-- title -->
-    <string name="title_home">Home</string>
+    <string name="title_home">Home</string>F
     <string name="title_cloud_storage">云盘</string>
     <string name="title_cloud_pick">上传</string>
     <string name="title_cloud_preview">预览</string>

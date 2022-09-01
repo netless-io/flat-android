@@ -14,6 +14,8 @@
     <string name="start">Start</string>
     <string name="enter">Enter</string>
     <string name="update">Update</string>
+    <string name="retry">Retry</string>
+    <string name="done">Done</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>

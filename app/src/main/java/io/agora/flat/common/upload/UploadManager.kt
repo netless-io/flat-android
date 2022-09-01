@@ -44,7 +44,7 @@ object UploadManager {
         executorService.submit(task)
 
         uploadFiles.value = uploadFiles.value.toMutableList().apply {
-            add(0, UploadFile(fileUUID = request.uuid, filename = request.filename))
+            add(0, UploadFile(fileUUID = request.uuid, filename = request.filename, size = request.size))
         }
     }
 
@@ -228,6 +228,7 @@ fun interface UploadEventListener {
 data class UploadFile(
     val fileUUID: String,
     val filename: String,
+    val size: Long = 0,
     val uploadState: UploadState = UploadState.Init,
     val progress: Float = 0.0F,
 )

@@ -27,7 +27,7 @@ private val DarkColorPalette = darkColors(
     background = Gray_10,
     // cards, sheets, and menus
     surface = FlatColorSurfaceDark,
-    error = FlatColorRed,
+    error = Red_7,
 
     onPrimary = FlatColorTextPrimaryDark,
     onSecondary = FlatColorTextSecondaryDark,
@@ -50,7 +50,7 @@ private val LightColorPalette = lightColors(
     background = FlatColorWhite,
     // cards, sheets, and menus
     surface = FlatColorSurface,
-    error = FlatColorRed,
+    error = Red_6,
 
     onPrimary = FlatColorTextPrimary,
     onSecondary = FlatColorTextSecondary,
@@ -60,13 +60,15 @@ private val LightColorPalette = lightColors(
 )
 
 private val LightExtendedColors = ExtendedColors(
-    textPrimary = Blue_12,
-    textSecondary = Gray_6,
+    textPrimary = Gray_6,
+    textSecondary = Gray_3,
+    textTitle = Blue_12,
 )
 
 private val DarkExtendedColors = ExtendedColors(
-    textPrimary = Blue_0,
-    textSecondary = Gray_3,
+    textPrimary = Gray_3,
+    textSecondary = Gray_6,
+    textTitle = Blue_0,
 )
 
 @Composable
@@ -96,12 +98,14 @@ object FlatTheme {
 data class ExtendedColors(
     val textPrimary: Color,
     val textSecondary: Color,
+    val textTitle: Color,
 )
 
 val LocalExtendedColors = staticCompositionLocalOf {
     ExtendedColors(
         textPrimary = Color.Unspecified,
-        textSecondary = Color.Unspecified
+        textSecondary = Color.Unspecified,
+        textTitle = Color.Unspecified
     )
 }
 

@@ -1,7 +1,9 @@
 package io.agora.flat.ui.activity.home
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.compose.FlatTextBodyTwo
 import io.agora.flat.ui.theme.Blue_0
 import io.agora.flat.ui.theme.Blue_10
@@ -21,21 +22,10 @@ import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.isDarkTheme
 
 @Composable
-internal fun LastEmptyView(imgRes: Int, message: Int, modifier: Modifier = Modifier.fillMaxSize()) {
-    Box(modifier, Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(painter = painterResource(id = imgRes), contentDescription = null)
-            Spacer(Modifier.height(4.dp))
-            FlatTextBodyOne(text = stringResource(id = message))
-        }
-    }
-}
-
-@Composable
 internal fun EmptyView(modifier: Modifier = Modifier, imgRes: Int, message: Int) {
     val bgColor = if (isDarkTheme()) Blue_10 else Blue_0
     val imgColor = MaterialTheme.colors.primary
-    val textColor = FlatTheme.colors.textSecondary
+    val textColor = FlatTheme.colors.textPrimary
     Box(modifier, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box {
