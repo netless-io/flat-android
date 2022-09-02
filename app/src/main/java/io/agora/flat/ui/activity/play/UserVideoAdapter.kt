@@ -53,7 +53,7 @@ class UserVideoAdapter(
         viewHolder.studentLeaveLy.isVisible = itemData.isLeft && !itemData.isOwner
         viewHolder.micClosed.isVisible = !itemData.audioOpen
 
-        if (itemData.isLeft && itemData.rtcUID != rtcVideoController.fullScreenUid) {
+        if (itemData.isJoined && itemData.rtcUID != rtcVideoController.fullScreenUid) {
             rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
         }
 
