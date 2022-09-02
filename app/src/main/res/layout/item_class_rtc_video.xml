@@ -68,6 +68,13 @@
             android:src="@drawable/ic_room_mic_closed"
             android:visibility="invisible" />
 
+        <io.agora.flat.ui.view.AudioVolumeView
+            android:id="@+id/audio_volume"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="@dimen/room_class_button_padding_size" />
+
         <FrameLayout
             android:id="@+id/teacher_leave_ly"
             android:layout_width="match_parent"
