@@ -10,6 +10,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -70,6 +71,10 @@ fun Context.dp2px(dp: Int): Int {
 fun Context.px2dp(px: Int): Int {
     return (px.toFloat() / resources.displayMetrics.density + 0.5).toInt()
 }
+
+fun Context.px(@DimenRes dimen: Int): Int = resources.getDimension(dimen).toInt()
+
+fun Context.dp(@DimenRes dimen: Int): Float = px(dimen) / resources.displayMetrics.density
 
 fun Context.isTabletMode(): Boolean {
     return resources.getBoolean(R.bool.isTablet)

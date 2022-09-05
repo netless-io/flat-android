@@ -13,7 +13,8 @@ import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.activity.cloud.list.CloudUploadPick
 import io.agora.flat.ui.activity.cloud.uploading.Uploading
 import io.agora.flat.ui.activity.history.HistoryScreen
-import io.agora.flat.ui.activity.home.*
+import io.agora.flat.ui.activity.home.ExtInitPage
+import io.agora.flat.ui.activity.home.HomeScreen
 import io.agora.flat.ui.activity.room.CreateRoomScreen
 import io.agora.flat.ui.activity.room.JoinRoomPage
 import io.agora.flat.ui.activity.room.RoomDetailScreen
@@ -112,6 +113,16 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
         }
         composable(LeafScreen.UserProfile.createRoute(screenRoot)) {
             UserProfile(navController)
+        }
+        composable(LeafScreen.History.createRoute(screenRoot)) {
+            HistoryScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                onOpenRoomDetail = { roomUUID, periodicUUID ->
+                    navController.navigate(LeafScreen.RoomDetail.createRoute(screenRoot, roomUUID, periodicUUID))
+                }
+            )
         }
     }
 }

@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/room_class_panel_title_height"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="4dp">

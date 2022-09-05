@@ -11,12 +11,12 @@
     <dimen name="room_class_video_area_width">120dp</dimen>
     <dimen name="room_class_layout_gap">12dp</dimen>
     <dimen name="room_class_toolbox_layout_size">40dp</dimen>
+    <dimen name="room_class_panel_title_height">40dp</dimen>
+    <dimen name="room_class_panel_margin_vertical">30dp</dimen>
+    <dimen name="room_class_panel_margin_horizontal">56dp</dimen>
 
-    <dimen name="room_class_sub_tools_margin">56dp</dimen>
     <dimen name="room_class_stroke_seeker">24dp</dimen>
-
     <dimen name="room_class_overlay_width">400dp</dimen>
-    <dimen name="room_class_overlay_width_small">180dp</dimen>
     <dimen name="room_class_message_max_width">300dp</dimen>
 
     <dimen name="room_class_video_user_avatar_size_normal">40dp</dimen>

@@ -16,10 +16,12 @@ import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
+import io.agora.flat.R
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.di.interfaces.SyncedClassState
+import io.agora.flat.util.dp
 import io.agora.flat.util.getAppVersion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,6 +84,16 @@ class BoardRoom @Inject constructor(
             } else {
                 WindowPrefersColorScheme.Light
             }
+            val styleMap = HashMap<String, String>()
+            styleMap["top"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
+            styleMap["right"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
+            styleMap["width"] = "${context.dp(R.dimen.room_class_toolbox_layout_size)}px"
+            styleMap["height"] = "${context.dp(R.dimen.room_class_toolbox_layout_size)}px"
+            styleMap["position"] = "fixed"
+            styleMap["border-radius"] = "8px"
+            styleMap["border"] = "1px solid rgba(0,0,0,.15)"
+            windowParams.collectorStyles = styleMap
+
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
                 nickName = userRepository.getUsername(),

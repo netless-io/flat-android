@@ -51,7 +51,8 @@
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_class_room_chat"
-                    app:tint="@color/color_class_room_icon" />
+                    app:tint="@color/color_class_room_icon"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/messageDot"
@@ -59,7 +60,8 @@
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_float_red_dot"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
 
             <FrameLayout
@@ -72,7 +74,8 @@
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_class_room_user_list"
-                    app:tint="@color/color_class_room_icon" />
+                    app:tint="@color/color_class_room_icon"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/userlistDot"
@@ -80,7 +83,8 @@
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_float_red_dot"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
 
             <ImageView
@@ -89,7 +93,8 @@
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_class_room_invite"
-                app:tint="@color/color_class_room_icon" />
+                app:tint="@color/color_class_room_icon"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/cloudservice"
@@ -97,7 +102,8 @@
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_class_room_cloud"
-                app:tint="@color/color_class_room_icon" />
+                app:tint="@color/color_class_room_icon"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/setting"
@@ -105,7 +111,8 @@
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_class_room_setting"
-                app:tint="@color/color_class_room_icon" />
+                app:tint="@color/color_class_room_icon"
+                tools:ignore="ContentDescription" />
 
             <FrameLayout
                 android:id="@+id/record_layout"
@@ -119,7 +126,8 @@
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_class_room_record"
                     android:visibility="visible"
-                    app:tint="@color/class_room_icon_gray" />
+                    app:tint="@color/class_room_icon_gray"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/stop_record"
@@ -128,10 +136,9 @@
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_class_room_record_stop"
                     android:visibility="gone"
-                    app:tint="@color/flat_day_night_primary_blue" />
+                    app:tint="@color/flat_day_night_primary_blue"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
-
-
         </LinearLayout>
 
         <FrameLayout
@@ -144,7 +151,8 @@
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_expanded"
-                app:tint="@color/class_room_icon_gray" />
+                app:tint="@color/class_room_icon_gray"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/expand"
@@ -153,7 +161,8 @@
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_collapsed"
                 android:visibility="gone"
-                app:tint="@color/class_room_icon_gray" />
+                app:tint="@color/class_room_icon_gray"
+                tools:ignore="ContentDescription" />
         </FrameLayout>
     </LinearLayout>
 
@@ -174,7 +183,8 @@
             android:layout_gravity="center"
             android:padding="@dimen/room_class_button_padding_size"
             android:src="@drawable/ic_room_hand_up_normal"
-            app:tint="@color/color_class_room_icon" />
+            app:tint="@color/color_class_room_icon"
+            tools:ignore="ContentDescription" />
     </FrameLayout>
 
     <include
@@ -182,8 +192,8 @@
         layout="@layout/layout_room_settings"
         android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
-        android:layout_marginVertical="28dp"
-        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
+        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
+        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
@@ -195,9 +205,8 @@
         layout="@layout/layout_room_cloud_storage"
         android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
-        android:layout_marginBottom="30dp"
+        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
+        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -208,9 +217,8 @@
         layout="@layout/layout_room_user_list"
         android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
-        android:layout_marginBottom="30dp"
+        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
+        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

@@ -9,9 +9,8 @@
         android:id="@+id/message_lv"
         android:layout_width="@dimen/room_class_overlay_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
-        android:layout_marginBottom="30dp"
+        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
+        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
