@@ -10,6 +10,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.util.inflate
@@ -45,7 +46,10 @@ class UserListAdapter(
                     if (itemData.isLeft) {
                         setTextAndColor(R.string.room_class_userlist_state_teacher_left, R.color.flat_red)
                     } else {
-                        setTextAndColor(R.string.room_class_userlist_state_teacher, R.color.flat_text_secondary)
+                        setTextAndColor(
+                            R.string.room_class_userlist_state_teacher,
+                            R.color.flat_day_night_text_secondary
+                        )
                     }
                 }
                 itemData.isSpeak -> {
@@ -73,7 +77,7 @@ class UserListAdapter(
                     }
                     itemData.isSpeak -> {
                         isVisible = true
-                        setImageResource(R.drawable.ic_room_userlist_handup_close)
+                        setImageResource(R.drawable.ic_room_user_list_handup_close)
                         setOnClickListener {
                             viewModel.closeSpeak(itemData.userUUID)
                         }
@@ -103,7 +107,7 @@ class UserListAdapter(
             } else {
                 if (itemData.isSpeak && viewModel.isSelf(itemData.userUUID)) {
                     isVisible = true
-                    setImageResource(R.drawable.ic_room_userlist_handup_close)
+                    setImageResource(R.drawable.ic_room_user_list_handup_close)
                     setOnClickListener {
                         viewModel.closeSpeak(itemData.userUUID)
                     }
@@ -111,6 +115,11 @@ class UserListAdapter(
                     isVisible = false
                 }
             }
+        }
+
+        viewHolder.avatar.load(itemData.avatarURL) {
+            crossfade(true)
+            placeholder(R.drawable.ic_class_room_user_avatar)
         }
     }
 
@@ -135,5 +144,6 @@ class UserListAdapter(
         val handup: ImageView = view.findViewById(R.id.handup)
         val username: TextView = view.findViewById(R.id.username)
         val state: TextView = view.findViewById(R.id.state)
+        val avatar: ImageView = view.findViewById(R.id.avatar)
     }
 }

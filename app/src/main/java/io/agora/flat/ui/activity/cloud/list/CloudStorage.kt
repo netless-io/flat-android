@@ -33,7 +33,7 @@ import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
 import io.agora.flat.util.ContentInfo
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.fileIconId
 import io.agora.flat.util.showToast
 
 @Composable
@@ -348,15 +348,7 @@ private fun CloudFileItem(
     onClick: () -> Unit,
 ) {
     val file = item.file
-    val imageId = when (file.fileURL.fileSuffix()) {
-        "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_file_image
-        "ppt", "pptx" -> R.drawable.ic_cloud_file_ppt
-        "doc", "docx" -> R.drawable.ic_cloud_file_word
-        "pdf" -> R.drawable.ic_cloud_file_pdf
-        "mp4" -> R.drawable.ic_cloud_file_video
-        "mp3", "aac" -> R.drawable.ic_cloud_file_audio
-        else -> R.drawable.ic_cloud_file_others
-    }
+    val imageId = file.fileURL.fileIconId()
     Box(Modifier.clickable(onClick = onClick)) {
         Row(Modifier.height(70.dp), verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(16.dp))

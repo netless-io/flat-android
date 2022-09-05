@@ -17,7 +17,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
-import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.IBoardRoom
 import io.agora.flat.event.RoomsUpdated
@@ -78,10 +77,6 @@ class ToolComponent(
                 if (areaId != RoomOverlayManager.AREA_ID_USER_LIST) {
                     hideUserListLayout()
                 }
-
-                if (areaId != RoomOverlayManager.AREA_ID_ROOM_STATE_SETTING) {
-                    hideRoomStateSettings()
-                }
             }
         }
 
@@ -95,28 +90,17 @@ class ToolComponent(
         lifecycleScope.launchWhenResumed {
             viewModel.recordState.collect { recordState ->
                 val isRecording = recordState != null
-                binding.layoutRoomStateSettings.recordDisplayingLy.isVisible = isRecording
-                binding.layoutRoomStateSettings.startRecord.isVisible = !isRecording
-                binding.layoutRoomStateSettings.stopRecord.isVisible = isRecording
-                recordState?.run {
-                    binding.layoutRoomStateSettings.recordTime.text = FlatFormatter.timeMS(recordTime * 1000)
-                }
+                binding.startRecord.isVisible = !isRecording
+                binding.stopRecord.isVisible = isRecording
             }
         }
 
         lifecycleScope.launchWhenResumed {
             viewModel.state.filterNotNull().collect {
-                binding.roomCtrlTool.isVisible = it.isOwner
-                if (it.isOwner) {
-                    binding.roomStart.isVisible = it.roomStatus == RoomStatus.Idle
-                    binding.roomStateSetting.isVisible = it.roomStatus != RoomStatus.Idle
-                    if (it.roomStatus == RoomStatus.Started) {
-                        binding.layoutRoomStateSettings.modeLayout.isVisible = it.showChangeClassMode
-                    }
-                }
+                binding.recordLayout.isVisible = it.isOwner
                 binding.cloudservice.isVisible = it.allowDraw
 
-                binding.handup.isVisible = it.shouldShowRaiseHand
+                binding.handupLayout.isVisible = it.shouldShowRaiseHand
                 binding.handup.isSelected = it.isRaiseHand
 
                 binding.layoutSettings.switchVideo.isEnabled = it.isOnStage
@@ -146,16 +130,6 @@ class ToolComponent(
                         RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
             }
         }
-    }
-
-    private fun hideRoomStateSettings() {
-        binding.layoutRoomStateSettings.root.isVisible = false
-        binding.roomStateSetting.isSelected = false
-    }
-
-    private fun showRoomStateSettings() {
-        binding.layoutRoomStateSettings.root.isVisible = true
-        binding.roomStateSetting.isSelected = true
     }
 
     private fun hideSettingLayout() {
@@ -236,30 +210,25 @@ class ToolComponent(
             binding.expand to { toolAnimator.show() },
             binding.layoutSettings.exit to { handleExit() },
 
-            binding.roomStart to {
-                viewModel.startClass()
-            },
-            binding.roomStateSetting to {
-                with(binding.layoutRoomStateSettings.root) {
-                    if (isVisible) {
-                        hideRoomStateSettings()
-                    } else {
-                        showRoomStateSettings()
-                    }
-                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_ROOM_STATE_SETTING, isVisible)
+            binding.startRecord to {
+                lifecycleScope.launch {
+                    binding.startRecord.isEnabled = false
+                    binding.startRecord.alpha = 0.2f
+                    viewModel.startRecord()
+                    activity.showToast(R.string.record_started_toast)
+                    binding.startRecord.alpha = 1f
+                    binding.startRecord.isEnabled = true
                 }
             },
-            binding.layoutRoomStateSettings.startRecord to {
-                viewModel.startRecord()
-            },
-            binding.layoutRoomStateSettings.stopRecord to {
-                viewModel.stopRecord()
-            },
-            binding.layoutRoomStateSettings.classModeInteraction to {
-                // ignore
-            },
-            binding.layoutRoomStateSettings.classModeLecture to {
-                // ignore
+            binding.stopRecord to {
+                lifecycleScope.launch {
+                    binding.stopRecord.isEnabled = false
+                    binding.stopRecord.alpha = 0.2f
+                    viewModel.stopRecord()
+                    activity.showToast(R.string.record_stopped_toast)
+                    binding.stopRecord.alpha = 1f
+                    binding.stopRecord.isEnabled = true
+                }
             },
             binding.handup to {
                 viewModel.raiseHand()
@@ -298,6 +267,13 @@ class ToolComponent(
                 viewModel.enableAudio(isChecked)
             }
         }
+        binding.layoutSettings.close.setOnClickListener {
+            hideSettingLayout()
+            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_SETTING, false)
+        }
+        binding.layoutSettings.root.setOnClickListener {
+            // block event
+        }
 
         cloudStorageAdapter = CloudStorageAdapter()
         cloudStorageAdapter.setOnItemClickListener {
@@ -306,6 +282,10 @@ class ToolComponent(
         }
         binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
         binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
+        binding.layoutCloudStorage.close.setOnClickListener {
+            hideCloudStorageLayout()
+            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
+        }
         binding.layoutCloudStorage.root.setOnClickListener {
             // block event
         }
@@ -313,6 +293,10 @@ class ToolComponent(
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter
         binding.layoutUserList.userList.layoutManager = LinearLayoutManager(activity)
+        binding.layoutUserList.close.setOnClickListener {
+            hideUserListLayout()
+            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_USER_LIST, false)
+        }
         binding.layoutUserList.root.setOnClickListener {
             // block event
         }

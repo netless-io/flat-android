@@ -14,19 +14,19 @@
     <color name="flat_blue_11">#FF050D1A</color>
     <color name="flat_blue_12">#FF03060D</color>
 
-    <color name="flat_grey_0">#FFECF0F7</color>
-    <color name="flat_grey_1">#FFE5E8F0</color>
-    <color name="flat_grey_2">#FFD5D9E0</color>
-    <color name="flat_grey_3">#FFB7BBC1</color>
-    <color name="flat_grey_4">#FF999CA3</color>
-    <color name="flat_grey_5">#FF7B7E84</color>
-    <color name="flat_grey_6">#FF5D6066</color>
-    <color name="flat_grey_7">#FF4B4D54</color>
-    <color name="flat_grey_8">#FF383B42</color>
-    <color name="flat_grey_9">#FF272A30</color>
-    <color name="flat_grey_10">#FF14181E</color>
-    <color name="flat_grey_11">#FF070A11</color>
-    <color name="flat_grey_12">#FF03060D</color>
+    <color name="flat_gray_0">#FFECF0F7</color>
+    <color name="flat_gray_1">#FFE5E8F0</color>
+    <color name="flat_gray_2">#FFD5D9E0</color>
+    <color name="flat_gray_3">#FFB7BBC1</color>
+    <color name="flat_gray_4">#FF999CA3</color>
+    <color name="flat_gray_5">#FF7B7E84</color>
+    <color name="flat_gray_6">#FF5D6066</color>
+    <color name="flat_gray_7">#FF4B4D54</color>
+    <color name="flat_gray_8">#FF383B42</color>
+    <color name="flat_gray_9">#FF272A30</color>
+    <color name="flat_gray_10">#FF14181E</color>
+    <color name="flat_gray_11">#FF070A11</color>
+    <color name="flat_gray_12">#FF03060D</color>
 
     <color name="flat_green_0">#FFF5FAF2</color>
     <color name="flat_green_1">#FFECF6E6</color>

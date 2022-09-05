@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/flat_day_night_primary_blue" android:state_selected="true" />
+    <item android:color="@color/class_room_icon_gray" />
+</selector>

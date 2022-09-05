@@ -146,7 +146,7 @@
     <string name="message_unmuted">Unmuted</string>
     <string name="class_room_message_muted">All members are mute</string>
     <string name="room_class_message_empty_hit">Say something…</string>
-    <string name="room_class_cloudstorage_empty_hit">No files</string>
+    <string name="room_class_cloud_empty_hint">No files</string>
     <string name="room_class_teacher_leave">Teacher has left</string>
     <string name="room_class_student_left">Student has left</string>
     <string name="room_dialog_exit_title">Close Options</string>
@@ -170,6 +170,8 @@
     <string name="class_settings">Class settings</string>
     <string name="interaction_mode">Interaction</string>
     <string name="lecture_mode">Lecture</string>
+    <string name="record_started_toast">Record Started</string>
+    <string name="record_stopped_toast">Record Stopped</string>
 
     <string name="cloud_storage">Cloud Storage</string>
     <string name="cloud_storage_usage_format">%1$s used</string>

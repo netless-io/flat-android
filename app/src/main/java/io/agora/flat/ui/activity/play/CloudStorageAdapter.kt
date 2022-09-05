@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.play
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -8,6 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.fileIconId
+import io.agora.flat.util.inflate
 
 class CloudStorageAdapter(
     private val dataSet: MutableList<CloudStorageFile> = mutableListOf(),
@@ -15,19 +17,16 @@ class CloudStorageAdapter(
     private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val inflate = LayoutInflater.from(viewGroup.context)
-        val view = inflate.inflate(R.layout.item_room_cloud_storage, viewGroup, false)
+        val view = viewGroup.inflate(R.layout.item_room_cloud_storage, viewGroup, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = dataSet[position]
-
+        viewHolder.fileType.setImageResource(item.fileURL.fileIconId())
         viewHolder.filename.text = item.fileName
-        viewHolder.add.setOnClickListener {
-            onItemClickListener?.onAddClick(item)
-        }
-
+        viewHolder.fileDate.text = FlatFormatter.longDate(item.createAt)
+        viewHolder.fileSize.text = FlatFormatter.size(item.fileSize)
         viewHolder.itemView.setOnClickListener {
             onItemClickListener?.onAddClick(item)
         }
@@ -48,6 +47,9 @@ class CloudStorageAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val filename: TextView = view.findViewById(R.id.filename)
         val add: ImageView = view.findViewById(R.id.add)
+        val fileSize: TextView = view.findViewById(R.id.file_size)
+        val fileDate: TextView = view.findViewById(R.id.file_date)
+        val fileType: ImageView = view.findViewById(R.id.file_type_image)
     }
 
     fun interface OnItemClickListener {

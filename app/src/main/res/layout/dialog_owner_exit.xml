@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:text="@string/hangup_room_exit_tip"
-            android:textColor="#7A7B7C"
+            android:textColor="@color/flat_day_night_text_primary"
             android:textSize="14sp" />
     </FrameLayout>
 
@@ -55,12 +55,12 @@
         <TextView
             android:id="@+id/leftButton"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
             android:text="@string/hangup_room"
-            android:textColor="#444E60" />
+            android:textColor="@color/flat_day_night_text_primary" />
 
         <View
             android:layout_width="16dp"
@@ -69,11 +69,11 @@
         <TextView
             android:id="@+id/rightButton"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:background="@drawable/shape_red_border_round_4_bg"
             android:gravity="center"
             android:text="@string/end_room"
-            android:textColor="#F45454" />
+            android:textColor="@color/flat_red" />
     </LinearLayout>
 </LinearLayout>

@@ -1,19 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/shape_gray_border_round_4_bg"
-    android:orientation="vertical"
-    tools:layout_width="260dp">
+    android:background="@drawable/shape_gray_border_round_8_bg"
+    android:orientation="vertical">
 
-    <TextView
-        style="@style/RoomTextTitle"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp"
-        android:paddingVertical="10dp"
-        android:text="@string/user_list" />
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <ImageView
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:src="@drawable/ic_class_room_user_list"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            style="@style/RoomTextTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_list" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:src="@drawable/ic_class_room_close"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/flat_day_night_divider" />
 
     <FrameLayout
         android:layout_width="match_parent"

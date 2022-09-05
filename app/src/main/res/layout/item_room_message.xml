@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="8dp"
+    android:paddingHorizontal="16dp"
     tools:layout_width="@dimen/room_class_overlay_width">
 
     <LinearLayout
@@ -17,24 +17,22 @@
 
         <TextView
             android:id="@+id/name"
+            style="@style/RoomTextBodyOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#7A7B7C"
             android:textSize="12sp"
             tools:text="昵称" />
 
         <TextView
             android:id="@+id/leftMessage"
+            style="@style/RoomTextBodyOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:layout_marginTop="4dp"
             android:background="@drawable/shape_gray_solid_round_12_bg"
             android:maxWidth="@dimen/room_class_message_max_width"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="5dp"
-            android:textColor="#444E60"
-            android:textSize="14sp"
+            android:padding="4dp"
             tools:text="老师好" />
     </LinearLayout>
 

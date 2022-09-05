@@ -25,7 +25,6 @@ class RecordManager @Inject constructor(
     lateinit var roomUUID: String
 
     private var timer: Job? = null
-    private var startRecordJob: Job? = null
 
     private var recordState = MutableStateFlow<RecordState?>(null)
     private var videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
@@ -46,60 +45,44 @@ class RecordManager @Inject constructor(
         return recordState.asStateFlow()
     }
 
-    fun startRecord() {
-        if (videoUsers.value.isEmpty()) {
-            startRecordJob = viewModelScope.launch {
-                videoUsers.collect {
-                    if (videoUsers.value.isNotEmpty()) {
-                        startRecord()
-                    }
-                }
-            }
-            return
-        }
-        startRecordJob?.cancel()
-
-        viewModelScope.launch {
-            val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
-            if (acquireResp is Success) {
-                val transcodingConfig = TranscodingConfig(
-                    width,
-                    height,
-                    15,
-                    500,
-                    mixedVideoLayout = 3,
-                    layoutConfig = getLayoutConfig(),
-                    backgroundConfig = getBackgroundConfig()
+    suspend fun startRecord() {
+        val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
+        if (acquireResp is Success) {
+            val transcodingConfig = TranscodingConfig(
+                width,
+                height,
+                15,
+                500,
+                mixedVideoLayout = 3,
+                layoutConfig = getLayoutConfig(),
+                backgroundConfig = getBackgroundConfig()
+            )
+            val startResp = cloudRecordRepository.startRecordWithAgora(
+                roomUUID,
+                acquireResp.data.resourceId,
+                transcodingConfig
+            )
+            if (startResp is Success) {
+                recordState.value = RecordState(
+                    resourceId = startResp.data.resourceId,
+                    sid = startResp.data.sid
                 )
-                val startResp = cloudRecordRepository.startRecordWithAgora(
-                    roomUUID,
-                    acquireResp.data.resourceId,
-                    transcodingConfig
-                )
-                if (startResp is Success) {
-                    recordState.value = RecordState(
-                        resourceId = startResp.data.resourceId,
-                        sid = startResp.data.sid
-                    )
-                    startTimer()
-                }
+                startTimer()
             }
         }
     }
 
-    fun stopRecord() {
-        viewModelScope.launch {
-            recordState.value?.run {
-                val resp = cloudRecordRepository.stopRecordWithAgora(
-                    roomUUID,
-                    resourceId,
-                    sid,
-                )
-                if (resp.isSuccess) {
-                    recordState.value = null
-                }
-                stopTimer()
+    suspend fun stopRecord() {
+        recordState.value?.run {
+            val resp = cloudRecordRepository.stopRecordWithAgora(
+                roomUUID,
+                resourceId,
+                sid,
+            )
+            if (resp.isSuccess) {
+                recordState.value = null
             }
+            stopTimer()
         }
     }
 

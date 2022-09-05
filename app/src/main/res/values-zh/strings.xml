@@ -160,7 +160,7 @@
     <string name="message_unmuted">已解除禁言</string>
     <string name="class_room_message_muted">全员禁言中</string>
     <string name="room_class_message_empty_hit">说点什么吧…</string>
-    <string name="room_class_cloudstorage_empty_hit">暂无文件</string>
+    <string name="room_class_cloud_empty_hint">暂无文件</string>
     <string name="room_class_teacher_leave">老师暂时离开</string>
     <string name="room_class_student_left">学生暂时离开</string>
     <string name="room_dialog_exit_title">关闭选项</string>
@@ -184,6 +184,9 @@
     <string name="class_settings">课堂设置</string>
     <string name="interaction_mode">互动模式</string>
     <string name="lecture_mode">讲课模式</string>
+
+    <string name="record_started_toast">开启录制</string>
+    <string name="record_stopped_toast">录制完成，可到历史记录查看</string>
 
     <string name="cloud_storage">云盘</string>
     <string name="cloud_storage_usage_format">已使用 %1$s</string>

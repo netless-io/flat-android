@@ -4,28 +4,70 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settingLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/shape_gray_border_round_4_bg"
-    android:orientation="vertical"
-    android:padding="8dp"
-    tools:layout_width="170dp">
-
-    <TextView
-        style="@style/RoomTextTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/settings" />
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_gray_border_round_8_bg"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="40dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <ImageView
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:src="@drawable/ic_class_room_setting"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            style="@style/RoomTextCaption"
+            style="@style/RoomTextTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/settings" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:padding="@dimen/room_class_button_padding_size"
+            android:src="@drawable/ic_class_room_close"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/flat_day_night_divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:layout_width="@dimen/room_class_button_content_size"
+            android:layout_height="@dimen/room_class_button_content_size"
+            android:src="@drawable/ic_class_room_camera_on"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            style="@style/RoomTextBodyOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/flat_gap_1_0"
             android:text="@string/camera" />
 
         <View
@@ -43,18 +85,28 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
         android:background="@color/flat_day_night_divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="48dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:layout_width="@dimen/room_class_button_content_size"
+            android:layout_height="@dimen/room_class_button_content_size"
+            android:src="@drawable/ic_class_room_mic_on"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            style="@style/RoomTextCaption"
+            style="@style/RoomTextBodyOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/flat_gap_1_0"
             android:text="@string/microphone" />
 
         <View
@@ -72,18 +124,28 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
         android:background="@color/flat_day_night_divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="48dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:layout_width="@dimen/room_class_button_content_size"
+            android:layout_height="@dimen/room_class_button_content_size"
+            android:src="@drawable/ic_class_room_record"
+            app:tint="@color/class_room_icon_gray"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            style="@style/RoomTextCaption"
+            style="@style/RoomTextBodyOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/flat_gap_1_0"
             android:text="@string/video_area" />
 
         <View
@@ -98,19 +160,29 @@
             android:theme="@style/SwitchStyle" />
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@color/flat_day_night_divider" />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
     <TextView
         android:id="@+id/exit"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="36dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="16dp"
         android:background="@drawable/shape_red_border_round_4_bg"
         android:drawablePadding="0dp"
         android:gravity="center"
         android:paddingHorizontal="14dp"
         android:text="@string/exit_room"
-        android:textColor="#f45454"
+        android:textColor="#F45454"
         android:textSize="14sp"
         app:drawableStartCompat="@drawable/ic_toolbox_exit" />
 </LinearLayout>

@@ -4,11 +4,11 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/flat_white</item>
         <item name="colorPrimaryVariant">@color/flat_white</item>
-        <item name="colorOnPrimary">@color/flat_text_primary</item>
+        <item name="colorOnPrimary">@color/flat_day_night_text_primary</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/flat_blue</item>
         <item name="colorSecondaryVariant">@color/flat_blue</item>
-        <item name="colorOnSecondary">@color/flat_text_primary</item>
+        <item name="colorOnSecondary">@color/flat_day_night_text_secondary</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->

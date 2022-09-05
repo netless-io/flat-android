@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.common.rtm.Message
-import io.agora.flat.databinding.LayoutMessageListBinding
+import io.agora.flat.databinding.LayoutRoomMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
 
 
@@ -22,7 +22,7 @@ class MessageListView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private var binding: LayoutMessageListBinding = LayoutMessageListBinding.inflate(
+    private var binding: LayoutRoomMessageListBinding = LayoutRoomMessageListBinding.inflate(
         LayoutInflater.from(context),
         this,
         true,

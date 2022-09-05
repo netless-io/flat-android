@@ -4,20 +4,7 @@
     <color name="flat_blue">@color/flat_blue_6</color>
     <color name="flat_light_green">@color/flat_green_6</color>
     <color name="flat_yellow">@color/flat_yellow_6</color>
-
-    <color name="flat_text_primary">@color/flat_blue_12</color>
-    <color name="flat_text_secondary">@color/flat_grey_6</color>
-    <color name="flat_background">@color/flat_white</color>
-    <color name="flat_surface">#FFF9F9FA</color>
-    <color name="flat_divider">@color/flat_grey_1</color>
-
-    <color name="flat_text_primary_dark">@color/flat_grey_0</color>
-    <color name="flat_text_secondary_dark">@color/flat_grey_4</color>
-    <color name="flat_background_dark">@color/flat_grey_10</color>
-    <color name="flat_surface_dark">#FF15181D</color>
-    <color name="flat_divider_dark">@color/flat_grey_8</color>
-
-    <color name="flat_gray">#FFCCCCCC</color>
+    <color name="flat_gray">@color/flat_gray_6</color>
 
     <color name="flat_white_50">#7FFFFFFF</color>
     <color name="flat_blue_50">#7F3381FF</color>
@@ -25,9 +12,13 @@
 
     <color name="ic_launcher_background">@color/flat_white</color>
 
-    <color name="flat_day_night_text_primary">@color/flat_text_primary</color>
-    <color name="flat_day_night_text_secondary">@color/flat_text_secondary</color>
-    <color name="flat_day_night_background">@color/flat_background</color>
-    <color name="flat_day_night_surface">@color/flat_surface</color>
-    <color name="flat_day_night_divider">@color/flat_divider</color>
+    <color name="flat_day_night_text_primary">@color/flat_gray_6</color>
+    <color name="flat_day_night_text_secondary">@color/flat_gray_3</color>
+    <color name="flat_day_night_background">@color/flat_white</color>
+    <color name="flat_day_night_surface">@color/flat_white</color>
+    <color name="flat_day_night_divider">@color/flat_gray_2</color>
+    <color name="flat_day_night_primary_blue">@color/flat_blue_6</color>
+
+    <color name="class_room_panel_title">@color/flat_blue_12</color>
+    <color name="class_room_icon_gray">@color/flat_gray_6</color>
 </resources>

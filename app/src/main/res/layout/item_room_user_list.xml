@@ -3,59 +3,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/room_class_item_height">
+    android:layout_height="@dimen/room_class_user_list_item_height"
+    android:paddingHorizontal="16dp">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="@dimen/room_class_item_height"
-        android:tag="LAYOUT"
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/avatar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="1dp"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circleStyle"
+        app:srcCompat="@drawable/ic_class_room_user_avatar"
+        app:strokeColor="@color/flat_day_night_divider"
+        app:strokeWidth="1dp"
+        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/handup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:padding="4dp"
-        android:src="@drawable/ic_room_userlist_handup_close"
+        android:src="@drawable/ic_room_user_list_handup_close"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        style="@style/RoomTextBodyOne"
+        android:layout_margin="8dp"
         android:ellipsize="end"
+        android:maxWidth="200dp"
         android:maxLines="1"
-        android:textColor="#7A7B7C"
-        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="用户名" />
 
     <TextView
         android:id="@+id/state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/RoomTextBodyTwo"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#7A7B7C"
-        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@id/username"
         app:layout_constraintStart_toEndOf="@id/username"
+        app:layout_constraintTop_toTopOf="@id/username"
         tools:text="（连麦中）" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginTop="2dp"
         android:background="@color/flat_day_night_divider"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package io.agora.flat.util
 
+import io.agora.flat.R
 import io.agora.flat.data.model.CoursewareType
 import java.util.*
 
@@ -29,6 +30,19 @@ fun String.coursewareType(): CoursewareType {
         }
     }
 }
+
+fun String.fileIconId(): Int {
+    return when (this.fileSuffix()) {
+        "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_file_image
+        "ppt", "pptx" -> R.drawable.ic_cloud_file_ppt
+        "doc", "docx" -> R.drawable.ic_cloud_file_word
+        "pdf" -> R.drawable.ic_cloud_file_pdf
+        "mp4" -> R.drawable.ic_cloud_file_video
+        "mp3", "aac" -> R.drawable.ic_cloud_file_audio
+        else -> R.drawable.ic_cloud_file_others
+    }
+}
+
 
 fun String.isDynamicDoc(): Boolean {
     return this.coursewareType() == CoursewareType.DocDynamic

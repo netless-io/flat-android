@@ -466,11 +466,11 @@ class ClassRoomViewModel @Inject constructor(
         return result.isSuccess
     }
 
-    fun startRecord() {
+    suspend fun startRecord() {
         recordManager.startRecord()
     }
 
-    fun stopRecord() {
+    suspend fun stopRecord() {
         recordManager.stopRecord()
     }
 

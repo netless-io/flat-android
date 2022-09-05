@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:text="@string/room_theme"
-            android:textColor="#7A7B7C"
+            android:textColor="@color/flat_day_night_text_primary"
             android:textSize="14sp" />
 
         <TextView
@@ -39,9 +39,9 @@
             android:ellipsize="end"
             android:gravity="end"
             android:maxLines="1"
-            android:textColor="#444E60"
+            android:textColor="@color/flat_day_night_text_secondary"
             android:textSize="14sp"
-            tools:text="会议名称" />
+            tools:text="会议主题" />
     </LinearLayout>
 
     <LinearLayout
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:text="@string/room_id"
-            android:textColor="#7A7B7C"
+            android:textColor="@color/flat_day_night_text_primary"
             android:textSize="14sp" />
 
         <TextView
@@ -68,7 +68,7 @@
             android:ellipsize="end"
             android:gravity="end"
             android:maxLines="1"
-            android:textColor="#444E60"
+            android:textColor="@color/flat_day_night_text_secondary"
             android:textSize="14sp"
             tools:text="21465346122" />
     </LinearLayout>
@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:text="@string/time_start"
-            android:textColor="#7A7B7C"
+            android:textColor="@color/flat_day_night_text_primary"
             android:textSize="14sp" />
 
         <TextView
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
-            android:textColor="#444E60"
+            android:textColor="@color/flat_day_night_text_secondary"
             android:textSize="14sp"
             tools:text="11/26 14:30~15:30" />
     </FrameLayout>
@@ -99,7 +99,7 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/copy"
         android:layout_width="232dp"
-        android:layout_height="36dp"
+        android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="24dp"
         android:background="@drawable/shape_blue_solid_round_4_bg"

@@ -10,17 +10,20 @@
     <dimen name="room_class_button_padding_size">4dp</dimen>
     <dimen name="room_class_video_area_width">120dp</dimen>
     <dimen name="room_class_layout_gap">12dp</dimen>
+    <dimen name="room_class_toolbox_layout_size">40dp</dimen>
 
-    <dimen name="room_class_sub_tools_margin">40dp</dimen>
+    <dimen name="room_class_sub_tools_margin">56dp</dimen>
     <dimen name="room_class_stroke_seeker">24dp</dimen>
 
-    <dimen name="room_class_overlay_width">240dp</dimen>
+    <dimen name="room_class_overlay_width">400dp</dimen>
     <dimen name="room_class_overlay_width_small">180dp</dimen>
-    <dimen name="room_class_message_max_width">200dp</dimen>
+    <dimen name="room_class_message_max_width">300dp</dimen>
 
     <dimen name="room_class_video_user_avatar_size_normal">40dp</dimen>
     <dimen name="room_class_video_user_avatar_size_fullscreen">120dp</dimen>
     <dimen name="room_class_item_height">36dp</dimen>
+    <dimen name="room_class_cloud_item_height">70dp</dimen>
+    <dimen name="room_class_user_list_item_height">56dp</dimen>
 
     <dimen name="room_replay_sub_tools_margin">56dp</dimen>
     <dimen name="room_replay_seek_bar_width">180dp</dimen>

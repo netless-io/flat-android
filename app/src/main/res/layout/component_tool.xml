@@ -24,10 +24,12 @@
 
     <LinearLayout
         android:id="@+id/tools_layout"
-        android:layout_width="@dimen/room_class_button_size"
+        android:layout_width="@dimen/room_class_toolbox_layout_size"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_gray_border_left_round_bg"
+        android:layout_marginEnd="@dimen/flat_gap_2_0"
+        android:background="@drawable/shape_gray_border_round_8_bg"
         android:orientation="vertical"
+        android:padding="@dimen/flat_gap_1_0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/marginSpace"
         app:layout_constraintTop_toTopOf="parent">
@@ -39,28 +41,6 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:id="@+id/roomCtrlTool"
-                android:layout_width="@dimen/room_class_button_size"
-                android:layout_height="@dimen/room_class_button_size"
-                android:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/roomStart"
-                    android:layout_width="@dimen/room_class_button_size"
-                    android:layout_height="@dimen/room_class_button_size"
-                    android:padding="@dimen/room_class_button_padding_size"
-                    android:src="@drawable/ic_toolbox_ext_state_idle_normal" />
-
-                <ImageView
-                    android:id="@+id/roomStateSetting"
-                    android:layout_width="@dimen/room_class_button_size"
-                    android:layout_height="@dimen/room_class_button_size"
-                    android:padding="@dimen/room_class_button_padding_size"
-                    android:src="@drawable/ic_toolbox_ext_state_selector"
-                    android:visibility="gone" />
-            </FrameLayout>
-
-            <FrameLayout
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:visibility="visible">
@@ -70,7 +50,8 @@
                     android:layout_width="@dimen/room_class_button_size"
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
-                    android:src="@drawable/ic_toolbox_ext_message_selector" />
+                    android:src="@drawable/ic_class_room_chat"
+                    app:tint="@color/color_class_room_icon" />
 
                 <ImageView
                     android:id="@+id/messageDot"
@@ -78,15 +59,8 @@
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
                     android:src="@drawable/ic_float_red_dot"
-                    android:visibility="invisible" />
+                    android:visibility="visible" />
             </FrameLayout>
-
-            <ImageView
-                android:id="@+id/cloudservice"
-                android:layout_width="@dimen/room_class_button_size"
-                android:layout_height="@dimen/room_class_button_size"
-                android:padding="@dimen/room_class_button_padding_size"
-                android:src="@drawable/ic_toolbox_ext_cloudservice_selector" />
 
             <FrameLayout
                 android:layout_width="@dimen/room_class_button_size"
@@ -97,7 +71,8 @@
                     android:layout_width="@dimen/room_class_button_size"
                     android:layout_height="@dimen/room_class_button_size"
                     android:padding="@dimen/room_class_button_padding_size"
-                    android:src="@drawable/ic_toolbox_ext_userlist_selector" />
+                    android:src="@drawable/ic_class_room_user_list"
+                    app:tint="@color/color_class_room_icon" />
 
                 <ImageView
                     android:id="@+id/userlistDot"
@@ -113,14 +88,50 @@
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
-                android:src="@drawable/ic_toolbox_ext_invite_selector" />
+                android:src="@drawable/ic_class_room_invite"
+                app:tint="@color/color_class_room_icon" />
+
+            <ImageView
+                android:id="@+id/cloudservice"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:padding="@dimen/room_class_button_padding_size"
+                android:src="@drawable/ic_class_room_cloud"
+                app:tint="@color/color_class_room_icon" />
 
             <ImageView
                 android:id="@+id/setting"
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
-                android:src="@drawable/ic_toolbox_ext_setting_selector" />
+                android:src="@drawable/ic_class_room_setting"
+                app:tint="@color/color_class_room_icon" />
+
+            <FrameLayout
+                android:id="@+id/record_layout"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size">
+
+                <ImageView
+                    android:id="@+id/start_record"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
+                    android:src="@drawable/ic_class_room_record"
+                    android:visibility="visible"
+                    app:tint="@color/class_room_icon_gray" />
+
+                <ImageView
+                    android:id="@+id/stop_record"
+                    android:layout_width="@dimen/room_class_button_size"
+                    android:layout_height="@dimen/room_class_button_size"
+                    android:padding="@dimen/room_class_button_padding_size"
+                    android:src="@drawable/ic_class_room_record_stop"
+                    android:visibility="gone"
+                    app:tint="@color/flat_day_night_primary_blue" />
+            </FrameLayout>
+
+
         </LinearLayout>
 
         <FrameLayout
@@ -132,7 +143,8 @@
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
-                android:src="@drawable/ic_toolbox_ext_expanded" />
+                android:src="@drawable/ic_toolbox_ext_expanded"
+                app:tint="@color/class_room_icon_gray" />
 
             <ImageView
                 android:id="@+id/expand"
@@ -140,44 +152,37 @@
                 android:layout_height="@dimen/room_class_button_size"
                 android:padding="@dimen/room_class_button_padding_size"
                 android:src="@drawable/ic_toolbox_ext_collapsed"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:tint="@color/class_room_icon_gray" />
         </FrameLayout>
     </LinearLayout>
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/handup_layout"
+        android:layout_width="@dimen/room_class_toolbox_layout_size"
+        android:layout_height="@dimen/room_class_toolbox_layout_size"
         android:layout_marginVertical="@dimen/room_class_layout_gap"
-        android:background="@drawable/shape_gray_border_left_round_bg"
-        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/shape_gray_border_round_8_bg"
+        app:layout_constraintLeft_toLeftOf="@id/tools_layout"
+        app:layout_constraintRight_toRightOf="@id/tools_layout"
         app:layout_constraintTop_toBottomOf="@id/tools_layout">
 
         <ImageView
             android:id="@+id/handup"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
+            android:layout_gravity="center"
             android:padding="@dimen/room_class_button_padding_size"
-            android:src="@drawable/ic_room_hand_up_selector" />
+            android:src="@drawable/ic_room_hand_up_normal"
+            app:tint="@color/color_class_room_icon" />
     </FrameLayout>
-
-    <include
-        android:id="@+id/layout_room_state_settings"
-        layout="@layout/layout_room_state_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
-        android:minWidth="@dimen/room_class_overlay_width"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/guideline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline"
-        tools:visibility="visible" />
 
     <include
         android:id="@+id/layout_settings"
         layout="@layout/layout_room_settings"
-        android:layout_width="@dimen/room_class_overlay_width_small"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/room_class_overlay_width"
+        android:layout_height="match_parent"
+        android:layout_marginVertical="28dp"
         android:layout_marginEnd="@dimen/room_class_sub_tools_margin"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/guideline"
@@ -209,5 +214,5 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
