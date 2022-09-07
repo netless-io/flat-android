@@ -11,7 +11,7 @@
         android:layout_height="@dimen/room_class_button_size"
         android:layout_margin="12dp"
         android:background="@drawable/shape_black_solid_round_16_bg"
-        android:padding="@dimen/room_class_button_padding_size"
+        android:padding="@dimen/room_class_button_gap"
         android:src="@drawable/ic_playback_exit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -37,7 +37,7 @@
                 android:id="@+id/message"
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
-                android:padding="@dimen/room_class_button_padding_size"
+                android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_toolbox_ext_message_selector" />
         </LinearLayout>
     </LinearLayout>

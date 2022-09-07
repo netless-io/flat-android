@@ -4,9 +4,10 @@
     <color name="flat_day_night_text_secondary">@color/flat_gray_6</color>
     <color name="flat_day_night_background">@color/flat_gray_10</color>
     <color name="flat_day_night_surface">@color/flat_gray_9</color>
-    <color name="flat_day_night_divider">@color/flat_gray_7</color>
+    <color name="flat_day_night_divider">@color/flat_gray_8</color>
     <color name="flat_day_night_primary_blue">@color/flat_blue_7</color>
 
     <color name="class_room_panel_title">@color/flat_blue_0</color>
     <color name="class_room_icon_gray">@color/flat_gray_3</color>
+    <color name="class_room_icon_bg">@color/flat_gray_8</color>
 </resources>

@@ -63,7 +63,7 @@
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
             android:layout_gravity="end|bottom"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_room_mic_closed"
             android:visibility="invisible" />

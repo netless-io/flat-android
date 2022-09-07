@@ -18,7 +18,7 @@
         <ImageView
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_class_room_setting"
             app:tint="@color/class_room_icon_gray"
             tools:ignore="ContentDescription" />
@@ -38,7 +38,7 @@
             android:id="@+id/close"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_class_room_close"
             app:tint="@color/class_room_icon_gray"
             tools:ignore="ContentDescription" />
@@ -51,10 +51,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <ImageView
             android:layout_width="@dimen/room_class_button_content_size"
@@ -93,7 +94,8 @@
         android:layout_height="48dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <ImageView
             android:layout_width="@dimen/room_class_button_content_size"
@@ -132,7 +134,8 @@
         android:layout_height="48dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <ImageView
             android:layout_width="@dimen/room_class_button_content_size"

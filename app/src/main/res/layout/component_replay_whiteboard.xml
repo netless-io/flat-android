@@ -29,14 +29,14 @@
                 android:id="@+id/playback_start"
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
-                android:padding="@dimen/room_class_button_padding_size"
+                android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_playback_start" />
 
             <ImageView
                 android:id="@+id/playback_pause"
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
-                android:padding="@dimen/room_class_button_padding_size"
+                android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_playback_pause"
                 android:visibility="gone" />
         </FrameLayout>

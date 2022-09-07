@@ -1,17 +1,20 @@
 package io.agora.flat.common.board
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.herewhite.sdk.domain.ConvertedFiles
 import com.herewhite.sdk.domain.RoomPhase
 import com.herewhite.sdk.domain.WindowAppParam
 import com.herewhite.sdk.domain.WindowPrefersColorScheme
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
 import io.agora.board.fast.FastRoomListener
 import io.agora.board.fast.Fastboard
 import io.agora.board.fast.FastboardView
+import io.agora.board.fast.extension.FastResource
 import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.ui.RoomControllerGroup
@@ -30,8 +33,6 @@ import javax.inject.Inject
 
 @ActivityRetainedScoped
 class BoardRoom @Inject constructor(
-    @ApplicationContext
-    val context: Context,
     val userRepository: UserRepository,
     val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,
@@ -41,15 +42,18 @@ class BoardRoom @Inject constructor(
     }
 
     private lateinit var fastboard: Fastboard
-    private var fastboardView: FastboardView? = null
+    private lateinit var fastboardView: FastboardView
     private var fastRoom: FastRoom? = null
     private var darkMode: Boolean = false
     private var rootRoomController: RoomControllerGroup? = null
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
-    private var flatNetlessUA = listOf(
-        "fastboard/${Fastboard.VERSION}",
-        "FLAT/NETLESS@${context.getAppVersion()}"
-    )
+    private val context: Context by lazy { fastboardView.context }
+    private val flatNetlessUA: List<String> by lazy {
+        listOf(
+            "fastboard/${Fastboard.VERSION}",
+            "FLAT/NETLESS@${context.getAppVersion()}"
+        )
+    }
 
     override fun initSdk(fastboardView: FastboardView) {
         this.fastboardView = fastboardView
@@ -84,15 +88,7 @@ class BoardRoom @Inject constructor(
             } else {
                 WindowPrefersColorScheme.Light
             }
-            val styleMap = HashMap<String, String>()
-            styleMap["top"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
-            styleMap["right"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
-            styleMap["width"] = "${context.dp(R.dimen.room_class_toolbox_layout_size)}px"
-            styleMap["height"] = "${context.dp(R.dimen.room_class_toolbox_layout_size)}px"
-            styleMap["position"] = "fixed"
-            styleMap["border-radius"] = "8px"
-            styleMap["border"] = "1px solid rgba(0,0,0,.15)"
-            windowParams.collectorStyles = styleMap
+            windowParams.collectorStyles = getCollectorStyle()
 
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
@@ -128,9 +124,35 @@ class BoardRoom @Inject constructor(
             fastRoom?.rootRoomController = rootRoomController
             updateRoomController(writable)
         }
+        val fastResource = object : FastResource() {
+            override fun createApplianceBackground(darkMode: Boolean): Drawable? {
+                return ContextCompat.getDrawable(context, R.drawable.ic_class_room_icon_bg)
+            }
+
+            override fun getIconColor(darkMode: Boolean): ColorStateList? {
+                return ContextCompat.getColorStateList(context, R.color.color_class_room_icon)
+            }
+
+            override fun getLayoutBackground(darkMode: Boolean): Drawable? {
+                return ContextCompat.getDrawable(context, R.drawable.shape_gray_border_round_8_bg)
+            }
+        }
+        fastRoom?.setResource(fastResource)
         setDarkMode(darkMode)
 
         fastRoom?.join()
+    }
+
+    private fun getCollectorStyle(): HashMap<String, String> {
+        val styleMap = HashMap<String, String>()
+        styleMap["top"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
+        styleMap["right"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
+        styleMap["width"] = "${context.dp(R.dimen.room_class_button_area_size)}px"
+        styleMap["height"] = "${context.dp(R.dimen.room_class_button_area_size)}px"
+        styleMap["position"] = "fixed"
+        styleMap["border-radius"] = "8px"
+        styleMap["border"] = "1px solid rgba(0,0,0,.15)"
+        return styleMap
     }
 
     override fun setDarkMode(dark: Boolean) {
@@ -153,7 +175,7 @@ class BoardRoom @Inject constructor(
         if (fastRoom?.room?.writable != writable) {
             fastRoom?.setWritable(writable)
         }
-        fastboardView?.post {
+        fastboardView.post {
             updateRoomController(writable)
         }
     }
@@ -185,8 +207,7 @@ class BoardRoom @Inject constructor(
     }
 
     override fun insertVideo(videoUrl: String, title: String) {
-        val param = WindowAppParam.createMediaPlayerApp(videoUrl, title)
-        fastRoom?.room?.addApp(param, null)
+        fastRoom?.insertVideo(videoUrl, title)
     }
 
     override fun observeRoomPhase(): Flow<BoardRoomPhase> {

@@ -61,7 +61,6 @@ class ExtComponent(
             }
         }
 
-
         lifecycleScope.launchWhenCreated {
             classRoomViewModel.loginThirdParty()
         }

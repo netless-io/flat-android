@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/room_class_video_area_width"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/flat_day_night_surface">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/videoList"
@@ -27,21 +28,21 @@
             android:id="@+id/videoOpt"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_video_state_gray_selector" />
 
         <ImageView
             android:id="@+id/audioOpt"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_audio_state_gray_selector" />
 
         <ImageView
             android:id="@+id/enterFullScreen"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_video_to_expand" />
     </LinearLayout>
 

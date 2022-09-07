@@ -5,16 +5,16 @@
     <dimen name="flat_gap_3_0">18dp</dimen>
     <dimen name="flat_gap_4_0">24dp</dimen>
 
-    <dimen name="room_class_button_size">48dp</dimen>
-    <dimen name="room_class_button_content_size">36dp</dimen>
-    <dimen name="room_class_button_padding_size">6dp</dimen>
+    <dimen name="room_class_button_area_size">48dp</dimen>
+    <dimen name="room_class_button_size">40dp</dimen>
+    <dimen name="room_class_button_content_size">32dp</dimen>
+    <dimen name="room_class_button_gap">4dp</dimen>
     <dimen name="room_class_video_area_width">180dp</dimen>
     <dimen name="room_class_layout_gap">18dp</dimen>
-    <dimen name="room_class_toolbox_layout_size">60dp</dimen>
     <dimen name="room_class_panel_title_height">60dp</dimen>
     <dimen name="room_class_panel_margin_vertical">80dp</dimen>
 
-    <dimen name="room_class_panel_margin_horizontal">84dp</dimen>
+    <dimen name="room_class_panel_margin_horizontal">64dp</dimen>
     <dimen name="room_class_stroke_seeker">32dp</dimen>
 
     <dimen name="room_class_overlay_width">500dp</dimen>
@@ -27,5 +27,5 @@
     <dimen name="room_replay_sub_tools_margin">72dp</dimen>
     <dimen name="room_replay_seek_bar_width">240dp</dimen>
 
-    <dimen name="room_message_send_height">60dp</dimen>
+    <dimen name="room_message_send_height">48dp</dimen>
 </resources>

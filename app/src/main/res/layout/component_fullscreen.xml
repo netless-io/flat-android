@@ -69,21 +69,21 @@
             android:id="@+id/fullVideoOpt"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_video_state_selector" />
 
         <ImageView
             android:id="@+id/fullAudioOpt"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_audio_state_selector" />
 
         <ImageView
             android:id="@+id/exitFullScreen"
             android:layout_width="@dimen/room_class_button_size"
             android:layout_height="@dimen/room_class_button_size"
-            android:padding="@dimen/room_class_button_padding_size"
+            android:padding="@dimen/room_class_button_gap"
             android:src="@drawable/ic_room_video_to_collapse" />
     </LinearLayout>
 </FrameLayout>

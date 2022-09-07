@@ -396,7 +396,7 @@ class ToolComponent(
         RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_INVITE_DIALOG, true)
     }
 
-    private val itemSize = activity.resources.getDimensionPixelSize(R.dimen.room_class_button_size)
+    private val itemSize = activity.resources.getDimensionPixelSize(R.dimen.room_class_button_area_size)
 
     private val collapseHeight = itemSize
     private val expandHeight: Int

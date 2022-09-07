@@ -2,7 +2,6 @@ package io.agora.flat.ui.activity.play
 
 import android.content.res.Configuration
 import android.widget.FrameLayout
-import androidx.activity.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoint

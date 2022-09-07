@@ -8,6 +8,6 @@
         android:id="@+id/appliance"
         android:layout_width="@dimen/room_class_button_size"
         android:layout_height="@dimen/room_class_button_size"
-        android:padding="@dimen/room_class_button_padding_size"
+        android:padding="@dimen/room_class_button_gap"
         tools:src="@drawable/ic_toolbox_hand_selector" />
 </FrameLayout>
