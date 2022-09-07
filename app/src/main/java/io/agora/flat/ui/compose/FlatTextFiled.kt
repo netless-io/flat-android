@@ -108,12 +108,15 @@ private fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
 @Preview(uiMode = 0x30)
 @Preview(uiMode = 0x20)
 private fun FlatTextButtonPreview() {
-    FlatColumnPage {
+    FlatPage {
         Column(Modifier.padding(horizontal = 16.dp)) {
             FlatNormalVerticalSpacer()
             FlatPrimaryTextField("TextField", onValueChange = {})
             FlatNormalVerticalSpacer()
             FlatPrimaryTextField("TextButton", enabled = false, onValueChange = {})
+            FlatNormalVerticalSpacer()
+            FastBasicTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
+            FlatNormalVerticalSpacer()
         }
     }
 }

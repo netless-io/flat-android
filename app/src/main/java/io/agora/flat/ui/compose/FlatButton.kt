@@ -20,11 +20,7 @@ fun FlatPrimaryTextButton(
 ) {
     val darkMode = isDarkTheme()
     val colors = ButtonDefaults.textButtonColors(
-        backgroundColor = if (enabled) {
-            if (darkMode) Blue_7 else Blue_6
-        } else {
-            if (darkMode) Gray_9 else Gray_2
-        },
+        backgroundColor = if (enabled) MaterialTheme.colors.primary else if (darkMode) Gray_9 else Gray_2,
         contentColor = if (darkMode) Gray_0 else Gray_0,
         disabledContentColor = if (darkMode) Gray_7 else Gray_5
     )
@@ -37,7 +33,7 @@ fun FlatPrimaryTextButton(
         shape = Shapes.small,
         onClick = onClick
     ) {
-        FlatTextButton(text)
+        FlatTextOnButton(text)
     }
 }
 
@@ -63,7 +59,7 @@ fun FlatSecondaryTextButton(
         colors = colors,
         onClick = onClick
     ) {
-        FlatTextButton(text)
+        FlatTextOnButton(text)
     }
 }
 
@@ -89,7 +85,7 @@ fun FlatHighlightTextButton(
             Icon(painterResource(icon), contentDescription = null)
             Spacer(modifier = Modifier.width(4.dp))
         }
-        FlatTextButton(text)
+        FlatTextOnButton(text)
     }
 }
 
@@ -102,11 +98,7 @@ fun FlatSmallPrimaryTextButton(
 ) {
     val darkMode = isDarkTheme()
     val colors = ButtonDefaults.textButtonColors(
-        backgroundColor = if (enabled) {
-            if (darkMode) Blue_7 else Blue_6
-        } else {
-            if (darkMode) Gray_9 else Gray_2
-        },
+        backgroundColor = if (enabled) MaterialTheme.colors.primary else if (darkMode) Gray_9 else Gray_2,
         contentColor = if (darkMode) Gray_0 else Gray_0,
         disabledContentColor = if (darkMode) Gray_7 else Gray_5
     )
@@ -118,7 +110,7 @@ fun FlatSmallPrimaryTextButton(
         shape = Shapes.small,
         onClick = onClick
     ) {
-        FlatTextButton(text)
+        FlatTextOnButton(text)
     }
 }
 
@@ -144,31 +136,32 @@ fun FlatSmallSecondaryTextButton(
         colors = colors,
         onClick = onClick
     ) {
-        FlatTextButton(text)
+        FlatTextOnButton(text)
     }
 }
 
 @Composable
-@Preview
-@Preview(uiMode = 0x20)
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 private fun FlatTextButtonPreview() {
-    FlatColumnPage {
-        FlatPrimaryTextButton("TextButton", onClick = {})
-        FlatNormalVerticalSpacer()
-        FlatPrimaryTextButton("TextButton", enabled = false, onClick = {})
+    FlatPage {
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            FlatNormalVerticalSpacer()
+            FlatPrimaryTextButton("TextButton", onClick = {})
+            FlatNormalVerticalSpacer()
+            FlatPrimaryTextButton("TextButton", enabled = false, onClick = {})
+            FlatNormalVerticalSpacer()
+            FlatSecondaryTextButton("TextButton", onClick = {})
+            FlatNormalVerticalSpacer()
+            FlatSecondaryTextButton("TextButton", enabled = false, onClick = {})
 
-        FlatLargeVerticalSpacer()
+            FlatNormalVerticalSpacer()
+            FlatHighlightTextButton("TextButton", icon = R.drawable.ic_login_out, enabled = true, onClick = {})
 
-        FlatSecondaryTextButton("TextButton", onClick = {})
-        FlatNormalVerticalSpacer()
-        FlatSecondaryTextButton("TextButton", enabled = false, onClick = {})
-
-        FlatNormalVerticalSpacer()
-        FlatHighlightTextButton("TextButton", icon = R.drawable.ic_login_out, enabled = true, onClick = {})
-
-        FlatNormalVerticalSpacer()
-        FlatSmallPrimaryTextButton("TextButton", onClick = {})
-        FlatNormalVerticalSpacer()
-        FlatSmallSecondaryTextButton("TextButton") {}
+            FlatNormalVerticalSpacer()
+            FlatSmallPrimaryTextButton("TextButton", onClick = {})
+            FlatNormalVerticalSpacer()
+            FlatSmallSecondaryTextButton("TextButton") {}
+        }
     }
 }

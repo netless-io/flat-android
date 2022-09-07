@@ -17,10 +17,7 @@ import io.agora.flat.ui.compose.FlatColumnPage
 @Composable
 fun UserProfile(navController: NavController) {
     Column {
-        BackTopAppBar(
-            title = stringResource(R.string.title_my_profile),
-            onBackPressed = { navController.popBackStack() },
-        )
+        BackTopAppBar(stringResource(R.string.title_my_profile), onBackPressed = { navController.popBackStack() })
         SettingsList()
     }
 }

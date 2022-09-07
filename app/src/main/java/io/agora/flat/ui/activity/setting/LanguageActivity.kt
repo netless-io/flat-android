@@ -41,7 +41,7 @@ class LanguageActivity : BaseComposeActivity() {
                         viewModel.save()
                         Navigator.launchHomeActivity(this@LanguageActivity)
                     }) {
-                        FlatTextButton(stringResource(R.string.save))
+                        FlatTextOnButton(stringResource(R.string.save))
                     }
                 }
 

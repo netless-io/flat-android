@@ -50,13 +50,11 @@ fun PhoneAndCodeArea(
 
     Column(Modifier.padding(horizontal = 16.dp)) {
         FlatTextCaption(text = stringResource(id = R.string.bind_phone))
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Spacer(Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
             FlatTextBodyOne(text = "+86")
             Image(painterResource(R.drawable.ic_login_arrow_down), contentDescription = "")
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(Modifier.width(8.dp))
             FastBasicTextField(
                 value = phone,
                 onValueChange = {
@@ -86,12 +84,12 @@ fun PhoneAndCodeArea(
             FlatDivider(color = Red_6, thickness = 1.dp)
             FlatTextBodyTwo(stringResource(R.string.login_phone_invalid_tip), color = Red_6)
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
         FlatTextCaption(stringResource(R.string.verification_code))
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(Modifier.width(8.dp))
             FastBasicTextField(
                 value = code,
                 onValueChange = {
@@ -125,7 +123,7 @@ fun PhoneAndCodeArea(
                     onSendCode()
                 },
             ) {
-                FlatTextButton(text = sendCodeText)
+                FlatTextOnButton(text = sendCodeText)
             }
         }
         if (isValidCode) {

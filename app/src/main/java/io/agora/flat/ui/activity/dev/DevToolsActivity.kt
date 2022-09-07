@@ -82,7 +82,7 @@ fun ResumeCheckVersion() {
                     context.finish()
                 }
             }) {
-            FlatTextButton("确定")
+            FlatTextOnButton("确定")
         }
     }
 }

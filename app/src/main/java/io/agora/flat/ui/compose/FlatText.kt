@@ -101,7 +101,7 @@ fun FlatTextSubtitle(
 fun FlatTextBodyOne(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
+    color: Color = FlatTheme.colors.textPrimary,
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
@@ -121,7 +121,7 @@ fun FlatTextBodyOne(
 fun FlatTextBodyOneSecondary(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = if (isDarkTheme()) FlatColorTextSecondaryDark else FlatColorTextSecondary,
+    color: Color = FlatTheme.colors.textSecondary,
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
@@ -160,7 +160,7 @@ fun FlatTextBodyTwo(
 }
 
 @Composable
-fun FlatTextButton(
+fun FlatTextOnButton(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,

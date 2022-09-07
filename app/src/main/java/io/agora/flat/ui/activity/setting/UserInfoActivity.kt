@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.setting
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -119,25 +121,33 @@ private fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> 
 
     LazyColumn(Modifier.fillMaxWidth()) {
         item {
-            AvatarItem(stringResource(R.string.user_avatar), userAvatar = avatar) {
+            AvatarItem(avatar = avatar) {
                 launcherPickAvatar("image/*")
             }
             SettingItem(
+                id = R.drawable.ic_user_profile_head,
                 tip = stringResource(R.string.username),
                 desc = state.userInfo?.name ?: "",
                 onClick = { Navigator.launchEditNameActivity(context) }
             )
         }
         item {
-            FlatTextBodyTwo(stringResource(R.string.bind_info), Modifier.padding(16.dp))
-            BindingItem(stringResource(R.string.github), bindingGithub) {
+            BindingItem(
+                icon = R.drawable.ic_user_profile_github,
+                tip = stringResource(R.string.github),
+                bind = bindingGithub
+            ) {
                 if (bindingGithub) {
                     actioner(UserInfoUiAction.UnbindGithub)
                 } else {
                     actioner(UserInfoUiAction.BindGithub)
                 }
             }
-            BindingItem(stringResource(R.string.wechat), bindingWeChat) {
+            BindingItem(
+                icon = R.drawable.ic_user_profile_wechat,
+                tip = stringResource(R.string.wechat),
+                bind = bindingWeChat
+            ) {
                 if (bindingWeChat) {
                     actioner(UserInfoUiAction.UnbindWeChat)
                 } else {
@@ -150,16 +160,17 @@ private fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> 
 
 @Composable
 internal fun AvatarItem(
-    tip: String,
-    userAvatar: Any?,
+    avatar: Any?,
     onIconClick: () -> Unit = {},
 ) {
     Row(Modifier.heightIn(48.dp), verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.width(16.dp))
-        FlatTextBodyOne(tip, Modifier.weight(1f))
+        Image(painterResource(R.drawable.ic_user_profile_avater), contentDescription = null)
+        Spacer(Modifier.width(4.dp))
+        FlatTextBodyOne(stringResource(R.string.user_avatar), Modifier.weight(1f))
         IconButton(onClick = onIconClick) {
             Image(
-                painter = rememberImagePainter(userAvatar),
+                painter = rememberImagePainter(avatar),
                 contentDescription = null,
                 modifier = Modifier
                     .size(32.dp, 32.dp)
@@ -174,25 +185,30 @@ internal fun AvatarItem(
 
 @Composable
 private fun BindingItem(
+    @DrawableRes icon: Int,
     tip: String,
     bind: Boolean,
     onClick: () -> Unit,
 ) {
     Row(Modifier.heightIn(48.dp), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.width(16.dp))
-        FlatTextBodyOne(tip, modifier = Modifier.weight(1f))
+        Spacer(Modifier.width(16.dp))
+        Image(painterResource(icon), contentDescription = null)
+        Spacer(Modifier.width(4.dp))
+        FlatTextBodyOne(tip, Modifier.weight(1f))
         TextButton(onClick = onClick) {
-            FlatTextButton(stringResource(if (bind) R.string.unbind else R.string.bind))
+            FlatTextOnButton(stringResource(if (bind) R.string.unbind else R.string.bind))
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(Modifier.width(16.dp))
     }
 }
 
-@Preview(showBackground = true, uiMode = 0x30)
-@Preview(showBackground = true, uiMode = 0x20)
 @Composable
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 fun DefaultPreview() {
     val userInfo = UserInfo("name", "", "uuid", false)
     val userBindings = UserBindings(wechat = false, phone = true, github = false, google = true)
-    UserInfoScreen(UserInfoUiState(userInfo, userBindings)) { }
+    FlatPage {
+        UserInfoScreen(UserInfoUiState(userInfo, userBindings)) { }
+    }
 }

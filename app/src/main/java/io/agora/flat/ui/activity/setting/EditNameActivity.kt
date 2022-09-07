@@ -18,7 +18,7 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextField
-import io.agora.flat.ui.compose.FlatTextButton
+import io.agora.flat.ui.compose.FlatTextOnButton
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
@@ -55,7 +55,7 @@ private fun EditNameScreen(viewModel: UserViewModel = hiltViewModel()) {
                     }
                 }
             }) {
-                FlatTextButton(stringResource(id = R.string.save))
+                FlatTextOnButton(stringResource(id = R.string.save))
             }
         }
         Box(Modifier.padding(16.dp)) {

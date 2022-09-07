@@ -40,7 +40,9 @@ class AccountSecurityActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AccountSecurityScreen()
+            FlatPage {
+                AccountSecurityScreen()
+            }
         }
     }
 }
@@ -71,7 +73,7 @@ private fun AccountSecurityScreen(viewState: AccountSecurityUiState, onMessageSh
 
     ShowUiMessageEffect(viewState.message, onMessageShown)
 
-    FlatColumnPage {
+    Column {
         BackTopAppBar(stringResource(R.string.account_security), {
             context.getActivity()?.finish()
         })
@@ -80,9 +82,7 @@ private fun AccountSecurityScreen(viewState: AccountSecurityUiState, onMessageSh
             tip = stringResource(R.string.cancel_account),
             detail = detail,
             enabled = viewState.roomCount == 0,
-            onClick = {
-                showCancelDialog = true
-            }
+            onClick = { showCancelDialog = true }
         )
     }
     if (showCancelDialog) {
@@ -105,7 +105,6 @@ private fun CancelAccountDialog(onDismissRequest: () -> Unit, viewModel: Account
                 Column(Modifier.padding(horizontal = 16.dp)) {
                     Spacer(Modifier.height(12.dp))
                     FlatTextTitle(stringResource(R.string.account_security_cancel_dialog_title))
-
                     Spacer(Modifier.height(12.dp))
                     FlatTextBodyOne(
                         stringResource(R.string.account_security_cancel_dialog_message),
@@ -114,9 +113,7 @@ private fun CancelAccountDialog(onDismissRequest: () -> Unit, viewModel: Account
                             .verticalScroll(scrollState)
                     )
                     Spacer(NormalVerticalModifier)
-                    CancelAccountCheck(onAgree = {
-                        viewModel.deleteAccount()
-                    })
+                    CancelAccountCheck(viewModel::deleteAccount)
                 }
             }
         }
@@ -126,7 +123,6 @@ private fun CancelAccountDialog(onDismissRequest: () -> Unit, viewModel: Account
 @Composable
 fun CancelAccountCheck(onAgree: () -> Unit) {
     var agree by remember { mutableStateOf(false) }
-
     var remainTime by remember { mutableStateOf(0L) }
     val countDownTimer = remember {
         object : CountDownTimer(Config.cancelAccountCountTime, 1000) {
@@ -157,9 +153,7 @@ fun CancelAccountCheck(onAgree: () -> Unit) {
         CancelAgreeButton(
             text = buttonText,
             enabled = buttonEnable,
-            onClick = {
-                onAgree()
-            },
+            onClick = onAgree,
         )
     }
 
@@ -200,14 +194,16 @@ private fun CancelAgreeButton(text: String, enabled: Boolean, onClick: () -> Uni
         colors = colors,
         onClick = onClick,
     ) {
-        FlatTextButton(text, softWrap = false, maxLines = 1)
+        FlatTextOnButton(text, softWrap = false, maxLines = 1)
     }
 }
 
 @Composable
-@Preview
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 private fun AccountSecurityScreenPreview() {
-    AccountSecurityScreen(
-        viewState = AccountSecurityUiState(roomCount = 1, loading = true)
-    ) {}
+    FlatPage {
+        AccountSecurityScreen(AccountSecurityUiState(roomCount = 1, loading = true)) {}
+    }
+
 }

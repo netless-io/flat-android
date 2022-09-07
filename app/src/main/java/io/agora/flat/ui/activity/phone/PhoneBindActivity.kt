@@ -17,7 +17,7 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.CloseTopAppBar
-import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.PhoneAndCodeArea
 import io.agora.flat.ui.theme.Shapes
@@ -31,9 +31,11 @@ class PhoneBindActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PhoneBindScreen(onBindSuccess = {
-                Navigator.launchHomeActivity(this@PhoneBindActivity)
-            })
+            FlatPage {
+                PhoneBindScreen(onBindSuccess = {
+                    Navigator.launchHomeActivity(this@PhoneBindActivity)
+                })
+            }
         }
     }
 }
@@ -88,10 +90,9 @@ internal fun PhoneBindScreen(
 ) {
     var phone by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
-
     val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !viewState.binding
 
-    FlatColumnPage {
+    Column {
         CloseTopAppBar(stringResource(R.string.bind_phone), {
             actioner(PhoneBindUiAction.Close)
         })
@@ -108,7 +109,7 @@ internal fun PhoneBindScreen(
         Spacer(modifier = Modifier.weight(1f))
         Box(modifier = Modifier.padding(16.dp)) {
             FlatPrimaryTextButton(
-                text = "确定",
+                text = stringResource(id = R.string.confirm),
                 enabled = buttonEnable,
                 onClick = {
                     actioner(PhoneBindUiAction.Bind("+86${phone}", code))
@@ -119,7 +120,10 @@ internal fun PhoneBindScreen(
 }
 
 @Composable
-@Preview
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 internal fun PhoneBindScreenPreview() {
-    PhoneBindScreen(viewState = PhoneBindUiViewState.Empty) {}
+    FlatPage {
+        PhoneBindScreen(viewState = PhoneBindUiViewState.Empty) {}
+    }
 }

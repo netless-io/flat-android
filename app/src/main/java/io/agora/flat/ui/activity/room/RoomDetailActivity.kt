@@ -156,12 +156,15 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                     if (viewState.isPeriodicRoom) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
                         Column(MaxWidth.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
+                            FlatTextBodyOneSecondary(
+                                text = stringResource(
+                                    R.string.view_all_room_format,
+                                    periodicRoomInfo.rooms.size
+                                ),
                                 Modifier
                                     .padding(4.dp)
                                     .clickable { actioner(DetailUiAction.ShowAllRooms) },
-                                style = allRoomTextStyle
+                                color = MaterialTheme.colors.primary
                             )
                             FlatNormalVerticalSpacer()
                         }
@@ -536,12 +539,6 @@ private val allRoomTextStyle = TextStyle(
     color = FlatColorBlue,
 )
 
-private val moreInfoTextStyle = TextStyle(
-    fontFamily = FontFamily.Default,
-    fontSize = 14.sp,
-    color = FlatColorTextSecondary,
-)
-
 @Composable
 private fun MoreRomeInfoDisplay(uuid: String, roomType: RoomType, isPeriodic: Boolean) {
     Column(
@@ -661,7 +658,7 @@ private fun RoomType(roomType: RoomType, modifier: Modifier = Modifier) {
         RoomType.SmallClass -> stringResource(R.string.room_type_small_class)
         RoomType.OneToOne -> stringResource(R.string.room_type_one_to_one)
     }
-    Text(type, modifier, style = moreInfoTextStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    FlatTextBodyTwo(type, modifier, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
 //@Composable

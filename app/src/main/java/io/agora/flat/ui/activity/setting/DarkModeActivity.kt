@@ -36,12 +36,12 @@ class DarkModeActivity : BaseComposeActivity() {
             val state by viewModel.state.collectAsState()
 
             FlatColumnPage {
-                BackTopAppBar(title = stringResource(R.string.title_dark_mode), { finish() }) {
+                BackTopAppBar(stringResource(R.string.title_dark_mode), { finish() }) {
                     TextButton(onClick = {
                         viewModel.save()
                         Navigator.launchHomeActivity(this@DarkModeActivity)
                     }) {
-                        FlatTextButton(stringResource(R.string.save))
+                        FlatTextOnButton(stringResource(R.string.save))
                     }
                 }
 
@@ -49,8 +49,7 @@ class DarkModeActivity : BaseComposeActivity() {
                     items(
                         count = state.modes.size,
                         key = { index: Int -> state.modes[index].display },
-                    )
-                    { index ->
+                    ) { index ->
                         DarkModeItem(
                             state.modes[index], state.modes[index] == state.current,
                             Modifier

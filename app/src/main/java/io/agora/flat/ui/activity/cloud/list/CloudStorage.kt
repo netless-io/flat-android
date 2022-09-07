@@ -278,7 +278,7 @@ private fun RowScope.UploadPickItem(@DrawableRes id: Int, @StringRes text: Int, 
     ) {
         Image(painterResource(id), contentDescription = "", Modifier.size(48.dp))
         Spacer(Modifier.height(4.dp))
-        FlatTextButton(stringResource(text))
+        FlatTextOnButton(stringResource(text))
     }
 }
 

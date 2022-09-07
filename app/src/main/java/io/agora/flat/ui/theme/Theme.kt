@@ -63,12 +63,14 @@ private val LightExtendedColors = ExtendedColors(
     textPrimary = Gray_6,
     textSecondary = Gray_3,
     textTitle = Blue_12,
+    divider = Gray_1,
 )
 
 private val DarkExtendedColors = ExtendedColors(
     textPrimary = Gray_3,
     textSecondary = Gray_6,
     textTitle = Blue_0,
+    divider = Gray_8,
 )
 
 @Composable
@@ -99,13 +101,15 @@ data class ExtendedColors(
     val textPrimary: Color,
     val textSecondary: Color,
     val textTitle: Color,
+    val divider: Color,
 )
 
 val LocalExtendedColors = staticCompositionLocalOf {
     ExtendedColors(
         textPrimary = Color.Unspecified,
         textSecondary = Color.Unspecified,
-        textTitle = Color.Unspecified
+        textTitle = Color.Unspecified,
+        divider = Color.Unspecified
     )
 }
 

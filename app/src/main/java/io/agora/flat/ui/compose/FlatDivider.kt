@@ -10,15 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.agora.flat.ui.theme.Gray_1
-import io.agora.flat.ui.theme.Gray_8
-import io.agora.flat.ui.theme.isDarkTheme
-import io.agora.flat.ui.theme.isTabletMode
+import io.agora.flat.ui.theme.*
 
 @Composable
 fun FlatDivider(
     modifier: Modifier = Modifier,
-    color: Color = if (isDarkTheme()) Gray_8 else Gray_1,
+    color: Color = FlatTheme.colors.divider,
     thickness: Dp = if (isTabletMode()) 1.dp else 0.5.dp,
     startIndent: Dp = 0.dp,
     endIndent: Dp = 0.dp,

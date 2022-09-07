@@ -9,8 +9,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -28,6 +26,7 @@ import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.viewmodel.SettingsUiState
 import io.agora.flat.ui.viewmodel.SettingsViewModel
 import io.agora.flat.util.getAppVersion
@@ -68,7 +67,7 @@ fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit)
                 },
             )
         }
-        BottomOptArea(onLogoutClick = {
+        BottomOperateArea(onLogoutClick = {
             actioner(SettingsUiAction.Logout)
         })
     }
@@ -110,7 +109,7 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
             )
             SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_update,
+                id = R.drawable.ic_settings_app_version,
                 tip = stringResource(R.string.setting_check_update),
                 desc = context.getAppVersion(),
             )
@@ -121,7 +120,7 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
             //     onClick = { Navigator.launchFeedbackActivity(context) })
             // SettingItemDivider()
             SettingItem(
-                id = R.drawable.ic_user_profile_aboutus,
+                id = R.drawable.ic_settings_about_us,
                 tip = stringResource(R.string.title_about_us),
                 onClick = { Navigator.launchAboutUsActivity(context) })
             SettingItemDivider()
@@ -152,7 +151,7 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
 }
 
 @Composable
-private fun BottomOptArea(onLogoutClick: () -> Unit) {
+private fun BottomOperateArea(onLogoutClick: () -> Unit) {
     Box(
         Modifier
             .padding(horizontal = 16.dp, vertical = 32.dp)
@@ -174,41 +173,34 @@ internal fun SettingItem(
     enabled: Boolean = true,
     onClick: () -> Unit = {},
 ) {
-    val color = MaterialTheme.colors.onBackground
-    CompositionLocalProvider(
-        LocalContentColor provides color.copy(alpha = 1f),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(48.dp)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick
+            ),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(48.dp)
-                .clickable(
-                    enabled = enabled,
-                    onClick = onClick
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Spacer(Modifier.width(16.dp))
-            if (id != 0) {
-                Image(painterResource(id), contentDescription = null)
-                Spacer(Modifier.width(4.dp))
-            }
-            Column(
-                Modifier
-                    .weight(1f)
-                    .padding(vertical = 8.dp)
-            ) {
-                FlatTextBodyOne(text = tip)
-                if (detail != null) {
-                    FlatTextCaption(text = detail)
-                }
-            }
-            Spacer(Modifier.width(8.dp))
-            FlatTextBodyOneSecondary(text = desc)
-            Spacer(Modifier.width(8.dp))
-            Icon(Icons.Outlined.NavigateNext, contentDescription = null)
-            Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(16.dp))
+        if (id != 0) {
+            Image(painterResource(id), contentDescription = null)
+            Spacer(Modifier.width(4.dp))
         }
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(vertical = 8.dp)
+        ) {
+            FlatTextBodyOne(tip)
+            if (detail != null) FlatTextCaption(text = detail)
+        }
+        Spacer(Modifier.width(8.dp))
+        FlatTextBodyOne(desc, color = FlatTheme.colors.textSecondary)
+        Spacer(Modifier.width(8.dp))
+        Icon(painterResource(id = R.drawable.ic_arrow_right), contentDescription = null)
+        Spacer(Modifier.width(16.dp))
     }
 }
 
@@ -232,9 +224,9 @@ internal fun SettingItemSwitch(
             Spacer(Modifier.width(16.dp))
             Image(painterResource(id), contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            FlatTextBodyOne(text = tip)
+            FlatTextBodyOne(tip)
             Spacer(Modifier.weight(1f))
-            FlatTextBodyOneSecondary(text = desc)
+            FlatTextBodyOne(desc, color = FlatTheme.colors.textSecondary)
             Spacer(Modifier.width(8.dp))
             Switch(checked = checked, onCheckedChange = onCheckedChange)
             Spacer(Modifier.width(16.dp))
@@ -247,15 +239,12 @@ internal fun SettingItemDivider() {
     FlatDivider(startIndent = 44.dp, endIndent = 16.dp)
 }
 
-@Preview(showSystemUi = false)
 @Composable
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 fun UserSettingActivityPreview() {
     val state = SettingsUiState()
     FlatColumnPage {
-        BackTopAppBar(title = stringResource(R.string.title_setting), onBackPressed = { })
-        Box(Modifier.weight(1f)) {
-            SettingsList(state) {}
-            BottomOptArea {}
-        }
+        SettingsScreen(state, {})
     }
 }

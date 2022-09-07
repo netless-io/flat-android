@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.Color
 val FlatColorRed = Color(0xFFF45454)
 val FlatColorRedLight = Color(0xFFF2E4E7)
 val FlatColorBlue = Color(0xFF3381FF)
-val FlatColorLightGreen = Color(0xFF7EC452)
 
 val FlatColorSurface = Color(0xFFF9F9FA)
 val FlatColorTextPrimary = Color(0xFF03060D)

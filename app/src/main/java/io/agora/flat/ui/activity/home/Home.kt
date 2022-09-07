@@ -115,7 +115,7 @@ private fun OperationItem(
     @StringRes tip: Int,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isDarkTheme()) Blue_10 else Blue_0
+    val bgColor = if (isDarkTheme()) Blue_8 else Blue_0
     val icColor = if (isDarkTheme()) Blue_2 else Blue_6
     Box(modifier, Alignment.TopCenter) {
         Column(
