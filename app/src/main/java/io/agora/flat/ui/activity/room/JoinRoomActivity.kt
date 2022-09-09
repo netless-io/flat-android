@@ -4,11 +4,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Checkbox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +24,7 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.JoinRoomAction
+import io.agora.flat.ui.viewmodel.JoinRoomUiState
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
 import io.agora.flat.util.showToast
 
@@ -37,14 +40,17 @@ class JoinRoomActivity : BaseComposeActivity() {
 }
 
 @Composable
-fun JoinRoomPage(
+fun JoinRoomScreen(
     navController: NavController,
     viewModel: JoinRoomViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
 
-    ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
+    ShowUiMessageEffect(
+        uiMessage = viewState.message,
+        onMessageShown = viewModel::clearMessage
+    )
 
     viewState.roomPlayInfo?.let { roomPlayInfo ->
         LaunchedEffect(roomPlayInfo) {
@@ -63,69 +69,60 @@ fun JoinRoomPage(
             }
         }
     }
-    JoinRoomPage(actioner = actioner)
+    JoinRoomScreen(viewState, actioner = actioner)
 }
 
 @Composable
-private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
+private fun JoinRoomScreen(viewState: JoinRoomUiState, actioner: (JoinRoomAction) -> Unit) {
     var uuid by remember { mutableStateOf("") }
-    var openAudio by remember { mutableStateOf(false) }
-    var openVideo by remember { mutableStateOf(false) }
+    var micOn by remember { mutableStateOf(false) }
+    var cameraOn by remember { mutableStateOf(false) }
 
-    // val clipboard = rememberAndroidClipboardController()
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
     val context = LocalContext.current
-
-    // WindowFocusObserver { isWindowFocused ->
-    //     if (isWindowFocused) {
-    //         val id = clipboard.getText().toString().parseRoomID()
-    //         if (!id.isNullOrBlank()) {
-    //             uuid = id
-    //             // clear clipboard when fetched
-    //             clipboard.putText("")
-    //         }
-    //     }
-    // }
-
     Column {
         CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
         Column(
             Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)
+                .noRippleClickable { focusManager.clearFocus() },
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            FlatNormalVerticalSpacer()
-            FlatTextBodyTwo(stringResource(R.string.room_id))
-            FlatSmallVerticalSpacer()
-            FlatPrimaryTextField(
+            Spacer(Modifier.height(48.dp))
+            ThemeTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
-                placeholderValue = stringResource(R.string.input_room_id_hint),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Ascii)
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp)
+                    .focusRequester(focusRequester),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                placeholderValue = stringResource(R.string.input_room_id_hint)
             )
-            FlatNormalVerticalSpacer()
-            FlatTextBodyTwo(stringResource(R.string.join_option))
-            FlatSmallVerticalSpacer()
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = openAudio,
-                    onCheckedChange = { openAudio = it }
-                )
-                Spacer(Modifier.width(4.dp))
-                FlatTextBodyTwo(stringResource(R.string.turn_on_mic))
-                Spacer(Modifier.width(40.dp))
-                Checkbox(
-                    checked = openVideo,
-                    onCheckedChange = { openVideo = it }
-                )
-                Spacer(Modifier.width(4.dp))
-                FlatTextBodyTwo(stringResource(R.string.turn_on_camera))
-            }
             Spacer(Modifier.height(32.dp))
-            FlatPrimaryTextButton(stringResource(R.string.join)) {
-                if (uuid.isNotBlank()) {
-                    actioner(JoinRoomAction.JoinRoom(uuid, openVideo, openAudio))
-                } else {
-                    context.showToast(R.string.join_room_toast_empty)
+            DevicePreviewLayout(
+                cameraOn = cameraOn,
+                onCameraChanged = { cameraOn = it },
+                micOn = micOn,
+                onMicChanged = { micOn = it },
+                avatar = viewState.avatar
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 32.dp), contentAlignment = Alignment.Center
+            ) {
+                FlatPrimaryTextButton(stringResource(R.string.join)) {
+                    if (uuid.isNotBlank()) {
+                        actioner(JoinRoomAction.JoinRoom(uuid, cameraOn, micOn))
+                    } else {
+                        context.showToast(R.string.join_room_toast_empty)
+                    }
+                    focusManager.clearFocus()
                 }
             }
         }
@@ -133,7 +130,10 @@ private fun JoinRoomPage(actioner: (JoinRoomAction) -> Unit) {
 }
 
 @Composable
-@Preview
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 private fun PagePreview() {
-    JoinRoomPage {}
+    FlatPage {
+        JoinRoomScreen(JoinRoomUiState.Empty) {}
+    }
 }

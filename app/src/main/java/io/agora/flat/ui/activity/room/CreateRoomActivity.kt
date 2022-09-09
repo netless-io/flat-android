@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -117,7 +119,12 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
 
     Column {
         CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })
-        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .weight(1f)
+                .noRippleClickable { focusManager.clearFocus() },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Spacer(Modifier.height(12.dp))
             ThemeTextField(
                 value = theme,
@@ -136,17 +143,13 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
             }
             Spacer(Modifier.height(32.dp))
             DevicePreviewLayout(
-                cameraOn,
-                onCameraChanged = {
-                    cameraOn = it
-                },
-                micOn,
-                onMicChanged = {
-                    micOn = it
-                },
+                cameraOn = cameraOn,
+                onCameraChanged = { cameraOn = it },
+                micOn = micOn,
+                onMicChanged = { micOn = it },
                 avatar = viewState.avatar
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -163,10 +166,12 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
 }
 
 @Composable
-private fun ThemeTextField(
+internal fun ThemeTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     placeholderValue: String,
 ) {
     var isCaptured by remember { mutableStateOf(false) }
@@ -183,6 +188,8 @@ private fun ThemeTextField(
             textAlign = TextAlign.Center,
         ),
         cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         singleLine = true,
     ) { innerTextField ->
         Box(Modifier, contentAlignment = Alignment.Center) {
@@ -260,24 +267,8 @@ private fun TypeCheckItem(iconPainter: Painter, text: String, checked: Boolean, 
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
-private fun ThemeInputPreview() {
-    FlatPage {
-        ThemeTextField(
-            "创建房间",
-            {},
-            Modifier
-                .fillMaxWidth(1f)
-                .height(64.dp),
-            "AAA创建房间",
-        )
-    }
-}
-
-@Composable
-@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
-@Preview(widthDp = 400, uiMode = 0x20)
 @Preview(device = PIXEL_C, widthDp = 400, uiMode = 0x20)
-private fun CreateRoomPageTabletPreview() {
+private fun CreateRoomScreenPreview() {
     FlatPage {
         CreateRoomScreen(CreateRoomUiState()) {}
     }

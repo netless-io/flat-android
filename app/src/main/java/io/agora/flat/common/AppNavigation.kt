@@ -16,7 +16,7 @@ import io.agora.flat.ui.activity.history.HistoryScreen
 import io.agora.flat.ui.activity.home.ExtInitPage
 import io.agora.flat.ui.activity.home.HomeScreen
 import io.agora.flat.ui.activity.room.CreateRoomScreen
-import io.agora.flat.ui.activity.room.JoinRoomPage
+import io.agora.flat.ui.activity.room.JoinRoomScreen
 import io.agora.flat.ui.activity.room.RoomDetailScreen
 import io.agora.flat.ui.activity.setting.SettingsScreen
 import io.agora.flat.ui.activity.setting.UserProfile
@@ -98,7 +98,7 @@ private fun NavGraphBuilder.addHomeExtGraph(navController: NavHostController) {
             CreateRoomScreen(navController)
         }
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
-            JoinRoomPage(navController)
+            JoinRoomScreen(navController)
         }
         composable(
             LeafScreen.RoomDetail.createRoute(screenRoot),
@@ -200,7 +200,7 @@ fun NavGraphBuilder.addHomeGraph(navController: NavController) {
             CreateRoomScreen(navController)
         }
         composable(LeafScreen.RoomJoin.createRoute(screenRoot)) {
-            JoinRoomPage(navController)
+            JoinRoomScreen(navController)
         }
         composable(
             LeafScreen.RoomDetail.createRoute(screenRoot),

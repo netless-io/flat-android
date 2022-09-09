@@ -9,6 +9,7 @@ import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class JoinRoomViewModel @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val roomRepository: RoomRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val uiMessageManager = UiMessageManager()
 
@@ -32,6 +34,7 @@ class JoinRoomViewModel @Inject constructor(
                 _state.value = _state.value.copy(message = it)
             }
         }
+        _state.value = _state.value.copy(avatar = userRepository.getUserInfo()?.avatar)
     }
 
     fun joinRoom(uuid: String, openVideo: Boolean, openAudio: Boolean) {
@@ -57,6 +60,7 @@ class JoinRoomViewModel @Inject constructor(
 
 data class JoinRoomUiState(
     val roomPlayInfo: RoomPlayInfo? = null,
+    val avatar: String? = null,
     val message: UiMessage? = null,
 ) {
     companion object {
