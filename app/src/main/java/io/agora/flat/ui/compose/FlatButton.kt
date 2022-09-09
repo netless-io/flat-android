@@ -45,8 +45,9 @@ fun FlatSecondaryTextButton(
 ) {
     val darkMode = isDarkTheme()
     val colors = ButtonDefaults.outlinedButtonColors(
-        contentColor = if (darkMode) Gray_4 else Gray_6,
-        disabledContentColor = if (darkMode) Gray_7 else Gray_5
+        contentColor = if (darkMode) Gray_3 else Gray_6,
+        disabledContentColor = if (darkMode) Gray_7 else Gray_5,
+        backgroundColor = MaterialTheme.colors.surface
     )
 
     OutlinedButton(

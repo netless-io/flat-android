@@ -10,9 +10,9 @@ import io.agora.flat.common.rtm.MessageFactory
 import io.agora.flat.common.rtm.RoomBanEvent
 import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
+import io.agora.flat.event.EventBus
 import io.agora.flat.event.MessagesAppended
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.UserManager

@@ -62,9 +62,7 @@ internal fun FeedbackScreen(onBackPressed: () -> Unit, onCommitFeedback: (text: 
                 focusedIndicatorColor = FlatColorBorder,
                 unfocusedIndicatorColor = FlatColorBorder
             ),
-            placeholder = {
-                FlatTextBodyOneSecondary(stringResource(R.string.feedback_input_hint))
-            }
+            placeholder = { FlatTextBodyOneSecondary(stringResource(R.string.feedback_input_hint)) }
         )
         Spacer(modifier = Modifier.weight(1f))
         Box(Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {

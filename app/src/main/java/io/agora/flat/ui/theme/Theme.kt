@@ -20,19 +20,19 @@ private val DarkColorPalette = darkColors(
     primary = Blue_7,
     primaryVariant = Blue_7,
 
-    secondary = FlatColorBlue,
-    secondaryVariant = FlatColorBlue,
+    secondary = Blue_7,
+    secondaryVariant = Blue_7,
 
     // behind scrollable content
     background = Gray_10,
     // cards, sheets, and menus
-    surface = FlatColorSurfaceDark,
+    surface = Gray_10,
     error = Red_7,
 
     onPrimary = FlatColorTextPrimaryDark,
     onSecondary = FlatColorTextSecondaryDark,
-    onBackground = FlatColorTextPrimaryDark,
-    onSurface = FlatColorTextPrimaryDark,
+    onBackground = Gray_3,
+    onSurface = Gray_3,
     onError = FlatColorBlack
 )
 
@@ -49,13 +49,13 @@ private val LightColorPalette = lightColors(
     // behind scrollable content
     background = FlatColorWhite,
     // cards, sheets, and menus
-    surface = FlatColorSurface,
+    surface = FlatColorWhite,
     error = Red_6,
 
     onPrimary = FlatColorTextPrimary,
     onSecondary = FlatColorTextSecondary,
-    onBackground = FlatColorTextPrimary,
-    onSurface = FlatColorTextPrimary,
+    onBackground = Gray_6,
+    onSurface = Gray_6,
     onError = FlatColorWhite
 )
 

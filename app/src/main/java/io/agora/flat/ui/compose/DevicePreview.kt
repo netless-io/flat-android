@@ -28,7 +28,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import io.agora.flat.R
 import io.agora.flat.ui.theme.Blue_0
-import io.agora.flat.ui.theme.Blue_8
+import io.agora.flat.ui.theme.Gray_8
 import io.agora.flat.ui.theme.isDarkTheme
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -44,7 +44,7 @@ fun DevicePreviewLayout(
     val cameraColor = if (cameraOn) MaterialTheme.colors.primary else MaterialTheme.colors.error
     val micIcon = if (micOn) R.drawable.ic_class_room_mic_on else R.drawable.ic_class_room_mic_off
     val micColor = if (micOn) MaterialTheme.colors.primary else MaterialTheme.colors.error
-    val bgColor = if (isDarkTheme()) Blue_8 else Blue_0
+    val bgColor = if (isDarkTheme()) Gray_8 else Blue_0
 
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val recordPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)

@@ -15,8 +15,8 @@ import io.agora.flat.common.login.LoginManager
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.event.EventBus
 import io.agora.flat.di.interfaces.LogConfig
+import io.agora.flat.event.EventBus
 import io.agora.flat.logger.LoggerModule
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton

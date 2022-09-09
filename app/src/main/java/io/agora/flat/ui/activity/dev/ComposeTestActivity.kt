@@ -32,8 +32,8 @@ import io.agora.flat.data.model.CloudStorageFile
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.ComposeVideoPlayer
 import io.agora.flat.ui.compose.MediaPlayback
-import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.FlatColorWhite
+import io.agora.flat.ui.theme.FlatTheme
 import kotlin.math.roundToInt
 
 class ComposeTestActivity : BaseComposeActivity() {

@@ -3,21 +3,21 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-  <path
-      android:pathData="M0,0h24v24h-24z"
-      android:strokeAlpha="0.01"
-      android:fillColor="#ffffff"
-      android:fillAlpha="0.01"/>
-  <path
-      android:pathData="M15.418,9C18.281,9 20.829,11.123 20.829,13.73C20.829,15.185 19.896,16.474 18.636,17.453L18.598,17.483L19.077,19.111L17.33,18.132L17.18,18.17C16.593,18.321 16.002,18.459 15.418,18.459C12.387,18.459 10,16.34 10,13.73C10,11.123 12.387,9 15.418,9Z"
-      android:strokeLineJoin="round"
-      android:strokeWidth="1.25"
-      android:fillColor="#00000000"
-      android:strokeColor="#5D6066"/>
-  <path
-      android:pathData="M8.996,14.482C8.349,14.482 7.695,14.328 7.043,14.162L6.878,14.119L4.942,15.204L5.472,13.4L5.43,13.367C4.034,12.282 3,10.854 3,9.241C3,6.353 5.824,4 8.996,4C11.745,4 14.016,5.576 14.75,7.732"
-      android:strokeLineJoin="round"
-      android:strokeWidth="1.25"
-      android:fillColor="#00000000"
-      android:strokeColor="#5D6066"/>
+    <path
+        android:fillAlpha="0.01"
+        android:fillColor="#ffffff"
+        android:pathData="M0,0h24v24h-24z"
+        android:strokeAlpha="0.01" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M15.418,9C18.281,9 20.829,11.123 20.829,13.73C20.829,15.185 19.896,16.474 18.636,17.453L18.598,17.483L19.077,19.111L17.33,18.132L17.18,18.17C16.593,18.321 16.002,18.459 15.418,18.459C12.387,18.459 10,16.34 10,13.73C10,11.123 12.387,9 15.418,9Z"
+        android:strokeWidth="1.25"
+        android:strokeColor="#5D6066"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M8.996,14.482C8.349,14.482 7.695,14.328 7.043,14.162L6.878,14.119L4.942,15.204L5.472,13.4L5.43,13.367C4.034,12.282 3,10.854 3,9.241C3,6.353 5.824,4 8.996,4C11.745,4 14.016,5.576 14.75,7.732"
+        android:strokeWidth="1.25"
+        android:strokeColor="#5D6066"
+        android:strokeLineJoin="round" />
 </vector>
