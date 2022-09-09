@@ -18,7 +18,7 @@ import io.agora.flat.ui.theme.isDarkTheme
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun FlatAvatar(avatar: String, size: Dp) {
+fun FlatAvatar(avatar: String?, size: Dp) {
     Image(
         painter = rememberImagePainter(avatar),
         contentDescription = null,

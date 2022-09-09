@@ -10,7 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.isTabletMode
 
 @Composable
 fun FlatDivider(

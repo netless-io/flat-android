@@ -11,7 +11,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatColorBlue
+import io.agora.flat.ui.theme.FlatColorRed
+import io.agora.flat.ui.theme.FlatColorTextSecondary
+import io.agora.flat.ui.theme.FlatTheme
 
 
 @Composable

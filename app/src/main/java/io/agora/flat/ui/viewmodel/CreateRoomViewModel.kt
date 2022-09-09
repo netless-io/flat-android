@@ -43,6 +43,7 @@ class CreateRoomViewModel @Inject constructor(
             uuid,
             loading,
             username,
+            userRepository.getUserInfo()!!.avatar,
             message
         )
     }.stateIn(
@@ -84,6 +85,7 @@ data class CreateRoomUiState(
     val roomUUID: String = "",
     val loading: Boolean = false,
     val username: String = "",
+    val avatar: String? = null,
     val message: UiMessage? = null
 ) {
     companion object {

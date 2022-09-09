@@ -34,9 +34,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
+import io.agora.flat.common.rtc.AgoraRtc
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.di.interfaces.Crashlytics
 import io.agora.flat.di.interfaces.LogReporter
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
@@ -55,6 +57,9 @@ class MainActivity : BaseComposeActivity() {
     @Inject
     lateinit var logReporter: LogReporter
 
+    @Inject
+    lateinit var rtcApi: RtcApi
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -64,7 +69,9 @@ class MainActivity : BaseComposeActivity() {
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
 
             if (viewState.protocolAgreed) {
-                MainScreen(viewState)
+                CompositionLocalProvider(LocalAgoraRtc provides rtcApi as? AgoraRtc) {
+                    MainScreen(viewState)
+                }
                 LifecycleHandler(
                     onCreate = {
                         loginManager.registerApp()

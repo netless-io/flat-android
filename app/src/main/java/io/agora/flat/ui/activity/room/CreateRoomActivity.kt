@@ -2,25 +2,31 @@ package io.agora.flat.ui.activity.room
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Checkbox
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,13 +38,11 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatColorGray
+import io.agora.flat.ui.theme.*
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.CreateRoomUiState
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.util.delayLaunch
-import io.agora.flat.util.isTabletMode
 
 @AndroidEntryPoint
 class CreateRoomActivity : BaseComposeActivity() {
@@ -67,7 +71,7 @@ fun CreateRoomScreen(
                 navController.popBackStack()
             }
             is CreateRoomAction.JoinRoom -> {
-                viewModel.enableVideo(action.openVideo)
+                viewModel.enableVideo(action.cameraOn)
                 Navigator.launchRoomPlayActivity(context, viewState.roomUUID, quickStart = true)
                 scope.delayLaunch {
                     navController.popBackStack()
@@ -82,63 +86,126 @@ fun CreateRoomScreen(
         }
     }
 
-    CreateRoomContent(viewState, actioner)
+    CreateRoomScreen(viewState, actioner)
 }
 
 @Composable
-private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoomAction) -> Unit) {
-    val defaultTheme = LocalContext.current.getString(
+private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoomAction) -> Unit) {
+    val context = LocalContext.current
+    val defaultTheme = context.getString(
         R.string.join_room_default_time_format,
         viewState.username
     )
     var theme by remember { mutableStateOf(defaultTheme) }
     var type by remember { mutableStateOf(RoomType.BigClass) }
-    var openVideo by remember { mutableStateOf(false) }
+    var cameraOn by remember { mutableStateOf(false) }
+    var micOn by remember { mutableStateOf(false) }
+
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     if (viewState.roomUUID.isNotBlank()) {
         LaunchedEffect(true) {
-            actioner(CreateRoomAction.JoinRoom(viewState.roomUUID, openVideo))
+            actioner(CreateRoomAction.JoinRoom(viewState.roomUUID, cameraOn, micOn))
         }
     }
 
     ShowUiMessageEffect(
         uiMessage = viewState.message,
-        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) })
+        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) }
+    )
 
     Column {
         CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp)
-        ) {
-            FlatNormalVerticalSpacer()
-            FlatTextBodyTwo(stringResource(R.string.room_theme))
-            FlatSmallVerticalSpacer()
-            FlatPrimaryTextField(
+        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.height(12.dp))
+            ThemeTextField(
                 value = theme,
                 onValueChange = { theme = it },
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp)
+                    .focusRequester(focusRequester),
                 placeholderValue = stringResource(R.string.create_room_input_theme)
             )
-            FlatNormalVerticalSpacer()
-            FlatTextBodyTwo(stringResource(R.string.create_room_type))
-            FlatSmallVerticalSpacer()
-            TypeCheckLayout(type) { type = it }
-            FlatNormalVerticalSpacer()
-            FlatTextBodyTwo(stringResource(R.string.join_option))
-            FlatSmallVerticalSpacer()
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = openVideo, onCheckedChange = { openVideo = it })
-                Spacer(Modifier.width(8.dp))
-                FlatTextCaption(stringResource(id = R.string.turn_on_camera))
+            Spacer(Modifier.height(32.dp))
+            TypeChooseLayout(type) {
+                type = it
+                focusManager.clearFocus()
             }
             Spacer(Modifier.height(32.dp))
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            DevicePreviewLayout(
+                cameraOn,
+                onCameraChanged = {
+                    cameraOn = it
+                },
+                micOn,
+                onMicChanged = {
+                    micOn = it
+                },
+                avatar = viewState.avatar
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 32.dp), contentAlignment = Alignment.Center
+            ) {
                 FlatPrimaryTextButton(stringResource(R.string.start), enabled = !viewState.loading) {
                     actioner(CreateRoomAction.CreateRoom(theme, type))
+                    focusManager.clearFocus()
                 }
-                if (viewState.loading) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
+                if (viewState.loading) CircularProgressIndicator(Modifier.size(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholderValue: String,
+) {
+    var isCaptured by remember { mutableStateOf(false) }
+    val dividerColor = if (isCaptured) Blue_6 else Gray_1
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier.onFocusChanged {
+            isCaptured = it.isCaptured
+        },
+        textStyle = MaterialTheme.typography.h6.copy(
+            color = FlatTheme.colors.textPrimary,
+            textAlign = TextAlign.Center,
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        singleLine = true,
+    ) { innerTextField ->
+        Box(Modifier, contentAlignment = Alignment.Center) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 48.dp), contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
+            }
+            Spacer(
+                Modifier
+                    .fillMaxWidth(1f)
+                    .height(1.dp)
+                    .background(dividerColor)
+                    .align(Alignment.BottomCenter)
+            )
+            if (value.isEmpty()) {
+                FlatTextBodyOneSecondary(placeholderValue)
+            }
+            if (value.isNotBlank()) {
+                IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
+                    Icon(Icons.Outlined.Clear, "", tint = FlatTheme.colors.textPrimary)
                 }
             }
         }
@@ -146,120 +213,79 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
 }
 
 @Composable
-private fun TypeCheckLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
+private fun TypeChooseLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
     Row {
-        TypeItem(
-            checked = type == RoomType.BigClass,
+        TypeCheckItem(
+            iconPainter = painterResource(R.drawable.ic_room_type_big_class),
             text = stringResource(id = R.string.room_type_big_class),
-            desc = stringResource(id = R.string.room_type_desc_big_class),
-            id = R.drawable.img_big_class,
+            checked = type == RoomType.BigClass,
             modifier = Modifier
                 .weight(1f)
                 .clickable { onTypeChange(RoomType.BigClass) })
-        Spacer(Modifier.width(16.dp))
-        TypeItem(
-            checked = type == RoomType.SmallClass,
+        TypeCheckItem(
+            iconPainter = painterResource(R.drawable.ic_room_type_small_class),
             text = stringResource(id = R.string.room_type_small_class),
-            desc = stringResource(id = R.string.room_type_desc_small_class),
-            id = R.drawable.img_small_class,
+            checked = type == RoomType.SmallClass,
             modifier = Modifier
                 .weight(1f)
-                .clickable { onTypeChange(RoomType.SmallClass) })
-        Spacer(Modifier.width(16.dp))
-        TypeItem(
-            checked = type == RoomType.OneToOne,
-            text = stringResource(id = R.string.room_type_one_to_one),
-            desc = stringResource(id = R.string.room_type_desc_one_to_one),
-            id = R.drawable.img_one_to_one,
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onTypeChange(RoomType.OneToOne) })
-    }
-}
-
-@Composable
-private fun TypeItem(checked: Boolean, text: String, desc: String, @DrawableRes id: Int, modifier: Modifier) {
-    val isTablet = LocalContext.current.isTabletMode()
-
-    if (isTablet) {
-        TypeItemTablet(checked, text, desc, id, modifier)
-    } else {
-        TypeItemPhone(checked, text, id, modifier)
-    }
-}
-
-@Composable
-private fun TypeItemTablet(checked: Boolean, text: String, desc: String, @DrawableRes id: Int, modifier: Modifier) {
-    val border = BorderStroke(1.dp, if (checked) FlatColorBlue else FlatColorGray)
-    val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
-
-    Row(modifier = modifier.border(border, shape = MaterialTheme.shapes.small)) {
-        Image(
-            painter = painterResource(id),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .padding(12.dp)
-                .size(72.dp)
+                .clickable { onTypeChange(RoomType.SmallClass) }
         )
-        Column(Modifier.weight(1f)) {
-            Spacer(modifier = Modifier.height(8.dp))
-            FlatTextBodyOne(text)
-            Spacer(modifier = Modifier.height(4.dp))
-            FlatTextCaption(desc, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Icon(
-                painterResource(icon),
-                null,
-                Modifier
-                    .align(Alignment.End)
-                    .padding(12.dp),
-                Color.Unspecified
-            )
+        TypeCheckItem(
+            iconPainter = painterResource(R.drawable.ic_room_type_ono_to_one),
+            text = stringResource(id = R.string.room_type_one_to_one),
+            checked = type == RoomType.OneToOne,
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onTypeChange(RoomType.OneToOne) }
+        )
+    }
+}
+
+@Composable
+private fun TypeCheckItem(iconPainter: Painter, text: String, checked: Boolean, modifier: Modifier) {
+    val icColor = if (checked) {
+        MaterialTheme.colors.primary
+    } else {
+        if (isDarkTheme()) Gray_6 else Gray_3
+    }
+    val textColor = if (isDarkTheme()) Gray_6 else Gray_3
+    Box(modifier, contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(iconPainter, null, modifier = Modifier.size(48.dp), colorFilter = ColorFilter.tint(icColor))
+            FlatTextCaption(text, color = textColor)
         }
     }
 }
 
 @Composable
-private fun TypeItemPhone(checked: Boolean, text: String, @DrawableRes id: Int, modifier: Modifier) {
-    val border = BorderStroke(1.dp, if (checked) FlatColorBlue else FlatColorGray)
-    val icon = if (checked) R.drawable.ic_item_checked else R.drawable.ic_item_unchecked
-
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Column(
-            Modifier.border(border, shape = MaterialTheme.shapes.small),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .aspectRatio(1f)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            FlatTextBodyOne(text)
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Icon(painter = painterResource(icon), contentDescription = null, tint = Color.Unspecified)
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
+private fun ThemeInputPreview() {
+    FlatPage {
+        ThemeTextField(
+            "创建房间",
+            {},
+            Modifier
+                .fillMaxWidth(1f)
+                .height(64.dp),
+            "AAA创建房间",
+        )
     }
 }
 
 @Composable
-@Preview(device = PIXEL_C)
-@Preview(device = PIXEL_C, uiMode = 0x20)
-@Preview
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
+@Preview(device = PIXEL_C, widthDp = 400, uiMode = 0x20)
 private fun CreateRoomPageTabletPreview() {
     FlatPage {
-        CreateRoomContent(CreateRoomUiState()) {}
+        CreateRoomScreen(CreateRoomUiState()) {}
     }
 }
 
 internal sealed class CreateRoomAction {
     object Close : CreateRoomAction()
-    data class JoinRoom(val roomUUID: String, val openVideo: Boolean) : CreateRoomAction()
+    data class JoinRoom(val roomUUID: String, val cameraOn: Boolean, val micOn: Boolean) : CreateRoomAction()
     data class CreateRoom(val title: String, val roomType: RoomType) : CreateRoomAction()
     data class OnMessageShown(val id: Long) : CreateRoomAction()
 }
