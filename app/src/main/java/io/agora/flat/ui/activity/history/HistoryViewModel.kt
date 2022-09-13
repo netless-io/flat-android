@@ -7,6 +7,8 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.repository.RoomRepository
+import io.agora.flat.event.EventBus
+import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.runAtLeast
 import kotlinx.coroutines.flow.*
@@ -19,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
+    private val eventBus: EventBus,
 ) : ViewModel() {
     private val histories = MutableStateFlow(listOf<RoomInfo>())
     private val refreshing = ObservableLoadingCounter()
@@ -37,6 +40,12 @@ class HistoryViewModel @Inject constructor(
     private var historyPage: Int = 1
 
     init {
+        viewModelScope.launch {
+            eventBus.events.filterIsInstance<RoomsUpdated>().collect {
+                reloadHistories()
+            }
+        }
+
         reloadHistories()
     }
 

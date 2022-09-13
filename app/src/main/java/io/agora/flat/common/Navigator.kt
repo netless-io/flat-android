@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import io.agora.flat.Constants
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
@@ -119,7 +119,7 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchPreviewActivity(context: Context, file: CloudStorageFile) {
+    fun launchPreviewActivity(context: Context, file: CloudFile) {
         val intent = Intent(context, PreviewActivity::class.java).apply {
             putExtra(Constants.IntentKey.CLOUD_FILE, file)
         }

@@ -31,6 +31,7 @@ import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.UserInfoUiAction
 import io.agora.flat.ui.viewmodel.UserInfoUiState
 import io.agora.flat.ui.viewmodel.UserInfoViewModel
@@ -92,6 +93,10 @@ internal fun UserInfoScreen(
             }
             else -> viewModel.processAction(action)
         }
+    }
+
+    ShowUiMessageEffect(uiMessage = state.message) {
+        viewModel.clearMessage(it)
     }
 
     UserInfoScreen(state, actioner)

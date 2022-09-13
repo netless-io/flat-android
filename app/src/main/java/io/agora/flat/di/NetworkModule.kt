@@ -78,13 +78,13 @@ object NetworkModule {
     fun provideCloudStorageService(
         @NetworkModule.NormalOkHttpClient client: OkHttpClient,
         appEnv: AppEnv,
-    ): CloudStorageService {
+    ): CloudStorageServiceV2 {
         return Retrofit.Builder()
             .baseUrl(appEnv.flatServiceUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(CloudStorageService::class.java)
+            .create(CloudStorageServiceV2::class.java)
     }
 
     @Provides

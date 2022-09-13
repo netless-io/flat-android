@@ -12,6 +12,7 @@ import io.agora.flat.http.api.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 import javax.inject.Singleton
 
 @Module
@@ -35,7 +36,11 @@ object UserModule {
         return object : HeaderProvider {
             override fun getHeaders(): Set<Pair<String, String>> {
                 return appKVCenter.getToken()?.let {
-                    setOf("Authorization" to String.format("Bearer %s", it))
+                    setOf(
+                        "Authorization" to String.format("Bearer %s", it),
+                        "x-session-id" to appKVCenter.getSessionId(),
+                        "x-request-id" to UUID.randomUUID().toString()
+                    )
                 } ?: emptySet()
             }
         }

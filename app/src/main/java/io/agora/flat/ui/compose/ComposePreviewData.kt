@@ -1,7 +1,10 @@
 package io.agora.flat.ui.compose
 
 import com.google.gson.Gson
+import io.agora.flat.data.model.CloudFile
+import io.agora.flat.data.model.ResourceType
 import io.agora.flat.data.model.RoomInfo
+import io.agora.flat.ui.activity.cloud.list.CloudUiFile
 
 object ComposePreviewData {
     val roomInfo: RoomInfo
@@ -22,5 +25,41 @@ object ComposePreviewData {
                     "            \"hasRecord\": true\n" +
                     "        }"
             return Gson().fromJson(roomStr, RoomInfo::class.java)
+        }
+
+    val CloudListFiles: List<CloudUiFile>
+        get() {
+            return listOf(
+                CloudUiFile(
+                    CloudFile(
+                        "1",
+                        "long long long long long long name file.jpg",
+                        1111024,
+                        createAt = 1627898586449,
+                        fileURL = "",
+                        resourceType = ResourceType.NormalResources
+                    ),
+                ),
+                CloudUiFile(
+                    CloudFile(
+                        "2",
+                        "2.doc",
+                        111024,
+                        createAt = 1627818586449,
+                        fileURL = "",
+                        resourceType = ResourceType.NormalResources
+                    ),
+                ),
+                CloudUiFile(
+                    CloudFile(
+                        "3",
+                        "3.mp4",
+                        111111024,
+                        createAt = 1617898586449,
+                        fileURL = "",
+                        resourceType = ResourceType.NormalResources
+                    ),
+                ),
+            )
         }
 }

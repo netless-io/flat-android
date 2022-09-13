@@ -16,7 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.CoursewareType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.setting.ComposeWebView
@@ -100,6 +100,7 @@ fun DocumentPreview(
                 settings?.apply {
                     javaScriptEnabled = true
                     useWideViewPort = true
+                    domStorageEnabled = true
                     cacheMode = WebSettings.LOAD_NO_CACHE
                     setSupportZoom(false)
                 }
@@ -122,7 +123,7 @@ fun DocumentPreview(
 @Composable
 fun MediaPreview(
     modifier: Modifier = Modifier.fillMaxSize(),
-    file: CloudStorageFile,
+    file: CloudFile,
     actioner: (PreviewAction) -> Unit,
 ) {
     LaunchedEffect(file) {
@@ -146,7 +147,7 @@ fun MediaPreview(
 @Composable
 fun ImagePreview(
     modifier: Modifier = Modifier.fillMaxSize(),
-    file: CloudStorageFile,
+    file: CloudFile,
     actioner: (PreviewAction) -> Unit,
 ) {
     LaunchedEffect(file) {

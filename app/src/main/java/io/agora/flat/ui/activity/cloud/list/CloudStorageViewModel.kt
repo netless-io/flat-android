@@ -11,20 +11,17 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.FlatErrorCode
-import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
-import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.*
+import io.agora.flat.data.model.CloudFile
+import io.agora.flat.data.model.CoursewareType
+import io.agora.flat.data.model.FileConvertStep
+import io.agora.flat.data.model.ResourceType
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
-import io.agora.flat.util.ContentInfo
-import io.agora.flat.util.coursewareType
-import io.agora.flat.util.isDynamicDoc
-import io.agora.flat.util.runAtLeast
+import io.agora.flat.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,12 +32,12 @@ import javax.inject.Inject
 @HiltViewModel
 class CloudStorageViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
-    private val appKVCenter: AppKVCenter,
 ) : ViewModel() {
     private val files = MutableStateFlow(listOf<CloudUiFile>())
     private val totalUsage = MutableStateFlow(0L)
     private val refreshing = ObservableLoadingCounter()
     private val showBadge = MutableStateFlow(false)
+    private val dirPath = MutableStateFlow("/")
 
     val state = combine(
         refreshing.observable,
@@ -48,13 +45,15 @@ class CloudStorageViewModel @Inject constructor(
         totalUsage,
         files,
         UploadManager.uploadFiles,
-    ) { refreshing, showBadge, totalUsage, files, uploadFiles ->
+        dirPath,
+    ) { refreshing, showBadge, totalUsage, files, uploadFiles, dirPath ->
         CloudStorageUiState(
             refreshing = refreshing,
             showBadge = showBadge,
             totalUsage = totalUsage,
             files = files,
             uploadFiles = uploadFiles,
+            dirPath = dirPath,
             errorMessage = null,
         )
     }.stateIn(
@@ -83,7 +82,7 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             refreshing.addLoader()
             runAtLeast {
-                val resp = cloudStorageRepository.listFiles(1)
+                val resp = cloudStorageRepository.listFiles(1, path = state.value.dirPath)
                 if (resp is Success) {
                     totalUsage.value = resp.data.totalUsage
                     files.value = resp.data.files.map {
@@ -98,19 +97,24 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
-    private fun checkConvertState(file: CloudStorageFile) {
+    private fun checkConvertState(file: CloudFile) {
         when (file.convertStep) {
             FileConvertStep.None -> {
-                checkAndStartConvert(file.fileURL, file.fileUUID)
+                startConvert(file.fileURL)
             }
             FileConvertStep.Converting -> {
                 if (file.resourceType == ResourceType.WhiteboardConvert) {
-                    startConvertQuery(file.fileURL.isDynamicDoc(), file.taskToken, file.taskUUID, file.fileUUID)
+                    startConvertQuery(
+                        dynamic = file.fileURL.isDynamicDoc(),
+                        taskUUID = file.whiteboardConvert.taskToken,
+                        taskToken = file.whiteboardConvert.taskUUID,
+                        fileUUID = file.fileUUID
+                    )
                 }
                 if (file.resourceType == ResourceType.WhiteboardProjector) {
                     startProjectorQuery(
-                        taskUUID = file.taskUUID,
-                        taskToken = file.taskToken,
+                        taskUUID = file.whiteboardProjector.taskUUID,
+                        taskToken = file.whiteboardProjector.taskToken,
                         fileUUID = file.fileUUID,
                     )
                 }
@@ -131,12 +135,13 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             refreshing.addLoader()
             val checked = files.value.filter { it.checked }
-            val result = cloudStorageRepository.remove(checked.map { it.file.fileUUID })
+            val result = cloudStorageRepository.delete(checked.map { it.file.fileUUID })
             if (result is Success) {
                 files.value = files.value.filterNot { it.checked }
-
                 val size = checked.sumOf { it.file.fileSize }
                 totalUsage.value = totalUsage.value - size
+            } else {
+
             }
             refreshing.removeLoader()
         }
@@ -144,100 +149,62 @@ class CloudStorageViewModel @Inject constructor(
 
     fun uploadFile(uri: Uri, info: ContentInfo) {
         viewModelScope.launch {
-            // TODO move to cloudStorageRepository
-            var respData: CloudStorageUploadStartResp? = null
-            var result = cloudStorageRepository.updateStart(info.filename, info.size)
-            when (result) {
-                is Success -> respData = result.data
+            when (val result = cloudStorageRepository.updateStart(info.filename, info.size, state.value.dirPath)) {
+                is Success -> {
+                    val data = result.data
+                    val request = UploadRequest(
+                        uuid = data.fileUUID,
+                        policyURL = data.ossDomain,
+                        filepath = data.ossFilePath,
+                        policy = data.policy,
+                        signature = data.signature,
+
+                        filename = info.filename,
+                        size = info.size,
+                        mediaType = info.mediaType,
+                        uri = uri
+                    )
+                    UploadManager.upload(request)
+                }
                 is Failure -> {
-                    val exception = result.exception as FlatNetException
-                    if (exception.code == FlatErrorCode.Web_UploadConcurrentLimit) {
-                        cloudStorageRepository.cancel()
-                        // retry
-                        result = cloudStorageRepository.updateStart(
-                            info.filename,
-                            info.size,
-                        )
-                        if (result is Success) {
-                            respData = result.data
-                        }
-                    }
+                    // TODO
                 }
             }
-
-            if (respData == null) {
-                return@launch
-            }
-
-            val request = UploadRequest(
-                uuid = respData.fileUUID,
-                filepath = respData.filePath,
-                policy = respData.policy,
-                policyURL = respData.policyURL,
-                signature = respData.signature,
-
-                filename = info.filename,
-                size = info.size,
-                mediaType = info.mediaType,
-                uri = uri
-            )
-            UploadManager.upload(request)
         }
     }
 
     private fun handleUploadSuccess(fileUUID: String, filename: String, size: Long) {
         viewModelScope.launch {
-            val useProjector = filename.isDynamicDoc() && appKVCenter.useProjectorConvertor()
-            val resp = cloudStorageRepository.updateFinish(fileUUID, projector = useProjector)
+            val resp = cloudStorageRepository.updateFinish(fileUUID)
             if (resp is Success) {
-                // delayRemoveSuccess(fileUUID)
                 totalUsage.value = totalUsage.value + size
-                files.value = files.value.toMutableList().apply {
-                    add(
-                        0, CloudUiFile(
-                            CloudStorageFile(
-                                fileUUID = fileUUID,
-                                fileName = filename,
-                                fileSize = size,
-                                fileURL = filename,
-                                convertStep = FileConvertStep.None,
-                                taskUUID = "",
-                                taskToken = "",
-                                createAt = System.currentTimeMillis(),
-                            )
-                        )
-                    )
+                when (filename.coursewareType()) {
+                    CoursewareType.DocStatic, CoursewareType.DocDynamic -> {
+                        addUiFile(fileUUID, filename, size, null)
+                        startConvert(fileUUID)
+                    }
+                    else -> {
+                        addUiFile(fileUUID, filename, size, ResourceType.NormalResources)
+                    }
                 }
-                checkAndStartConvert(filename, fileUUID)
             }
         }
     }
 
-    private fun checkAndStartConvert(filename: String, fileUUID: String) {
-        when (filename.coursewareType()) {
-            CoursewareType.DocStatic -> {
-                startConvert(fileUUID, false)
-            }
-            CoursewareType.DocDynamic -> {
-                val useProjector = appKVCenter.useProjectorConvertor()
-                if (useProjector) {
-                    startProjectorConvert(fileUUID)
-                } else {
-                    startConvert(fileUUID, true)
-                }
-            }
-            else -> {; }
-        }
-    }
-
-    private fun startProjectorConvert(fileUUID: String) {
-        viewModelScope.launch {
-            val resp = cloudStorageRepository.convertStart(fileUUID, projector = true)
-            if (resp is Success) {
-                updateConvertStep(fileUUID, FileConvertStep.Converting)
-                startProjectorQuery(resp.data.taskUUID, resp.data.taskToken, fileUUID)
-            }
-        }
+    private fun addUiFile(fileUUID: String, filename: String, size: Long, resourceType: ResourceType?) {
+        val targetFiles = files.value.toMutableList()
+        val uiFile = CloudUiFile(
+            CloudFile(
+                fileUUID = fileUUID,
+                fileName = filename,
+                fileSize = size,
+                fileURL = filename,
+                createAt = System.currentTimeMillis(),
+                resourceType = resourceType,
+            )
+        )
+        targetFiles.add(0, uiFile)
+        files.value = targetFiles
     }
 
     private fun startProjectorQuery(
@@ -265,17 +232,38 @@ class CloudStorageViewModel @Inject constructor(
         projectorQuery.startQuery()
     }
 
-    private fun startConvert(fileUUID: String, dynamic: Boolean) {
+    private fun startConvert(fileUUID: String) {
         viewModelScope.launch {
-            val resp = cloudStorageRepository.convertStart(fileUUID)
-            if (resp is Success) {
-                updateConvertStep(fileUUID, FileConvertStep.Converting)
-                startConvertQuery(
-                    dynamic,
-                    taskUUID = resp.data.taskUUID,
-                    taskToken = resp.data.taskToken,
-                    fileUUID = fileUUID,
-                )
+            when (val resp = cloudStorageRepository.convertStart(fileUUID)) {
+                is Success -> {
+                    val data = resp.data
+                    when (data.resourceType) {
+                        ResourceType.WhiteboardConvert -> {
+                            updateResourceType(fileUUID, ResourceType.WhiteboardConvert)
+                            updateConvertStep(fileUUID, FileConvertStep.Converting)
+                            startConvertQuery(
+                                false, // only static doc take this branch
+                                taskUUID = data.whiteboardConvert!!.taskUUID,
+                                taskToken = data.whiteboardConvert.taskToken,
+                                fileUUID = fileUUID,
+                            )
+                        }
+                        ResourceType.WhiteboardProjector -> {
+                            updateResourceType(fileUUID, ResourceType.WhiteboardProjector)
+                            updateConvertStep(fileUUID, FileConvertStep.Converting)
+                            startProjectorQuery(
+                                taskUUID = data.whiteboardProjector!!.taskUUID,
+                                taskToken = data.whiteboardProjector.taskToken,
+                                fileUUID = fileUUID,
+                            )
+                        }
+                        else -> {}
+                    }
+
+                }
+                is Failure -> {
+                    // TODO
+                }
             }
         }
     }
@@ -319,15 +307,42 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun updateConvertStep(fileUUID: String, convertStep: FileConvertStep) {
-        files.value.indexOfFirst { fileUUID == it.file.fileUUID }.let { index ->
-            if (index < 0) return
-            val uiFile = files.value[index]
-
-            val changed = uiFile.copy(
-                file = uiFile.file.copy(convertStep = convertStep)
-            )
-            files.value = files.value.toMutableList().apply { set(index, changed) }
+        val targetFiles = files.value.toMutableList()
+        val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
+        if (index >= 0) {
+            val file = targetFiles[index].file
+            targetFiles[index] = CloudUiFile(copyConvertStep(file, convertStep))
         }
+        files.value = targetFiles
+    }
+
+    private fun copyConvertStep(file: CloudFile, convertStep: FileConvertStep): CloudFile {
+        val result: CloudFile = when (file.resourceType) {
+            ResourceType.WhiteboardConvert -> {
+                val fileMeta = file.meta!!.copy(
+                    whiteboardConvert = file.whiteboardConvert.copy(convertStep = convertStep)
+                )
+                file.copy(meta = fileMeta)
+            }
+            ResourceType.WhiteboardProjector -> {
+                val fileMeta = file.meta!!.copy(
+                    whiteboardProjector = file.whiteboardProjector.copy(convertStep = convertStep)
+                )
+                file.copy(meta = fileMeta)
+            }
+            else -> file
+        }
+        return result
+    }
+
+    private fun updateResourceType(fileUUID: String, resourceType: ResourceType) {
+        val targetFiles = files.value.toMutableList()
+        val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
+        if (index >= 0) {
+            val file = targetFiles[index].file
+            targetFiles[index] = CloudUiFile(file.copy(resourceType = resourceType))
+        }
+        files.value = targetFiles
     }
 
     fun clearBadgeFlag() {

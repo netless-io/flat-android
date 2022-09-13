@@ -84,7 +84,7 @@ class ClassRoomViewModel @Inject constructor(
 
     val messageUsers = userManager.observeUsers()
 
-    private var _cloudStorageFiles = MutableStateFlow<List<CloudStorageFile>>(mutableListOf())
+    private var _cloudStorageFiles = MutableStateFlow<List<CloudFile>>(mutableListOf())
     val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
 
     private var _videoAreaShown = MutableStateFlow(true)
@@ -480,7 +480,7 @@ class ClassRoomViewModel @Inject constructor(
 
     fun requestCloudStorageFiles() {
         viewModelScope.launch {
-            val result = cloudStorageRepository.listFiles(1)
+            val result = cloudStorageRepository.listFiles(1, path = "")
             if (result.isSuccess) {
                 _cloudStorageFiles.value = result.getOrThrow().files.filter {
                     it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
@@ -489,7 +489,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun insertCourseware(file: CloudStorageFile) {
+    fun insertCourseware(file: CloudFile) {
         viewModelScope.launch {
             // "正在插入课件……"
             when (file.fileURL.coursewareType()) {
@@ -539,19 +539,19 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    private fun insertDocs(file: CloudStorageFile, dynamic: Boolean) {
+    private fun insertDocs(file: CloudFile, dynamic: Boolean) {
         val convert = ConverterV5.Builder().apply {
             setResource(file.fileURL)
             setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
-            setTaskUuid(file.taskUUID)
-            setTaskToken(file.taskToken)
+            setTaskUuid(file.whiteboardConvert.taskUUID)
+            setTaskToken(file.whiteboardConvert.taskToken)
             setPoolInterval(2000)
             setCallback(object : ConverterCallbacks {
                 override fun onProgress(progress: Double, convertInfo: ConversionInfo?) {
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    boardRoom.insertPpt("/${file.taskUUID}/${UUID.randomUUID()}", ppt, file.fileName)
+                    boardRoom.insertPpt("/${file.whiteboardConvert.taskUUID}/${UUID.randomUUID()}", ppt, file.fileName)
                 }
 
                 override fun onFailure(e: ConvertException) {
@@ -561,10 +561,10 @@ class ClassRoomViewModel @Inject constructor(
         convert.startConvertTask()
     }
 
-    private fun insertProjectorDocs(file: CloudStorageFile) {
+    private fun insertProjectorDocs(file: CloudFile) {
         val projectorQuery = ProjectorQuery.Builder()
-            .setTaskToken(file.taskToken)
-            .setTaskUuid(file.taskUUID)
+            .setTaskToken(file.whiteboardProjector.taskToken)
+            .setTaskUuid(file.whiteboardProjector.taskUUID)
             .setPoolInterval(2000)
             .setCallback(object : ProjectorQuery.Callback {
                 override fun onProgress(progress: Double, convertInfo: ProjectorQuery.QueryResponse) {
@@ -572,7 +572,7 @@ class ClassRoomViewModel @Inject constructor(
                 }
 
                 override fun onFinish(response: ProjectorQuery.QueryResponse) {
-                    boardRoom.insertProjectorPpt(file.taskUUID, response.prefix, file.fileName)
+                    boardRoom.insertProjectorPpt(file.whiteboardProjector.taskUUID, response.prefix, file.fileName)
                 }
 
                 override fun onFailure(e: ConvertException?) {

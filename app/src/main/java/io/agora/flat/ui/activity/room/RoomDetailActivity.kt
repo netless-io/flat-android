@@ -56,9 +56,7 @@ class RoomDetailActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-//            FlatPage {
-//                RoomDetailPage()
-//            }
+
         }
     }
 }
@@ -101,9 +99,7 @@ fun RoomDetailScreen(
             DetailUiAction.ShowAllRooms -> visible = true
             DetailUiAction.AllRoomBack -> visible = false
             DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> viewModel.cancelRoom()
-            DetailUiAction.ModifyRoom -> {
-
-            }
+            DetailUiAction.ModifyRoom -> {}
         }
     }
 
@@ -219,7 +215,10 @@ private fun AppBarMoreButton(isOwner: Boolean, roomStatus: RoomStatus, actioner:
             Icon(Icons.Outlined.MoreHoriz, contentDescription = null)
         }
 
-        DetailDropdownMenu(isOwner, roomStatus, expanded, { expanded = false }, actioner)
+        DetailDropdownMenu(isOwner, roomStatus, expanded, { expanded = false }, {
+            expanded = false
+            actioner(it)
+        })
     }
 }
 

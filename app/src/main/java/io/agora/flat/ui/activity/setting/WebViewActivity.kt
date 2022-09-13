@@ -61,6 +61,7 @@ internal fun WebViewContent(url: String, title: String?, onPageBack: () -> Unit)
                     settings?.apply {
                         javaScriptEnabled = true
                         useWideViewPort = true
+                        domStorageEnabled = true
                         cacheMode = WebSettings.LOAD_NO_CACHE
                         setSupportZoom(false)
                     }

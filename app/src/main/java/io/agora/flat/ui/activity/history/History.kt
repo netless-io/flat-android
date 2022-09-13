@@ -43,7 +43,7 @@ private fun HistoryScreen(
     onOpenRoomDetail: (String, String?) -> Unit
 ) {
     Column {
-        BackTopAppBar(title = "历史记录", onBackPressed = onBackPressed)
+        BackTopAppBar(stringResource(R.string.home_room_history), onBackPressed = onBackPressed)
         FlatSwipeRefresh(
             refreshing = viewState.refreshing,
             onRefresh = onRefresh,

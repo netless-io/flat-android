@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.data.AppEnv
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.CoursewareType
 import io.agora.flat.util.coursewareType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ class PreviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     appEnv: AppEnv,
 ) : ViewModel() {
-    val file: CloudStorageFile = savedStateHandle.get<CloudStorageFile>(Constants.IntentKey.CLOUD_FILE)!!
+    val file: CloudFile = savedStateHandle.get<CloudFile>(Constants.IntentKey.CLOUD_FILE)!!
 
     private var loading = true
     private var rendering = true

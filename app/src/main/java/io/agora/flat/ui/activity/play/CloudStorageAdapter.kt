@@ -6,13 +6,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.fileIconId
 import io.agora.flat.util.inflate
 
 class CloudStorageAdapter(
-    private val dataSet: MutableList<CloudStorageFile> = mutableListOf(),
+    private val dataSet: MutableList<CloudFile> = mutableListOf(),
 ) : RecyclerView.Adapter<CloudStorageAdapter.ViewHolder>() {
     private var onItemClickListener: OnItemClickListener? = null
 
@@ -34,7 +34,7 @@ class CloudStorageAdapter(
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataSet(data: List<CloudStorageFile>) {
+    fun setDataSet(data: List<CloudFile>) {
         dataSet.clear()
         dataSet.addAll(data)
         notifyDataSetChanged()
@@ -53,6 +53,6 @@ class CloudStorageAdapter(
     }
 
     fun interface OnItemClickListener {
-        fun onAddClick(item: CloudStorageFile)
+        fun onAddClick(item: CloudFile)
     }
 }

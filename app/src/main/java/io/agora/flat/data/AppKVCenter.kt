@@ -114,6 +114,16 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         }.apply()
     }
 
+    fun getSessionId(): String {
+        return store.getString(KEY_SESSION_ID, "") ?: ""
+    }
+
+    fun updateSessionId(sessionId: String) {
+        store.edit().apply {
+            putString(KEY_SESSION_ID, sessionId)
+        }.apply()
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -128,6 +138,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_PROJECTOR_CONVERTOR = "key_convertor_projector"
 
         const val KEY_LAST_CANCEL_UPDATE = "key_last_cancel_update"
+
+        const val KEY_SESSION_ID = "key_session_id"
     }
 
     class MockData {

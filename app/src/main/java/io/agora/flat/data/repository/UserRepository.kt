@@ -10,6 +10,7 @@ import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +32,7 @@ class UserRepository @Inject constructor(
         return when (result) {
             is Success -> {
                 appKVCenter.setUserInfo(result.data)
+                appKVCenter.updateSessionId(UUID.randomUUID().toString())
                 logger.setUserId(result.data.uuid)
                 Success(true)
             }

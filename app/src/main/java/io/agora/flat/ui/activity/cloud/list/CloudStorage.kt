@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.ui.activity.home.EmptyView
 import io.agora.flat.ui.compose.*
@@ -74,7 +74,7 @@ internal fun CloudScreen(
     onOpenItemPick: () -> Unit,
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
-    onItemClick: (file: CloudStorageFile) -> Unit,
+    onItemClick: (file: CloudFile) -> Unit,
     onPreviewRestrict: () -> Unit
 ) {
     var editMode by rememberSaveable { mutableStateOf(false) }
@@ -288,7 +288,7 @@ internal fun CloudFileList(
     files: List<CloudUiFile>,
     editMode: Boolean,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
-    onItemClick: (CloudStorageFile) -> Unit,
+    onItemClick: (CloudFile) -> Unit,
     onPreviewRestrict: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
@@ -418,34 +418,11 @@ fun ConvertingImage(modifier: Modifier = Modifier) {
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
 private fun CloudFileItemPreview() {
-    val item = CloudUiFile(
-        CloudStorageFile(
-            "1",
-            "long long long long long long name file.jpg",
-            1111024,
-            createAt = 1627898586449,
-            fileURL = "",
-            convertStep = FileConvertStep.Done,
-            taskUUID = "",
-            taskToken = "",
-        ),
-    )
-    val item2 = CloudUiFile(
-        CloudStorageFile(
-            "1",
-            "long long long long long long name file.jpg",
-            1111024,
-            createAt = 1627898586449,
-            fileURL = "",
-            convertStep = FileConvertStep.Done,
-            taskUUID = "",
-            taskToken = "",
-        ),
-    )
     FlatPage {
         Column {
-            CloudFileItem(item, false, {}, {})
-            CloudFileItem(item2, true, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[0], false, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[1], true, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[2], true, {}, {})
         }
     }
 }
@@ -453,44 +430,7 @@ private fun CloudFileItemPreview() {
 @Composable
 @Preview
 private fun CloudStoragePreview() {
-    val files = listOf(
-        CloudUiFile(
-            CloudStorageFile(
-                "1",
-                "long long long long long long name file.jpg",
-                1111024,
-                createAt = 1627898586449,
-                fileURL = "",
-                convertStep = FileConvertStep.Done,
-                taskUUID = "",
-                taskToken = "",
-            ),
-        ),
-        CloudUiFile(
-            CloudStorageFile(
-                "2",
-                "2.doc",
-                111024,
-                createAt = 1627818586449,
-                fileURL = "",
-                convertStep = FileConvertStep.Done,
-                taskUUID = "",
-                taskToken = "",
-            ),
-        ),
-        CloudUiFile(
-            CloudStorageFile(
-                "3",
-                "3.mp4",
-                111111024,
-                createAt = 1617898586449,
-                fileURL = "",
-                convertStep = FileConvertStep.Done,
-                taskUUID = "",
-                taskToken = "",
-            ),
-        ),
-    )
+    val files = ComposePreviewData.CloudListFiles;
     val viewState = CloudStorageUiState(files = files)
     FlatPage {
         CloudScreen(

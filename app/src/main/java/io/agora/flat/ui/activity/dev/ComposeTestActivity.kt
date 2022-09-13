@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.gson.Gson
 import io.agora.flat.R
-import io.agora.flat.data.model.CloudStorageFile
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.ComposeVideoPlayer
 import io.agora.flat.ui.compose.MediaPlayback
@@ -112,7 +112,7 @@ fun ComposeVideoPlayerTest(modifier: Modifier) {
     val fileStr = """
         {"convertStep":"None","createAt":1639021269495,"fileName":"1601363746034307.mp4","fileSize":1737449,"fileURL":"https://flat-storage.oss-accelerate.aliyuncs.com/cloud-storage/2021-12/09/f0073464-9aef-480c-9bca-a2117ef97fe3/f0073464-9aef-480c-9bca-a2117ef97fe3.mp4","fileUUID":"f0073464-9aef-480c-9bca-a2117ef97fe3","region":"cn-hz","taskToken":"","taskUUID":""}
     """.trimIndent()
-    val file: CloudStorageFile = Gson().fromJson(fileStr, CloudStorageFile::class.java)
+    val file: CloudFile = Gson().fromJson(fileStr, CloudFile::class.java)
 
     var playerControl by remember {
         mutableStateOf<MediaPlayback?>(null)
