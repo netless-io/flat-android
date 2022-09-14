@@ -16,6 +16,8 @@
     <string name="update">Update</string>
     <string name="retry">Retry</string>
     <string name="done">Done</string>
+    <string name="preview">Preview</string>
+    <string name="rename">Rename</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
@@ -182,6 +184,9 @@
     <string name="cloud_storage_upload_list_title">Upload List</string>
     <string name="cloud_storage_no_files">No data available</string>
     <string name="cloud_preview_transcoding_hint">Courseware is being transcoded, please wait…</string>
+    <string name="cloud_new_folder_title">New Folder</string>
+    <string name="cloud_new_folder_hint">input name</string>
+    <string name="cloud_rename_hint">file name</string>
 
     <string name="upload_success">Upload successfully</string>
     <string name="upload_failure">Upload failed</string>

@@ -1,15 +1,22 @@
 package io.agora.flat.util
 
 import io.agora.flat.R
+import io.agora.flat.data.model.CLOUD_ROOT_DIR
+import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.CoursewareType
+import io.agora.flat.data.model.ResourceType
 import java.util.*
 
-fun String.fileSuffix(): String {
+fun String.fileExtension(): String {
     return substringAfterLast('.').lowercase(Locale.getDefault())
 }
 
+fun String.nameWithoutExtension(): String {
+    return if (contains('.')) substringBefore('.') else this
+}
+
 fun String.coursewareType(): CoursewareType {
-    return when (fileSuffix()) {
+    return when (fileExtension()) {
         "jpg", "jpeg", "png", "webp" -> {
             CoursewareType.Image
         }
@@ -31,15 +38,21 @@ fun String.coursewareType(): CoursewareType {
     }
 }
 
-fun String.fileIconId(): Int {
-    return when (this.fileSuffix()) {
+fun CloudFile.fileIcon(): Int {
+    return when (this.fileURL.fileExtension()) {
         "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_file_image
         "ppt", "pptx" -> R.drawable.ic_cloud_file_ppt
         "doc", "docx" -> R.drawable.ic_cloud_file_word
         "pdf" -> R.drawable.ic_cloud_file_pdf
         "mp4" -> R.drawable.ic_cloud_file_video
         "mp3", "aac" -> R.drawable.ic_cloud_file_audio
-        else -> R.drawable.ic_cloud_file_others
+        else -> {
+            if (this.resourceType == ResourceType.Directory) {
+                R.drawable.ic_cloud_file_folder
+            } else {
+                R.drawable.ic_cloud_file_others
+            }
+        }
     }
 }
 
@@ -84,4 +97,20 @@ fun String.isValidPhone(): Boolean {
 
 fun String.isValidSmsCode(): Boolean {
     return this.length == 6
+}
+
+/**
+ * just for cloud files
+ */
+fun String.parentFolder(): String {
+    val path = this
+    if (CLOUD_ROOT_DIR == path) return CLOUD_ROOT_DIR
+    val endsWithSlash = path.endsWith('/')
+    val index = path.lastIndexOf('/', if (endsWithSlash) path.length - 2 else path.length - 1)
+    return path.substring(0, index + 1)
+}
+
+fun String.folderName(): String {
+    val folder = this
+    return folder.split('/').findLast { it != "" } ?: ""
 }

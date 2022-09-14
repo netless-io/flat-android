@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.cloud.list
 
 import io.agora.flat.common.upload.UploadFile
+import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
 
 data class CloudUiFile(
@@ -14,7 +15,7 @@ data class CloudStorageUiState(
     val totalUsage: Long = 0,
     val files: List<CloudUiFile> = emptyList(),
     val uploadFiles: List<UploadFile> = emptyList(),
-    val dirPath: String = "/",
+    val dirPath: String = CLOUD_ROOT_DIR,
     val errorMessage: String? = null,
 ) {
     val deletable: Boolean

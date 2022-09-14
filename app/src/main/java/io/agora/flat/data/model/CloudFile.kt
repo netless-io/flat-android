@@ -3,6 +3,8 @@ package io.agora.flat.data.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+const val CLOUD_ROOT_DIR = "/"
+
 @Parcelize
 data class CloudFile constructor(
     val fileUUID: String,

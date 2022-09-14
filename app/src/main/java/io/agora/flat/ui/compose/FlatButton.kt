@@ -15,6 +15,9 @@ import io.agora.flat.ui.theme.*
 @Composable
 fun FlatPrimaryTextButton(
     text: String,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(40.dp),
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -25,9 +28,7 @@ fun FlatPrimaryTextButton(
         disabledContentColor = if (darkMode) Gray_7 else Gray_5
     )
     TextButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp),
+        modifier = modifier,
         enabled = enabled,
         colors = colors,
         shape = Shapes.small,
@@ -40,6 +41,9 @@ fun FlatPrimaryTextButton(
 @Composable
 fun FlatSecondaryTextButton(
     text: String,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(40.dp),
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -51,9 +55,7 @@ fun FlatSecondaryTextButton(
     )
 
     OutlinedButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp),
+        modifier = modifier,
         enabled = enabled,
         shape = Shapes.small,
         border = BorderStroke(1.dp, if (darkMode) Gray_6 else Gray_3),

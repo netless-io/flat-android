@@ -21,7 +21,7 @@ import io.agora.flat.common.upload.UploadState
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.fileSuffix
+import io.agora.flat.util.fileExtension
 
 @Composable
 internal fun Uploading(onCloseUploading: () -> Unit, viewModel: UploadingViewModel = hiltViewModel()) {
@@ -59,7 +59,7 @@ fun UploadFileList(uploadFiles: List<UploadFile>, onRetry: (uuid: String) -> Uni
 
 @Composable
 private fun UploadFileItem(file: UploadFile, onClick: () -> Unit) {
-    val imageId = when (file.filename.fileSuffix()) {
+    val imageId = when (file.filename.fileExtension()) {
         "jpg", "jpeg", "png", "webp" -> R.drawable.ic_cloud_file_image
         "ppt", "pptx" -> R.drawable.ic_cloud_file_ppt
         "doc", "docx" -> R.drawable.ic_cloud_file_word

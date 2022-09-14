@@ -23,18 +23,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.FileConvertStep
+import io.agora.flat.data.model.ResourceType
 import io.agora.flat.ui.activity.home.EmptyView
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
-import io.agora.flat.util.ContentInfo
-import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.fileIconId
-import io.agora.flat.util.showToast
+import io.agora.flat.util.*
 
 @Composable
 fun CloudScreen(
@@ -48,8 +48,8 @@ fun CloudScreen(
     CloudScreen(
         viewState = viewState,
         onOpenUploading = {
-            onOpenUploading()
             viewModel.clearBadgeFlag()
+            onOpenUploading()
         },
         onDeleteClick = viewModel::deleteChecked,
         onReload = viewModel::reloadFileList,
@@ -57,11 +57,17 @@ fun CloudScreen(
         onUploadFile = viewModel::uploadFile,
         onItemChecked = viewModel::checkItem,
         onItemClick = { file ->
-            Navigator.launchPreviewActivity(context, file)
+            if (file.resourceType == ResourceType.Directory) {
+                viewModel.enterFolder(file.fileName)
+            } else {
+                Navigator.launchPreviewActivity(context, file)
+            }
         },
-        onPreviewRestrict = {
-            context.showToast(R.string.cloud_preview_transcoding_hint)
-        }
+        onItemPreview = { Navigator.launchPreviewActivity(context, it) },
+        onItemRename = viewModel::rename,
+        onPreviewRestrict = { context.showToast(R.string.cloud_preview_transcoding_hint) },
+        onNewFolder = viewModel::createFolder,
+        onFolderBack = viewModel::backFolder
     )
 }
 
@@ -75,9 +81,14 @@ internal fun CloudScreen(
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
     onItemClick: (file: CloudFile) -> Unit,
-    onPreviewRestrict: () -> Unit
+    onItemPreview: (file: CloudFile) -> Unit,
+    onItemRename: (fileUuid: String, fileName: String) -> Unit,
+    onPreviewRestrict: () -> Unit,
+    onNewFolder: (String) -> Unit,
+    onFolderBack: () -> Unit
 ) {
     var editMode by rememberSaveable { mutableStateOf(false) }
+    var showNewFolder by rememberSaveable { mutableStateOf(false) }
 
     Column {
         CloudTopAppBar(
@@ -85,8 +96,10 @@ internal fun CloudScreen(
             editMode = editMode,
             onOpenUploading = onOpenUploading,
             onEditClick = { editMode = true },
+            onNewFolder = { showNewFolder = true },
             onDeleteClick = onDeleteClick,
             onDoneClick = { editMode = false },
+            onFolderBack = onFolderBack,
         )
         FlatSwipeRefresh(viewState.refreshing, onRefresh = onReload) {
             Box(Modifier.fillMaxSize()) {
@@ -96,12 +109,59 @@ internal fun CloudScreen(
                     editMode = editMode,
                     onItemChecked = onItemChecked,
                     onItemClick = onItemClick,
+                    onItemPreview = onItemPreview,
+                    onItemRename = onItemRename,
                     onPreviewRestrict = onPreviewRestrict
                 )
                 if (isTabletMode()) {
                     AddFileLayoutPad(onOpenItemPick)
                 } else {
                     AddFileLayout(onUploadFile)
+                }
+            }
+        }
+    }
+    if (showNewFolder) {
+        NewFolderDialog(
+            value = stringResource(R.string.cloud_new_folder_title),
+            onCancel = { showNewFolder = false },
+            onConfirm = {
+                showNewFolder = false
+                onNewFolder(it)
+            }
+        )
+    }
+}
+
+@Composable
+private fun NewFolderDialog(value: String, onCancel: () -> Unit, onConfirm: (String) -> Unit) {
+    var name by rememberSaveable { mutableStateOf(value) }
+
+    Dialog(onCancel) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                FlatTextTitle(stringResource(R.string.cloud_new_folder_title))
+                Spacer(Modifier.height(24.dp))
+                FlatPrimaryTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    placeholderValue = stringResource(R.string.cloud_new_folder_hint)
+                )
+                Spacer(Modifier.height(24.dp))
+                Row {
+                    FlatSecondaryTextButton(
+                        stringResource(R.string.cancel),
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) { onCancel() }
+                    Spacer(Modifier.width(12.dp))
+                    FlatPrimaryTextButton(
+                        stringResource(R.string.confirm),
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) { onConfirm(name) }
                 }
             }
         }
@@ -114,9 +174,51 @@ private fun CloudTopAppBar(
     editMode: Boolean,
     onOpenUploading: () -> Unit,
     onEditClick: () -> Unit,
+    onNewFolder: () -> Unit,
     onDeleteClick: () -> Unit,
     onDoneClick: () -> Unit,
+    onFolderBack: () -> Unit,
 ) {
+    if (viewState.dirPath == CLOUD_ROOT_DIR) {
+        FlatMainTopAppBar(
+            title = stringResource(R.string.title_cloud_storage),
+            actions = cloudAppBarAction(
+                viewState,
+                editMode,
+                onDeleteClick,
+                onDoneClick,
+                onOpenUploading,
+                onEditClick,
+                onNewFolder
+            )
+        )
+    } else {
+        val title = viewState.dirPath.split('/').findLast { it != "" } ?: ""
+        BackTopAppBar(
+            title = title,
+            onBackPressed = onFolderBack,
+            actions = cloudAppBarAction(
+                viewState,
+                editMode,
+                onDeleteClick,
+                onDoneClick,
+                onOpenUploading,
+                onEditClick,
+                onNewFolder
+            )
+        )
+    }
+}
+
+private fun cloudAppBarAction(
+    viewState: CloudStorageUiState,
+    editMode: Boolean,
+    onDeleteClick: () -> Unit,
+    onDoneClick: () -> Unit,
+    onOpenUploading: () -> Unit,
+    onEditClick: () -> Unit,
+    onNewFolder: () -> Unit
+): @Composable (RowScope.() -> Unit) = {
     val deletable = viewState.deletable
     val uploadingSize = viewState.uploadFiles.size
     val showBadge = viewState.showBadge
@@ -127,33 +229,32 @@ private fun CloudTopAppBar(
         MaterialTheme.colors.error.copy(ContentAlpha.disabled)
     }
 
-    FlatMainTopAppBar(stringResource(R.string.title_cloud_storage)) {
-        if (editMode) {
-            TextButton(onClick = onDeleteClick, enabled = deletable) {
-                FlatTextBodyOne(stringResource(R.string.delete), color = deleteColor)
-            }
-            TextButton(onClick = onDoneClick) {
-                FlatTextBodyOne(stringResource(R.string.done))
-            }
-        } else {
-            UploadingIcon(showBadge, uploadingSize, onClick = onOpenUploading)
-            IconButton(onClick = onEditClick) {
-                FlatIcon(id = R.drawable.ic_cloud_list_edit)
-            }
+    if (editMode) {
+        TextButton(onClick = onDeleteClick, enabled = deletable) {
+            FlatTextBodyOne(stringResource(R.string.delete), color = deleteColor)
+        }
+        TextButton(onClick = onDoneClick) {
+            FlatTextBodyOne(stringResource(R.string.done))
+        }
+    } else {
+        UploadingIcon(showBadge, uploadingSize, onClick = onOpenUploading)
+        IconButton(onClick = onEditClick) {
+            FlatIcon(id = R.drawable.ic_cloud_list_edit)
+        }
+        IconButton(onClick = onNewFolder) {
+            FlatIcon(id = R.drawable.ic_cloud_list_new_folder)
         }
     }
 }
 
 @Composable
 private fun UploadingIcon(showBadge: Boolean, size: Int, onClick: () -> Unit) {
-    IconButton(onClick = {
-        onClick()
-    }) {
-        BadgedBox(badge = {
-            if (showBadge) {
-                Badge { Text("$size") }
-            }
-        }) {
+    IconButton(onClick = onClick) {
+        BadgedBox(
+            badge = {
+                if (showBadge) Badge { Text("$size") }
+            },
+        ) {
             FlatIcon(id = R.drawable.ic_cloud_list_unloading)
         }
     }
@@ -202,7 +303,7 @@ private fun BoxScope.AddFileLayoutPad(onOpenItemPick: () -> Unit) {
 private fun UpdatePickLayout(
     aniValue: Float,
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
-    onCoverClick: () -> Unit
+    onCoverClick: () -> Unit,
 ) {
     Column {
         Box(
@@ -289,9 +390,12 @@ internal fun CloudFileList(
     editMode: Boolean,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
     onItemClick: (CloudFile) -> Unit,
-    onPreviewRestrict: () -> Unit
+    onItemPreview: (CloudFile) -> Unit,
+    onItemRename: (fileUuid: String, fileName: String) -> Unit,
+    onPreviewRestrict: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+    var renaming by remember { mutableStateOf<CloudFile?>(null) }
 
     LaunchedEffect(files.firstOrNull()) {
         scrollState.animateScrollToItem(0)
@@ -313,9 +417,7 @@ internal fun CloudFileList(
                 CloudFileItem(
                     item,
                     editMode,
-                    onCheckedChange = { checked ->
-                        onItemChecked(index, checked)
-                    },
+                    onCheckedChange = { checked -> onItemChecked(index, checked) },
                     onClick = {
                         when (item.file.convertStep) {
                             FileConvertStep.Done, FileConvertStep.None -> {
@@ -324,6 +426,12 @@ internal fun CloudFileList(
                             else -> onPreviewRestrict()
                         }
                     },
+                    onPreview = {
+                        onItemPreview(item.file)
+                    },
+                    onRename = {
+                        renaming = item.file
+                    }
                 )
             }
 
@@ -338,6 +446,55 @@ internal fun CloudFileList(
             }
         }
     }
+    if (renaming != null) {
+        FileRenameDialog(
+            value = renaming!!.fileName.nameWithoutExtension(),
+            onCancel = { renaming = null },
+            onConfirm = {
+                val fileName = when (renaming!!.resourceType) {
+                    ResourceType.Directory -> it
+                    else -> "$it.${renaming!!.fileName.fileExtension()}"
+                }
+                onItemRename(renaming!!.fileUUID, fileName)
+                renaming = null
+            }
+        )
+    }
+}
+
+@Composable
+private fun FileRenameDialog(value: String, onCancel: () -> Unit, onConfirm: (String) -> Unit) {
+    var name by rememberSaveable { mutableStateOf(value) }
+
+    Dialog(onCancel) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                FlatTextTitle(stringResource(R.string.rename))
+                Spacer(Modifier.height(24.dp))
+                FlatPrimaryTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    placeholderValue = stringResource(R.string.cloud_rename_hint)
+                )
+                Spacer(Modifier.height(24.dp))
+                Row {
+                    FlatSecondaryTextButton(
+                        stringResource(R.string.cancel),
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) { onCancel() }
+                    Spacer(Modifier.width(12.dp))
+                    FlatPrimaryTextButton(
+                        stringResource(R.string.confirm),
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) { onConfirm(name) }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -346,9 +503,13 @@ private fun CloudFileItem(
     editMode: Boolean = true,
     onCheckedChange: ((Boolean) -> Unit),
     onClick: () -> Unit,
+    onPreview: () -> Unit,
+    onRename: () -> Unit,
 ) {
     val file = item.file
-    val imageId = file.fileURL.fileIconId()
+    val imageId = file.fileIcon()
+    val canPreview = file.resourceType != ResourceType.Directory
+
     Box(Modifier.clickable(onClick = onClick)) {
         Row(Modifier.height(70.dp), verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(16.dp))
@@ -382,15 +543,47 @@ private fun CloudFileItem(
             }
             if (editMode) {
                 Checkbox(checked = item.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(Modifier.width(12.dp))
             } else {
-                IconButton(onClick = { }) {
-                    FlatIcon(id = R.drawable.ic_cloud_list_option)
-                }
-                Spacer(modifier = Modifier.width(12.dp))
+                ItemMoreButton(canPreview, onPreview, onRename)
+                Spacer(Modifier.width(12.dp))
             }
         }
         FlatDivider(startIndent = 52.dp, endIndent = 12.dp, modifier = Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+fun ItemMoreButton(canPreview: Boolean, onPreview: () -> Unit, onRename: () -> Unit) {
+    Box {
+        var expanded by remember { mutableStateOf(false) }
+
+        IconButton({ expanded = true }) {
+            FlatIcon(R.drawable.ic_cloud_list_option)
+        }
+        DropdownMenu(
+            modifier = Modifier.wrapContentSize(),
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            if (canPreview) {
+                DropdownMenuItem({
+                    expanded = false
+                    onPreview()
+                }) {
+                    FlatTextBodyOne(stringResource(R.string.preview))
+                }
+            }
+            DropdownMenuItem({
+                expanded = false
+                onRename()
+            }) {
+                FlatTextBodyOne(stringResource(R.string.rename))
+            }
+            DropdownMenuItem({ expanded = false }) {
+                FlatTextBodyOne(stringResource(R.string.cancel))
+            }
+        }
     }
 }
 
@@ -417,12 +610,22 @@ fun ConvertingImage(modifier: Modifier = Modifier) {
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
+private fun EditNameDialogPreview() {
+    FlatPage {
+        NewFolderDialog("HHHH", {}, {})
+    }
+}
+
+
+@Composable
+@Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
+@Preview(widthDp = 400, uiMode = 0x20)
 private fun CloudFileItemPreview() {
     FlatPage {
         Column {
-            CloudFileItem(ComposePreviewData.CloudListFiles[0], false, {}, {})
-            CloudFileItem(ComposePreviewData.CloudListFiles[1], true, {}, {})
-            CloudFileItem(ComposePreviewData.CloudListFiles[2], true, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[0], false, {}, {}, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[1], true, {}, {}, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[2], true, {}, {}, {}, {})
         }
     }
 }
@@ -430,19 +633,23 @@ private fun CloudFileItemPreview() {
 @Composable
 @Preview
 private fun CloudStoragePreview() {
-    val files = ComposePreviewData.CloudListFiles;
+    val files = ComposePreviewData.CloudListFiles
     val viewState = CloudStorageUiState(files = files)
     FlatPage {
         CloudScreen(
-            viewState,
-            { },
-            { },
-            { },
-            { },
-            { _, _ -> },
-            { _, _ -> },
-            {},
-            {}
+            viewState = viewState,
+            onOpenUploading = { },
+            onDeleteClick = { },
+            onReload = { },
+            onOpenItemPick = { },
+            onUploadFile = { _, _ -> },
+            onItemChecked = { _, _ -> },
+            onItemClick = {},
+            onItemPreview = {},
+            onItemRename = { _, _ -> },
+            onPreviewRestrict = {},
+            onNewFolder = { },
+            onFolderBack = {},
         )
     }
 }

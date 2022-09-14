@@ -26,7 +26,7 @@ private val DarkColorPalette = darkColors(
     // behind scrollable content
     background = Gray_10,
     // cards, sheets, and menus
-    surface = Gray_10,
+    surface = Gray_9,
     error = Red_7,
 
     onPrimary = FlatColorTextPrimaryDark,

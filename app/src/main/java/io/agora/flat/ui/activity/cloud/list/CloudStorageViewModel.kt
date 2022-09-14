@@ -15,15 +15,13 @@ import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.CloudFile
-import io.agora.flat.data.model.CoursewareType
-import io.agora.flat.data.model.FileConvertStep
-import io.agora.flat.data.model.ResourceType
+import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -37,7 +35,7 @@ class CloudStorageViewModel @Inject constructor(
     private val totalUsage = MutableStateFlow(0L)
     private val refreshing = ObservableLoadingCounter()
     private val showBadge = MutableStateFlow(false)
-    private val dirPath = MutableStateFlow("/")
+    private val dirPath = MutableStateFlow(CLOUD_ROOT_DIR)
 
     val state = combine(
         refreshing.observable,
@@ -64,6 +62,12 @@ class CloudStorageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            state.map { it.dirPath }.distinctUntilChanged().collect {
+                reloadFileList()
+            }
+        }
+
+        viewModelScope.launch {
             UploadManager.uploadSuccess.filterNotNull().collect {
                 handleUploadSuccess(fileUUID = it.uuid, filename = it.filename, size = it.size)
             }
@@ -74,8 +78,6 @@ class CloudStorageViewModel @Inject constructor(
                 showBadge.value = it > 0
             }
         }
-
-        reloadFileList()
     }
 
     fun reloadFileList() {
@@ -345,8 +347,49 @@ class CloudStorageViewModel @Inject constructor(
         files.value = targetFiles
     }
 
+    private fun updateFilename(fileUUID: String, filename: String) {
+        val targetFiles = files.value.toMutableList()
+        val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
+        if (index >= 0) {
+            val file = targetFiles[index].file
+            targetFiles[index] = CloudUiFile(file.copy(fileName = filename))
+        }
+        files.value = targetFiles
+    }
+
     fun clearBadgeFlag() {
         showBadge.value = false
+    }
+
+    fun createFolder(name: String) {
+        viewModelScope.launch {
+            when (val result = cloudStorageRepository.createDirectory(state.value.dirPath, name)) {
+                is Success -> {
+                    addUiFile(UUID.randomUUID().toString(), name, 0, ResourceType.Directory)
+                }
+                is Failure -> {
+
+                }
+            }
+        }
+    }
+
+    fun enterFolder(name: String) {
+        dirPath.value = "${state.value.dirPath}$name/"
+    }
+
+    fun backFolder() {
+        dirPath.value = state.value.dirPath.parentFolder()
+    }
+
+    fun rename(fileUuid: String, fileName: String) {
+        viewModelScope.launch {
+            val name = fileName.nameWithoutExtension()
+            when (val result = cloudStorageRepository.rename(fileUuid, name)) {
+                is Success -> updateFilename(fileUuid, fileName)
+                is Failure -> {}
+            }
+        }
     }
 }
 

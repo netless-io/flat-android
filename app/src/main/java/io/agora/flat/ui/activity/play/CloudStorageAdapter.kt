@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.CloudFile
 import io.agora.flat.util.FlatFormatter
-import io.agora.flat.util.fileIconId
+import io.agora.flat.util.fileIcon
 import io.agora.flat.util.inflate
 
 class CloudStorageAdapter(
@@ -23,7 +23,7 @@ class CloudStorageAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = dataSet[position]
-        viewHolder.fileType.setImageResource(item.fileURL.fileIconId())
+        viewHolder.fileType.setImageResource(item.fileIcon())
         viewHolder.filename.text = item.fileName
         viewHolder.fileDate.text = FlatFormatter.longDate(item.createAt)
         viewHolder.fileSize.text = FlatFormatter.size(item.fileSize)

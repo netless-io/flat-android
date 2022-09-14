@@ -54,6 +54,8 @@ class FlatErrorCode {
         const val Web_FileSizeTooBig = 700002 // single file size too big
         const val Web_FileNotFound = 700003 // file info not found
         const val Web_FileExists = 700004 // file already exists
+        const val Web_DirectoryNotExists = 700005 // directory not exists
+        const val Web_DirectoryAlreadyExists = 700006 // directory already exists
 
         const val Web_FileIsConverted = 800000
         const val Web_FileConvertFailed = 800001// file convert failed

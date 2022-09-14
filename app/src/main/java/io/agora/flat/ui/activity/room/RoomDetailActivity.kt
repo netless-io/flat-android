@@ -463,7 +463,7 @@ private fun Operations(
         }
     RoomStatus.Stopped ->
         Column(modifier) {
-            FlatPrimaryTextButton(stringResource(id = R.string.replay), roomInfo.hasRecord, onClick = {
+            FlatPrimaryTextButton(stringResource(id = R.string.replay), enabled = roomInfo.hasRecord, onClick = {
                 actioner(DetailUiAction.Playback(roomInfo.roomUUID))
             })
         }

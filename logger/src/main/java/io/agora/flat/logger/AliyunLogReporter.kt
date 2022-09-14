@@ -60,6 +60,10 @@ internal class AliyunLogReporter @Inject constructor(private val logConfig: LogC
     }
 
     override fun report(item: Map<String, String?>) {
+        // debug mode not report
+        if (BuildConfig.DEBUG) {
+            return
+        }
         val log = Log()
         log.putContent("uid", uid)
         item.forEach { (k, v) ->

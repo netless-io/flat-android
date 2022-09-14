@@ -1,7 +1,6 @@
 package io.agora.flat.util
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class FlatExtensionsKtTest {
@@ -20,5 +19,13 @@ class FlatExtensionsKtTest {
         assertFalse("00".isValidSmsCode())
         assertTrue("0000".isValidSmsCode())
         assertTrue("000000".isValidSmsCode())
+    }
+
+    @Test
+    fun parentFolder() {
+        assertEquals("/", "/".parentFolder())
+        assertEquals("/", "/root".parentFolder())
+        assertEquals("/", "/root/".parentFolder())
+        assertEquals("/root/", "/root/file".parentFolder())
     }
 }

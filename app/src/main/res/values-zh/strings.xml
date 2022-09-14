@@ -18,6 +18,8 @@
     <string name="update">升级</string>
     <string name="retry">重试</string>
     <string name="done">完成</string>
+    <string name="preview">预览</string>
+    <string name="rename">重命名</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -197,6 +199,9 @@
     <string name="cloud_storage_upload_list_title">传输列表</string>
     <string name="cloud_storage_no_files">暂无数据</string>
     <string name="cloud_preview_transcoding_hint">课件转换中，请稍后…</string>
+    <string name="cloud_new_folder_title">新建文件夹</string>
+    <string name="cloud_new_folder_hint">请输入新建文件夹名字</string>
+    <string name="cloud_rename_hint">重命名文件</string>
 
     <string name="upload_success">上传成功</string>
     <string name="upload_failure">上传失败</string>

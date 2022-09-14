@@ -19,6 +19,14 @@ class CloudStorageRepository @Inject constructor(
 ) {
     private var avatarUrl: String? = null
 
+    suspend fun createDirectory(dir: String, name: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.createDirectory(
+                CreateDirectoryReq(parentDirectoryPath = dir, directoryName = name)
+            ).toResult()
+        }
+    }
+
     suspend fun listFiles(
         page: Int = 1,
         size: Int = 50,
@@ -29,6 +37,12 @@ class CloudStorageRepository @Inject constructor(
             cloudStorageService.listFiles(
                 CloudListFilesReq(page = page, size = size, directoryPath = path, order = order)
             ).toResult()
+        }
+    }
+
+    suspend fun rename(fileUUID: String, name: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.rename(CloudFileRenameReq(fileUUID = fileUUID, newName = name)).toResult()
         }
     }
 
