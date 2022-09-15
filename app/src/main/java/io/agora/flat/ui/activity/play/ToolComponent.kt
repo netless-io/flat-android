@@ -46,8 +46,6 @@ class ToolComponent(
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var boardRoom: IBoardRoom
     private lateinit var appEnv: AppEnv
-
-    private lateinit var cloudStorageAdapter: CloudStorageAdapter
     private lateinit var userListAdapter: UserListAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -69,11 +67,7 @@ class ToolComponent(
                 if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
                     hideSettingLayout()
                 }
-
-                if (areaId != RoomOverlayManager.AREA_ID_CLOUD_STORAGE) {
-                    hideCloudStorageLayout()
-                }
-
+                binding.cloudservice.isSelected = areaId == RoomOverlayManager.AREA_ID_CLOUD_STORAGE
                 if (areaId != RoomOverlayManager.AREA_ID_USER_LIST) {
                     hideUserListLayout()
                 }
@@ -112,13 +106,6 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.cloudStorageFiles.collect {
-                cloudStorageAdapter.setDataSet(it)
-                binding.layoutCloudStorage.listEmpty.isVisible = it.isEmpty()
-            }
-        }
-
-        lifecycleScope.launch {
             viewModel.messageAreaShown.collect {
                 binding.message.isSelected = it
             }
@@ -142,16 +129,6 @@ class ToolComponent(
         binding.setting.isSelected = true
     }
 
-    private fun hideCloudStorageLayout() {
-        binding.layoutCloudStorage.root.isVisible = false
-        binding.cloudservice.isSelected = false
-    }
-
-    private fun showCloudStorageLayout() {
-        binding.layoutCloudStorage.root.isVisible = true
-        binding.cloudservice.isSelected = true
-    }
-
     private fun hideUserListLayout() {
         binding.layoutUserList.root.isVisible = false
         binding.userlist.isSelected = false
@@ -172,15 +149,8 @@ class ToolComponent(
                 RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_MESSAGE, shown)
             },
             binding.cloudservice to {
-                with(binding.layoutCloudStorage.root) {
-                    if (isVisible) {
-                        hideCloudStorageLayout()
-                    } else {
-                        showCloudStorageLayout()
-                        viewModel.requestCloudStorageFiles()
-                    }
-                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, isVisible)
-                }
+                val targetShow = RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_CLOUD_STORAGE
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, targetShow)
             },
             binding.userlist to {
                 with(binding.layoutUserList.root) {
@@ -275,20 +245,20 @@ class ToolComponent(
             // block event
         }
 
-        cloudStorageAdapter = CloudStorageAdapter()
-        cloudStorageAdapter.setOnItemClickListener {
-            viewModel.insertCourseware(it)
-            hideCloudStorageLayout()
-        }
-        binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
-        binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
-        binding.layoutCloudStorage.close.setOnClickListener {
-            hideCloudStorageLayout()
-            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
-        }
-        binding.layoutCloudStorage.root.setOnClickListener {
-            // block event
-        }
+//        cloudStorageAdapter = CloudStorageAdapter()
+//        cloudStorageAdapter.setOnItemClickListener {
+//            viewModel.insertCourseware(it)
+//            hideCloudStorageLayout()
+//        }
+//        binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
+//        binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
+//        binding.layoutCloudStorage.close.setOnClickListener {
+//            hideCloudStorageLayout()
+//            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
+//        }
+//        binding.layoutCloudStorage.root.setOnClickListener {
+//            // block event
+//        }
 
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter

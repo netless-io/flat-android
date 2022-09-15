@@ -17,7 +17,6 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudStorageRepository
-import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -31,22 +30,23 @@ import javax.inject.Inject
 class CloudStorageViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
 ) : ViewModel() {
-    private val files = MutableStateFlow(listOf<CloudUiFile>())
+    private val loadUiState = MutableStateFlow(LoadUiState.Init)
+    private val loadedFiles = MutableStateFlow(listOf<CloudUiFile>())
     private val totalUsage = MutableStateFlow(0L)
-    private val refreshing = ObservableLoadingCounter()
+
     private val showBadge = MutableStateFlow(false)
     private val dirPath = MutableStateFlow(CLOUD_ROOT_DIR)
 
     val state = combine(
-        refreshing.observable,
+        loadUiState,
         showBadge,
         totalUsage,
-        files,
+        loadedFiles,
         UploadManager.uploadFiles,
         dirPath,
-    ) { refreshing, showBadge, totalUsage, files, uploadFiles, dirPath ->
+    ) { loadUiState, showBadge, totalUsage, files, uploadFiles, dirPath ->
         CloudStorageUiState(
-            refreshing = refreshing,
+            loadUiState = loadUiState,
             showBadge = showBadge,
             totalUsage = totalUsage,
             files = files,
@@ -82,20 +82,60 @@ class CloudStorageViewModel @Inject constructor(
 
     fun reloadFileList() {
         viewModelScope.launch {
-            refreshing.addLoader()
-            runAtLeast {
-                val resp = cloudStorageRepository.listFiles(1, path = state.value.dirPath)
-                if (resp is Success) {
+            loadUiState.value = loadUiState.value.copy(refresh = LoadState.Loading)
+            when (val resp = cloudStorageRepository.listFiles(1, path = state.value.dirPath)) {
+                is Success -> {
                     totalUsage.value = resp.data.totalUsage
-                    files.value = resp.data.files.map {
-                        CloudUiFile(file = it, checked = false)
+                    val files = resp.data.files
+                    loadedFiles.value = files.map { CloudUiFile(it) }
+                    files.forEach(::checkConvertState)
+                    delayLaunch {
+                        loadUiState.value = loadUiState.value.copy(
+                            page = 1,
+                            refresh = LoadState.NotLoading(files.isEmpty()),
+                            append = LoadState.NotLoading(false)
+                        )
                     }
-                    resp.data.files.forEach(::checkConvertState)
-                } else {
-                    // do nothing
+                }
+                is Failure -> {
+                    delayLaunch {
+                        loadUiState.value = loadUiState.value.copy(
+                            page = 0,
+                            refresh = LoadState.Error(resp.exception),
+                            append = LoadState.NotLoading(false)
+                        )
+                    }
                 }
             }
-            refreshing.removeLoader()
+        }
+    }
+
+    fun loadMoreFileList() {
+        viewModelScope.launch {
+            if (loadUiState.value.append == LoadState.Loading) {
+                return@launch
+            }
+            loadUiState.value = loadUiState.value.copy(append = LoadState.Loading)
+            val nextPage = loadUiState.value.page + 1
+            when (val resp = cloudStorageRepository.listFiles(nextPage, path = state.value.dirPath)) {
+                is Success -> {
+                    totalUsage.value = resp.data.totalUsage
+                    val files = resp.data.files
+                    loadedFiles.value += files.map { CloudUiFile(it) }
+                    files.forEach(::checkConvertState)
+                    delayLaunch {
+                        loadUiState.value = loadUiState.value.copy(
+                            page = nextPage,
+                            append = LoadState.NotLoading(files.isEmpty())
+                        )
+                    }
+                }
+                is Failure -> {
+                    delayLaunch {
+                        loadUiState.value = loadUiState.value.copy(append = LoadState.Error(resp.exception))
+                    }
+                }
+            }
         }
     }
 
@@ -127,25 +167,25 @@ class CloudStorageViewModel @Inject constructor(
 
     fun checkItem(index: Int, checked: Boolean) {
         viewModelScope.launch {
-            val fs = files.value.toMutableList()
+            val fs = loadedFiles.value.toMutableList()
             fs[index] = fs[index].copy(checked = checked)
-            files.value = fs
+            loadedFiles.value = fs
         }
     }
 
     fun deleteChecked() {
         viewModelScope.launch {
-            refreshing.addLoader()
-            val checked = files.value.filter { it.checked }
-            val result = cloudStorageRepository.delete(checked.map { it.file.fileUUID })
-            if (result is Success) {
-                files.value = files.value.filterNot { it.checked }
-                val size = checked.sumOf { it.file.fileSize }
-                totalUsage.value = totalUsage.value - size
-            } else {
+            val checked = loadedFiles.value.filter { it.checked }
+            when (val result = cloudStorageRepository.delete(checked.map { it.file.fileUUID })) {
+                is Success -> {
+                    loadedFiles.value = loadedFiles.value.filterNot { it.checked }
+                    val size = checked.sumOf { it.file.fileSize }
+                    totalUsage.value = totalUsage.value - size
+                }
+                is Failure -> {
 
+                }
             }
-            refreshing.removeLoader()
         }
     }
 
@@ -194,7 +234,7 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun addUiFile(fileUUID: String, filename: String, size: Long, resourceType: ResourceType?) {
-        val targetFiles = files.value.toMutableList()
+        val targetFiles = loadedFiles.value.toMutableList()
         val uiFile = CloudUiFile(
             CloudFile(
                 fileUUID = fileUUID,
@@ -206,7 +246,7 @@ class CloudStorageViewModel @Inject constructor(
             )
         )
         targetFiles.add(0, uiFile)
-        files.value = targetFiles
+        loadedFiles.value = targetFiles
     }
 
     private fun startProjectorQuery(
@@ -309,13 +349,13 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun updateConvertStep(fileUUID: String, convertStep: FileConvertStep) {
-        val targetFiles = files.value.toMutableList()
+        val targetFiles = loadedFiles.value.toMutableList()
         val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
         if (index >= 0) {
             val file = targetFiles[index].file
             targetFiles[index] = CloudUiFile(copyConvertStep(file, convertStep))
         }
-        files.value = targetFiles
+        loadedFiles.value = targetFiles
     }
 
     private fun copyConvertStep(file: CloudFile, convertStep: FileConvertStep): CloudFile {
@@ -338,23 +378,23 @@ class CloudStorageViewModel @Inject constructor(
     }
 
     private fun updateResourceType(fileUUID: String, resourceType: ResourceType) {
-        val targetFiles = files.value.toMutableList()
+        val targetFiles = loadedFiles.value.toMutableList()
         val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
         if (index >= 0) {
             val file = targetFiles[index].file
             targetFiles[index] = CloudUiFile(file.copy(resourceType = resourceType))
         }
-        files.value = targetFiles
+        loadedFiles.value = targetFiles
     }
 
     private fun updateFilename(fileUUID: String, filename: String) {
-        val targetFiles = files.value.toMutableList()
+        val targetFiles = loadedFiles.value.toMutableList()
         val index = targetFiles.indexOfFirst { fileUUID == it.file.fileUUID }
         if (index >= 0) {
             val file = targetFiles[index].file
             targetFiles[index] = CloudUiFile(file.copy(fileName = filename))
         }
-        files.value = targetFiles
+        loadedFiles.value = targetFiles
     }
 
     fun clearBadgeFlag() {
@@ -387,7 +427,8 @@ class CloudStorageViewModel @Inject constructor(
             val name = fileName.nameWithoutExtension()
             when (val result = cloudStorageRepository.rename(fileUuid, name)) {
                 is Success -> updateFilename(fileUuid, fileName)
-                is Failure -> {}
+                is Failure -> {
+                }
             }
         }
     }

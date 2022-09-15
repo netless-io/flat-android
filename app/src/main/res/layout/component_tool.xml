@@ -209,17 +209,17 @@
         app:layout_constraintTop_toTopOf="@id/guideline"
         tools:visibility="gone" />
 
-    <include
-        android:id="@+id/layout_cloud_storage"
-        layout="@layout/layout_room_cloud_storage"
-        android:layout_width="@dimen/room_class_overlay_width"
-        android:layout_height="match_parent"
-        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
-        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+<!--    <include-->
+<!--        android:id="@+id/layout_cloud_storage"-->
+<!--        layout="@layout/layout_room_cloud_storage"-->
+<!--        android:layout_width="@dimen/room_class_overlay_width"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"-->
+<!--        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"-->
+<!--        android:visibility="gone"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        tools:visibility="gone" />-->
 
     <include
         android:id="@+id/layout_user_list"

@@ -27,9 +27,7 @@ class CloudStorageAdapter(
         viewHolder.filename.text = item.fileName
         viewHolder.fileDate.text = FlatFormatter.longDate(item.createAt)
         viewHolder.fileSize.text = FlatFormatter.size(item.fileSize)
-        viewHolder.itemView.setOnClickListener {
-            onItemClickListener?.onAddClick(item)
-        }
+        viewHolder.itemView.setOnClickListener { onItemClickListener?.onAddClick(item) }
     }
 
     override fun getItemCount() = dataSet.size

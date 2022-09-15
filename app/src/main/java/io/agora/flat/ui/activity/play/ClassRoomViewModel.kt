@@ -1,16 +1,8 @@
 package io.agora.flat.ui.activity.play
 
-import android.graphics.BitmapFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.herewhite.sdk.ConverterCallbacks
-import com.herewhite.sdk.converter.ConvertType
-import com.herewhite.sdk.converter.ConverterV5
-import com.herewhite.sdk.converter.ProjectorQuery
-import com.herewhite.sdk.domain.ConversionInfo
-import com.herewhite.sdk.domain.ConvertException
-import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
@@ -39,13 +31,9 @@ import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
 import io.agora.flat.ui.viewmodel.RtcVideoController
-import io.agora.flat.util.coursewareType
 import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.io.IOException
-import java.net.URL
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,8 +72,8 @@ class ClassRoomViewModel @Inject constructor(
 
     val messageUsers = userManager.observeUsers()
 
-    private var _cloudStorageFiles = MutableStateFlow<List<CloudFile>>(mutableListOf())
-    val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
+    // private var _cloudStorageFiles = MutableStateFlow<List<CloudFile>>(mutableListOf())
+    // val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
 
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
@@ -478,110 +466,16 @@ class ClassRoomViewModel @Inject constructor(
         clipboard.putText(text)
     }
 
-    fun requestCloudStorageFiles() {
-        viewModelScope.launch {
-            val result = cloudStorageRepository.listFiles(1, path = "")
-            if (result.isSuccess) {
-                _cloudStorageFiles.value = result.getOrThrow().files.filter {
-                    it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
-                }
-            }
-        }
-    }
-
-    fun insertCourseware(file: CloudFile) {
-        viewModelScope.launch {
-            // "正在插入课件……"
-            when (file.fileURL.coursewareType()) {
-                CoursewareType.Image -> {
-                    val imageSize = loadImageSize(file.fileURL)
-                    boardRoom.insertImage(file.fileURL, w = imageSize.width, h = imageSize.height)
-                }
-                CoursewareType.Audio, CoursewareType.Video -> {
-                    boardRoom.insertVideo(file.fileURL, file.fileName)
-                }
-                CoursewareType.DocStatic -> {
-                    insertDocs(file, false)
-                }
-                CoursewareType.DocDynamic -> {
-                    if (file.resourceType == ResourceType.WhiteboardConvert) {
-                        insertDocs(file, true)
-                    } else if (file.resourceType == ResourceType.WhiteboardProjector) {
-                        insertProjectorDocs(file)
-                    }
-                }
-                else -> {
-                    // Not Support Mobile
-                }
-            }
-        }
-    }
-
-    /**
-     * This code is used as an example, the application needs to manage io and async itself.
-     * The application may get the image width and height from the api
-     *
-     * @param src
-     */
-    private suspend fun loadImageSize(src: String): ImageSize {
-        return withContext(Dispatchers.IO) {
-            return@withContext try {
-                URL(src).openStream().use {
-                    val options = BitmapFactory.Options().apply {
-                        inJustDecodeBounds = true
-                    }
-                    BitmapFactory.decodeStream(it, null, options)
-                    ImageSize(options.outWidth, options.outHeight)
-                }
-            } catch (e: IOException) {
-                ImageSize(720, 360)
-            }
-        }
-    }
-
-    private fun insertDocs(file: CloudFile, dynamic: Boolean) {
-        val convert = ConverterV5.Builder().apply {
-            setResource(file.fileURL)
-            setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
-            setTaskUuid(file.whiteboardConvert.taskUUID)
-            setTaskToken(file.whiteboardConvert.taskToken)
-            setPoolInterval(2000)
-            setCallback(object : ConverterCallbacks {
-                override fun onProgress(progress: Double, convertInfo: ConversionInfo?) {
-                }
-
-                override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    boardRoom.insertPpt("/${file.whiteboardConvert.taskUUID}/${UUID.randomUUID()}", ppt, file.fileName)
-                }
-
-                override fun onFailure(e: ConvertException) {
-                }
-            })
-        }.build()
-        convert.startConvertTask()
-    }
-
-    private fun insertProjectorDocs(file: CloudFile) {
-        val projectorQuery = ProjectorQuery.Builder()
-            .setTaskToken(file.whiteboardProjector.taskToken)
-            .setTaskUuid(file.whiteboardProjector.taskUUID)
-            .setPoolInterval(2000)
-            .setCallback(object : ProjectorQuery.Callback {
-                override fun onProgress(progress: Double, convertInfo: ProjectorQuery.QueryResponse) {
-
-                }
-
-                override fun onFinish(response: ProjectorQuery.QueryResponse) {
-                    boardRoom.insertProjectorPpt(file.whiteboardProjector.taskUUID, response.prefix, file.fileName)
-                }
-
-                override fun onFailure(e: ConvertException?) {
-
-                }
-            })
-            .build()
-        projectorQuery.startQuery()
-    }
+//    fun requestCloudStorageFiles() {
+//        viewModelScope.launch {
+//            val result = cloudStorageRepository.listFiles(1, path = "")
+//            if (result.isSuccess) {
+//                _cloudStorageFiles.value = result.getOrThrow().files.filter {
+//                    it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
+//                }
+//            }
+//        }
+//    }
 
     fun closeSpeak(uuid: String) {
         viewModelScope.launch {

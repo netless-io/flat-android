@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.cloud.list
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.*
@@ -27,10 +28,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.data.model.CLOUD_ROOT_DIR
-import io.agora.flat.data.model.CloudFile
-import io.agora.flat.data.model.FileConvertStep
-import io.agora.flat.data.model.ResourceType
+import io.agora.flat.data.model.*
 import io.agora.flat.ui.activity.home.EmptyView
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.*
@@ -53,6 +51,7 @@ fun CloudScreen(
         },
         onDeleteClick = viewModel::deleteChecked,
         onReload = viewModel::reloadFileList,
+        onLoadMore = viewModel::loadMoreFileList,
         onOpenItemPick = { onOpenItemPick?.invoke() },
         onUploadFile = viewModel::uploadFile,
         onItemChecked = viewModel::checkItem,
@@ -77,6 +76,7 @@ internal fun CloudScreen(
     onOpenUploading: () -> Unit,
     onDeleteClick: () -> Unit,
     onReload: () -> Unit,
+    onLoadMore: () -> Unit,
     onOpenItemPick: () -> Unit,
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
@@ -89,6 +89,7 @@ internal fun CloudScreen(
 ) {
     var editMode by rememberSaveable { mutableStateOf(false) }
     var showNewFolder by rememberSaveable { mutableStateOf(false) }
+    val refreshing = viewState.loadUiState.refresh == LoadState.Loading
 
     Column {
         CloudTopAppBar(
@@ -101,17 +102,19 @@ internal fun CloudScreen(
             onDoneClick = { editMode = false },
             onFolderBack = onFolderBack,
         )
-        FlatSwipeRefresh(viewState.refreshing, onRefresh = onReload) {
+        FlatSwipeRefresh(refreshing, onRefresh = onReload) {
             Box(Modifier.fillMaxSize()) {
                 CloudFileList(
                     modifier = Modifier.fillMaxSize(),
+                    loadState = viewState.loadUiState.append,
                     files = viewState.files,
                     editMode = editMode,
                     onItemChecked = onItemChecked,
                     onItemClick = onItemClick,
                     onItemPreview = onItemPreview,
                     onItemRename = onItemRename,
-                    onPreviewRestrict = onPreviewRestrict
+                    onPreviewRestrict = onPreviewRestrict,
+                    onLoadMore = onLoadMore,
                 )
                 if (isTabletMode()) {
                     AddFileLayoutPad(onOpenItemPick)
@@ -208,6 +211,7 @@ private fun CloudTopAppBar(
             )
         )
     }
+    BackHandler(viewState.dirPath != CLOUD_ROOT_DIR, onBack = onFolderBack)
 }
 
 private fun cloudAppBarAction(
@@ -386,6 +390,7 @@ private fun RowScope.UploadPickItem(@DrawableRes id: Int, @StringRes text: Int, 
 @Composable
 internal fun CloudFileList(
     modifier: Modifier,
+    loadState: LoadState,
     files: List<CloudUiFile>,
     editMode: Boolean,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
@@ -393,6 +398,7 @@ internal fun CloudFileList(
     onItemPreview: (CloudFile) -> Unit,
     onItemRename: (fileUuid: String, fileName: String) -> Unit,
     onPreviewRestrict: () -> Unit,
+    onLoadMore: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
     var renaming by remember { mutableStateOf<CloudFile?>(null) }
@@ -436,13 +442,7 @@ internal fun CloudFileList(
             }
 
             item {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter
-                ) {
-                    FlatTextCaption(stringResource(R.string.loaded_all))
-                }
+                CloudListFooter(loadState, onLoadMore = onLoadMore)
             }
         }
     }
@@ -459,6 +459,37 @@ internal fun CloudFileList(
                 renaming = null
             }
         )
+    }
+}
+
+@Composable
+private fun CloudListFooter(loadState: LoadState, onLoadMore: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clickable {
+                if (loadState is LoadState.Error) onLoadMore()
+            }
+            .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter
+    ) {
+        when (loadState) {
+            LoadState.Loading -> {
+                FlatTextCaption(stringResource(R.string.loaded_loading))
+            }
+            is LoadState.NotLoading -> {
+                if (loadState.end) {
+                    FlatTextCaption(stringResource(R.string.loaded_all))
+                } else {
+                    FlatTextCaption(stringResource(R.string.loaded_loading))
+                }
+            }
+            is LoadState.Error -> {
+                FlatTextCaption(stringResource(R.string.loaded_retry))
+            }
+        }
+    }
+    if (loadState is LoadState.NotLoading && !loadState.end) {
+        LaunchedEffect(loadState) { onLoadMore() }
     }
 }
 
@@ -641,6 +672,7 @@ private fun CloudStoragePreview() {
             onOpenUploading = { },
             onDeleteClick = { },
             onReload = { },
+            onLoadMore = { },
             onOpenItemPick = { },
             onUploadFile = { _, _ -> },
             onItemChecked = { _, _ -> },

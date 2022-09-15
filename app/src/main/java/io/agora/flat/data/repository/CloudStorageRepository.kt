@@ -29,7 +29,7 @@ class CloudStorageRepository @Inject constructor(
 
     suspend fun listFiles(
         page: Int = 1,
-        size: Int = 50,
+        size: Int = 20,
         path: String,
         order: String = "DESC",
     ): Result<CloudListFilesResp> {

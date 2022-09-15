@@ -16,28 +16,16 @@ data class CloudFile constructor(
     val meta: CloudFileMeta? = null,
 ) : Parcelable {
     val convertStep: FileConvertStep
-        get() {
-            return when (resourceType) {
-                ResourceType.WhiteboardConvert -> {
-                    whiteboardConvert.convertStep
-                }
-                ResourceType.WhiteboardProjector -> {
-                    whiteboardProjector.convertStep
-                }
-                else -> {
-                    FileConvertStep.Done
-                }
-            }
+        get() = when (resourceType) {
+            ResourceType.WhiteboardConvert -> whiteboardConvert.convertStep
+            ResourceType.WhiteboardProjector -> whiteboardProjector.convertStep
+            else -> FileConvertStep.Done
         }
     val whiteboardConvert: WhiteboardConvertPayload
-        get() {
-            return meta!!.whiteboardConvert!!
-        }
+        get() = meta!!.whiteboardConvert!!
 
     val whiteboardProjector: WhiteboardProjectorPayload
-        get() {
-            return meta!!.whiteboardProjector!!
-        }
+        get() = meta!!.whiteboardProjector!!
 }
 
 @Parcelize

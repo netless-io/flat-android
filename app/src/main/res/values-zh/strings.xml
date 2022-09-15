@@ -152,6 +152,8 @@
     <string name="room_class_stop_class_fail">结束房间失败</string>
 
     <string name="loaded_all">已加载全部</string>
+    <string name="loaded_retry">点击加载</string>
+    <string name="loaded_loading">加载中…</string>
     <string name="modify_room">修改房间</string>
     <string name="cancel_room">取消房间</string>
     <string name="remove_room">移除房间</string>

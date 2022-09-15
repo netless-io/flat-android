@@ -139,6 +139,8 @@
     <string name="room_class_start_class_fail">Failed to start the room</string>
     <string name="room_class_stop_class_fail">Failed to end the room</string>
     <string name="loaded_all">All loaded</string>
+    <string name="loaded_retry">Click to load</string>
+    <string name="loaded_loading">Loading…</string>
     <string name="modify_room">Modify room</string>
     <string name="cancel_room">Cancel room</string>
     <string name="remove_room">Remove room</string>
