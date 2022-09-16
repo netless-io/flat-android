@@ -63,6 +63,7 @@
     <string name="class_room_no_operate_permission">No permission</string>
     <string name="schedule_room">Subscribe Room</string>
     <string name="quick_start_room">Quick Start</string>
+    <string name="room_theme_empty_toast">room theme should not be empty</string>
 
     <string name="join_room">Join Room</string>
     <string name="enter_room">Enter Room</string>

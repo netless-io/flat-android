@@ -42,7 +42,10 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FillMaxSize
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import javax.inject.Inject
 
@@ -322,7 +325,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
                 )
             }
         }
-        Divider(MaxHeight.width(1.dp))
+        FlatDivider(
+            Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+        )
         AppNavHost(
             navController,
             modifier = Modifier
@@ -350,8 +357,8 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
     Column(
         FillMaxSize.background(MaterialTheme.colors.background),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Spacer(modifier = Modifier.height(100.dp))
         Box {
             IconButton(onClick = { onTabSelected(MainTab.Home) }) {
                 Image(painterResource(homeResId), null)

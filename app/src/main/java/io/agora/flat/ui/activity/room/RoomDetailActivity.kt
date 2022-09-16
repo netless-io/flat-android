@@ -23,13 +23,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -134,7 +131,9 @@ fun RoomDetailScreen(
 @Composable
 private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUiAction) -> Unit) {
     Column {
-        BackTopAppBar(stringResource(R.string.title_room_detail), { actioner(DetailUiAction.Back) }) {
+        BackTopAppBar(
+            viewState.roomInfo?.title ?: stringResource(R.string.title_room_detail),
+            onBackPressed = { actioner(DetailUiAction.Back) }) {
             viewState.roomInfo?.run {
                 AppBarMoreButton(viewState.isOwner, roomStatus, actioner)
             }
@@ -522,12 +521,6 @@ private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onC
         }
     }
 }
-
-private val allRoomTextStyle = TextStyle(
-    fontFamily = FontFamily.Default,
-    fontSize = 14.sp,
-    color = FlatColorBlue,
-)
 
 @Composable
 private fun MoreRomeInfoDisplay(uuid: String, roomType: RoomType, isPeriodic: Boolean) {

@@ -16,10 +16,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -30,44 +30,25 @@ import io.agora.flat.R
 import io.agora.flat.ui.theme.Blue_0
 import io.agora.flat.ui.theme.Gray_8
 import io.agora.flat.ui.theme.isDarkTheme
+import io.agora.flat.ui.theme.isTabletMode
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun DevicePreviewLayout(
+fun DeviceOptions(
     cameraOn: Boolean,
-    onCameraChanged: (Boolean) -> Unit,
     micOn: Boolean,
+    onCameraChanged: (Boolean) -> Unit,
     onMicChanged: (Boolean) -> Unit,
-    avatar: String?
+    size: Dp = if (isTabletMode()) 32.dp else 24.dp,
 ) {
     val cameraIcon = if (cameraOn) R.drawable.ic_class_room_camera_on else R.drawable.ic_class_room_camera_off
     val cameraColor = if (cameraOn) MaterialTheme.colors.primary else MaterialTheme.colors.error
     val micIcon = if (micOn) R.drawable.ic_class_room_mic_on else R.drawable.ic_class_room_mic_off
     val micColor = if (micOn) MaterialTheme.colors.primary else MaterialTheme.colors.error
-    val bgColor = if (isDarkTheme()) Gray_8 else Blue_0
 
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val recordPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
-    Card(
-        Modifier
-            .padding(horizontal = 48.dp)
-            .aspectRatio(1f)
-            .clip(MaterialTheme.shapes.large)
-    ) {
-        if (cameraOn) {
-            SimpleCameraPreview(Modifier.fillMaxSize())
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(bgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                FlatAvatar(avatar, 64.dp)
-            }
-        }
-    }
     Row {
         IconButton({
             if (cameraOn || cameraPermissionState.hasPermission) {
@@ -79,6 +60,7 @@ fun DevicePreviewLayout(
             Icon(
                 painterResource(cameraIcon),
                 null,
+                modifier = Modifier.size(size),
                 tint = cameraColor
             )
         }
@@ -93,8 +75,33 @@ fun DevicePreviewLayout(
             Icon(
                 painterResource(micIcon),
                 null,
+                modifier = Modifier.size(size),
                 tint = micColor
             )
+        }
+    }
+}
+
+@Composable
+fun CameraPreviewCard(
+    modifier: Modifier,
+    cameraOn: Boolean,
+    avatar: String?
+) {
+    val bgColor = if (isDarkTheme()) Gray_8 else Blue_0
+
+    Card(modifier = modifier) {
+        if (cameraOn) {
+            SimpleCameraPreview(Modifier.fillMaxSize())
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(bgColor),
+                contentAlignment = Alignment.Center
+            ) {
+                FlatAvatar(avatar, 64.dp)
+            }
         }
     }
 }

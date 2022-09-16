@@ -189,6 +189,19 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
+    fun delete(fileUUID: String) {
+        viewModelScope.launch {
+            when (val result = cloudStorageRepository.delete(listOf(fileUUID))) {
+                is Success -> {
+                    loadedFiles.value = loadedFiles.value.filterNot { it.file.fileUUID == fileUUID }
+                }
+                is Failure -> {
+
+                }
+            }
+        }
+    }
+
     fun uploadFile(uri: Uri, info: ContentInfo) {
         viewModelScope.launch {
             when (val result = cloudStorageRepository.updateStart(info.filename, info.size, state.value.dirPath)) {

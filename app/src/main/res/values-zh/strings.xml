@@ -65,6 +65,7 @@
     <string name="create_room_type">类型</string>
     <string name="create_room_input_theme">请输入房间主题</string>
     <string name="class_room_no_operate_permission">无法操作</string>
+    <string name="room_theme_empty_toast">房间主题不能为空</string>
 
     <string name="schedule_room">预约房间</string>
     <string name="quick_start_room">快速开始</string>

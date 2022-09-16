@@ -62,6 +62,7 @@ fun CloudScreen(
                 Navigator.launchPreviewActivity(context, file)
             }
         },
+        onItemDelete = { viewModel.delete(it.fileUUID) },
         onItemPreview = { Navigator.launchPreviewActivity(context, it) },
         onItemRename = viewModel::rename,
         onPreviewRestrict = { context.showToast(R.string.cloud_preview_transcoding_hint) },
@@ -83,6 +84,7 @@ internal fun CloudScreen(
     onItemClick: (file: CloudFile) -> Unit,
     onItemPreview: (file: CloudFile) -> Unit,
     onItemRename: (fileUuid: String, fileName: String) -> Unit,
+    onItemDelete: (file: CloudFile) -> Unit,
     onPreviewRestrict: () -> Unit,
     onNewFolder: (String) -> Unit,
     onFolderBack: () -> Unit
@@ -113,6 +115,7 @@ internal fun CloudScreen(
                     onItemClick = onItemClick,
                     onItemPreview = onItemPreview,
                     onItemRename = onItemRename,
+                    onItemDelete = onItemDelete,
                     onPreviewRestrict = onPreviewRestrict,
                     onLoadMore = onLoadMore,
                 )
@@ -397,6 +400,7 @@ internal fun CloudFileList(
     onItemClick: (CloudFile) -> Unit,
     onItemPreview: (CloudFile) -> Unit,
     onItemRename: (fileUuid: String, fileName: String) -> Unit,
+    onItemDelete: (CloudFile) -> Unit,
     onPreviewRestrict: () -> Unit,
     onLoadMore: () -> Unit,
 ) {
@@ -437,6 +441,9 @@ internal fun CloudFileList(
                     },
                     onRename = {
                         renaming = item.file
+                    },
+                    onDelete = {
+                        onItemDelete(item.file)
                     }
                 )
             }
@@ -536,6 +543,7 @@ private fun CloudFileItem(
     onClick: () -> Unit,
     onPreview: () -> Unit,
     onRename: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     val file = item.file
     val imageId = file.fileIcon()
@@ -576,7 +584,7 @@ private fun CloudFileItem(
                 Checkbox(checked = item.checked, onCheckedChange = onCheckedChange, Modifier.padding(3.dp))
                 Spacer(Modifier.width(12.dp))
             } else {
-                ItemMoreButton(canPreview, onPreview, onRename)
+                ItemMoreButton(canPreview, onPreview, onRename, onDelete)
                 Spacer(Modifier.width(12.dp))
             }
         }
@@ -585,7 +593,7 @@ private fun CloudFileItem(
 }
 
 @Composable
-fun ItemMoreButton(canPreview: Boolean, onPreview: () -> Unit, onRename: () -> Unit) {
+fun ItemMoreButton(canPreview: Boolean, onPreview: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit) {
     Box {
         var expanded by remember { mutableStateOf(false) }
 
@@ -611,8 +619,11 @@ fun ItemMoreButton(canPreview: Boolean, onPreview: () -> Unit, onRename: () -> U
             }) {
                 FlatTextBodyOne(stringResource(R.string.rename))
             }
-            DropdownMenuItem({ expanded = false }) {
-                FlatTextBodyOne(stringResource(R.string.cancel))
+            DropdownMenuItem({
+                expanded = false
+                onDelete()
+            }) {
+                FlatTextBodyOne(stringResource(R.string.delete))
             }
         }
     }
@@ -654,9 +665,9 @@ private fun EditNameDialogPreview() {
 private fun CloudFileItemPreview() {
     FlatPage {
         Column {
-            CloudFileItem(ComposePreviewData.CloudListFiles[0], false, {}, {}, {}, {})
-            CloudFileItem(ComposePreviewData.CloudListFiles[1], true, {}, {}, {}, {})
-            CloudFileItem(ComposePreviewData.CloudListFiles[2], true, {}, {}, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[0], false, {}, {}, {}, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[1], true, {}, {}, {}, {}, {})
+            CloudFileItem(ComposePreviewData.CloudListFiles[2], true, {}, {}, {}, {}, {})
         }
     }
 }
@@ -677,6 +688,7 @@ private fun CloudStoragePreview() {
             onUploadFile = { _, _ -> },
             onItemChecked = { _, _ -> },
             onItemClick = {},
+            onItemDelete = {},
             onItemPreview = {},
             onItemRename = { _, _ -> },
             onPreviewRestrict = {},

@@ -9,15 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -32,6 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +43,7 @@ import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.CreateRoomUiState
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.util.delayLaunch
+import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
 class CreateRoomActivity : BaseComposeActivity() {
@@ -75,9 +74,7 @@ fun CreateRoomScreen(
             is CreateRoomAction.JoinRoom -> {
                 viewModel.enableVideo(action.cameraOn)
                 Navigator.launchRoomPlayActivity(context, viewState.roomUUID, quickStart = true)
-                scope.delayLaunch {
-                    navController.popBackStack()
-                }
+                scope.delayLaunch { navController.popBackStack() }
             }
             is CreateRoomAction.CreateRoom -> {
                 viewModel.createRoom(action.title, action.roomType)
@@ -93,18 +90,30 @@ fun CreateRoomScreen(
 
 @Composable
 private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoomAction) -> Unit) {
-    val context = LocalContext.current
-    val defaultTheme = context.getString(
-        R.string.join_room_default_time_format,
-        viewState.username
+    ShowUiMessageEffect(
+        uiMessage = viewState.message,
+        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) }
     )
+
+    if (isTabletMode()) {
+        CreateRoomContentTablet(viewState, actioner)
+    } else {
+        CreateRoomContent(viewState, actioner)
+    }
+}
+
+@Composable
+private fun CreateRoomContentTablet(
+    viewState: CreateRoomUiState,
+    actioner: (CreateRoomAction) -> Unit
+) {
+    val defaultTheme = stringResource(R.string.join_room_default_time_format, viewState.username)
+
     var theme by remember { mutableStateOf(defaultTheme) }
     var type by remember { mutableStateOf(RoomType.BigClass) }
     var cameraOn by remember { mutableStateOf(false) }
     var micOn by remember { mutableStateOf(false) }
-
-    val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
+    var openDialog by remember { mutableStateOf(true) }
 
     if (viewState.roomUUID.isNotBlank()) {
         LaunchedEffect(true) {
@@ -112,10 +121,120 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
         }
     }
 
-    ShowUiMessageEffect(
-        uiMessage = viewState.message,
-        onMessageShown = { actioner(CreateRoomAction.OnMessageShown(it)) }
-    )
+    if (openDialog) {
+        Dialog(
+            onDismissRequest = {
+                actioner(CreateRoomAction.Close)
+                openDialog = false
+            },
+            properties = DialogProperties(
+                dismissOnClickOutside = false
+            )
+        ) {
+            val focusRequester = remember { FocusRequester() }
+            val focusManager = LocalFocusManager.current
+            val context = LocalContext.current
+
+            Surface(Modifier.sizeIn(maxWidth = 480.dp), shape = Shapes.large) {
+                Column(Modifier.noRippleClickable { focusManager.clearFocus() }) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(1f)
+                            .height(56.dp)
+                    ) {
+                        FlatTextTitle(stringResource(R.string.create_room), Modifier.align(Alignment.Center))
+                        IconButton(
+                            onClick = {
+                                actioner(CreateRoomAction.Close)
+                                openDialog = false
+                            },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(painterResource(R.drawable.ic_title_close), contentDescription = null)
+                        }
+                    }
+                    FlatDivider()
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Spacer(Modifier.height(12.dp))
+                        ThemeTextField(
+                            value = theme,
+                            onValueChange = { theme = it },
+                            modifier = Modifier
+                                .fillMaxWidth(1f)
+                                .height(64.dp)
+                                .padding(horizontal = 80.dp)
+                                .focusRequester(focusRequester),
+                            placeholderValue = stringResource(R.string.create_room_input_theme)
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        TypeChooseLayout(
+                            type = type,
+                            onTypeChange = {
+                                type = it
+                                focusManager.clearFocus()
+                            },
+                            modifier = Modifier.padding(horizontal = 80.dp),
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        CameraPreviewCard(
+                            modifier = Modifier
+                                .padding(horizontal = 48.dp)
+                                .aspectRatio(2f)
+                                .clip(MaterialTheme.shapes.large),
+                            cameraOn = cameraOn,
+                            avatar = viewState.avatar
+                        )
+                        Row(
+                            Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            DeviceOptions(
+                                cameraOn = cameraOn,
+                                micOn = micOn,
+                                onCameraChanged = { cameraOn = it },
+                                onMicChanged = { micOn = it }
+                            )
+                            Box(Modifier.padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                                FlatSmallPrimaryTextButton(
+                                    stringResource(R.string.start),
+                                    enabled = !viewState.loading
+                                ) {
+                                    if (theme.isNotBlank()) {
+                                        actioner(CreateRoomAction.CreateRoom(theme, type))
+                                    } else {
+                                        context.showToast(R.string.room_theme_empty_toast)
+                                    }
+                                    focusManager.clearFocus()
+                                }
+                                if (viewState.loading) CircularProgressIndicator(Modifier.size(24.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoomAction) -> Unit) {
+    val defaultTheme = stringResource(R.string.join_room_default_time_format, viewState.username)
+    var theme by remember { mutableStateOf(defaultTheme) }
+    var type by remember { mutableStateOf(RoomType.BigClass) }
+    var cameraOn by remember { mutableStateOf(false) }
+    var micOn by remember { mutableStateOf(false) }
+
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    if (viewState.roomUUID.isNotBlank()) {
+        LaunchedEffect(true) {
+            actioner(CreateRoomAction.JoinRoom(viewState.roomUUID, cameraOn, micOn))
+        }
+    }
 
     Column {
         CloseTopAppBar(stringResource(R.string.create_room), onClose = { actioner(CreateRoomAction.Close) })
@@ -137,17 +256,27 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
                 placeholderValue = stringResource(R.string.create_room_input_theme)
             )
             Spacer(Modifier.height(32.dp))
-            TypeChooseLayout(type) {
-                type = it
-                focusManager.clearFocus()
-            }
+            TypeChooseLayout(
+                type = type,
+                onTypeChange = {
+                    type = it
+                    focusManager.clearFocus()
+                }
+            )
             Spacer(Modifier.height(32.dp))
-            DevicePreviewLayout(
+            CameraPreviewCard(
+                modifier = Modifier
+                    .padding(horizontal = 48.dp)
+                    .aspectRatio(if (isTabletMode()) 2f else 1f)
+                    .clip(MaterialTheme.shapes.large),
                 cameraOn = cameraOn,
-                onCameraChanged = { cameraOn = it },
-                micOn = micOn,
-                onMicChanged = { micOn = it },
                 avatar = viewState.avatar
+            )
+            DeviceOptions(
+                cameraOn = cameraOn,
+                micOn = micOn,
+                onCameraChanged = { cameraOn = it },
+                onMicChanged = { micOn = it }
             )
             Spacer(Modifier.weight(1f))
             Box(
@@ -156,7 +285,11 @@ private fun CreateRoomScreen(viewState: CreateRoomUiState, actioner: (CreateRoom
                     .padding(16.dp, 32.dp), contentAlignment = Alignment.Center
             ) {
                 FlatPrimaryTextButton(stringResource(R.string.start), enabled = !viewState.loading) {
-                    actioner(CreateRoomAction.CreateRoom(theme, type))
+                    if (theme.isNotBlank()) {
+                        actioner(CreateRoomAction.CreateRoom(theme, type))
+                    } else {
+                        context.showToast(R.string.room_theme_empty_toast)
+                    }
                     focusManager.clearFocus()
                 }
                 if (viewState.loading) CircularProgressIndicator(Modifier.size(24.dp))
@@ -212,7 +345,7 @@ internal fun ThemeTextField(
             }
             if (value.isNotBlank()) {
                 IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Icon(Icons.Outlined.Clear, "", tint = FlatTheme.colors.textPrimary)
+                    Icon(painterResource(id = R.drawable.ic_text_filed_clear), "", tint = FlatTheme.colors.textPrimary)
                 }
             }
         }
@@ -220,8 +353,8 @@ internal fun ThemeTextField(
 }
 
 @Composable
-private fun TypeChooseLayout(type: RoomType, onTypeChange: (RoomType) -> Unit) {
-    Row {
+private fun TypeChooseLayout(type: RoomType, onTypeChange: (RoomType) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier) {
         TypeCheckItem(
             iconPainter = painterResource(R.drawable.ic_room_type_big_class),
             text = stringResource(id = R.string.room_type_big_class),
