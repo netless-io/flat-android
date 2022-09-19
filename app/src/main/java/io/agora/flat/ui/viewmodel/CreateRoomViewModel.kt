@@ -3,10 +3,10 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.data.AppDatabase
+import io.agora.flat.common.board.DeviceState
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
@@ -16,7 +16,6 @@ import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import io.agora.flat.util.runAtLeast
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,11 +24,9 @@ import javax.inject.Inject
 class CreateRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val database: AppDatabase,
+    private val appKVCenter: AppKVCenter,
     private val eventBus: EventBus,
 ) : ViewModel() {
-    private val username = userRepository.getUserInfo()!!.name
-
     private val roomUUID = MutableStateFlow("")
     private val loadingCounter = ObservableLoadingCounter()
     private val uiMessageManager = UiMessageManager()
@@ -42,14 +39,18 @@ class CreateRoomViewModel @Inject constructor(
         CreateRoomUiState(
             uuid,
             loading,
-            username,
+            userRepository.getUserInfo()!!.name,
             userRepository.getUserInfo()!!.avatar,
+            appKVCenter.getDeviceStatePreference(),
             message
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CreateRoomUiState.byUsername(username),
+        initialValue = CreateRoomUiState.by(
+            username = userRepository.getUserInfo()!!.name,
+            deviceState = appKVCenter.getDeviceStatePreference()
+        ),
     )
 
     fun createRoom(title: String, type: RoomType) {
@@ -68,9 +69,9 @@ class CreateRoomViewModel @Inject constructor(
         }
     }
 
-    fun enableVideo(enable: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            database.roomConfigDao().insertOrUpdate(RoomConfig(roomUUID.value, enable, enable))
+    fun updateDeviceState(cameraOn: Boolean, micOn: Boolean) {
+        viewModelScope.launch {
+            appKVCenter.setDeviceStatePreference(DeviceState(camera = cameraOn, mic = micOn))
         }
     }
 
@@ -86,11 +87,12 @@ data class CreateRoomUiState(
     val loading: Boolean = false,
     val username: String = "",
     val avatar: String? = null,
+    val deviceState: DeviceState,
     val message: UiMessage? = null
 ) {
     companion object {
-        fun byUsername(username: String): CreateRoomUiState {
-            return CreateRoomUiState(username = username)
+        fun by(username: String, deviceState: DeviceState): CreateRoomUiState {
+            return CreateRoomUiState(username = username, deviceState = deviceState)
         }
     }
 }

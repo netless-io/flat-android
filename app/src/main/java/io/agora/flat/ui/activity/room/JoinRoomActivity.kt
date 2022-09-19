@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.room
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -28,6 +29,7 @@ import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.board.DeviceState
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Shapes
@@ -36,6 +38,7 @@ import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomUiState
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
+import io.agora.flat.util.hasPermission
 import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
@@ -89,8 +92,12 @@ fun JoinRoomScreen(
 @Composable
 private fun JoinRoomContentTablet(viewState: JoinRoomUiState, actioner: (JoinRoomAction) -> Unit) {
     var uuid by remember { mutableStateOf("") }
-    var micOn by remember { mutableStateOf(false) }
-    var cameraOn by remember { mutableStateOf(false) }
+
+    val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
+    val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
+    var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
+    var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
+
     var openDialog by remember { mutableStateOf(true) }
 
     if (openDialog) {
@@ -152,6 +159,8 @@ private fun JoinRoomContentTablet(viewState: JoinRoomUiState, actioner: (JoinRoo
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         DeviceOptions(
+                            preferCameraOn = viewState.deviceState.camera,
+                            preferMicOn = viewState.deviceState.mic,
                             cameraOn = cameraOn,
                             micOn = micOn,
                             onCameraChanged = { cameraOn = it },
@@ -177,13 +186,16 @@ private fun JoinRoomContentTablet(viewState: JoinRoomUiState, actioner: (JoinRoo
 @Composable
 private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomAction) -> Unit) {
     var uuid by remember { mutableStateOf("") }
-    var micOn by remember { mutableStateOf(false) }
-    var cameraOn by remember { mutableStateOf(false) }
+
+    val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
+    val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
+    var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
+    var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-
     val context = LocalContext.current
+
     Column {
         CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
         Column(
@@ -214,6 +226,8 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
                 avatar = viewState.avatar
             )
             DeviceOptions(
+                preferCameraOn = viewState.deviceState.camera,
+                preferMicOn = viewState.deviceState.mic,
                 cameraOn = cameraOn,
                 micOn = micOn,
                 onCameraChanged = { cameraOn = it },
@@ -244,6 +258,6 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
 @Preview(widthDp = 640, uiMode = 0x20)
 private fun PagePreview() {
     FlatPage {
-        JoinRoomContent(JoinRoomUiState.Empty) {}
+        JoinRoomContent(JoinRoomUiState.by(DeviceState(true, mic = true))) {}
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import javax.inject.Inject
@@ -12,8 +13,7 @@ import javax.inject.Inject
  * 提供App级别的KV存储
  */
 class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
-    private val store: SharedPreferences =
-        context.getSharedPreferences("flat_kv_data", Context.MODE_PRIVATE)
+    private val store: SharedPreferences = context.getSharedPreferences("flat_kv_data", Context.MODE_PRIVATE)
     private val gson = Gson()
     private val mockData = MockData()
 
@@ -124,6 +124,21 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         }.apply()
     }
 
+    fun getDeviceStatePreference(): DeviceState {
+        val preferenceJson = store.getString(KEY_DEVICE_STATE, null)
+        return if (preferenceJson == null) {
+            DeviceState(camera = false, mic = true);
+        } else {
+            gson.fromJson(preferenceJson, DeviceState::class.java)
+        }
+    }
+
+    fun setDeviceStatePreference(deviceState: DeviceState) {
+        store.edit().apply {
+            putString(KEY_DEVICE_STATE, gson.toJson(deviceState))
+        }.apply()
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -140,6 +155,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_LAST_CANCEL_UPDATE = "key_last_cancel_update"
 
         const val KEY_SESSION_ID = "key_session_id"
+
+        const val KEY_DEVICE_STATE = "key_device_state"
     }
 
     class MockData {

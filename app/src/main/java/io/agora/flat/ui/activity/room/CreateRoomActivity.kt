@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.room
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -35,6 +36,7 @@ import androidx.navigation.NavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
@@ -43,6 +45,7 @@ import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.CreateRoomUiState
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
 import io.agora.flat.util.delayLaunch
+import io.agora.flat.util.hasPermission
 import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
@@ -72,7 +75,7 @@ fun CreateRoomScreen(
                 navController.popBackStack()
             }
             is CreateRoomAction.JoinRoom -> {
-                viewModel.enableVideo(action.cameraOn)
+                viewModel.updateDeviceState(action.cameraOn, action.micOn)
                 Navigator.launchRoomPlayActivity(context, viewState.roomUUID, quickStart = true)
                 scope.delayLaunch { navController.popBackStack() }
             }
@@ -107,12 +110,16 @@ private fun CreateRoomContentTablet(
     viewState: CreateRoomUiState,
     actioner: (CreateRoomAction) -> Unit
 ) {
+    val context = LocalContext.current
     val defaultTheme = stringResource(R.string.join_room_default_time_format, viewState.username)
-
     var theme by remember { mutableStateOf(defaultTheme) }
     var type by remember { mutableStateOf(RoomType.BigClass) }
-    var cameraOn by remember { mutableStateOf(false) }
-    var micOn by remember { mutableStateOf(false) }
+
+    val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
+    val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
+    var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
+    var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
+
     var openDialog by remember { mutableStateOf(true) }
 
     if (viewState.roomUUID.isNotBlank()) {
@@ -133,7 +140,6 @@ private fun CreateRoomContentTablet(
         ) {
             val focusRequester = remember { FocusRequester() }
             val focusManager = LocalFocusManager.current
-            val context = LocalContext.current
 
             Surface(Modifier.sizeIn(maxWidth = 480.dp), shape = Shapes.large) {
                 Column(Modifier.noRippleClickable { focusManager.clearFocus() }) {
@@ -191,6 +197,8 @@ private fun CreateRoomContentTablet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             DeviceOptions(
+                                preferCameraOn = viewState.deviceState.camera,
+                                preferMicOn = viewState.deviceState.mic,
                                 cameraOn = cameraOn,
                                 micOn = micOn,
                                 onCameraChanged = { cameraOn = it },
@@ -223,8 +231,11 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
     val defaultTheme = stringResource(R.string.join_room_default_time_format, viewState.username)
     var theme by remember { mutableStateOf(defaultTheme) }
     var type by remember { mutableStateOf(RoomType.BigClass) }
-    var cameraOn by remember { mutableStateOf(false) }
-    var micOn by remember { mutableStateOf(false) }
+
+    val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
+    val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
+    var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
+    var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -273,6 +284,8 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
                 avatar = viewState.avatar
             )
             DeviceOptions(
+                preferCameraOn = viewState.deviceState.camera,
+                preferMicOn = viewState.deviceState.mic,
                 cameraOn = cameraOn,
                 micOn = micOn,
                 onCameraChanged = { cameraOn = it },
@@ -403,7 +416,7 @@ private fun TypeCheckItem(iconPainter: Painter, text: String, checked: Boolean, 
 @Preview(device = PIXEL_C, widthDp = 400, uiMode = 0x20)
 private fun CreateRoomScreenPreview() {
     FlatPage {
-        CreateRoomScreen(CreateRoomUiState()) {}
+        CreateRoomScreen(CreateRoomUiState(deviceState = DeviceState(camera = false, mic = true))) {}
     }
 }
 
