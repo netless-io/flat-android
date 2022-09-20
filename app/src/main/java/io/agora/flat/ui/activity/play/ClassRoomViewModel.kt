@@ -12,9 +12,8 @@ import io.agora.flat.common.board.DeviceState
 import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.common.rtm.*
 import io.agora.flat.data.AppEnv
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.model.*
-import io.agora.flat.data.repository.CloudStorageRepository
-import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.Logger
@@ -41,8 +40,6 @@ class ClassRoomViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val roomRepository: RoomRepository,
     private val userRepository: UserRepository,
-    private val cloudStorageRepository: CloudStorageRepository,
-    private val roomConfigRepository: RoomConfigRepository,
     private val userManager: UserManager,
     private val recordManager: RecordManager,
     private val messageManager: ChatMessageManager,
@@ -55,6 +52,7 @@ class ClassRoomViewModel @Inject constructor(
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
     private val appEnv: AppEnv,
+    private val appKVCenter: AppKVCenter,
     private val logger: Logger,
 ) : ViewModel() {
     private var _state = MutableStateFlow<ClassRoomState?>(null)
@@ -72,9 +70,6 @@ class ClassRoomViewModel @Inject constructor(
 
     val messageUsers = userManager.observeUsers()
 
-    // private var _cloudStorageFiles = MutableStateFlow<List<CloudFile>>(mutableListOf())
-    // val cloudStorageFiles = _cloudStorageFiles.asStateFlow()
-
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
 
@@ -87,6 +82,7 @@ class ClassRoomViewModel @Inject constructor(
     private val quickStart: Boolean = savedStateHandle[Constants.IntentKey.ROOM_QUICK_START] ?: false
     private val currentUserUUID = userRepository.getUserUUID()
     private val currentUserName = userRepository.getUsername()
+    private val preferDeviceState = appKVCenter.getDeviceStatePreference()
     private var syncedStoreReady = false
     private var onStageLimit = RtcApi.MAX_CAPACITY
 
@@ -125,8 +121,7 @@ class ClassRoomViewModel @Inject constructor(
         initRoomState(deferredOne.await(), deferredTwo.await())
     }
 
-    private suspend fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
-        val config = roomConfigRepository.getRoomConfig(roomUUID) ?: RoomConfig(roomUUID)
+    private fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
         val isOwner = roomInfo.ownerUUID == currentUserUUID
 
         val initState = ClassRoomState(
@@ -146,8 +141,8 @@ class ClassRoomViewModel @Inject constructor(
 
             isSpeak = isOwner,
             isRaiseHand = false,
-            videoOpen = isOwner && config.enableVideo,
-            audioOpen = isOwner && config.enableAudio,
+            videoOpen = isOwner && preferDeviceState.camera,
+            audioOpen = isOwner && preferDeviceState.mic,
 
             boardUUID = joinRoomInfo.whiteboardRoomUUID,
             boardToken = joinRoomInfo.whiteboardRoomToken,
@@ -281,18 +276,32 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userManager.observeSelf().filterNotNull().collect {
                 logger.d("[USERS] current user state changed $it")
-                _state.value = _state.value?.copy(
-                    isSpeak = it.isSpeak,
-                    isRaiseHand = it.isRaiseHand,
-                    videoOpen = it.videoOpen,
-                    audioOpen = it.audioOpen,
-                )
-            }
-        }
-
-        viewModelScope.launch {
-            userManager.observeSelf().filterNotNull().collect {
-                boardRoom.setWritable(it.allowDraw)
+                val state = _state.value ?: return@collect
+                try {
+                    if (state.isSpeak != it.isSpeak) {
+                        if (it.isSpeak) {
+                            boardRoom.setWritable(true)
+                            boardRoom.setAllowDraw(true)
+                            syncedClassState.updateDeviceState(
+                                userId = it.userUUID,
+                                camera = preferDeviceState.camera,
+                                mic = preferDeviceState.mic
+                            )
+                        } else {
+                            syncedClassState.deleteDeviceState(it.userUUID)
+                            boardRoom.setAllowDraw(false)
+                            boardRoom.setWritable(false)
+                        }
+                    }
+                    _state.value = state.copy(
+                        isSpeak = it.isSpeak,
+                        isRaiseHand = it.isRaiseHand,
+                        videoOpen = it.videoOpen,
+                        audioOpen = it.audioOpen,
+                    )
+                } catch (e: Exception) {
+                    logger.e(e, "[USERS] self change error")
+                }
             }
         }
 
@@ -300,12 +309,10 @@ class ClassRoomViewModel @Inject constructor(
             userManager.observeUsers().collect {
                 logger.d("[USERS] users changed $it")
                 val users = it.filter { user -> user.isOwner || user.isSpeak }.toMutableList()
-
                 val devicesMap = getUpdateDevices(videoUsers.value, users)
                 devicesMap.forEach { (rtcUID, state) ->
                     updateRtcStream(rtcUID, audioOpen = state.mic, videoOpen = state.camera)
                 }
-
                 _videoUsers.value = users
             }
         }
@@ -466,22 +473,12 @@ class ClassRoomViewModel @Inject constructor(
         clipboard.putText(text)
     }
 
-//    fun requestCloudStorageFiles() {
-//        viewModelScope.launch {
-//            val result = cloudStorageRepository.listFiles(1, path = "")
-//            if (result.isSuccess) {
-//                _cloudStorageFiles.value = result.getOrThrow().files.filter {
-//                    it.convertStep == FileConvertStep.Done || it.convertStep == FileConvertStep.None
-//                }
-//            }
-//        }
-//    }
-
     fun closeSpeak(uuid: String) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (state.isOwner) {
                 syncedClassState.updateOnStage(uuid, false)
+                syncedClassState.deleteDeviceState(uuid)
             }
             if (userManager.isUserSelf(uuid)) {
                 syncedClassState.updateOnStage(uuid, false)

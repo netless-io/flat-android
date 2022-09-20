@@ -3,12 +3,8 @@ package io.agora.flat.common.board
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.core.content.ContextCompat
-import com.herewhite.sdk.domain.ConvertedFiles
-import com.herewhite.sdk.domain.RoomPhase
-import com.herewhite.sdk.domain.WindowAppParam
-import com.herewhite.sdk.domain.WindowPrefersColorScheme
+import com.herewhite.sdk.domain.*
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
 import io.agora.board.fast.FastRoomListener
@@ -20,9 +16,11 @@ import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.common.FlatBoardException
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.util.dp
 import io.agora.flat.util.getAppVersion
@@ -30,17 +28,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
 class BoardRoom @Inject constructor(
     val userRepository: UserRepository,
     val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,
+    val logger: Logger
 ) : IBoardRoom {
-    companion object {
-        const val TAG = "BoardRoom"
-    }
-
     private lateinit var fastboard: Fastboard
     private lateinit var fastboardView: FastboardView
     private var fastRoom: FastRoom? = null
@@ -103,7 +101,7 @@ class BoardRoom @Inject constructor(
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
-                Log.d(TAG, "onPhaseChanged:${phase.name}")
+                logger.d("[BoardRoom] onPhaseChanged:${phase.name}")
                 when (phase) {
                     RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
                     RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
@@ -141,6 +139,8 @@ class BoardRoom @Inject constructor(
         setDarkMode(darkMode)
 
         fastRoom?.join()
+
+        fastRoom?.room?.roomState?.cameraState
     }
 
     private fun getCollectorStyle(): HashMap<String, String> {
@@ -171,12 +171,27 @@ class BoardRoom @Inject constructor(
         fastRoom = null
     }
 
-    override fun setWritable(writable: Boolean) {
-        if (fastRoom?.room?.writable != writable) {
-            fastRoom?.setWritable(writable)
+    override suspend fun setWritable(writable: Boolean): Boolean = suspendCoroutine {
+        if (fastRoom?.isWritable == writable) {
+            it.resume(writable)
         }
+        fastRoom?.room?.setWritable(writable, object : Promise<Boolean> {
+            override fun then(success: Boolean) {
+                logger.d("[BoardRoom] set writable result $success")
+                it.resume(success)
+            }
+
+            override fun catchEx(t: SDKError) {
+                logger.w("[BoardRoom] set writable error ${t.jsStack}")
+                it.resumeWithException(t)
+            }
+        }) ?: it.resumeWithException(FlatBoardException("[BoardRoom] room not ready"))
+    }
+
+    override fun setAllowDraw(allow: Boolean) {
+        fastRoom?.room?.disableDeviceInputs(!allow)
         fastboardView.post {
-            updateRoomController(writable)
+            updateRoomController(allow)
         }
     }
 

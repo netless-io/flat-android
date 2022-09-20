@@ -3,6 +3,7 @@ package io.agora.flat.ui.manager
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RoomUser
+import io.agora.flat.di.interfaces.RtmApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,6 +12,7 @@ import javax.inject.Inject
 @ActivityRetainedScoped
 class UserManager @Inject constructor(
     private val userQuery: UserQuery,
+    private val rtmApi: RtmApi
 ) {
     private var _users = MutableStateFlow<List<RoomUser>>(emptyList())
     val users: List<RoomUser>
@@ -179,12 +181,13 @@ class UserManager @Inject constructor(
     }
 
     fun updateDeviceState(devicesState: Map<String, DeviceState>) {
+        val updateUuids = this.devicesState.keys + devicesState.keys
         this.devicesState = devicesState
         val updateUsers = mutableListOf<RoomUser>()
-        devicesState.forEach { (uuid, state) ->
+        updateUuids.forEach { uuid ->
             val user = usersCache[uuid]?.copy(
-                audioOpen = state.mic,
-                videoOpen = state.camera
+                audioOpen = devicesState[uuid]?.mic ?: false,
+                videoOpen = devicesState[uuid]?.camera ?: false
             )
             if (user != null) {
                 updateUsers.add(user)
@@ -215,7 +218,6 @@ class UserManager @Inject constructor(
             }
             if (user != null) updateUsers.add(user)
         }
-
         updateAndNotifyUser(updateUsers)
     }
 

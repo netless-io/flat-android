@@ -28,3 +28,8 @@ data class FlatRtcException(
     val code: Int,
     override val message: String = "",
 ) : FlatException(message = message)
+
+data class FlatBoardException(
+    override val message: String = "",
+    val code: Int? = null,
+) : FlatException(message = message)

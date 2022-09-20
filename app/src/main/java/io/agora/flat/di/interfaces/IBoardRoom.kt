@@ -17,7 +17,9 @@ interface IBoardRoom {
 
     fun release()
 
-    fun setWritable(writable: Boolean)
+    suspend fun setWritable(writable: Boolean): Boolean
+
+    fun setAllowDraw(allow: Boolean)
 
     fun hideAllOverlay()
 

@@ -28,6 +28,9 @@ object FlatErrorHandler {
                 is FlatRtmException -> {
                     defaultValue
                 }
+                else -> {
+                    defaultValue
+                }
             }
         } else {
             return defaultValue
