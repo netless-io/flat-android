@@ -4,12 +4,8 @@ import android.Manifest
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,15 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -162,7 +155,7 @@ private fun CreateRoomContentTablet(
                     FlatDivider()
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Spacer(Modifier.height(12.dp))
-                        ThemeTextField(
+                        RoomThemeTextField(
                             value = theme,
                             onValueChange = { theme = it },
                             modifier = Modifier
@@ -256,7 +249,7 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(12.dp))
-            ThemeTextField(
+            RoomThemeTextField(
                 value = theme,
                 onValueChange = { theme = it },
                 modifier = Modifier
@@ -306,60 +299,6 @@ private fun CreateRoomContent(viewState: CreateRoomUiState, actioner: (CreateRoo
                     focusManager.clearFocus()
                 }
                 if (viewState.loading) CircularProgressIndicator(Modifier.size(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-internal fun ThemeTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    placeholderValue: String,
-) {
-    var isCaptured by remember { mutableStateOf(false) }
-    val dividerColor = if (isCaptured) Blue_6 else Gray_1
-
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier.onFocusChanged {
-            isCaptured = it.isCaptured
-        },
-        textStyle = MaterialTheme.typography.h6.copy(
-            color = FlatTheme.colors.textPrimary,
-            textAlign = TextAlign.Center,
-        ),
-        cursorBrush = SolidColor(MaterialTheme.colors.primary),
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true,
-    ) { innerTextField ->
-        Box(Modifier, contentAlignment = Alignment.Center) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 48.dp), contentAlignment = Alignment.Center
-            ) {
-                innerTextField()
-            }
-            Spacer(
-                Modifier
-                    .fillMaxWidth(1f)
-                    .height(1.dp)
-                    .background(dividerColor)
-                    .align(Alignment.BottomCenter)
-            )
-            if (value.isEmpty()) {
-                FlatTextBodyOneSecondary(placeholderValue)
-            }
-            if (value.isNotBlank()) {
-                IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Icon(painterResource(id = R.drawable.ic_text_filed_clear), "", tint = FlatTheme.colors.textPrimary)
-                }
             }
         }
     }

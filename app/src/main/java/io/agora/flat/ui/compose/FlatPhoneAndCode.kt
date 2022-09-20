@@ -55,7 +55,7 @@ fun PhoneAndCodeArea(
             FlatTextBodyOne(text = "+86")
             Image(painterResource(R.drawable.ic_login_arrow_down), contentDescription = "")
             Spacer(Modifier.width(8.dp))
-            FastBasicTextField(
+            BindPhoneTextField(
                 value = phone,
                 onValueChange = {
                     if (isValidPhone.not() && it.isValidPhone()) {
@@ -90,11 +90,11 @@ fun PhoneAndCodeArea(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
             Spacer(Modifier.width(8.dp))
-            FastBasicTextField(
+            BindPhoneTextField(
                 value = code,
                 onValueChange = {
                     if (it.length > 6) {
-                        return@FastBasicTextField
+                        return@BindPhoneTextField
                     }
                     if (isValidCode.not() && it.isValidSmsCode()) {
                         isValidCode = true

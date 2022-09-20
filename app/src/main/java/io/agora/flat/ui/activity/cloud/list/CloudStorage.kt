@@ -129,48 +129,13 @@ internal fun CloudScreen(
     }
     if (showNewFolder) {
         NewFolderDialog(
-            value = stringResource(R.string.cloud_new_folder_title),
+            value = "",
             onCancel = { showNewFolder = false },
             onConfirm = {
                 showNewFolder = false
                 onNewFolder(it)
             }
         )
-    }
-}
-
-@Composable
-private fun NewFolderDialog(value: String, onCancel: () -> Unit, onConfirm: (String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf(value) }
-
-    Dialog(onCancel) {
-        Surface(shape = Shapes.large) {
-            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                FlatTextTitle(stringResource(R.string.cloud_new_folder_title))
-                Spacer(Modifier.height(24.dp))
-                FlatPrimaryTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    placeholderValue = stringResource(R.string.cloud_new_folder_hint)
-                )
-                Spacer(Modifier.height(24.dp))
-                Row {
-                    FlatSecondaryTextButton(
-                        stringResource(R.string.cancel),
-                        Modifier
-                            .weight(1f)
-                            .height(40.dp)
-                    ) { onCancel() }
-                    Spacer(Modifier.width(12.dp))
-                    FlatPrimaryTextButton(
-                        stringResource(R.string.confirm),
-                        Modifier
-                            .weight(1f)
-                            .height(40.dp)
-                    ) { onConfirm(name) }
-                }
-            }
-        }
     }
 }
 
@@ -325,7 +290,8 @@ private fun UpdatePickLayout(
                 ) { onCoverClick() }) {
         }
         Box(
-            MaxWidth
+            Modifier
+                .fillMaxWidth()
                 .height(160.dp * aniValue)
                 .background(MaterialTheme.colors.surface)
         ) {
@@ -360,16 +326,16 @@ internal fun BoxScope.UploadPickRow(onUploadFile: (uri: Uri, info: ContentInfo) 
         onUploadFile(it.uri, it)
     }
     Row(Modifier.align(Alignment.Center)) {
-        UploadPickItem(R.drawable.ic_cloud_file_image, R.string.cloud_storage_upload_image) {
+        UploadPickItem(R.drawable.ic_upload_file_image, R.string.cloud_storage_upload_image) {
             launcher("image/*")
         }
-        UploadPickItem(R.drawable.ic_cloud_file_video, R.string.cloud_storage_upload_video) {
+        UploadPickItem(R.drawable.ic_upload_file_video, R.string.cloud_storage_upload_video) {
             launcher("video/*")
         }
-        UploadPickItem(R.drawable.ic_cloud_file_audio, R.string.cloud_storage_upload_music) {
+        UploadPickItem(R.drawable.ic_upload_file_audio, R.string.cloud_storage_upload_music) {
             launcher("audio/*")
         }
-        UploadPickItem(R.drawable.ic_cloud_file_word, R.string.cloud_storage_upload_doc) {
+        UploadPickItem(R.drawable.ic_upload_file_doc, R.string.cloud_storage_upload_doc) {
             launcher("*/*")
         }
     }
@@ -436,15 +402,9 @@ internal fun CloudFileList(
                             else -> onPreviewRestrict()
                         }
                     },
-                    onPreview = {
-                        onItemPreview(item.file)
-                    },
-                    onRename = {
-                        renaming = item.file
-                    },
-                    onDelete = {
-                        onItemDelete(item.file)
-                    }
+                    onPreview = { onItemPreview(item.file) },
+                    onRename = { renaming = item.file },
+                    onDelete = { onItemDelete(item.file) }
                 )
             }
 
@@ -507,11 +467,14 @@ private fun FileRenameDialog(value: String, onCancel: () -> Unit, onConfirm: (St
     Dialog(onCancel) {
         Surface(shape = Shapes.large) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
-                FlatTextTitle(stringResource(R.string.rename))
+                FlatTextTitle(stringResource(R.string.rename), modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(24.dp))
-                FlatPrimaryTextField(
+                CloudDialogTextField(
                     value = name,
                     onValueChange = { name = it },
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(64.dp),
                     placeholderValue = stringResource(R.string.cloud_rename_hint)
                 )
                 Spacer(Modifier.height(24.dp))
@@ -526,6 +489,51 @@ private fun FileRenameDialog(value: String, onCancel: () -> Unit, onConfirm: (St
                     FlatPrimaryTextButton(
                         stringResource(R.string.confirm),
                         Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) { onConfirm(name) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewFolderDialog(
+    value: String,
+    onCancel: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by rememberSaveable { mutableStateOf(value) }
+
+    Dialog(onCancel) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                FlatTextTitle(
+                    stringResource(R.string.cloud_new_folder_title),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(24.dp))
+                CloudDialogTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(64.dp),
+                    placeholderValue = stringResource(R.string.cloud_new_folder_hint)
+                )
+                Spacer(Modifier.height(24.dp))
+                Row {
+                    FlatSecondaryTextButton(
+                        text = stringResource(R.string.cancel),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                    ) { onCancel() }
+                    Spacer(Modifier.width(12.dp))
+                    FlatPrimaryTextButton(
+                        text = stringResource(R.string.confirm),
+                        modifier = Modifier
                             .weight(1f)
                             .height(40.dp)
                     ) { onConfirm(name) }

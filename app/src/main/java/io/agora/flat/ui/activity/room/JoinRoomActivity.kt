@@ -132,7 +132,7 @@ private fun JoinRoomContentTablet(viewState: JoinRoomUiState, actioner: (JoinRoo
                     }
                     FlatDivider()
                     Spacer(Modifier.height(12.dp))
-                    ThemeTextField(
+                    RoomThemeTextField(
                         value = uuid,
                         onValueChange = { uuid = it },
                         modifier = Modifier
@@ -205,7 +205,7 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(48.dp))
-            ThemeTextField(
+            RoomThemeTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
                 modifier = Modifier

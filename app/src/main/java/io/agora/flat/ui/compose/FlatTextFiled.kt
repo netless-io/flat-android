@@ -1,24 +1,25 @@
 package io.agora.flat.ui.compose
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.agora.flat.R
 import io.agora.flat.ui.theme.*
 
 @Composable
@@ -61,7 +62,7 @@ fun FlatPrimaryTextField(
 }
 
 @Composable
-fun FastBasicTextField(
+fun BindPhoneTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -105,6 +106,118 @@ private fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
 }
 
 @Composable
+fun RoomThemeTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    placeholderValue: String,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val dividerColor = if (isFocused) MaterialTheme.colors.primary else FlatTheme.colors.divider
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier.onFocusChanged {
+            isFocused = it.isFocused
+        },
+        textStyle = MaterialTheme.typography.h6.copy(
+            color = FlatTheme.colors.textPrimary,
+            textAlign = TextAlign.Center,
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+    ) { innerTextField ->
+        Box(Modifier, contentAlignment = Alignment.Center) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 48.dp), contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
+            }
+            Spacer(
+                Modifier
+                    .fillMaxWidth(1f)
+                    .height(1.dp)
+                    .background(dividerColor)
+                    .align(Alignment.BottomCenter)
+            )
+            if (value.isEmpty()) {
+                FlatTextBodyOneSecondary(placeholderValue)
+            }
+            if (value.isNotBlank()) {
+                IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
+                    Icon(painterResource(id = R.drawable.ic_text_filed_clear), "", tint = FlatTheme.colors.textPrimary)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CloudDialogTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    placeholderValue: String,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val dividerColor = if (isFocused) MaterialTheme.colors.primary else FlatTheme.colors.divider
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier.onFocusChanged {
+            isFocused = it.isFocused
+        },
+        textStyle = MaterialTheme.typography.h6.copy(
+            color = FlatTheme.colors.textPrimary,
+            textAlign = TextAlign.Start,
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+    ) { innerTextField ->
+        Box(Modifier, contentAlignment = Alignment.CenterStart) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(end = 48.dp), contentAlignment = Alignment.CenterStart
+            ) {
+                innerTextField()
+            }
+            Spacer(
+                Modifier
+                    .fillMaxWidth(1f)
+                    .height(1.dp)
+                    .background(dividerColor)
+                    .align(Alignment.BottomCenter)
+            )
+            if (value.isEmpty()) {
+                FlatTextBodyOneSecondary(placeholderValue)
+            }
+            if (value.isNotBlank()) {
+                IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
+                    Icon(
+                        painterResource(id = io.agora.flat.R.drawable.ic_text_filed_clear),
+                        "",
+                        tint = FlatTheme.colors.textPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 @Preview(uiMode = 0x30)
 @Preview(uiMode = 0x20)
 private fun FlatTextButtonPreview() {
@@ -115,7 +228,7 @@ private fun FlatTextButtonPreview() {
             FlatNormalVerticalSpacer()
             FlatPrimaryTextField("TextButton", enabled = false, onValueChange = {})
             FlatNormalVerticalSpacer()
-            FastBasicTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
+            BindPhoneTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
             FlatNormalVerticalSpacer()
         }
     }
