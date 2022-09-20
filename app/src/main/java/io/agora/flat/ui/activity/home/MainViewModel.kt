@@ -49,7 +49,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             if (isLoggedIn()) {
                 if (userRepository.loginCheck() is Success) {
-                    _state.value = _state.value.copy(loginState = LoginState.Login)
+                    _state.value = _state.value.copy(
+                        loginState = LoginState.Login,
+                        userAvatar = userRepository.getUserInfo()?.avatar
+                    )
                 } else {
                     _state.value = _state.value.copy(loginState = LoginState.Error)
                 }
@@ -124,6 +127,7 @@ class MainViewModel @Inject constructor(
 data class MainUiState(
     val protocolAgreed: Boolean,
     val loginState: LoginState = LoginState.Init,
+    val userAvatar: String? = null,
     val versionCheckResult: VersionCheckResult = VersionCheckResult.Empty,
     val updating: Boolean = false,
     val message: UiMessage? = null,

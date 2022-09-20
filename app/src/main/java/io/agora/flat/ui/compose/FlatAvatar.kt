@@ -12,22 +12,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import io.agora.flat.ui.theme.FlatColorDivider
-import io.agora.flat.ui.theme.FlatColorDividerDark
-import io.agora.flat.ui.theme.isDarkTheme
+import io.agora.flat.R
+import io.agora.flat.ui.theme.FlatTheme
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun FlatAvatar(avatar: String?, size: Dp) {
     Image(
-        painter = rememberImagePainter(avatar),
+        painter = rememberImagePainter(avatar) {
+            placeholder(R.drawable.ic_user_profile_head)
+        },
         contentDescription = null,
         modifier = Modifier
             .size(size, size)
             .clip(shape = RoundedCornerShape(size / 2))
             .border(
                 1.dp,
-                if (isDarkTheme()) FlatColorDividerDark else FlatColorDivider,
+                FlatTheme.colors.divider,
                 RoundedCornerShape(50)
             ),
         contentScale = ContentScale.Crop

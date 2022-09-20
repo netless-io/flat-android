@@ -42,7 +42,6 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.FillMaxSize
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.theme.isTabletMode
@@ -176,7 +175,7 @@ fun MainScreen(viewState: MainUiState) {
 
         if (viewState.loginState == LoginState.Login) {
             if (isTabletMode()) {
-                MainTablet(navController, selectTab)
+                MainTablet(navController, selectTab, viewState.userAvatar)
             } else {
                 Main(navController, selectTab)
             }
@@ -250,7 +249,12 @@ internal fun Main(navController: NavHostController, mainTab: MainTab) {
 }
 
 @Composable
-internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
+internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avatar: String?) {
+    val onOpenSetting = {
+        navController.navigate(LeafScreen.Settings.createRoute(Screen.HomeExt)) {
+            popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))
+        }
+    }
     Row {
         Box(Modifier.width(56.dp)) {
             MainPadRail(selectedTab = mainTab) { selectedTab ->
@@ -266,6 +270,11 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
+                }
+            }
+            if (mainTab == MainTab.Home) {
+                IconButton(onClick = onOpenSetting, Modifier.padding(vertical = 16.dp).align(Alignment.TopCenter)) {
+                    FlatAvatar(avatar, size = 32.dp)
                 }
             }
         }
@@ -355,7 +364,7 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
     }
 
     Column(
-        FillMaxSize.background(MaterialTheme.colors.background),
+        Modifier.fillMaxSize().background(MaterialTheme.colors.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

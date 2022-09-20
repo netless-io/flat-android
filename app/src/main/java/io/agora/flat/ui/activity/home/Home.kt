@@ -162,8 +162,10 @@ fun FlatHomeTopBar(
                 modifier = Modifier.size(24.dp, 24.dp)
             )
         }
-        IconButton(onClick = onOpenSetting) {
-            FlatAvatar(userAvatar, size = 24.dp)
+        if (!isTabletMode()) {
+            IconButton(onClick = onOpenSetting) {
+                FlatAvatar(userAvatar, size = 24.dp)
+            }
         }
     }
 }
