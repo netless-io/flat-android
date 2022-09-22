@@ -225,6 +225,13 @@ dependencies {
         implementation 'com.github.netless-io:fastboard-android:7222ef10a8'
     }
 
+    // for local syncplayer debug
+    if (findProject(":syncplayer") != null) {
+        implementation project(':syncplayer')
+    } else {
+        implementation "com.github.netless-io:sync-player-android:1.0.0"
+    }
+
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
 

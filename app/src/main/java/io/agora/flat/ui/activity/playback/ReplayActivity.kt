@@ -18,10 +18,8 @@ class ReplayActivity : BaseActivity() {
         setContentView(binding.root)
         initSystemUI()
 
-        componentSet.add(ReplayWhiteboardComponent(this, binding.whiteboardContainer, binding.videoListContainer))
+        componentSet.add(ReplayPlayerComponent(this, binding.whiteboardContainer, binding.videoListContainer))
         // componentSet.add(ReplayToolComponent(this, binding.toolsContainer))
-        // componentSet.add(ReplayVideoComponent(this, binding.videoListContainer))
-
         componentSet.forEach { lifecycle.addObserver(it) }
     }
 

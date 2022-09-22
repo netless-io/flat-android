@@ -14,4 +14,10 @@ if (localPropertiesFile.exists()) {
         include ':fastboard'
         project(':fastboard').projectDir = new File("$fastboardPath/library")
     }
+
+    def syncplayerPath = properties.getProperty("agora.syncplayer")
+    if (syncplayerPath != null) {
+        include ':syncplayer'
+        project(':syncplayer').projectDir = new File("$syncplayerPath/library")
+    }
 }

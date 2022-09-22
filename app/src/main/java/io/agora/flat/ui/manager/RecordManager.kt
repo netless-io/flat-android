@@ -2,7 +2,10 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.*
+import io.agora.flat.data.model.BackgroundConfig
+import io.agora.flat.data.model.LayoutConfig
+import io.agora.flat.data.model.RoomUser
+import io.agora.flat.data.model.UpdateLayoutClientRequest
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.util.Ticker
 import kotlinx.coroutines.CoroutineScope
@@ -48,26 +51,13 @@ class RecordManager @Inject constructor(
     suspend fun startRecord() {
         val acquireResp = cloudRecordRepository.acquireRecord(roomUUID)
         if (acquireResp is Success) {
-            val transcodingConfig = TranscodingConfig(
-                width,
-                height,
-                15,
-                500,
-                mixedVideoLayout = 3,
-                layoutConfig = getLayoutConfig(),
-                backgroundConfig = getBackgroundConfig()
-            )
             val startResp = cloudRecordRepository.startRecordWithAgora(
                 roomUUID,
                 acquireResp.data.resourceId,
-                transcodingConfig
             )
             if (startResp is Success) {
-                recordState.value = RecordState(
-                    resourceId = startResp.data.resourceId,
-                    sid = startResp.data.sid
-                )
-                startTimer()
+                recordState.value = RecordState(resourceId = startResp.data.resourceId, sid = startResp.data.sid)
+                // startTimer()
             }
         }
     }
@@ -82,7 +72,6 @@ class RecordManager @Inject constructor(
             if (resp.isSuccess) {
                 recordState.value = null
             }
-            stopTimer()
         }
     }
 
