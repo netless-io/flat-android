@@ -10,7 +10,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
-import io.agora.flat.ui.activity.cloud.list.CloudUploadPick
 import io.agora.flat.ui.activity.cloud.uploading.Uploading
 import io.agora.flat.ui.activity.history.HistoryScreen
 import io.agora.flat.ui.activity.home.ExtInitPage
@@ -42,7 +41,6 @@ sealed class LeafScreen(private val route: String) {
     object CloudStorage : LeafScreen("cloud")
     object HomeExtInit : LeafScreen("home_ext_init")
     object CloudExtInit : LeafScreen("cloud_ext_init")
-    object CloudUploadPick : LeafScreen("upload_pick")
     object CloudUploading : LeafScreen("uploading")
     object RoomJoin : LeafScreen("room_join")
     object RoomCreate : LeafScreen("room_create")
@@ -136,11 +134,6 @@ fun NavGraphBuilder.addCloudExtGraph(navController: NavHostController) {
     ) {
         composable(LeafScreen.CloudExtInit.createRoute(Screen.CloudExt)) {
             ExtInitPage()
-        }
-        composable(LeafScreen.CloudUploadPick.createRoute(Screen.CloudExt)) {
-            CloudUploadPick(
-                onPickClose = navController::popBackStack,
-            )
         }
         composable(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {
             Uploading(

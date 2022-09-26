@@ -329,11 +329,6 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avat
                             launchSingleTop = true
                         }
                     },
-                    onOpenItemPick = {
-                        navController.navigate(LeafScreen.CloudUploadPick.createRoute(Screen.CloudExt)) {
-                            launchSingleTop = true
-                        }
-                    }
                 )
             }
         }

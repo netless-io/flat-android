@@ -31,13 +31,15 @@ import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.*
 import io.agora.flat.ui.activity.home.EmptyView
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatColorWhite
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.util.*
 
 @Composable
 fun CloudScreen(
     onOpenUploading: () -> Unit,
-    onOpenItemPick: (() -> Unit)? = null,
     viewModel: CloudStorageViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -52,7 +54,6 @@ fun CloudScreen(
         onDeleteClick = viewModel::deleteChecked,
         onReload = viewModel::reloadFileList,
         onLoadMore = viewModel::loadMoreFileList,
-        onOpenItemPick = { onOpenItemPick?.invoke() },
         onUploadFile = viewModel::uploadFile,
         onItemChecked = viewModel::checkItem,
         onItemClick = { file ->
@@ -78,7 +79,6 @@ internal fun CloudScreen(
     onDeleteClick: () -> Unit,
     onReload: () -> Unit,
     onLoadMore: () -> Unit,
-    onOpenItemPick: () -> Unit,
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
     onItemChecked: (index: Int, checked: Boolean) -> Unit,
     onItemClick: (file: CloudFile) -> Unit,
@@ -120,22 +120,18 @@ internal fun CloudScreen(
                     onLoadMore = onLoadMore,
                 )
                 if (isTabletMode()) {
-                    AddFileLayoutPad(onOpenItemPick)
+                    FileAddLayoutPad(onUploadFile)
                 } else {
-                    AddFileLayout(onUploadFile)
+                    FileAddLayout(onUploadFile)
                 }
             }
         }
     }
     if (showNewFolder) {
-        NewFolderDialog(
-            value = "",
-            onCancel = { showNewFolder = false },
-            onConfirm = {
-                showNewFolder = false
-                onNewFolder(it)
-            }
-        )
+        NewFolderDialog(value = "", onCancel = { showNewFolder = false }, onConfirm = {
+            showNewFolder = false
+            onNewFolder(it)
+        })
     }
 }
 
@@ -160,8 +156,8 @@ private fun CloudTopAppBar(
                 onDoneClick,
                 onOpenUploading,
                 onEditClick,
-                onNewFolder
-            )
+                onNewFolder,
+            ),
         )
     } else {
         val title = viewState.dirPath.split('/').findLast { it != "" } ?: ""
@@ -175,8 +171,8 @@ private fun CloudTopAppBar(
                 onDoneClick,
                 onOpenUploading,
                 onEditClick,
-                onNewFolder
-            )
+                onNewFolder,
+            ),
         )
     }
     BackHandler(viewState.dirPath != CLOUD_ROOT_DIR, onBack = onFolderBack)
@@ -233,21 +229,20 @@ private fun UploadingIcon(showBadge: Boolean, size: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun BoxScope.AddFileLayout(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit) {
+private fun BoxScope.FileAddLayout(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit) {
     var showPick by remember { mutableStateOf(false) }
 
     FloatingActionButton(
-        onClick = { showPick = true },
-        modifier = Modifier
+        onClick = { showPick = true }, modifier = Modifier
             .align(Alignment.BottomEnd)
             .padding(16.dp)
     ) {
-        Icon(painterResource(R.drawable.ic_cloud_list_add), contentDescription = null, tint = FlatColorWhite)
+        Icon(painterResource(R.drawable.ic_cloud_list_add), null, tint = FlatColorWhite)
     }
 
     val aniValue: Float by animateFloatAsState(if (showPick) 1f else 0f)
     if (aniValue > 0) {
-        UpdatePickLayout(
+        UploadPickLayout(
             aniValue,
             onUploadFile = { uri, info ->
                 onUploadFile(uri, info)
@@ -260,19 +255,30 @@ private fun BoxScope.AddFileLayout(onUploadFile: (uri: Uri, info: ContentInfo) -
 }
 
 @Composable
-private fun BoxScope.AddFileLayoutPad(onOpenItemPick: () -> Unit) {
+private fun BoxScope.FileAddLayoutPad(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit) {
+    var showPick by remember { mutableStateOf(false) }
+
     FloatingActionButton(
-        onClick = onOpenItemPick,
-        modifier = Modifier
+        onClick = { showPick = true }, modifier = Modifier
             .align(Alignment.BottomEnd)
             .padding(16.dp)
     ) {
-        Icon(painterResource(R.drawable.ic_cloud_list_add), contentDescription = null, tint = FlatColorWhite)
+        Icon(painterResource(R.drawable.ic_cloud_list_add), null, tint = FlatColorWhite)
+    }
+
+    if (showPick) {
+        UploadPickDialog(
+            onUploadFile = { uri, info ->
+                showPick = false
+                onUploadFile(uri, info)
+            },
+            onCancel = { showPick = false },
+        )
     }
 }
 
 @Composable
-private fun UpdatePickLayout(
+private fun UploadPickLayout(
     aniValue: Float,
     onUploadFile: (uri: Uri, info: ContentInfo) -> Unit,
     onCoverClick: () -> Unit,
@@ -285,10 +291,8 @@ private fun UpdatePickLayout(
                 .graphicsLayer(alpha = aniValue)
                 .background(Color(0x52000000))
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onCoverClick() }) {
-        }
+                    interactionSource = remember { MutableInteractionSource() }, indication = null
+                ) { onCoverClick() }) {}
         Box(
             Modifier
                 .fillMaxWidth()
@@ -300,9 +304,7 @@ private fun UpdatePickLayout(
                     .align(Alignment.TopCenter)
                     .clickable { onCoverClick() }) {
                 Image(
-                    painterResource(R.drawable.ic_record_arrow_down),
-                    "",
-                    Modifier.padding(4.dp)
+                    painterResource(R.drawable.ic_record_arrow_down), "", Modifier.padding(4.dp)
                 )
             }
             UploadPickRow(onUploadFile)
@@ -311,11 +313,19 @@ private fun UpdatePickLayout(
 }
 
 @Composable
-fun CloudUploadPick(onPickClose: () -> Unit, viewModel: CloudStorageViewModel = hiltViewModel()) {
-    Column {
-        CloseTopAppBar(stringResource(id = R.string.title_cloud_pick), onClose = onPickClose)
-        Box(MaxWidthSpread) {
-            UploadPickRow(viewModel::uploadFile)
+private fun UploadPickDialog(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit, onCancel: () -> Unit) {
+    Dialog(onCancel) {
+        Surface(shape = Shapes.large) {
+            Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                FlatTextTitle(
+                    stringResource(R.string.title_cloud_pick), modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(24.dp))
+                Box {
+                    UploadPickRow(onUploadFile)
+                }
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -391,8 +401,8 @@ internal fun CloudFileList(
             ) { index ->
                 val item = files[index]
                 CloudFileItem(
-                    item,
-                    editMode,
+                    item = item,
+                    editMode = editMode,
                     onCheckedChange = { checked -> onItemChecked(index, checked) },
                     onClick = {
                         when (item.file.convertStep) {
@@ -404,7 +414,7 @@ internal fun CloudFileList(
                     },
                     onPreview = { onItemPreview(item.file) },
                     onRename = { renaming = item.file },
-                    onDelete = { onItemDelete(item.file) }
+                    onDelete = { onItemDelete(item.file) },
                 )
             }
 
@@ -414,8 +424,7 @@ internal fun CloudFileList(
         }
     }
     if (renaming != null) {
-        FileRenameDialog(
-            value = renaming!!.fileName.nameWithoutExtension(),
+        FileRenameDialog(value = renaming!!.fileName.nameWithoutExtension(),
             onCancel = { renaming = null },
             onConfirm = {
                 val fileName = when (renaming!!.resourceType) {
@@ -424,8 +433,7 @@ internal fun CloudFileList(
                 }
                 onItemRename(renaming!!.fileUUID, fileName)
                 renaming = null
-            }
-        )
+            })
     }
 }
 
@@ -437,8 +445,7 @@ private fun CloudListFooter(loadState: LoadState, onLoadMore: () -> Unit) {
             .clickable {
                 if (loadState is LoadState.Error) onLoadMore()
             }
-            .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter
-    ) {
+            .padding(top = 12.dp, bottom = 20.dp), Alignment.TopCenter) {
         when (loadState) {
             LoadState.Loading -> {
                 FlatTextCaption(stringResource(R.string.loaded_loading))
@@ -499,11 +506,7 @@ private fun FileRenameDialog(value: String, onCancel: () -> Unit, onConfirm: (St
 }
 
 @Composable
-private fun NewFolderDialog(
-    value: String,
-    onCancel: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
+private fun NewFolderDialog(value: String, onCancel: () -> Unit, onConfirm: (String) -> Unit) {
     var name by rememberSaveable { mutableStateOf(value) }
 
     Dialog(onCancel) {
@@ -532,8 +535,7 @@ private fun NewFolderDialog(
                     ) { onCancel() }
                     Spacer(Modifier.width(12.dp))
                     FlatPrimaryTextButton(
-                        text = stringResource(R.string.confirm),
-                        modifier = Modifier
+                        text = stringResource(R.string.confirm), modifier = Modifier
                             .weight(1f)
                             .height(40.dp)
                     ) { onConfirm(name) }
@@ -576,10 +578,7 @@ private fun CloudFileItem(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 FlatTextBodyOne(
-                    file.fileName,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = FlatTheme.colors.textPrimary
+                    file.fileName, maxLines = 1, overflow = TextOverflow.Ellipsis, color = FlatTheme.colors.textPrimary
                 )
                 Spacer(Modifier.height(4.dp))
                 Row {
@@ -642,9 +641,7 @@ fun ConvertingImage(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition()
 
     val angle: Float by infiniteTransition.animateFloat(
-        initialValue = 0F,
-        targetValue = 360F,
-        animationSpec = infiniteRepeatable(
+        initialValue = 0F, targetValue = 360F, animationSpec = infiniteRepeatable(
             animation = tween(1000, easing = LinearEasing),
         )
     )
@@ -692,7 +689,6 @@ private fun CloudStoragePreview() {
             onDeleteClick = { },
             onReload = { },
             onLoadMore = { },
-            onOpenItemPick = { },
             onUploadFile = { _, _ -> },
             onItemChecked = { _, _ -> },
             onItemClick = {},
@@ -709,5 +705,5 @@ private fun CloudStoragePreview() {
 @Composable
 @Preview
 private fun UpdatePickDialogPreview() {
-    UpdatePickLayout(1f, { _, _ -> }) {}
+    UploadPickLayout(1f, { _, _ -> }) {}
 }
