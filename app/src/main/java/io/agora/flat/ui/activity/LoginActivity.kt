@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +42,7 @@ import io.agora.flat.ui.activity.phone.PhoneBindDialog
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.MaxHeightSpread
+import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
 import io.agora.flat.util.*
@@ -174,9 +174,11 @@ internal fun LoginMain(actioner: (LoginUiAction) -> Unit) {
 
 @Composable
 internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
+    val img = if (isDarkTheme()) R.drawable.img_pad_login_dark else R.drawable.img_pad_login_light
+
     Row {
         Image(
-            painterResource(R.drawable.img_pad_login),
+            painterResource(img),
             contentDescription = null,
             MaxHeightSpread,
             contentScale = ContentScale.Crop,
@@ -292,7 +294,6 @@ private fun LoginButtonsArea(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoginSlogan() {
     val context = LocalContext.current
