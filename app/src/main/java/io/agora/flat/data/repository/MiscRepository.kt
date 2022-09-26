@@ -27,12 +27,6 @@ class MiscRepository @Inject constructor(
         }
     }
 
-    // suspend fun logError(message: String) {
-    //     return withContext(Dispatchers.IO) {
-    //         miscService.logError(LogErrorReq(message)).toResult()
-    //     }
-    // }
-
     suspend fun censorRtm(text: String): Boolean {
         return withContext(Dispatchers.IO) {
             val result = miscService.censorRtm(RtmCensorReq(text)).toResult()

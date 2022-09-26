@@ -2,7 +2,62 @@ package io.agora.flat.common
 
 class FlatErrorCode {
 
-    object Web
+    object Web {
+        /**
+         * Flat Web 服务
+         * https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
+         */
+        const val ParamsCheckFailed = 100000 // parameter verification failed
+        const val ServerFail = 100001 // server fail (retry)
+        const val CurrentProcessFailed = 100002 // current processing failed
+        const val NotPermission = 100003 // insufficient permissions
+        const val NeedLoginAgain = 100004 // user need login in again
+        const val UnsupportedPlatform = 100005// Unsupported login platform
+        const val JWTSignFailed = 100006// jwt sign failed
+        const val ExhaustiveAttack = 100007// exhaustive attack
+        const val RequestSignatureIncorrect = 100008// exhaustive attack
+        const val NonCompliant = 100009 // non compliant
+        const val UnsupportedOperation = 100010 // operation not supported
+
+        const val RoomNotFound = 200000 // room not found
+        const val RoomIsEnded = 200001 // room has been ended
+        const val RoomIsRunning = 200002// room status is running
+        const val RoomNotIsRunning = 200003 // room not is running
+        const val RoomNotIsEnded = 200004 // room not is stopped
+        const val RoomNotIsIdle = 200005 // room not is idle
+
+        const val PeriodicNotFound = 300000 // room not found
+        const val PeriodicIsEnded = 300001 // room has been ended
+        const val PeriodicSubRoomHasRunning = 300002 // periodic sub room has running
+
+        const val UserNotFound = 400000 // user not found
+        const val UserRoomListNotEmpty = 400001 // user room list is not empty.
+        const val UserAlreadyBinding = 400002 // user already binding.
+
+        const val RecordNotFound = 500000 // record info not found
+
+        const val UploadConcurrentLimit = 700000
+        const val NotEnoughTotalUsage = 700001 // not enough total usage
+        const val FileSizeTooBig = 700002 // single file size too big
+        const val FileNotFound = 700003 // file info not found
+        const val FileExists = 700004 // file already exists
+        const val DirectoryNotExists = 700005 // directory not exists
+        const val DirectoryAlreadyExists = 700006 // directory already exists
+
+        const val FileIsConverted = 800000
+        const val FileConvertFailed = 800001// file convert failed
+        const val FileIsConverting = 800002 // file is converting
+        const val FileIsConvertWaiting = 800003 // file convert is in waiting status
+
+        // https://docs.github.com/en/developers/apps/troubleshooting-authorization-request-errors
+        const val LoginGithubSuspended = 900000
+        const val LoginGithubURLMismatch = 900001
+        const val LoginGithubAccessDenied = 900002
+
+        const val SMSVerificationCodeInvalid = 110000// verification code invalid
+        const val SMSAlreadyExist = 110001 // phone already exist by current user
+        const val SMSAlreadyBinding = 110002 // phone are binding by other users
+    }
 
     object RTM {
         /**
@@ -13,59 +68,15 @@ class FlatErrorCode {
         const val RTM_LOGOUT_ERROR_START = 0x12000
     }
 
-    object RTC
+    object RTC {
+
+    }
 
     companion object {
-        /**
-         * Flat Web 服务
-         * https://github.com/netless-io/flat-server/blob/main/src/ErrorCode.ts
-         */
-        const val Web_ParamsCheckFailed = 100000 // parameter verification failed
-        const val Web_ServerFail = 100001 // server fail (retry)
-        const val Web_CurrentProcessFailed = 100002 // current processing failed
-        const val Web_NotPermission = 100003 // insufficient permissions
-        const val Web_NeedLoginAgain = 100004 // user need login in again
-        const val Web_UnsupportedPlatform = 100005// Unsupported login platform
-        const val Web_JWTSignFailed = 100006// jwt sign failed
         const val Web_ExhaustiveAttack = 100007// exhaustive attack
-        const val Web_RequestSignatureIncorrect = 100008// exhaustive attack
-        const val Web_NonCompliant = 100009 // non compliant
-        const val Web_UnsupportedOperation = 100010 // operation not supported
 
         const val Web_RoomNotFound = 200000 // room not found
         const val Web_RoomIsEnded = 200001 // room has been ended
-        const val Web_RoomIsRunning = 200002// room status is running
-        const val Web_RoomNotIsRunning = 200003 // room not is running
-        const val Web_RoomNotIsEnded = 200004 // room not is stopped
-        const val Web_RoomNotIsIdle = 200005 // room not is idle
-
-        const val Web_PeriodicNotFound = 300000 // room not found
-        const val Web_PeriodicIsEnded = 300001 // room has been ended
-        const val Web_PeriodicSubRoomHasRunning = 300002 // periodic sub room has running
-
-        const val Web_UserNotFound = 400000 // user not found
-        const val Web_UserRoomListNotEmpty = 400001 // user room list is not empty.
-        const val Web_UserAlreadyBinding = 400002 // user already binding.
-
-        const val Web_RecordNotFound = 500000 // record info not found
-
-        const val Web_UploadConcurrentLimit = 700000
-        const val Web_NotEnoughTotalUsage = 700001 // not enough total usage
-        const val Web_FileSizeTooBig = 700002 // single file size too big
-        const val Web_FileNotFound = 700003 // file info not found
-        const val Web_FileExists = 700004 // file already exists
-        const val Web_DirectoryNotExists = 700005 // directory not exists
-        const val Web_DirectoryAlreadyExists = 700006 // directory already exists
-
-        const val Web_FileIsConverted = 800000
-        const val Web_FileConvertFailed = 800001// file convert failed
-        const val Web_FileIsConverting = 800002 // file is converting
-        const val Web_FileIsConvertWaiting = 800003 // file convert is in waiting status
-
-        // https://docs.github.com/en/developers/apps/troubleshooting-authorization-request-errors
-        const val Web_LoginGithubSuspended = 900000
-        const val Web_LoginGithubURLMismatch = 900001
-        const val Web_LoginGithubAccessDenied = 900002
 
         const val Web_SMSVerificationCodeInvalid = 110000// verification code invalid
         const val Web_SMSAlreadyExist = 110001 // phone already exist by current user

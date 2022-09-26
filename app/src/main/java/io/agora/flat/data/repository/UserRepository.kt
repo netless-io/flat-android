@@ -232,9 +232,7 @@ class UserRepository @Inject constructor(
 
     suspend fun removeBinding(loginPlatform: LoginPlatform): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            val result = userService.removeBinding(RemoveBindingReq(loginPlatform)).toResult()
-
-            return@withContext when (result) {
+            when (val result = userService.removeBinding(RemoveBindingReq(loginPlatform)).toResult()) {
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     when (loginPlatform) {
@@ -260,9 +258,7 @@ class UserRepository @Inject constructor(
         } else {
             failure ?: Failure(
                 FlatNetException(
-                    RuntimeException("limit send code"),
-                    status = 404,
-                    code = FlatErrorCode.Web_ExhaustiveAttack
+                    RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web_ExhaustiveAttack
                 )
             )
         }

@@ -17,8 +17,7 @@ class CloudRecordRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             cloudRecordService.acquireRecord(
                 RecordAcquireReq(
-                    roomUUID,
-                    RecordAcquireReqData(RecordAcquireReqDataClientRequest(expiredHour, 0))
+                    roomUUID, RecordAcquireReqData(RecordAcquireReqDataClientRequest(expiredHour, 0))
                 )
             ).toResult()
         }
@@ -55,10 +54,7 @@ class CloudRecordRepository @Inject constructor(
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.queryRecordWithAgora(
-                RecordReq(
-                    roomUUID,
-                    AgoraRecordParams(resourceId, AgoraRecordMode.Individual),
-                )
+                RecordReq(roomUUID, AgoraRecordParams(resourceId, AgoraRecordMode.Individual))
             ).toResult()
         }
     }

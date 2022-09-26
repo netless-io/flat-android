@@ -34,8 +34,7 @@ class RoomRepository @Inject constructor(
 
     suspend fun getPeriodicRoomInfo(periodicUUID: String): Result<RoomDetailPeriodic> {
         return withContext(Dispatchers.IO) {
-            roomService.getPeriodicRoomInfo(RoomDetailPeriodicReq(periodicUUID = periodicUUID))
-                .toResult()
+            roomService.getPeriodicRoomInfo(RoomDetailPeriodicReq(periodicUUID = periodicUUID)).toResult()
         }
     }
 

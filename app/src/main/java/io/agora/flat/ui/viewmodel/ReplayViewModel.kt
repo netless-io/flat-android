@@ -65,8 +65,7 @@ class ReplayViewModel @Inject constructor(
                                         name = it.value.name,
                                         avatarURL = it.value.avatarURL,
                                         videoUrl = videoUrl.replace(
-                                            ".m3u8",
-                                            "__uid_s_${it.value.rtcUID}__uid_e_av.m3u8"
+                                            ".m3u8", "__uid_s_${it.value.rtcUID}__uid_e_av.m3u8"
                                         ),
                                     )
                                 }.filter { user ->
@@ -76,9 +75,7 @@ class ReplayViewModel @Inject constructor(
                                 }
                                 Log.e("Aderan", users.toString())
                                 _state.value = _state.value.copy(
-                                    users = users,
-                                    recordInfo = recordInfo,
-                                    roomInfo = roomInfo
+                                    users = users, recordInfo = recordInfo, roomInfo = roomInfo
                                 )
                             }
                             is Failure -> {}
@@ -87,54 +84,7 @@ class ReplayViewModel @Inject constructor(
                 }
                 is Failure -> {}
             }
-
-//            if (resp is Success) {
-//                val roomInfo = resp.data.roomInfo
-//                if (roomInfo.roomStatus != RoomStatus.Stopped) {
-//                    return@launch
-//                }
-//                var videoUrl: String? = null
-//                when (val recordResp = cloudRecordRepository.getRecordInfo(roomUUID)) {
-//                    is Failure -> {
-//
-//                    }
-//                    is Success -> {
-//                        _state.value = _state.value.copy(roomInfo = roomInfo, recordInfo = recordResp.data)
-//                        videoUrl = recordResp.data.recordInfo.firstOrNull()?.videoURL
-//                    }
-//                }
-//                if (videoUrl != null) {
-//                    when (val usersResp = roomRepository.getRoomUsers(roomUUID, null)) {
-//                        is Failure -> {}
-//                        is Success -> {
-//                            val users = usersResp.data.values
-//                                .map {
-//                                    RelayUiUser(
-//                                        userUUID = it.userUUID,
-//                                        rtcUID = it.rtcUID,
-//                                        name = it.name,
-//                                        avatarURL = it.avatarURL,
-//                                        videoUrl = videoUrl.replace(".m3u8", "__uid_s_${it.rtcUID}__uid_e_av.m3u8"),
-//                                    )
-//                                }
-//                                .filter { user ->
-//                                    withContext(Dispatchers.IO) {
-//                                        UrlUtils.isResourceExisted(user.videoUrl)
-//                                    }
-//                                }
-//                            Log.e("Aderan", users.toString())
-//                        }
-//                    }
-//                }
-//            }
         }
-
-//        viewModelScope.launch {
-//            val result = cloudRecordRepository.getRecordInfo(roomUUID)
-//            if (result is Success) {
-//                _state.value = _state.value.copy(recordInfo = result.data)
-//            }
-//        }
     }
 
     fun updateTime(time: Long) {

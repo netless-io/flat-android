@@ -13,7 +13,6 @@ data class FlatNetException constructor(
 
     companion object {
         const val DEFAULT_ERROR_STATUS = -1
-
         const val DEFAULT_ERROR_CODE = -1
         const val DEFAULT_WEB_ERROR_CODE = -2
     }

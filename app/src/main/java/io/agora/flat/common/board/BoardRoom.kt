@@ -48,8 +48,7 @@ class BoardRoom @Inject constructor(
     private val context: Context by lazy { fastboardView.context }
     private val flatNetlessUA: List<String> by lazy {
         listOf(
-            "fastboard/${Fastboard.VERSION}",
-            "FLAT/NETLESS@${context.getAppVersion()}"
+            "fastboard/${Fastboard.VERSION}", "FLAT/NETLESS@${context.getAppVersion()}"
         )
     }
 
