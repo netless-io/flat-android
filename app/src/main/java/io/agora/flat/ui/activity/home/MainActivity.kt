@@ -114,10 +114,12 @@ class MainActivity : BaseComposeActivity() {
                     )
                 }
             } else {
-                GlobalAgreementDialog(
-                    onAgree = { viewModel.agreeProtocol() },
-                    onRefuse = { finish() },
-                )
+                FlatPage {
+                    GlobalAgreementDialog(
+                        onAgree = { viewModel.agreeProtocol() },
+                        onRefuse = { finish() },
+                    )
+                }
             }
 
             ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)

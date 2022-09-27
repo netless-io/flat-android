@@ -5,19 +5,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.agora.flat.Constants
 import io.agora.flat.R
-import io.agora.flat.ui.theme.FlatColorTextPrimary
 import io.agora.flat.ui.theme.Shapes
 
 @Composable
@@ -27,7 +21,7 @@ fun GlobalAgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
         Dialog(onDismissRequest = {}) {
             Surface(shape = Shapes.large) {
                 Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                    Text(stringResource(R.string.login_agreement_dialog_title), style = FlatTitleTextStyle)
+                    FlatTextTitle(stringResource(R.string.login_agreement_dialog_title))
                     FlatNormalVerticalSpacer()
                     GlobalRecheckAgreementMessage()
                     FlatNormalVerticalSpacer()
@@ -43,7 +37,7 @@ fun GlobalAgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
         Dialog(onDismissRequest = {}) {
             Surface(shape = Shapes.large) {
                 Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                    Text(stringResource(R.string.login_agreement_dialog_title), style = FlatTitleTextStyle)
+                    FlatTextTitle(stringResource(R.string.login_agreement_dialog_title))
                     FlatNormalVerticalSpacer()
                     GlobalAgreementMessage()
                     FlatNormalVerticalSpacer()
@@ -115,10 +109,3 @@ private fun GlobalRecheckAgreementMessage() {
 
     FlatClickableText(text = text, items = items)
 }
-
-private val FlatTitleTextStyle = TextStyle(
-    fontFamily = FontFamily.Default,
-    fontWeight = FontWeight.Bold,
-    fontSize = 20.sp,
-    color = FlatColorTextPrimary,
-)

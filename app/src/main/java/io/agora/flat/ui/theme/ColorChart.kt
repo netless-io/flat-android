@@ -2,6 +2,7 @@ package io.agora.flat.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// 颜色系统为一套配色表，一般情况下无语义颜色
 val Blue_0 = Color(0xFFF4F8FF)
 val Blue_1 = Color(0xFFEBF2FF)
 val Blue_2 = Color(0xFFD6E5FF)
@@ -58,8 +59,8 @@ val Yellow_10 = Color(0xFF2E1E00)
 val Yellow_11 = Color(0xFF170F00)
 val Yellow_12 = Color(0xFF0C0800)
 
-val Red_1 = Color(0xFFFAE9E6)
 val Red_0 = Color(0xFFFCF3F2)
+val Red_1 = Color(0xFFFAE9E6)
 val Red_2 = Color(0xFFF6D2CC)
 val Red_3 = Color(0xFFEDA599)
 val Red_4 = Color(0xFFE47866)
@@ -71,3 +72,6 @@ val Red_9 = Color(0xFF540C00)
 val Red_10 = Color(0xFF2A0600)
 val Red_11 = Color(0xFF150300)
 val Red_12 = Color(0xFF0A0200)
+
+val FlatColorWhite = Color(0xFFFFFFFF)
+val FlatColorBlack = Color(0xFF000000)

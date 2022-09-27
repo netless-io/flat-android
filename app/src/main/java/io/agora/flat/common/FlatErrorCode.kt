@@ -1,7 +1,6 @@
 package io.agora.flat.common
 
 class FlatErrorCode {
-
     object Web {
         /**
          * Flat Web 服务

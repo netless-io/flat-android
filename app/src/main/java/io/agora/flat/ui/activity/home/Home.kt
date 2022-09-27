@@ -88,13 +88,13 @@ fun FlatNetworkError(onClick: () -> Unit) {
             .fillMaxWidth()
             .height(40.dp)
             .clickable(onClick = onClick)
-            .background(FlatColorRedLight)
+            .background(Red_1)
             .padding(horizontal = 16.dp)
     ) {
         FlatTextBodyOne(
             stringResource(R.string.network_error),
             Modifier.align(Alignment.CenterStart),
-            FlatColorRed
+            Red_3
         )
         Image(painterResource(R.drawable.ic_arrow_right_red), "", Modifier.align(Alignment.CenterEnd))
     }

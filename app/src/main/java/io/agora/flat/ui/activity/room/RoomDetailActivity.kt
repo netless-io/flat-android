@@ -239,17 +239,17 @@ private fun DetailDropdownMenu(
                 FlatTextBodyOne(stringResource(R.string.modify_room))
             }
             DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.cancel_room), color = FlatColorRed)
+                FlatTextBodyOne(stringResource(R.string.cancel_room), color = Red_3)
             }
         }
         if (!isOwner && roomStatus != RoomStatus.Stopped) {
             DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.remove_room), color = FlatColorRed)
+                FlatTextBodyOne(stringResource(R.string.remove_room), color = Red_3)
             }
         }
         if (roomStatus == RoomStatus.Stopped) {
             DropdownMenuItem(onClick = { actioner(DetailUiAction.DeleteRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.delete_history), color = FlatColorRed)
+                FlatTextBodyOne(stringResource(R.string.delete_history), color = Red_3)
             }
         }
     }
@@ -607,21 +607,21 @@ private fun RoomState(state: RoomStatus, modifier: Modifier) {
                 stringResource(R.string.home_room_state_idle),
                 modifier,
                 style = typography.body2,
-                color = FlatColorRed
+                color = Red_3
             )
         RoomStatus.Started, RoomStatus.Paused ->
             Text(
                 stringResource(R.string.home_room_state_started),
                 modifier,
                 style = typography.body2,
-                color = FlatColorBlue
+                color = Blue_6
             )
         RoomStatus.Stopped ->
             Text(
                 stringResource(R.string.home_room_state_end),
                 modifier,
                 style = typography.body2,
-                color = FlatColorTextSecondary
+                color = Gray_6
             )
     }
 }

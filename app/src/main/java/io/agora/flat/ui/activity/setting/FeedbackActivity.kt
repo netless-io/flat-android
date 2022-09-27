@@ -24,7 +24,7 @@ import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
-import io.agora.flat.ui.theme.FlatColorBorder
+import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.viewmodel.FeedbackViewModel
 
 class FeedbackActivity : BaseComposeActivity() {
@@ -51,19 +51,17 @@ internal fun FeedbackScreen(onBackPressed: () -> Unit, onCommitFeedback: (text: 
 
     FlatColumnPage {
         BackTopAppBar(stringResource(R.string.title_feedback), onBackPressed = onBackPressed)
-        OutlinedTextField(
-            value = text,
+        OutlinedTextField(value = text,
             onValueChange = { text = it },
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
                 .weight(2f),
             colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = FlatColorBorder,
-                unfocusedIndicatorColor = FlatColorBorder
+                focusedIndicatorColor = FlatTheme.colors.divider,
+                unfocusedIndicatorColor = FlatTheme.colors.divider,
             ),
-            placeholder = { FlatTextBodyOneSecondary(stringResource(R.string.feedback_input_hint)) }
-        )
+            placeholder = { FlatTextBodyOneSecondary(stringResource(R.string.feedback_input_hint)) })
         Spacer(modifier = Modifier.weight(1f))
         Box(Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
             FlatPrimaryTextButton(stringResource(R.string.commit), onClick = {

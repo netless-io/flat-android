@@ -11,10 +11,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.ui.theme.FlatColorBlue
-import io.agora.flat.ui.theme.FlatColorRed
-import io.agora.flat.ui.theme.FlatColorTextSecondary
+import io.agora.flat.ui.theme.Blue_6
 import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Gray_6
+import io.agora.flat.ui.theme.Red_3
 
 
 @Composable
@@ -22,27 +22,24 @@ fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier) {
     val typography = MaterialTheme.typography
 
     when (roomStatus) {
-        RoomStatus.Idle ->
-            Text(
-                modifier = modifier,
-                text = stringResource(R.string.home_room_state_idle),
-                style = typography.body2,
-                color = FlatColorRed
-            )
-        RoomStatus.Started, RoomStatus.Paused ->
-            Text(
-                modifier = modifier,
-                text = stringResource(R.string.home_room_state_started),
-                style = typography.body2,
-                color = FlatColorBlue
-            )
-        RoomStatus.Stopped ->
-            Text(
-                modifier = modifier,
-                text = stringResource(R.string.home_room_state_end),
-                style = typography.body2,
-                color = FlatColorTextSecondary
-            )
+        RoomStatus.Idle -> Text(
+            modifier = modifier,
+            text = stringResource(R.string.home_room_state_idle),
+            style = typography.body2,
+            color = Red_3
+        )
+        RoomStatus.Started, RoomStatus.Paused -> Text(
+            modifier = modifier,
+            text = stringResource(R.string.home_room_state_started),
+            style = typography.body2,
+            color = Blue_6
+        )
+        RoomStatus.Stopped -> Text(
+            modifier = modifier,
+            text = stringResource(R.string.home_room_state_end),
+            style = typography.body2,
+            color = Gray_6
+        )
     }
 }
 
