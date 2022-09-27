@@ -132,8 +132,9 @@ fun RoomDetailScreen(
 private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUiAction) -> Unit) {
     Column {
         BackTopAppBar(
-            viewState.roomInfo?.title ?: stringResource(R.string.title_room_detail),
-            onBackPressed = { actioner(DetailUiAction.Back) }) {
+            title = viewState.roomInfo?.title ?: stringResource(R.string.title_room_detail),
+            onBackPressed = { actioner(DetailUiAction.Back) },
+        ) {
             viewState.roomInfo?.run {
                 AppBarMoreButton(viewState.isOwner, roomStatus, actioner)
             }
@@ -141,7 +142,8 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
         Box(
             Modifier
                 .fillMaxWidth()
-                .weight(1f), Alignment.Center
+                .weight(1f),
+            Alignment.Center,
         ) {
             if (viewState.roomInfo != null) {
                 val roomInfo = viewState.roomInfo
@@ -149,7 +151,7 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                     TimeDisplay(
                         begin = roomInfo.beginTime,
                         end = roomInfo.endTime,
-                        state = roomInfo.roomStatus
+                        state = roomInfo.roomStatus,
                     )
                     if (viewState.isPeriodicRoom) {
                         val periodicRoomInfo = viewState.periodicRoomInfo!!
@@ -160,10 +162,7 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             FlatTextBodyOneSecondary(
-                                stringResource(
-                                    R.string.view_all_room_format,
-                                    periodicRoomInfo.rooms.size
-                                ),
+                                stringResource(R.string.view_all_room_format, periodicRoomInfo.rooms.size),
                                 Modifier
                                     .padding(4.dp)
                                     .clickable { actioner(DetailUiAction.ShowAllRooms) },
@@ -174,7 +173,11 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
                     }
                     MoreRomeInfoDisplay(roomInfo.inviteCode, roomInfo.roomType, viewState.isPeriodicRoom)
 
-                    BottomOperations(MaxWidthSpread, roomInfo, actioner)
+                    BottomOperations(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f), roomInfo, actioner
+                    )
                 }
             }
             if (viewState.loading) {
@@ -189,7 +192,8 @@ private fun RoomDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUi
 private fun PeriodicDetailScreen(viewState: RoomDetailViewState, actioner: (DetailUiAction) -> Unit) {
     FlatColumnPage {
         BackHandler(onBack = { actioner(DetailUiAction.AllRoomBack) })
-        BackTopAppBar(stringResource(R.string.title_room_all),
+        BackTopAppBar(
+            stringResource(R.string.title_room_all),
             onBackPressed = { actioner(DetailUiAction.AllRoomBack) }) {
             viewState.roomInfo?.run {
                 AppBarMoreButton(viewState.isOwner, roomStatus, actioner)
@@ -239,17 +243,17 @@ private fun DetailDropdownMenu(
                 FlatTextBodyOne(stringResource(R.string.modify_room))
             }
             DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.cancel_room), color = Red_3)
+                FlatTextBodyOne(stringResource(R.string.cancel_room), color = Red_6)
             }
         }
         if (!isOwner && roomStatus != RoomStatus.Stopped) {
             DropdownMenuItem(onClick = { actioner(DetailUiAction.CancelRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.remove_room), color = Red_3)
+                FlatTextBodyOne(stringResource(R.string.remove_room), color = Red_6)
             }
         }
         if (roomStatus == RoomStatus.Stopped) {
             DropdownMenuItem(onClick = { actioner(DetailUiAction.DeleteRoom) }) {
-                FlatTextBodyOne(stringResource(R.string.delete_history), color = Red_3)
+                FlatTextBodyOne(stringResource(R.string.delete_history), color = Red_6)
             }
         }
     }
@@ -315,7 +319,8 @@ private fun PeriodicSubRoomItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         FlatTextBodyTwo(
-            dayText, Modifier
+            dayText,
+            Modifier
                 .padding(horizontal = 16.dp)
                 .widthIn(min = 16.dp)
         )
@@ -325,9 +330,10 @@ private fun PeriodicSubRoomItem(
         FlatTextBodyTwo(timeDuring, Modifier.padding(horizontal = 16.dp))
         FlatRoomStatusText(roomStatus, Modifier.padding(horizontal = 24.dp))
         Box(Modifier.padding(horizontal = 12.dp, vertical = 5.dp), Alignment.Center) {
-            Icon(Icons.Outlined.MoreHoriz, null, Modifier
-                .size(24.dp)
-                .clickable { expanded = true })
+            Icon(Icons.Outlined.MoreHoriz, null,
+                Modifier
+                    .size(24.dp)
+                    .clickable { expanded = true })
             DropdownMenu(expanded, { expanded = false }, Modifier.wrapContentSize()) {
                 DropdownMenuItem(onClick = { expanded = false }) {
                     FlatTextBodyOne(stringResource(R.string.title_room_detail))
@@ -349,7 +355,6 @@ private fun PeriodicSubRoomItem(
 @Composable
 private fun PeriodicInfoDisplay(roomPeriodic: RoomPeriodic, number: Int) {
     val context = LocalContext.current
-    val bgColor = if (isDarkTheme()) Blue_8 else Blue_0
 
     Box(
         Modifier
@@ -401,13 +406,13 @@ private fun BottomOperations(
                 roomInfo,
                 Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp),
-                actioner = actioner
+                    .padding(16.dp), actioner = actioner
             )
         } else {
             Operations(
                 roomInfo,
-                MaxWidth
+                Modifier
+                    .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(16.dp, 32.dp),
                 actioner = actioner
@@ -422,26 +427,20 @@ private fun TabletOperations(
     modifier: Modifier,
     actioner: (DetailUiAction) -> Unit,
 ) = when (roomInfo.roomStatus) {
-    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
-        Row(modifier) {
-            FlatSmallSecondaryTextButton(stringResource(R.string.copy_invite)) {
-                actioner(DetailUiAction.Invite)
-            }
-            FlatNormalHorizontalSpacer()
-            FlatSmallPrimaryTextButton(
-                enterRoomString(roomInfo.isOwner, roomInfo.roomStatus),
-                onClick = {
-                    actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
-                }
-            )
+    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started -> Row(modifier) {
+        FlatSmallSecondaryTextButton(stringResource(R.string.copy_invite)) {
+            actioner(DetailUiAction.Invite)
         }
-    RoomStatus.Stopped ->
-        Row(modifier) {
-            FlatSmallPrimaryTextButton(
-                stringResource(id = R.string.replay), enabled = roomInfo.hasRecord,
-                onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) }
-            )
-        }
+        FlatNormalHorizontalSpacer()
+        FlatSmallPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
+            actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
+        })
+    }
+    RoomStatus.Stopped -> Row(modifier) {
+        FlatSmallPrimaryTextButton(stringResource(id = R.string.replay),
+            enabled = roomInfo.hasRecord,
+            onClick = { actioner(DetailUiAction.Playback(roomInfo.roomUUID)) })
+    }
 }
 
 @Composable
@@ -450,22 +449,20 @@ private fun Operations(
     modifier: Modifier,
     actioner: (DetailUiAction) -> Unit,
 ) = when (roomInfo.roomStatus) {
-    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started ->
-        Column(modifier) {
-            FlatSecondaryTextButton(stringResource(R.string.copy_invite), onClick = {
-                actioner(DetailUiAction.Invite)
-            })
-            FlatNormalVerticalSpacer()
-            FlatPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
-                actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
-            })
-        }
-    RoomStatus.Stopped ->
-        Column(modifier) {
-            FlatPrimaryTextButton(stringResource(id = R.string.replay), enabled = roomInfo.hasRecord, onClick = {
-                actioner(DetailUiAction.Playback(roomInfo.roomUUID))
-            })
-        }
+    RoomStatus.Idle, RoomStatus.Paused, RoomStatus.Started -> Column(modifier) {
+        FlatSecondaryTextButton(stringResource(R.string.copy_invite), onClick = {
+            actioner(DetailUiAction.Invite)
+        })
+        FlatNormalVerticalSpacer()
+        FlatPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
+            actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
+        })
+    }
+    RoomStatus.Stopped -> Column(modifier) {
+        FlatPrimaryTextButton(stringResource(id = R.string.replay), enabled = roomInfo.hasRecord, onClick = {
+            actioner(DetailUiAction.Playback(roomInfo.roomUUID))
+        })
+    }
 }
 
 @Composable
@@ -602,27 +599,15 @@ private fun TimeDisplay(begin: Long, end: Long, state: RoomStatus) {
 @Composable
 private fun RoomState(state: RoomStatus, modifier: Modifier) {
     when (state) {
-        RoomStatus.Idle ->
-            Text(
-                stringResource(R.string.home_room_state_idle),
-                modifier,
-                style = typography.body2,
-                color = Red_3
-            )
-        RoomStatus.Started, RoomStatus.Paused ->
-            Text(
-                stringResource(R.string.home_room_state_started),
-                modifier,
-                style = typography.body2,
-                color = Blue_6
-            )
-        RoomStatus.Stopped ->
-            Text(
-                stringResource(R.string.home_room_state_end),
-                modifier,
-                style = typography.body2,
-                color = Gray_6
-            )
+        RoomStatus.Idle -> Text(
+            stringResource(R.string.home_room_state_idle), modifier, style = typography.body2, color = Red_6
+        )
+        RoomStatus.Started, RoomStatus.Paused -> Text(
+            stringResource(R.string.home_room_state_started), modifier, style = typography.body2, color = Blue_6
+        )
+        RoomStatus.Stopped -> Text(
+            stringResource(R.string.home_room_state_end), modifier, style = typography.body2, color = Gray_6
+        )
     }
 }
 
@@ -638,8 +623,7 @@ private fun RoomDetailPreview() {
             inviteCode = "1111111111-1111111111-1111111111-1111111111",
             username = "UserXXX",
             baseInviteUrl = "",
-        ),
-        userUUID = "722f7f6d-cc0f-4e63-a543-446a3b7bd659"
+        ), userUUID = "722f7f6d-cc0f-4e63-a543-446a3b7bd659"
     )
     FlatPage {
         RoomDetailScreen(state) {}
@@ -676,8 +660,7 @@ private fun BottomOperationsPreview() {
                 username = "UserXXX",
                 baseInviteUrl = "",
             ),
-        ) {
-        }
+        ) {}
     }
 }
 

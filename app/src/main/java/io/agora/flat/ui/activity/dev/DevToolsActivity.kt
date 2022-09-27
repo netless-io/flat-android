@@ -24,7 +24,6 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showDebugToast
 import kotlinx.coroutines.delay
@@ -40,7 +39,11 @@ class DevToolsActivity : BaseComposeActivity() {
             FlatColumnPage {
                 BackTopAppBar(title = "DevTools", onBackPressed = { finish() })
 
-                LazyColumn(MaxWidthSpread) {
+                LazyColumn(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
                     item {
                         ResumeCheckVersion()
                         ClearLastCancelUpdate()
@@ -66,22 +69,19 @@ fun ResumeCheckVersion() {
             .height(56.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(Modifier.width(16.dp))
         FlatTextBodyTwo(text = "checkVersion")
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(Modifier.width(8.dp))
         OutlinedTextField(
-            value = interval,
-            onValueChange = { interval = it },
-            modifier = Modifier.weight(1f)
+            value = interval, onValueChange = { interval = it }, modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        TextButton(
-            onClick = {
-                Config.callVersionCheckInterval = interval.toLong() * 1000
-                if (context is Activity) {
-                    context.finish()
-                }
-            }) {
+        TextButton(onClick = {
+            Config.callVersionCheckInterval = interval.toLong() * 1000
+            if (context is Activity) {
+                context.finish()
+            }
+        }) {
             FlatTextOnButton("确定")
         }
     }
@@ -154,13 +154,12 @@ fun UserLoginFlag() {
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(16.dp))
         FlatTextBodyOne(text = "设置User")
         Spacer(modifier = Modifier.weight(1f))
-        Switch(
-            checked = loggedInData.value ?: false,
+        Switch(checked = loggedInData.value ?: false,
             enabled = loggedInData.value ?: true,
             onCheckedChange = { userViewModel.logout() })
         Spacer(modifier = Modifier.width(16.dp))
@@ -175,18 +174,17 @@ fun MockEnableFlag() {
     Row(
         Modifier
             .fillMaxWidth()
-            .height(56.dp), verticalAlignment = Alignment.CenterVertically
+            .height(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(16.dp))
         FlatTextBodyTwo(text = "登录Mock")
         Spacer(modifier = Modifier.weight(1f))
-        Switch(
-            checked = mockEnable,
-            onCheckedChange = {
-                mockEnable = it
-                AppKVCenter.MockData.mockEnable = it
-                userViewModel.logout()
-            })
+        Switch(checked = mockEnable, onCheckedChange = {
+            mockEnable = it
+            AppKVCenter.MockData.mockEnable = it
+            userViewModel.logout()
+        })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -206,12 +204,10 @@ fun ProjectorEnableFlag() {
         Spacer(modifier = Modifier.width(16.dp))
         FlatTextBodyTwo(text = "使用 Projector")
         Spacer(modifier = Modifier.weight(1f))
-        Switch(
-            checked = useProjector,
-            onCheckedChange = {
-                useProjector = it
-                appKVCenter.setUseProjectorConvertor(useProjector)
-            })
+        Switch(checked = useProjector, onCheckedChange = {
+            useProjector = it
+            appKVCenter.setUseProjectorConvertor(useProjector)
+        })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -231,13 +227,10 @@ fun ClearLastCancelUpdate() {
         Spacer(modifier = Modifier.width(16.dp))
         FlatTextBodyTwo(text = "清除 LastCancelUpdate")
         Spacer(modifier = Modifier.weight(1f))
-        Switch(
-            enabled = lastCancelUpdate != 0L,
-            checked = lastCancelUpdate != 0L,
-            onCheckedChange = {
-                lastCancelUpdate = 0
-                appKVCenter.setLastCancelUpdate(0)
-            })
+        Switch(enabled = lastCancelUpdate != 0L, checked = lastCancelUpdate != 0L, onCheckedChange = {
+            lastCancelUpdate = 0
+            appKVCenter.setLastCancelUpdate(0)
+        })
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -249,7 +242,11 @@ fun PreviewDevTools() {
     FlatColumnPage {
         BackTopAppBar(title = "DevTools", onBackPressed = { })
 
-        LazyColumn(MaxWidthSpread) {
+        LazyColumn(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
             item {
                 ClearLastCancelUpdate()
                 ProjectorEnableFlag()

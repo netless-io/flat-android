@@ -112,7 +112,7 @@ private fun CancelAccountDialog(onDismissRequest: () -> Unit, viewModel: Account
                             .heightIn(max = 400.dp)
                             .verticalScroll(scrollState)
                     )
-                    Spacer(NormalVerticalModifier)
+                    Spacer(Modifier.height(16.dp))
                     CancelAccountCheck(viewModel::deleteAccount)
                 }
             }

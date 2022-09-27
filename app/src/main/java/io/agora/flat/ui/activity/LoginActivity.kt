@@ -41,7 +41,6 @@ import io.agora.flat.ui.activity.login.LoginUiAction
 import io.agora.flat.ui.activity.phone.PhoneBindDialog
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.Gray_1
-import io.agora.flat.ui.theme.MaxHeightSpread
 import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
@@ -116,14 +115,11 @@ class LoginActivity : BaseComposeActivity() {
             LoginPage(actioner = actioner)
 
             if (showPhoneBind) {
-                PhoneBindDialog(
-                    onBindSuccess = {
-                        Navigator.launchHomeActivity(this)
-                    },
-                    onDismissRequest = {
-                        // should not cancel dialog
-                    }
-                )
+                PhoneBindDialog(onBindSuccess = {
+                    Navigator.launchHomeActivity(this)
+                }, onDismissRequest = {
+                    // should not cancel dialog
+                })
             }
         }
     }
@@ -143,9 +139,7 @@ class LoginActivity : BaseComposeActivity() {
 
     private fun handleRoomJump(intent: Intent) {
         lifecycleScope.launch {
-            if (intent.data?.scheme == "x-agora-flat-client" &&
-                intent.data?.authority == "joinRoom"
-            ) {
+            if (intent.data?.scheme == "x-agora-flat-client" && intent.data?.authority == "joinRoom") {
                 val roomUUID = intent.data?.getQueryParameter("roomUUID")
                 if (viewModel.isLoggedIn() && roomUUID != null) {
                     Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
@@ -180,10 +174,17 @@ internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
         Image(
             painterResource(img),
             contentDescription = null,
-            MaxHeightSpread,
+            Modifier
+                .fillMaxHeight()
+                .weight(1f),
             contentScale = ContentScale.Crop,
         )
-        Box(MaxHeightSpread, contentAlignment = Alignment.TopCenter) {
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .weight(1f),
+            contentAlignment = Alignment.TopCenter,
+        ) {
             LoginArea(modifier = Modifier.width(360.dp), actioner = actioner)
         }
     }
@@ -253,7 +254,7 @@ private fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
     )
     Box(Modifier.padding(16.dp)) {
         FlatPrimaryTextButton(
-            text = stringResource(id = R.string.login_sign_in_or_up),
+            stringResource(id = R.string.login_sign_in_or_up),
             enabled = phone.isValidPhone() && code.isValidSmsCode(),
         ) {
             actioner(LoginUiAction.PhoneLogin("+86${phone}", code))
@@ -267,7 +268,7 @@ private fun LoginButtonsArea(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(
-            modifier = Modifier
+            Modifier
                 .padding(horizontal = 16.dp)
                 .weight(1f)
                 .height(0.5.dp)
@@ -275,7 +276,7 @@ private fun LoginButtonsArea(
         )
         FlatTextBodyOneSecondary(stringResource(id = R.string.login_others_tip))
         Spacer(
-            modifier = Modifier
+            Modifier
                 .padding(horizontal = 16.dp)
                 .weight(1f)
                 .height(0.5.dp)
@@ -308,7 +309,7 @@ private fun LoginSlogan() {
         },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        FlatTextTitle(stringResource(id = R.string.login_welcome))
+        FlatTextTitle(stringResource(R.string.login_welcome))
         Spacer(Modifier.height(4.dp))
         FlatTextBodyOne(stringResource(R.string.login_page_label_1))
     }
@@ -323,12 +324,11 @@ private fun LoginAgreement(
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
         Spacer(Modifier.width(4.dp))
-        val text = stringResource(R.string.login_agreement_message)
         val items = listOf(
             ClickableItem(stringResource(R.string.privacy_policy), "privacy", Constants.URL.Privacy),
             ClickableItem(stringResource(R.string.term_of_service), "service", Constants.URL.Service)
         )
-        FlatClickableText(text = text, items = items)
+        FlatClickableText(stringResource(R.string.login_agreement_message), items = items)
     }
 }
 
@@ -358,8 +358,8 @@ private fun LoginImageButton(
 }
 
 @Composable
-@Preview(device = PIXEL_C, widthDp = 800, heightDp = 500)
+@Preview(device = PIXEL_C, widthDp = 800, heightDp = 600)
 @Preview(widthDp = 400, heightDp = 600)
-private fun LoginPagePreviewPad() {
+private fun LoginPagePreview() {
     LoginPage { }
 }

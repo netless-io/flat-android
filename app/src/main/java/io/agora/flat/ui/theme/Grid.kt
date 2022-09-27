@@ -5,7 +5,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-
 val GRID_BASE: Dp = 16.dp
 val GRID_0_25: Dp = GRID_BASE * 0.25f
 val GRID_0_50: Dp = GRID_BASE * 0.50f

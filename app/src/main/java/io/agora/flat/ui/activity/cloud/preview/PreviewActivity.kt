@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +22,6 @@ import io.agora.flat.data.model.CoursewareType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.setting.ComposeWebView
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.MaxWidthSpread
 
 @AndroidEntryPoint
 class PreviewActivity : BaseComposeActivity() {
@@ -54,7 +54,9 @@ private fun PreviewPage(
 
     FlatColumnPage {
         CloseTopAppBar(stringResource(R.string.title_cloud_preview), onClose = { onClose() })
-        Box(MaxWidthSpread) {
+        Box(Modifier
+            .fillMaxWidth()
+            .weight(1f)) {
             Box {
                 when (viewState.type) {
                     CoursewareType.Unknown -> {

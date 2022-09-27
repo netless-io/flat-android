@@ -18,8 +18,6 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
-import io.agora.flat.ui.theme.MaxWidth
-import io.agora.flat.ui.theme.MaxWidthSpread
 import io.agora.flat.ui.viewmodel.CallTestState
 import io.agora.flat.ui.viewmodel.CallTestViewModel
 
@@ -48,13 +46,22 @@ class CallTestActivity : BaseComposeActivity() {
 private fun CallTestContent(state: CallTestState, actioner: (CallTestUIAction) -> Unit) {
     FlatColumnPage {
         BackTopAppBar(stringResource(R.string.title_call_test), { actioner(CallTestUIAction.Back) })
-        Box(MaxWidthSpread.padding(16.dp)) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(16.dp)
+        ) {
             Column {
                 Text(text = "quality: ${state.quality}")
                 Text(text = "last mile: ${state.getLastMileResult()}")
             }
         }
-        Box(MaxWidth.padding(16.dp)) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Column {
                 FlatPrimaryTextButton(text = "网络质量探测") {
                     actioner(CallTestUIAction.LastmileTest)
