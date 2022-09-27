@@ -30,8 +30,8 @@ data class CloudFile constructor(
 
 @Parcelize
 data class CloudFileMeta constructor(
-    val whiteboardConvert: WhiteboardConvertPayload?,
-    val whiteboardProjector: WhiteboardProjectorPayload?,
+    val whiteboardConvert: WhiteboardConvertPayload? = null,
+    val whiteboardProjector: WhiteboardProjectorPayload? = null,
 ) : Parcelable
 
 @Parcelize
