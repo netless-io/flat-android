@@ -70,15 +70,4 @@ class FlatErrorCode {
     object RTC {
 
     }
-
-    companion object {
-        const val Web_ExhaustiveAttack = 100007// exhaustive attack
-
-        const val Web_RoomNotFound = 200000 // room not found
-        const val Web_RoomIsEnded = 200001 // room has been ended
-
-        const val Web_SMSVerificationCodeInvalid = 110000// verification code invalid
-        const val Web_SMSAlreadyExist = 110001 // phone already exist by current user
-        const val Web_SMSAlreadyBinding = 110002 // phone are binding by other users
-    }
 }

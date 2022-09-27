@@ -258,7 +258,7 @@ class UserRepository @Inject constructor(
         } else {
             failure ?: Failure(
                 FlatNetException(
-                    RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web_ExhaustiveAttack
+                    RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web.ExhaustiveAttack
                 )
             )
         }

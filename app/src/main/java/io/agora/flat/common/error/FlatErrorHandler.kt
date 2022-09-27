@@ -13,11 +13,11 @@ object FlatErrorHandler {
                         context.getString(R.string.error_string_network)
                     } else {
                         when (error.code) {
-                            FlatErrorCode.Web_RoomNotFound -> context.getString(R.string.fetcher_room_not_found)
-                            FlatErrorCode.Web_RoomIsEnded -> context.getString(R.string.fetcher_room_is_ended)
+                            FlatErrorCode.Web.RoomNotFound -> context.getString(R.string.fetcher_room_not_found)
+                            FlatErrorCode.Web.RoomIsEnded -> context.getString(R.string.fetcher_room_is_ended)
 
-                            FlatErrorCode.Web_SMSVerificationCodeInvalid -> context.getString(R.string.login_verification_code_invalid)
-                            FlatErrorCode.Web_ExhaustiveAttack -> context.getString(R.string.error_request_too_frequently)
+                            FlatErrorCode.Web.SMSVerificationCodeInvalid -> context.getString(R.string.login_verification_code_invalid)
+                            FlatErrorCode.Web.ExhaustiveAttack -> context.getString(R.string.error_request_too_frequently)
                             else -> defaultValue
                         }
                     }

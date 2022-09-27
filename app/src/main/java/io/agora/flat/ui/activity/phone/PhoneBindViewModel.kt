@@ -50,10 +50,10 @@ class PhoneBindViewModel @Inject constructor(
             } else {
                 val exception = (sendResult as Failure).exception as FlatNetException
                 when (exception.code) {
-                    FlatErrorCode.Web_SMSAlreadyExist -> {
+                    FlatErrorCode.Web.SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
-                    FlatErrorCode.Web_SMSAlreadyBinding -> {
+                    FlatErrorCode.Web.SMSAlreadyBinding -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
                     else -> {
@@ -74,13 +74,13 @@ class PhoneBindViewModel @Inject constructor(
             } else {
                 val exception = (bindResult as Failure).exception as FlatNetException
                 when (exception.code) {
-                    FlatErrorCode.Web_SMSAlreadyExist -> {
+                    FlatErrorCode.Web.SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.alreadyHasPhone())
                     }
-                    FlatErrorCode.Web_SMSVerificationCodeInvalid -> {
+                    FlatErrorCode.Web.SMSVerificationCodeInvalid -> {
                         showUiMessage(stringFetcher.invalidVerificationCode())
                     }
-                    FlatErrorCode.Web_ExhaustiveAttack -> {
+                    FlatErrorCode.Web.ExhaustiveAttack -> {
                         showUiMessage(stringFetcher.frequentRequest())
                     }
                     else -> {
