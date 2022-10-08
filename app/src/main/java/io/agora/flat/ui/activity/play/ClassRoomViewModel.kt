@@ -203,9 +203,7 @@ class ClassRoomViewModel @Inject constructor(
         logger.i("[RTC] start join rtc")
         state.value?.apply {
             rtcVideoController.setupUid(uid = rtcUID, ssUid = rtcShareScreen.uid)
-            rtcApi.joinChannel(
-                RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen)
-            )
+            rtcApi.joinChannel(RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen))
         }
     }
 

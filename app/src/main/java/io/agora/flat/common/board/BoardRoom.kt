@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import com.herewhite.sdk.domain.*
+import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
+import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.board.fast.FastRoom
 import io.agora.board.fast.FastRoomListener
@@ -81,12 +83,9 @@ class BoardRoom @Inject constructor(
         fastRoomOptions.sdkConfiguration = sdkConfiguration
 
         val roomParams = fastRoomOptions.roomParams.apply {
-            windowParams.prefersColorScheme = if (darkMode) {
-                WindowPrefersColorScheme.Dark
-            } else {
-                WindowPrefersColorScheme.Light
-            }
+            windowParams.prefersColorScheme = if (darkMode) Dark else Light
             windowParams.collectorStyles = getCollectorStyle()
+            windowParams.scrollVerticalOnly = true
 
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
@@ -101,7 +100,7 @@ class BoardRoom @Inject constructor(
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
-                logger.d("[BoardRoom] onPhaseChanged:${phase.name}")
+                logger.d("[boardroom] onPhaseChanged:${phase.name}")
                 when (phase) {
                     RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
                     RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
@@ -139,8 +138,6 @@ class BoardRoom @Inject constructor(
         setDarkMode(darkMode)
 
         fastRoom?.join()
-
-        fastRoom?.room?.roomState?.cameraState
     }
 
     private fun getCollectorStyle(): HashMap<String, String> {
@@ -159,9 +156,7 @@ class BoardRoom @Inject constructor(
         this.darkMode = dark
 
         if (::fastboard.isInitialized) {
-            val fastStyle = fastboard.fastStyle.apply {
-                isDarkMode = dark
-            }
+            val fastStyle = fastboard.fastStyle.apply { isDarkMode = dark }
             fastRoom?.fastStyle = fastStyle
         }
     }

@@ -71,9 +71,9 @@ class UserVideoAdapter(
 
     override fun getItemCount() = dataSet.size
 
-    fun setDataSet(data: List<RoomUser>) {
+    fun updateUsers(newUsers: List<RoomUser>) {
         dataSet.clear()
-        dataSet.addAll(data.distinctBy { it.rtcUID })
+        dataSet.addAll(newUsers.distinctBy { it.userUUID })
         notifyDataSetChanged()
     }
 

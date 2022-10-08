@@ -275,10 +275,12 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avat
                 }
             }
             if (mainTab == MainTab.Home) {
-                IconButton(onClick = onOpenSetting,
+                IconButton(
+                    onClick = onOpenSetting,
                     Modifier
                         .padding(vertical = 16.dp)
-                        .align(Alignment.TopCenter)) {
+                        .align(Alignment.TopCenter)
+                ) {
                     FlatAvatar(avatar, size = 32.dp)
                 }
             }

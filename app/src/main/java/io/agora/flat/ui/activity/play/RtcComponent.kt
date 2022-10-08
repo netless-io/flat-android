@@ -85,7 +85,7 @@ class RtcComponent(
         lifecycleScope.launchWhenResumed {
             viewModel.videoUsers.collect { users ->
                 logger.d("[RTC] videoUsers changed to $users")
-                adapter.setDataSet(users)
+                adapter.updateUsers(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
                     val findUser = users.find { it.isOnStage && it.userUUID == userCallOut!!.userUUID }

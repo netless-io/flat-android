@@ -245,21 +245,6 @@ class ToolComponent(
             // block event
         }
 
-//        cloudStorageAdapter = CloudStorageAdapter()
-//        cloudStorageAdapter.setOnItemClickListener {
-//            viewModel.insertCourseware(it)
-//            hideCloudStorageLayout()
-//        }
-//        binding.layoutCloudStorage.cloudStorageList.adapter = cloudStorageAdapter
-//        binding.layoutCloudStorage.cloudStorageList.layoutManager = LinearLayoutManager(activity)
-//        binding.layoutCloudStorage.close.setOnClickListener {
-//            hideCloudStorageLayout()
-//            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
-//        }
-//        binding.layoutCloudStorage.root.setOnClickListener {
-//            // block event
-//        }
-
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter
         binding.layoutUserList.userList.layoutManager = LinearLayoutManager(activity)
