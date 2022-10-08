@@ -56,7 +56,6 @@ class BoardRoom @Inject constructor(
 
     override fun initSdk(fastboardView: FastboardView) {
         this.fastboardView = fastboardView
-        this.fastboardView.setAutoResize(false)
         this.fastboard = fastboardView.fastboard
     }
 
