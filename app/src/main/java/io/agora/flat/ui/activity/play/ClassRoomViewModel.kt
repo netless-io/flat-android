@@ -68,7 +68,9 @@ class ClassRoomViewModel @Inject constructor(
 
     val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
-    val messageUsers = userManager.observeUsers()
+    val messageUsers = userManager.observeUsers().map {
+        it.filter { user -> !(user.isLeft && !user.isSpeak) }
+    }
 
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
