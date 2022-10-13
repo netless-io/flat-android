@@ -13,15 +13,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5" />
 
-    <android.widget.Space
-        android:id="@+id/marginSpace"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        app:layout_constraintBottom_toBottomOf="@id/guideline"
-        app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline" />
-
     <LinearLayout
         android:id="@+id/tools_layout"
         android:layout_width="@dimen/room_class_button_area_size"
@@ -30,7 +21,7 @@
         android:background="@drawable/shape_gray_border_round_8_bg"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/marginSpace"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -106,6 +97,7 @@
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:layout_margin="@dimen/room_class_button_gap"
+                android:background="@drawable/ic_class_room_icon_bg"
                 android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_class_room_cloud"
                 app:tint="@color/color_class_room_icon"
@@ -116,6 +108,7 @@
                 android:layout_width="@dimen/room_class_button_size"
                 android:layout_height="@dimen/room_class_button_size"
                 android:layout_margin="@dimen/room_class_button_gap"
+                android:background="@drawable/ic_class_room_icon_bg"
                 android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_class_room_setting"
                 app:tint="@color/color_class_room_icon"
@@ -208,18 +201,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/guideline"
         tools:visibility="gone" />
-
-<!--    <include-->
-<!--        android:id="@+id/layout_cloud_storage"-->
-<!--        layout="@layout/layout_room_cloud_storage"-->
-<!--        android:layout_width="@dimen/room_class_overlay_width"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"-->
-<!--        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"-->
-<!--        android:visibility="gone"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:visibility="gone" />-->
 
     <include
         android:id="@+id/layout_user_list"

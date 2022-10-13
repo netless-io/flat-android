@@ -50,7 +50,8 @@ class BoardRoom @Inject constructor(
     private val context: Context by lazy { fastboardView.context }
     private val flatNetlessUA: List<String> by lazy {
         listOf(
-            "fastboard/${Fastboard.VERSION}", "FLAT/NETLESS@${context.getAppVersion()}"
+            "fastboard/${Fastboard.VERSION}",
+            "FLAT/NETLESS@${context.getAppVersion()}",
         )
     }
 
@@ -85,6 +86,7 @@ class BoardRoom @Inject constructor(
             windowParams.prefersColorScheme = if (darkMode) Dark else Light
             windowParams.collectorStyles = getCollectorStyle()
             windowParams.scrollVerticalOnly = true
+            windowParams.stageStyle = "box-shadow: 0 0 0"
 
             userPayload = UserPayload(
                 userId = userRepository.getUserUUID(),
@@ -99,7 +101,7 @@ class BoardRoom @Inject constructor(
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
-                logger.d("[boardroom] onPhaseChanged:${phase.name}")
+                logger.d("[BOARD] room phase change to ${phase.name}")
                 when (phase) {
                     RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
                     RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
@@ -120,6 +122,7 @@ class BoardRoom @Inject constructor(
             fastRoom?.rootRoomController = rootRoomController
             updateRoomController(writable)
         }
+
         val fastResource = object : FastResource() {
             override fun createApplianceBackground(darkMode: Boolean): Drawable? {
                 return ContextCompat.getDrawable(context, R.drawable.ic_class_room_icon_bg)

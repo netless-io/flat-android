@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
-            android:src="@drawable/ic_room_cloud_storage_add"
+            android:src="@drawable/ic_class_cloud_arrow_right"
             tools:ignore="ContentDescription" />
 
         <LinearLayout

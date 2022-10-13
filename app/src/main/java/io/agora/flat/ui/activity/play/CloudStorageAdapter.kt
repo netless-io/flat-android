@@ -4,9 +4,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.CloudFile
+import io.agora.flat.data.model.ResourceType
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.fileIcon
 import io.agora.flat.util.inflate
@@ -27,6 +29,7 @@ class CloudStorageAdapter(
         viewHolder.filename.text = item.fileName
         viewHolder.fileDate.text = FlatFormatter.longDate(item.createAt)
         viewHolder.fileSize.text = FlatFormatter.size(item.fileSize)
+        viewHolder.add.isVisible = item.resourceType != ResourceType.Directory
         viewHolder.itemView.setOnClickListener { onItemClickListener?.onAddClick(item) }
     }
 

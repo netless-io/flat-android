@@ -79,7 +79,7 @@ fun FlatTextTitle(
 fun FlatTextSubtitle(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
+    color: Color = FlatTheme.colors.textTitle,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
     maxLines: Int = 1,

@@ -386,7 +386,7 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     fun enableAudio(enableAudio: Boolean, uuid: String = currentUserUUID) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
                 if (userManager.isUserSelf(uuid)) {
@@ -498,15 +498,6 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun muteChat(muted: Boolean) {
-        viewModelScope.launch {
-            if (userManager.isOwner()) {
-                syncedClassState.updateBan(muted)
-                rtmApi.sendChannelCommand(RoomBanEvent(roomUUID = roomUUID, status = muted))
-            }
-        }
-    }
-
     fun getInviteInfo(): InviteInfo? {
         val state = state.value ?: return null
         return InviteInfo(
@@ -584,9 +575,6 @@ data class ClassRoomState(
 
     val isOnStage: Boolean
         get() = isOwner || isSpeak
-
-    val showChangeClassMode: Boolean
-        get() = roomType == RoomType.SmallClass
 
     val shouldShowRaiseHand: Boolean = !isOnStage && !ban
 

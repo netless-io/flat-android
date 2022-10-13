@@ -79,7 +79,11 @@ fun BackTopAppBar(
         title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
-                Icon(painterResource(R.drawable.ic_arrow_left), contentDescription = null)
+                Icon(
+                    painterResource(R.drawable.ic_arrow_left),
+                    contentDescription = null,
+                    tint = FlatTheme.colors.textPrimary
+                )
             }
         },
         actions = actions
@@ -96,7 +100,11 @@ fun CloseTopAppBar(
         title = { FlatTextTitle(text = title) },
         navigationIcon = {
             IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.ic_title_close), contentDescription = null)
+                Icon(
+                    painterResource(R.drawable.ic_title_close),
+                    contentDescription = null,
+                    tint = FlatTheme.colors.textPrimary
+                )
             }
         },
         actions = actions

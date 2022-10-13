@@ -1,6 +1,5 @@
 package io.agora.flat.data.model
 
-// a class for record user in room. may be named as ClassUser / RoomUser etc.
 data class RoomUser(
     val userUUID: String,
     val rtcUID: Int = NOT_JOIN_RTC_UID,

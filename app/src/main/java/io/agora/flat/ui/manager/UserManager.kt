@@ -3,7 +3,6 @@ package io.agora.flat.ui.manager
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RoomUser
-import io.agora.flat.di.interfaces.RtmApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +11,6 @@ import javax.inject.Inject
 @ActivityRetainedScoped
 class UserManager @Inject constructor(
     private val userQuery: UserQuery,
-    private val rtmApi: RtmApi
 ) {
     private var _users = MutableStateFlow<List<RoomUser>>(emptyList())
     val users: List<RoomUser>
@@ -33,7 +31,7 @@ class UserManager @Inject constructor(
     private var devicesState: Map<String, DeviceState> = emptyMap()
     private var raiseHandState: List<String> = emptyList()
 
-    lateinit var selfUUID: String
+    private lateinit var selfUUID: String
     lateinit var ownerUUID: String
 
     fun observeUsers(): Flow<List<RoomUser>> {

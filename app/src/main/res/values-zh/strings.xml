@@ -127,7 +127,6 @@
     <string name="wechat">WeChat</string>
     <string name="github">Github</string>
 
-
     <!-- bind -->
     <string name="bind">绑定</string>
     <string name="unbind">解绑</string>
@@ -159,6 +158,7 @@
     <string name="cancel_room">取消房间</string>
     <string name="remove_room">移除房间</string>
     <string name="delete_history">删除记录</string>
+    <string name="show_all">显示全部</string>
 
     <string name="say_something">说点什么…</string>
     <string name="message_muted">已禁言</string>

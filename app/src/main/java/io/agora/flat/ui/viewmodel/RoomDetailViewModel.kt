@@ -49,7 +49,11 @@ class RoomDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(roomInfo, periodicRoomInfo, loadingState.observable) { roomInfo, periodicRoomInfo, loading ->
+            combine(
+                roomInfo,
+                periodicRoomInfo,
+                loadingState.observable,
+            ) { roomInfo, periodicRoomInfo, loading ->
                 _state.value.copy(
                     roomInfo = roomInfo,
                     periodicRoomInfo = periodicRoomInfo,
@@ -119,13 +123,11 @@ data class RoomDetailViewState(
     val roomInfo: UIRoomInfo? = null,
     val userUUID: String,
     val periodicRoomInfo: RoomDetailPeriodic? = null,
+    val allRoomsShown: Boolean = false,
     val loading: Boolean = false,
 ) {
     val isOwner: Boolean
         get() = roomInfo?.ownerUUID == userUUID
-
-    val isPeriodicRoom: Boolean
-        get() = periodicRoomInfo != null
 }
 
 data class UIRoomInfo(

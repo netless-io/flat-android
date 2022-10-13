@@ -70,7 +70,7 @@ fun FlatSecondaryTextButton(
 fun FlatHighlightTextButton(
     text: String,
     icon: Int = 0,
-    color: Color = Red_3,
+    color: Color = Red_6,
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {

@@ -357,12 +357,12 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avat
 @Composable
 internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
     val homeResId = when (selectedTab) {
-        MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.Cloud -> R.drawable.ic_home_main_normal
+        MainTab.Home -> R.drawable.ic_main_home_selected
+        MainTab.Cloud -> R.drawable.ic_main_home_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
-        MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
+        MainTab.Cloud -> R.drawable.ic_main_cloud_selected
+        MainTab.Home -> R.drawable.ic_main_cloud_normal
     }
 
     Column(
@@ -393,12 +393,12 @@ private fun MainBottomBar(
     onTabSelected: (MainTab) -> Unit
 ) {
     val homeResId = when (selectedTab) {
-        MainTab.Home -> R.drawable.ic_home_main_selected
-        MainTab.Cloud -> R.drawable.ic_home_main_normal
+        MainTab.Home -> R.drawable.ic_main_home_selected
+        MainTab.Cloud -> R.drawable.ic_main_home_normal
     }
     val csResId = when (selectedTab) {
-        MainTab.Cloud -> R.drawable.ic_home_cloudstorage_selected
-        MainTab.Home -> R.drawable.ic_home_cloudstorage_normal
+        MainTab.Cloud -> R.drawable.ic_main_cloud_selected
+        MainTab.Home -> R.drawable.ic_main_cloud_normal
     }
 
     Column(modifier) {

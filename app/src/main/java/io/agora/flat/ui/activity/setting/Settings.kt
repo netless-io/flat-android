@@ -142,7 +142,7 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 //     onClick = { Navigator.launchCallTestActivity(context) })
                 // SettingItemDivider()
                 SettingItem(
-                    id = R.drawable.ic_user_profile_feedback,
+                    id = R.drawable.ic_settings_debug,
                     tip = "Debug Tools",
                     onClick = { Navigator.launchDevToolsActivity(context) })
             }

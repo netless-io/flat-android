@@ -2,8 +2,6 @@ package io.agora.flat.ui.activity.cloud.list
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -93,19 +92,19 @@ internal fun CloudScreen(
     var showNewFolder by rememberSaveable { mutableStateOf(false) }
     val refreshing = viewState.loadUiState.refresh == LoadState.Loading
 
-    Column {
-        CloudTopAppBar(
-            viewState,
-            editMode = editMode,
-            onOpenUploading = onOpenUploading,
-            onEditClick = { editMode = true },
-            onNewFolder = { showNewFolder = true },
-            onDeleteClick = onDeleteClick,
-            onDoneClick = { editMode = false },
-            onFolderBack = onFolderBack,
-        )
-        FlatSwipeRefresh(refreshing, onRefresh = onReload) {
-            Box(Modifier.fillMaxSize()) {
+    Box {
+        Column {
+            CloudTopAppBar(
+                viewState,
+                editMode = editMode,
+                onOpenUploading = onOpenUploading,
+                onEditClick = { editMode = true },
+                onNewFolder = { showNewFolder = true },
+                onDeleteClick = onDeleteClick,
+                onDoneClick = { editMode = false },
+                onFolderBack = onFolderBack,
+            )
+            FlatSwipeRefresh(refreshing, onRefresh = onReload) {
                 CloudFileList(
                     modifier = Modifier.fillMaxSize(),
                     loadState = viewState.loadUiState.append,
@@ -119,12 +118,12 @@ internal fun CloudScreen(
                     onPreviewRestrict = onPreviewRestrict,
                     onLoadMore = onLoadMore,
                 )
-                if (isTabletMode()) {
-                    FileAddLayoutPad(onUploadFile)
-                } else {
-                    FileAddLayout(onUploadFile)
-                }
             }
+        }
+        if (isTabletMode()) {
+            FileAddLayoutPad(onUploadFile)
+        } else {
+            FileAddLayout(onUploadFile)
         }
     }
     if (showNewFolder) {
@@ -296,9 +295,10 @@ private fun UploadPickLayout(
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(160.dp * aniValue)
+                .height(PickFileItemHeight * 2 * aniValue)
                 .background(MaterialTheme.colors.surface)
         ) {
+            CloudPickFileGrid(onUploadFile)
             Box(
                 Modifier
                     .align(Alignment.TopCenter)
@@ -307,7 +307,6 @@ private fun UploadPickLayout(
                     painterResource(R.drawable.ic_record_arrow_down), "", Modifier.padding(4.dp)
                 )
             }
-            UploadPickRow(onUploadFile)
         }
     }
 }
@@ -322,47 +321,11 @@ private fun UploadPickDialog(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit
                 )
                 Spacer(Modifier.height(24.dp))
                 Box {
-                    UploadPickRow(onUploadFile)
+                    CloudPickFileGrid(onUploadFile)
                 }
                 Spacer(Modifier.height(24.dp))
             }
         }
-    }
-}
-
-@Composable
-internal fun BoxScope.UploadPickRow(onUploadFile: (uri: Uri, info: ContentInfo) -> Unit) {
-    val launcher: (String) -> Unit = launcherPickContent {
-        onUploadFile(it.uri, it)
-    }
-    Row(Modifier.align(Alignment.Center)) {
-        UploadPickItem(R.drawable.ic_upload_file_image, R.string.cloud_storage_upload_image) {
-            launcher("image/*")
-        }
-        UploadPickItem(R.drawable.ic_upload_file_video, R.string.cloud_storage_upload_video) {
-            launcher("video/*")
-        }
-        UploadPickItem(R.drawable.ic_upload_file_audio, R.string.cloud_storage_upload_music) {
-            launcher("audio/*")
-        }
-        UploadPickItem(R.drawable.ic_upload_file_doc, R.string.cloud_storage_upload_doc) {
-            launcher("*/*")
-        }
-    }
-}
-
-@Composable
-private fun RowScope.UploadPickItem(@DrawableRes id: Int, @StringRes text: Int, onClick: () -> Unit) {
-    Column(
-        Modifier
-            .weight(1F)
-            .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(painterResource(id), contentDescription = "", Modifier.size(48.dp))
-        Spacer(Modifier.height(4.dp))
-        FlatTextOnButton(stringResource(text))
     }
 }
 
@@ -663,7 +626,6 @@ private fun EditNameDialogPreview() {
     }
 }
 
-
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
@@ -704,6 +666,14 @@ private fun CloudStoragePreview() {
 
 @Composable
 @Preview
-private fun UpdatePickDialogPreview() {
+private fun UploadPickLayoutPreview() {
     UploadPickLayout(1f, { _, _ -> }) {}
+}
+
+@Composable
+@Preview(device = Devices.PIXEL_C)
+private fun UpdatePickDialogPreview() {
+    FlatTheme {
+        UploadPickDialog({ _, _ -> }) {}
+    }
 }

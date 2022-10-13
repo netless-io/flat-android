@@ -2,6 +2,7 @@ package io.agora.flat.ui.theme
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -80,7 +81,9 @@ fun FlatTheme(
 ) {
     val colors = if (darkTheme) DarkColorPalette else LightColorPalette
     val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
-    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+    CompositionLocalProvider(
+        LocalExtendedColors provides extendedColors,
+    ) {
         MaterialTheme(
             colors = colors,
             typography = Typography,

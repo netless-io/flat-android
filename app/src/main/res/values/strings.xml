@@ -146,6 +146,7 @@
     <string name="cancel_room">Cancel room</string>
     <string name="remove_room">Remove room</string>
     <string name="delete_history">Delete Record</string>
+    <string name="show_all">Show All</string>
     <string name="say_something">Say something…</string>
     <string name="message_muted">Muted</string>
     <string name="message_unmuted">Unmuted</string>

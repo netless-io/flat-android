@@ -142,7 +142,7 @@ private fun OperationItem(
                 )
             }
             Spacer(Modifier.height(8.dp))
-            FlatTextCaption(stringResource(tip))
+            FlatTextCaption(stringResource(tip), color = FlatTheme.colors.textPrimary)
         }
     }
 }

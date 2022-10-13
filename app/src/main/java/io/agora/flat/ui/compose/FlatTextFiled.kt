@@ -16,9 +16,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.agora.flat.R
 import io.agora.flat.ui.theme.*
 
@@ -123,9 +125,12 @@ fun RoomThemeTextField(
         modifier.onFocusChanged {
             isFocused = it.isFocused
         },
-        textStyle = MaterialTheme.typography.h6.copy(
+        textStyle = TextStyle(
             color = FlatTheme.colors.textPrimary,
-            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
+            fontSize = 20.sp,
+            letterSpacing = 0.15.sp,
+            textAlign = TextAlign.Center
         ),
         cursorBrush = SolidColor(MaterialTheme.colors.primary),
         keyboardOptions = keyboardOptions,

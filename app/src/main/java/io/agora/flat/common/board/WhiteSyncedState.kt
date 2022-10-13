@@ -48,7 +48,7 @@ class WhiteSyncedState @Inject constructor(
         syncedStore = fastRoom.room.syncedStore
         syncedStore.connectStorage(DEVICE_STATE_STORAGE, "{}", object : Promise<String> {
             override fun then(state: String) {
-                logger.d("[deviceState] initial state: $state")
+                logger.d("[SyncedState] deviceState initial state: $state")
                 _devicesFlow.value = getDevicesStates(state)
             }
 
@@ -56,13 +56,13 @@ class WhiteSyncedState @Inject constructor(
             }
         })
         syncedStore.addOnStateChangedListener(DEVICE_STATE_STORAGE) { value, diff ->
-            logger.d("[deviceState] updated: value: $value diff: $diff")
+            logger.d("[SyncedState] deviceState updated: value: $value diff: $diff")
             _devicesFlow.value = getDevicesStates(value)
         }
 
         syncedStore.connectStorage(CLASSROOM_STORAGE, gson.toJson(ClassroomState()), object : Promise<String> {
             override fun then(value: String) {
-                logger.d("[classroom] initial state: $value")
+                logger.d("[SyncedState] classroom initial state: $value")
                 val state = gson.fromJson(value, ClassroomState::class.java)
                 _classroomStateFlow.value = ClassroomState(
                     raiseHandUsers = state.raiseHandUsers,
@@ -74,7 +74,7 @@ class WhiteSyncedState @Inject constructor(
             }
         })
         syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
-            logger.d("[classroom] updated: value: $value diff: $diff")
+            logger.d("[SyncedState] classroom updated: value: $value diff: $diff")
             val state = gson.fromJson(value, ClassroomState::class.java)
             _classroomStateFlow.value = ClassroomState(
                 raiseHandUsers = state.raiseHandUsers,
@@ -84,7 +84,7 @@ class WhiteSyncedState @Inject constructor(
 
         syncedStore.connectStorage(ONSTAGE_USERS_STORAGE, "{}", object : Promise<String> {
             override fun then(state: String) {
-                logger.d("[onStageUsers] initial state: $state")
+                logger.d("[SyncedState] onStageUsers initial state: $state")
                 _onStagesFlow.value = getOnStageUsers(state)
             }
 
@@ -92,7 +92,7 @@ class WhiteSyncedState @Inject constructor(
             }
         })
         syncedStore.addOnStateChangedListener(ONSTAGE_USERS_STORAGE) { value, diff ->
-            logger.d("[onStageUsers] updated: value: $value diff: $diff")
+            logger.d("[SyncedState] onStageUsers updated: value: $value diff: $diff")
             _onStagesFlow.value = getOnStageUsers(value)
         }
 
@@ -110,7 +110,7 @@ class WhiteSyncedState @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            logger.e(e, "devices states parse error")
+            logger.w(e, "[SyncedState] devices states parse error!")
         }
         return deviceStates
     }
@@ -125,7 +125,7 @@ class WhiteSyncedState @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            logger.e(e, "onstage users parse error")
+            logger.e(e, "[SyncedState] onstage users parse error!")
         }
         return onStageUsers
     }

@@ -33,7 +33,9 @@ import io.agora.flat.common.board.DeviceState
 import io.agora.flat.data.model.RoomType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.ui.viewmodel.CreateRoomUiState
 import io.agora.flat.ui.viewmodel.CreateRoomViewModel
@@ -338,13 +340,12 @@ private fun TypeCheckItem(iconPainter: Painter, text: String, checked: Boolean, 
     val icColor = if (checked) {
         MaterialTheme.colors.primary
     } else {
-        if (isDarkTheme()) Gray_6 else Gray_3
+        FlatTheme.colors.textSecondary
     }
-    val textColor = if (isDarkTheme()) Gray_6 else Gray_3
     Box(modifier, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(iconPainter, null, modifier = Modifier.size(48.dp), colorFilter = ColorFilter.tint(icColor))
-            FlatTextCaption(text, color = textColor)
+            FlatTextCaption(text, color = FlatTheme.colors.textPrimary)
         }
     }
 }
