@@ -170,7 +170,9 @@ class ReplayPlayerComponent(
             player.setPlayerContainer(videoContainer)
         }
 
-        videoCombinePlayer = SyncPlayer.combine(*players.toTypedArray())
+        if (players.isNotEmpty()) {
+            videoCombinePlayer = SyncPlayer.combine(*players.toTypedArray())
+        }
     }
 
     private fun generateLayoutParams() = ViewGroup.LayoutParams(
