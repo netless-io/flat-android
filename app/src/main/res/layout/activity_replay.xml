@@ -9,18 +9,18 @@
 
     <FrameLayout
         android:id="@+id/videoListContainer"
-        android:layout_width="@dimen/room_class_video_area_width"
-        android:layout_height="match_parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/room_replay_video_height"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/whiteboardContainer"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/videoListContainer"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/videoListContainer" />
 
     <FrameLayout
         android:id="@+id/toolsContainer"
@@ -28,6 +28,6 @@
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/videoListContainer"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

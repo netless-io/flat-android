@@ -17,7 +17,8 @@ class CloudRecordRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             cloudRecordService.acquireRecord(
                 RecordAcquireReq(
-                    roomUUID, RecordAcquireReqData(RecordAcquireReqDataClientRequest(expiredHour, 0))
+                    roomUUID,
+                    RecordAcquireReqData(RecordAcquireReqDataClientRequest(expiredHour, 0))
                 )
             ).toResult()
         }
@@ -26,20 +27,19 @@ class CloudRecordRepository @Inject constructor(
     suspend fun startRecordWithAgora(
         roomUUID: String,
         resourceId: String,
+        transcodingConfig: TranscodingConfig,
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordStartRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.startRecordWithAgora(
                 RecordStartReq(
                     roomUUID,
-                    AgoraRecordParams(resourceid = resourceId, mode = AgoraRecordMode.Individual),
+                    AgoraRecordParams(resourceId, mode),
                     AgoraRecordStartedData(
                         ClientRequest(
                             RecordingConfig(
                                 subscribeUidGroup = 0,
-                                maxIdleTime = 30,
-                                channelType = 0,
-                                streamMode = "standard",
-                                videoStreamType = 1,
+                                transcodingConfig = transcodingConfig
                             )
                         )
                     )
@@ -50,11 +50,14 @@ class CloudRecordRepository @Inject constructor(
 
     suspend fun queryRecordWithAgora(
         roomUUID: String,
-        resourceId: String,
+        resourceId: String, mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.queryRecordWithAgora(
-                RecordReq(roomUUID, AgoraRecordParams(resourceId, AgoraRecordMode.Individual))
+                RecordReq(
+                    roomUUID,
+                    AgoraRecordParams(resourceId, mode),
+                )
             ).toResult()
         }
     }
@@ -62,13 +65,15 @@ class CloudRecordRepository @Inject constructor(
     suspend fun updateRecordLayoutWithAgora(
         roomUUID: String,
         resourceId: String,
+        sid: String,
         clientRequest: UpdateLayoutClientRequest,
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.updateRecordLayoutWithAgora(
                 RecordUpdateLayoutReq(
                     roomUUID,
-                    AgoraRecordParams(resourceId, AgoraRecordMode.Mix),
+                    AgoraRecordParams(resourceid = resourceId, mode = mode, sid = sid),
                     AgoraRecordUpdateLayoutData(clientRequest)
                 )
             ).toResult()
@@ -79,12 +84,13 @@ class CloudRecordRepository @Inject constructor(
         roomUUID: String,
         resourceId: String,
         sid: String,
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordStopRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.stopRecordWithAgora(
                 RecordReq(
                     roomUUID,
-                    AgoraRecordParams(resourceid = resourceId, mode = AgoraRecordMode.Individual, sid = sid),
+                    AgoraRecordParams(resourceId, mode, sid),
                 )
             ).toResult()
         }

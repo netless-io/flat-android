@@ -1,7 +1,6 @@
 package io.agora.flat.ui.activity.playback
 
 import android.util.Log
-import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.SeekBar
@@ -18,10 +17,10 @@ import com.herewhite.sdk.domain.*
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.model.RecordItem
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
-import io.agora.flat.ui.viewmodel.RelayUiUser
 import io.agora.flat.ui.viewmodel.ReplayViewModel
 import io.agora.flat.util.FlatFormatter
 import kotlinx.coroutines.launch
@@ -94,6 +93,10 @@ class ReplayPlayerComponent(
         whiteBinding.playbackPause.setOnClickListener {
             pausePlayer()
         }
+
+        videoBinding.videoContainer.layoutParams = videoBinding.videoContainer.layoutParams.also {
+            it.width = itemWidth
+        }
     }
 
     private fun startPlayer() {
@@ -150,35 +153,25 @@ class ReplayPlayerComponent(
     private fun observeData() {
         lifecycleScope.launch {
             viewModel.state.collect {
-                if (it.recordInfo != null && it.roomInfo != null) {
-                    if (clusterPlayer == null) {
-                        createVideoPlayer(it.roomInfo.beginTime, it.roomInfo.endTime, it.users)
-                        createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
-                        whiteBinding.playbackTime.text = FlatFormatter.timeMS(it.duration)
-                    }
+                if (it.recordInfo != null && clusterPlayer == null) {
+                    createVideoPlayer(it.recordInfo.recordInfo);
+                    createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
+                    whiteBinding.playbackTime.text = FlatFormatter.timeMS(it.duration)
                 }
             }
         }
     }
 
-    private fun createVideoPlayer(startTime: Long, endTime: Long, users: List<RelayUiUser>) {
-        val players = users.map { user -> VideoPlayer(activity, user.videoUrl) }
-        players.forEach { player ->
-            val itemView = activity.layoutInflater.inflate(R.layout.replay_video_item, null)
-            val videoContainer = itemView.findViewById<FrameLayout>(R.id.video_player_container)
-            videoBinding.videosContainer.addView(itemView, generateLayoutParams())
-            player.setPlayerContainer(videoContainer)
-        }
+    private val itemWidth = activity.resources.getDimensionPixelSize(R.dimen.room_replay_video_width) * 17
 
-        if (players.isNotEmpty()) {
-            videoCombinePlayer = SyncPlayer.combine(*players.toTypedArray())
+    private fun createVideoPlayer(recordItem: List<RecordItem>) {
+        if (recordItem.isNotEmpty()) {
+            val videoPlayer = VideoPlayer(activity, recordItem[0].videoURL)
+            videoPlayer.setPlayerContainer(videoBinding.videoContainer)
+
+            videoCombinePlayer = videoPlayer
         }
     }
-
-    private fun generateLayoutParams() = ViewGroup.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT
-    )
 
     private fun createWhitePlayer(roomUUID: String, roomToken: String) {
         val conf = PlayerConfiguration(roomUUID, roomToken).apply {
@@ -209,27 +202,23 @@ class ReplayPlayerComponent(
                     override fun onPositionChanged(atomPlayer: AtomPlayer, position: Long) {
                         super.onPositionChanged(atomPlayer, position)
                         if (!isSeeking) {
-                            Log.e("Aderan", "duration ${atomPlayer.duration()} position $position")
                             whiteBinding.playbackSeekBar.progress = progress(position)
                             whiteBinding.playbackTime.text = FlatFormatter.timeMS(position)
                             viewModel.updateTime(position)
                         }
                     }
 
-                    override fun onSeekTo(atomPlayer: AtomPlayer, timeMs: Long) {
-                        Log.e("Aderan", "seekTo ${atomPlayer.duration()} position $timeMs")
-                    }
+                    override fun onSeekTo(atomPlayer: AtomPlayer, timeMs: Long) {}
 
                     override fun onPhaseChanged(atomPlayer: AtomPlayer, phase: AtomPlayerPhase) {
-                        Log.e("Aderan", "onPhaseChanged phase $phase")
                         when (phase) {
                             AtomPlayerPhase.Idle -> {}
-                            AtomPlayerPhase.Ready -> {
-                                // seekBar.setMax(atomPlayer.duration().toInt())
-                            }
+                            AtomPlayerPhase.Ready -> {}
                             AtomPlayerPhase.Paused -> {}
                             AtomPlayerPhase.Playing -> {}
-                            AtomPlayerPhase.Buffering -> {}
+                            AtomPlayerPhase.Buffering -> {
+
+                            }
                             AtomPlayerPhase.End -> {
                                 clusterPlayer?.pause()
                                 clusterPlayer?.seekTo(0)
@@ -238,6 +227,7 @@ class ReplayPlayerComponent(
                         }
                     }
                 })
+                clusterPlayer?.prepare()
             }
 
             override fun catchEx(error: SDKError) {

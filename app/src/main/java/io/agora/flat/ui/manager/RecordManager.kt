@@ -2,10 +2,7 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.BackgroundConfig
-import io.agora.flat.data.model.LayoutConfig
-import io.agora.flat.data.model.RoomUser
-import io.agora.flat.data.model.UpdateLayoutClientRequest
+import io.agora.flat.data.model.*
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.util.Ticker
 import kotlinx.coroutines.CoroutineScope
@@ -21,9 +18,6 @@ class RecordManager @Inject constructor(
     private val cloudRecordRepository: CloudRecordRepository,
     private val userManager: UserManager,
 ) {
-    private val width = 120 * 3
-    private val height = 360 * 3
-
     lateinit var viewModelScope: CoroutineScope
     lateinit var roomUUID: String
 
@@ -37,9 +31,13 @@ class RecordManager @Inject constructor(
         viewModelScope = scope
 
         viewModelScope.launch {
-            userManager.observeUsers().collect {
+            userManager.observeUsers().collect { users ->
                 // TODO here ensure isSpeak or onStage contains owners
-                videoUsers.value = it.filter { value -> value.isSpeak }
+                val sortedList = users
+                    .filter { value -> value.isOnStage && !value.isOwner }
+                    .sortedBy { user -> user.rtcUID }
+                val owner = users.filter { it.isOwner }
+                videoUsers.value = owner + sortedList;
             }
         }
     }
@@ -54,24 +52,25 @@ class RecordManager @Inject constructor(
             val startResp = cloudRecordRepository.startRecordWithAgora(
                 roomUUID,
                 acquireResp.data.resourceId,
+                transcodingConfig()
             )
             if (startResp is Success) {
-                recordState.value = RecordState(resourceId = startResp.data.resourceId, sid = startResp.data.sid)
-                // startTimer()
+                recordState.value = RecordState(
+                    resourceId = startResp.data.resourceId,
+                    sid = startResp.data.sid
+                )
+                startTimer()
             }
         }
     }
 
     suspend fun stopRecord() {
         recordState.value?.run {
-            val resp = cloudRecordRepository.stopRecordWithAgora(
-                roomUUID,
-                resourceId,
-                sid,
-            )
-            if (resp.isSuccess) {
+            val resp = cloudRecordRepository.stopRecordWithAgora(roomUUID, resourceId, sid)
+            if (resp is Success) {
                 recordState.value = null
             }
+            stopTimer()
         }
     }
 
@@ -96,9 +95,27 @@ class RecordManager @Inject constructor(
                 layoutConfig = getLayoutConfig(),
                 backgroundConfig = getBackgroundConfig(),
             )
-            cloudRecordRepository.updateRecordLayoutWithAgora(roomUUID, recordState.value!!.resourceId, config)
+            cloudRecordRepository.updateRecordLayoutWithAgora(
+                roomUUID,
+                recordState.value!!.resourceId,
+                recordState.value!!.sid,
+                config
+            )
         }
     }
+
+    private val width = 144 * 17
+    private val height = 108
+
+    private fun transcodingConfig() = TranscodingConfig(
+        width,
+        height,
+        15,
+        500,
+        mixedVideoLayout = 3,
+        layoutConfig = getLayoutConfig(),
+        backgroundConfig = getBackgroundConfig()
+    )
 
     private fun getBackgroundConfig(): List<BackgroundConfig> {
         return videoUsers.value.map { user: RoomUser ->
@@ -110,10 +127,10 @@ class RecordManager @Inject constructor(
         return videoUsers.value.mapIndexed { index: Int, user: RoomUser ->
             LayoutConfig(
                 uid = user.rtcUID.toString(),
-                x_axis = 12f / 120,
-                y_axis = (8f + index * 80) / 360,
-                width = 96f / 120,
-                height = 72f / 360,
+                x_axis = index * 144 / width.toFloat(),
+                y_axis = 0f,
+                width = 144 / width.toFloat(),
+                height = 108 / height.toFloat(),
             )
         }
     }

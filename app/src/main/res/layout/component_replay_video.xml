@@ -3,16 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout_width="@dimen/room_class_button_size">
+    tools:layout_height="@dimen/room_replay_video_height">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/videos_container"
+    <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" />
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/video_container"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </HorizontalScrollView>
 
     <View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="#DBE1EA" />
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="@color/flat_day_night_divider" />
 </FrameLayout>

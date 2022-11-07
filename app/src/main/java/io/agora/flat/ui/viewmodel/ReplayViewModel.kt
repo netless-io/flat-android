@@ -1,6 +1,5 @@
 package io.agora.flat.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,12 +13,9 @@ import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.data.repository.RoomRepository
-import io.agora.flat.util.UrlUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,56 +38,31 @@ class ReplayViewModel @Inject constructor(
                     if (roomInfo.roomStatus != RoomStatus.Stopped) {
                         return@launch
                     }
-                    var videoUrl: String? = null
-                    var recordInfo: RecordInfo? = null
                     when (val recordResp = cloudRecordRepository.getRecordInfo(roomUUID)) {
                         is Success -> {
                             messageQuery.update(roomUUID, roomInfo.beginTime, roomInfo.endTime)
-                            recordInfo = recordResp.data
-                            videoUrl = recordResp.data.recordInfo.firstOrNull()?.videoURL
+                            _state.value = state.value.copy(
+                                recordInfo = recordResp.data,
+                                roomInfo = roomInfo
+                            )
                         }
                         is Failure -> {
-                            // request record info error
-                            // LOCAL_REPLAY_ERROR_REQUEST_RECORD
-                        }
-                    }
-                    if (videoUrl != null) {
-                        when (val usersResp = roomRepository.getRoomUsers(roomUUID, null)) {
-                            is Success -> {
-                                val users = usersResp.data.map {
-                                    RelayUiUser(
-                                        userUUID = it.key,
-                                        rtcUID = it.value.rtcUID,
-                                        name = it.value.name,
-                                        avatarURL = it.value.avatarURL,
-                                        videoUrl = videoUrl.replace(
-                                            ".m3u8", "__uid_s_${it.value.rtcUID}__uid_e_av.m3u8"
-                                        ),
-                                    )
-                                }.filter { user ->
-                                    withContext(Dispatchers.IO) {
-                                        UrlUtils.isResourceExisted(user.videoUrl)
-                                    }
-                                }
-                                Log.e("Aderan", users.toString())
-                                _state.value = _state.value.copy(
-                                    users = users, recordInfo = recordInfo, roomInfo = roomInfo
-                                )
-                            }
-                            is Failure -> {}
+
                         }
                     }
                 }
-                is Failure -> {}
+                is Failure -> {
+
+                }
             }
         }
     }
 
     fun updateTime(time: Long) {
-        // viewModelScope.launch {
-        //     val msgs = messageQuery.query(time)
-        //     _state.value = _state.value.copy(messages = msgs.toList())
-        // }
+        viewModelScope.launch {
+            val msgs = messageQuery.query(time)
+            _state.value = _state.value.copy(messages = msgs.toList())
+        }
     }
 }
 

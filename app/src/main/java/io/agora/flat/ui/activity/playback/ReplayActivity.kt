@@ -19,7 +19,7 @@ class ReplayActivity : BaseActivity() {
         initSystemUI()
 
         componentSet.add(ReplayPlayerComponent(this, binding.whiteboardContainer, binding.videoListContainer))
-        // componentSet.add(ReplayToolComponent(this, binding.toolsContainer))
+        componentSet.add(ReplayToolComponent(this, binding.toolsContainer))
         componentSet.forEach { lifecycle.addObserver(it) }
     }
 
