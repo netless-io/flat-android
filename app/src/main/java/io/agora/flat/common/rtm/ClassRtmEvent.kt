@@ -66,7 +66,7 @@ data class RaiseHandEvent(
 data class RoomStateEvent(
     override var sender: String? = null,
     val roomUUID: String,
-    val state: RoomStatus,
+    val status: RoomStatus,
 ) : ClassRtmEvent(), EventWithSender
 
 data class RoomBanEvent(

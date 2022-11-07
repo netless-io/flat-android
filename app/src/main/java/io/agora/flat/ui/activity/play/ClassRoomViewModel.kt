@@ -257,6 +257,11 @@ class ClassRoomViewModel @Inject constructor(
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
                 }
             }
+            is RoomStateEvent -> {
+                state.value?.run {
+                    _state.value = this.copy(roomStatus = event.status)
+                }
+            }
             is OnMemberJoined -> {
                 userManager.addUser(event.userId)
             }
@@ -441,7 +446,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
-                rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, state = RoomStatus.Started))
+                rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, status = RoomStatus.Started))
                 _state.value = state.copy(roomStatus = RoomStatus.Started)
             }
         }
@@ -450,7 +455,7 @@ class ClassRoomViewModel @Inject constructor(
     suspend fun pauseClass(): Boolean {
         val result = roomRepository.pauseRoomClass(roomUUID)
         if (result.isSuccess) {
-            rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, state = RoomStatus.Paused))
+            rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, status = RoomStatus.Paused))
         }
         return result.isSuccess
     }
@@ -458,7 +463,7 @@ class ClassRoomViewModel @Inject constructor(
     suspend fun stopClass(): Boolean {
         val result = roomRepository.stopRoomClass(roomUUID)
         if (result.isSuccess) {
-            rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, state = RoomStatus.Stopped))
+            rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, status = RoomStatus.Stopped))
             recordManager.stopRecord()
         }
         return result.isSuccess
