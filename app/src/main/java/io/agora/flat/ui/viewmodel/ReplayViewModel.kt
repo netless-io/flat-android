@@ -59,10 +59,10 @@ class ReplayViewModel @Inject constructor(
     }
 
     fun updateTime(time: Long) {
-        viewModelScope.launch {
-            val msgs = messageQuery.query(time)
-            _state.value = _state.value.copy(messages = msgs.toList())
-        }
+        // viewModelScope.launch {
+        //     val msgs = messageQuery.query(time)
+        //     _state.value = _state.value.copy(messages = msgs.toList())
+        // }
     }
 }
 

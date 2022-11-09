@@ -27,15 +27,15 @@
 
             <ImageView
                 android:id="@+id/playback_start"
-                android:layout_width="@dimen/room_class_button_size"
-                android:layout_height="@dimen/room_class_button_size"
+                android:layout_width="@dimen/room_class_button_area_size"
+                android:layout_height="@dimen/room_class_button_area_size"
                 android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_playback_start" />
 
             <ImageView
                 android:id="@+id/playback_pause"
-                android:layout_width="@dimen/room_class_button_size"
-                android:layout_height="@dimen/room_class_button_size"
+                android:layout_width="@dimen/room_class_button_area_size"
+                android:layout_height="@dimen/room_class_button_area_size"
                 android:padding="@dimen/room_class_button_gap"
                 android:src="@drawable/ic_playback_pause"
                 android:visibility="gone" />
@@ -62,4 +62,14 @@
             android:textColor="@color/flat_white"
             android:textSize="14sp" />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/flat_day_night_primary_blue"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

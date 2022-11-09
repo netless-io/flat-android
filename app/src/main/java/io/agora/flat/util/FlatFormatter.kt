@@ -7,14 +7,14 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object FlatFormatter {
-    private val timeFormatter = SimpleDateFormat("HH:mm")
+    private val timeHmFormatter = SimpleDateFormat("HH:mm")
     private val timeMsFormatter = SimpleDateFormat("mm:ss")
     private val dateFormat = SimpleDateFormat("MM-dd")
     private val longDateFormat = SimpleDateFormat("yyyy/MM/dd")
     private val longDateWithWeekFormat = SimpleDateFormat("yyyy/MM/dd EE", Locale.CHINA)
 
-    fun time(utcMs: Long): String {
-        return timeFormatter.format(utcMs)
+    fun timeHM(utcMs: Long): String {
+        return timeHmFormatter.format(utcMs)
     }
 
     fun timeMS(utcMs: Long): String {
@@ -34,7 +34,7 @@ object FlatFormatter {
     }
 
     fun timeDuring(beginMs: Long, endMs: Long): String {
-        return "${timeFormatter.format(beginMs)} ~ ${timeFormatter.format(endMs)}"
+        return "${timeHmFormatter.format(beginMs)} ~ ${timeHmFormatter.format(endMs)}"
     }
 
     fun diffTime(context: Context, begin: Long, end: Long): String {
@@ -51,13 +51,16 @@ object FlatFormatter {
         return context.getString(R.string.relative_time_dd, TimeUnit.MILLISECONDS.toDays(diff))
     }
 
-    fun timeStarted(beginMs: Long, endMs: Long): String {
-        val second = (endMs - beginMs) / 1000
-        var s = second % 60
-        var m = second % 3600 / 60
-        var h = second / 3600
-
-        return String.format("%02d:%02d:%02d", h, m, s)
+    fun timeDisplay(timeMs: Long): String {
+        val second = timeMs / 1000
+        val s = second % 60
+        val m = second % 3600 / 60
+        val h = second / 3600
+        return if (h > 0) {
+            String.format("%02d:%02d:%02d", h, m, s)
+        } else {
+            String.format("%02d:%02d", m, s)
+        }
     }
 
     fun size(size: Long): String {

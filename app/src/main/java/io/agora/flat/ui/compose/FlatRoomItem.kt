@@ -80,7 +80,7 @@ private fun RoomItemTime(roomStatus: RoomStatus, beginTime: Long, endTime: Long)
             FlatTextBodyTwo(
                 stringResource(
                     R.string.home_room_info_started_format,
-                    FlatFormatter.time(System.currentTimeMillis() - beginTime)
+                    FlatFormatter.timeHM(System.currentTimeMillis() - beginTime)
                 ), color = if (isDarkTheme()) Green_7 else Green_6
             )
         }

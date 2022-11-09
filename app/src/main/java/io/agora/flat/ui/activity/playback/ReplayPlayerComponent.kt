@@ -13,16 +13,23 @@ import com.herewhite.sdk.CommonCallback
 import com.herewhite.sdk.Player
 import com.herewhite.sdk.WhiteSdk
 import com.herewhite.sdk.WhiteSdkConfiguration
-import com.herewhite.sdk.domain.*
+import com.herewhite.sdk.domain.PlayerConfiguration
+import com.herewhite.sdk.domain.Promise
+import com.herewhite.sdk.domain.SDKError
+import com.herewhite.sdk.domain.WindowParams
+import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
+import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.RecordItem
+import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
 import io.agora.flat.ui.viewmodel.ReplayViewModel
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.isDarkMode
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -58,6 +65,11 @@ class ReplayPlayerComponent(
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
+
+        val whiteboardView = whiteBinding.whiteboardView
+        whiteboardView.removeAllViews()
+        whiteboardView.destroy()
+
         clusterPlayer?.release()
     }
 
@@ -67,11 +79,11 @@ class ReplayPlayerComponent(
 
         whiteBinding.playbackSeekBar.max = SEEK_BAR_MAX_PROGRESS
         whiteBinding.playbackSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            private var targetProgress: Long = -1
+            private var targetProgress: Int = -1
 
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    targetProgress = progress.toLong()
+                    targetProgress = progress
                 }
             }
 
@@ -82,8 +94,8 @@ class ReplayPlayerComponent(
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isSeeking = false
-                if (targetProgress != -1L) {
-                    clusterPlayer?.seekTo((targetProgress * viewModel.state.value.duration / SEEK_BAR_MAX_PROGRESS))
+                if (targetProgress != -1) {
+                    clusterPlayer?.seekTo(toPosition(targetProgress))
                 }
             }
         })
@@ -94,9 +106,18 @@ class ReplayPlayerComponent(
             pausePlayer()
         }
 
-        videoBinding.videoContainer.layoutParams = videoBinding.videoContainer.layoutParams.also {
+        videoBinding.videosContainer.layoutParams = videoBinding.videosContainer.layoutParams.also {
             it.width = itemWidth
         }
+    }
+
+    private fun toPosition(progress: Int): Long {
+        return (progress * viewModel.state.value.duration / SEEK_BAR_MAX_PROGRESS)
+    }
+
+    private fun toProgress(position: Long, duration: Long = viewModel.state.value.duration): Int {
+        val percent = if (duration > 0L) position * 1f / duration else 0f
+        return (percent * SEEK_BAR_MAX_PROGRESS).toInt()
     }
 
     private fun startPlayer() {
@@ -153,10 +174,10 @@ class ReplayPlayerComponent(
     private fun observeData() {
         lifecycleScope.launch {
             viewModel.state.collect {
-                if (it.recordInfo != null && clusterPlayer == null) {
-                    createVideoPlayer(it.recordInfo.recordInfo);
-                    createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken)
-                    whiteBinding.playbackTime.text = FlatFormatter.timeMS(it.duration)
+                if (it.recordInfo != null && it.roomInfo != null && clusterPlayer == null) {
+                    createVideoPlayer(it.roomInfo, it.recordInfo.recordInfo)
+                    createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken, it.duration)
+                    whiteBinding.playbackTime.text = getPlaybackTime()
                 }
             }
         }
@@ -164,16 +185,22 @@ class ReplayPlayerComponent(
 
     private val itemWidth = activity.resources.getDimensionPixelSize(R.dimen.room_replay_video_width) * 17
 
-    private fun createVideoPlayer(recordItem: List<RecordItem>) {
-        if (recordItem.isNotEmpty()) {
-            val videoPlayer = VideoPlayer(activity, recordItem[0].videoURL)
-            videoPlayer.setPlayerContainer(videoBinding.videoContainer)
-
-            videoCombinePlayer = videoPlayer
+    private fun createVideoPlayer(roomInfo: RoomInfo, recordItems: List<RecordItem>) {
+        if (recordItems.isNotEmpty()) {
+            val videoItems = recordItems.map {
+                VideoItem(
+                    beginTime = it.beginTime - roomInfo.beginTime,
+                    endTime = it.endTime - roomInfo.beginTime,
+                    videoURL = it.videoURL
+                )
+            }
+            val player = MultiVideoPlayer(activity, videoItems)
+            player.setPlayerContainer(videoBinding.videosContainer)
+            videoCombinePlayer = player
         }
     }
 
-    private fun createWhitePlayer(roomUUID: String, roomToken: String) {
+    private fun createWhitePlayer(roomUUID: String, roomToken: String, duration: Long) {
         val conf = PlayerConfiguration(roomUUID, roomToken).apply {
             val styleMap = hashMapOf(
                 "bottom" to "30px",
@@ -186,8 +213,10 @@ class ReplayPlayerComponent(
                 .setDebug(true)
                 .setCollectorStyles(styleMap)
                 .setContainerSizeRatio(9.0f / 16)
-            windowParams.prefersColorScheme = WindowPrefersColorScheme.Auto
+            windowParams.scrollVerticalOnly = true
+            windowParams.prefersColorScheme = if (activity.isDarkMode()) Dark else Light
         }
+        conf.duration = duration
 
         whiteSdk.createPlayer(conf, object : Promise<Player> {
             override fun then(player: Player) {
@@ -202,8 +231,8 @@ class ReplayPlayerComponent(
                     override fun onPositionChanged(atomPlayer: AtomPlayer, position: Long) {
                         super.onPositionChanged(atomPlayer, position)
                         if (!isSeeking) {
-                            whiteBinding.playbackSeekBar.progress = progress(position)
-                            whiteBinding.playbackTime.text = FlatFormatter.timeMS(position)
+                            whiteBinding.playbackSeekBar.progress = toProgress(position)
+                            whiteBinding.playbackTime.text = getPlaybackTime(position)
                             viewModel.updateTime(position)
                         }
                     }
@@ -214,8 +243,12 @@ class ReplayPlayerComponent(
                         when (phase) {
                             AtomPlayerPhase.Idle -> {}
                             AtomPlayerPhase.Ready -> {}
-                            AtomPlayerPhase.Paused -> {}
-                            AtomPlayerPhase.Playing -> {}
+                            AtomPlayerPhase.Paused -> {
+                                setPlaying(false)
+                            }
+                            AtomPlayerPhase.Playing -> {
+                                setPlaying(true)
+                            }
                             AtomPlayerPhase.Buffering -> {
 
                             }
@@ -225,6 +258,7 @@ class ReplayPlayerComponent(
                                 setPlaying(false)
                             }
                         }
+                        showLoading(AtomPlayerPhase.Buffering == phase)
                     }
                 })
                 clusterPlayer?.prepare()
@@ -237,8 +271,15 @@ class ReplayPlayerComponent(
         })
     }
 
-    private fun progress(position: Long, duration: Long = viewModel.state.value.duration): Int {
-        val percent = if (duration > 0L) position * 1f / duration else 0f
-        return (percent * SEEK_BAR_MAX_PROGRESS).toInt()
+    private fun showLoading(show: Boolean) {
+        whiteBinding.progressBar.isVisible = show
+    }
+
+    private fun getPlaybackTime(position: Long? = null): String {
+        return if (position != null) {
+            "${FlatFormatter.timeDisplay(position)}/${FlatFormatter.timeDisplay(viewModel.state.value.duration)}"
+        } else {
+            FlatFormatter.timeDisplay(viewModel.state.value.duration)
+        }
     }
 }
