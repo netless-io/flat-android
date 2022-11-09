@@ -47,11 +47,11 @@ class AgoraBoardRoom @Inject constructor(
     private var darkMode: Boolean = false
     private var rootRoomController: RoomControllerGroup? = null
     private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
-    private val context: Context by lazy { fastboardView.context }
+    private val activityContext: Context by lazy { fastboardView.context }
     private val flatNetlessUA: List<String> by lazy {
         listOf(
             "fastboard/${Fastboard.VERSION}",
-            "FLAT/NETLESS@${context.getAppVersion()}",
+            "FLAT/NETLESS@${activityContext.getAppVersion()}",
         )
     }
 
@@ -130,15 +130,15 @@ class AgoraBoardRoom @Inject constructor(
 
         val fastResource = object : FastResource() {
             override fun createApplianceBackground(darkMode: Boolean): Drawable? {
-                return ContextCompat.getDrawable(context, R.drawable.ic_class_room_icon_bg)
+                return ContextCompat.getDrawable(activityContext, R.drawable.ic_class_room_icon_bg)
             }
 
             override fun getIconColor(darkMode: Boolean): ColorStateList? {
-                return ContextCompat.getColorStateList(context, R.color.color_class_room_icon)
+                return ContextCompat.getColorStateList(activityContext, R.color.color_class_room_icon)
             }
 
             override fun getLayoutBackground(darkMode: Boolean): Drawable? {
-                return ContextCompat.getDrawable(context, R.drawable.shape_gray_border_round_8_bg)
+                return ContextCompat.getDrawable(activityContext, R.drawable.shape_gray_border_round_8_bg)
             }
         }
         fastRoom?.setResource(fastResource)
@@ -151,10 +151,10 @@ class AgoraBoardRoom @Inject constructor(
 
     private fun getCollectorStyle(): HashMap<String, String> {
         val styleMap = HashMap<String, String>()
-        styleMap["top"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
-        styleMap["right"] = "${context.dp(R.dimen.flat_gap_2_0)}px"
-        styleMap["width"] = "${context.dp(R.dimen.room_class_button_area_size)}px"
-        styleMap["height"] = "${context.dp(R.dimen.room_class_button_area_size)}px"
+        styleMap["top"] = "${activityContext.dp(R.dimen.flat_gap_2_0)}px"
+        styleMap["right"] = "${activityContext.dp(R.dimen.flat_gap_2_0)}px"
+        styleMap["width"] = "${activityContext.dp(R.dimen.room_class_button_area_size)}px"
+        styleMap["height"] = "${activityContext.dp(R.dimen.room_class_button_area_size)}px"
         styleMap["position"] = "fixed"
         styleMap["border-radius"] = "8px"
         styleMap["border"] = "1px solid rgba(0,0,0,.15)"
