@@ -21,7 +21,7 @@ import io.agora.flat.R
 import io.agora.flat.common.FlatBoardException
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.BoardRoom
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.util.dp
@@ -40,7 +40,7 @@ class AgoraBoardRoom @Inject constructor(
     val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,
     val logger: Logger
-) : IBoardRoom {
+) : BoardRoom {
     private lateinit var fastboard: Fastboard
     private lateinit var fastboardView: FastboardView
     private var fastRoom: FastRoom? = null

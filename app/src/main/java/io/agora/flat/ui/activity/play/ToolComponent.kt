@@ -18,7 +18,7 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.databinding.ComponentToolBinding
-import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.BoardRoom
 import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -36,7 +36,7 @@ class ToolComponent(
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {
-        fun boardRoom(): IBoardRoom
+        fun boardRoom(): BoardRoom
         fun appEnv(): AppEnv
     }
 
@@ -44,7 +44,7 @@ class ToolComponent(
     private lateinit var toolAnimator: SimpleAnimator
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
-    private lateinit var boardRoom: IBoardRoom
+    private lateinit var boardRoom: BoardRoom
     private lateinit var appEnv: AppEnv
     private lateinit var userListAdapter: UserListAdapter
 

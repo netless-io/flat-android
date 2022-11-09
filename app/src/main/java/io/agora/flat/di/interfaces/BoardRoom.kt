@@ -6,7 +6,7 @@ import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.common.board.BoardRoomPhase
 import kotlinx.coroutines.flow.Flow
 
-interface IBoardRoom {
+interface BoardRoom {
     fun initSdk(fastboardView: FastboardView)
 
     fun setDarkMode(dark: Boolean)

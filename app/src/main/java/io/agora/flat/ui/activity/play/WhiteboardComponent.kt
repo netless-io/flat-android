@@ -9,7 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.databinding.ComponentWhiteboardBinding
-import io.agora.flat.di.interfaces.IBoardRoom
+import io.agora.flat.di.interfaces.BoardRoom
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.util.isDarkMode
 
@@ -21,11 +21,11 @@ class WhiteboardComponent(
     @EntryPoint
     @InstallIn(ActivityComponent::class)
     interface BoardComponentEntryPoint {
-        fun boardRoom(): IBoardRoom
+        fun boardRoom(): BoardRoom
     }
 
     private lateinit var binding: ComponentWhiteboardBinding
-    private lateinit var boardRoom: IBoardRoom
+    private lateinit var boardRoom: BoardRoom
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
