@@ -13,7 +13,7 @@ interface IBoardRoom {
 
     fun setRoomController(rootRoomController: RoomControllerGroup)
 
-    fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean)
+    suspend fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean): Boolean
 
     fun release()
 

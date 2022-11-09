@@ -65,7 +65,12 @@ class BoardRoom @Inject constructor(
         fastRoom?.rootRoomController = rootRoomController
     }
 
-    override fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean) {
+    override suspend fun join(
+        roomUUID: String,
+        roomToken: String,
+        region: String,
+        writable: Boolean
+    ): Boolean = suspendCoroutine { cont ->
         val fastRoomOptions = FastRoomOptions(
             Constants.NETLESS_APP_IDENTIFIER,
             roomUUID,
@@ -139,7 +144,9 @@ class BoardRoom @Inject constructor(
         fastRoom?.setResource(fastResource)
         setDarkMode(darkMode)
 
-        fastRoom?.join()
+        fastRoom?.join {
+            cont.resume(true)
+        }
     }
 
     private fun getCollectorStyle(): HashMap<String, String> {
@@ -171,6 +178,7 @@ class BoardRoom @Inject constructor(
     override suspend fun setWritable(writable: Boolean): Boolean = suspendCoroutine {
         if (fastRoom?.isWritable == writable) {
             it.resume(writable)
+            return@suspendCoroutine
         }
         fastRoom?.room?.setWritable(writable, object : Promise<Boolean> {
             override fun then(success: Boolean) {

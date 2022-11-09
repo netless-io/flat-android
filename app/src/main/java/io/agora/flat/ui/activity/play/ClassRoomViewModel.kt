@@ -112,6 +112,7 @@ class ClassRoomViewModel @Inject constructor(
                 joinBoard()
                 joinRtm()
                 joinRtc()
+                syncInitState()
                 observerUserState()
                 if (quickStart) startClass()
             }
@@ -183,7 +184,7 @@ class ClassRoomViewModel @Inject constructor(
         _state.value = initState
     }
 
-    private fun joinBoard() {
+    private suspend fun joinBoard() {
         logger.i("[BOARD] start joining board room")
         state.value?.let {
             boardRoom.join(it.boardUUID, it.boardToken, it.region, it.allowDraw)
@@ -276,6 +277,18 @@ class ClassRoomViewModel @Inject constructor(
             }
             else -> {
                 logger.w("[RTM] event not handled: $event")
+            }
+        }
+    }
+
+    private fun syncInitState() {
+        state.value?.run {
+            if (isSpeak) {
+                syncedClassState.updateDeviceState(
+                    userId = userUUID,
+                    camera = videoOpen,
+                    mic = audioOpen
+                )
             }
         }
     }
