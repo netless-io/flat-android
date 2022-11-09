@@ -11,7 +11,7 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
@@ -32,7 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassCloudViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
-    private val boardRoom: BoardRoom,
+    private val boardRoom: AgoraBoardRoom,
 ) : ViewModel() {
     private val dirPath = MutableStateFlow(CLOUD_ROOT_DIR)
     private val loadUiState = MutableStateFlow(LoadUiState.Init)

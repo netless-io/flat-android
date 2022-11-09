@@ -35,7 +35,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @ActivityRetainedScoped
-class BoardRoom @Inject constructor(
+class AgoraBoardRoom @Inject constructor(
     val userRepository: UserRepository,
     val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,

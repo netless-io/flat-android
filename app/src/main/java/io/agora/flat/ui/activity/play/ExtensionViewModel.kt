@@ -3,7 +3,7 @@ package io.agora.flat.ui.activity.play
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.common.board.BoardRoomPhase
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.util.UiMessage
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ExtensionViewModel @Inject constructor(
     private val errorManager: RoomErrorManager,
-    private val boardRoom: BoardRoom,
+    private val boardRoom: AgoraBoardRoom,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExtensionState())
     val state = _state.asStateFlow()

@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.android.ClipboardController
-import io.agora.flat.common.board.BoardRoom
+import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.common.board.DeviceState
 import io.agora.flat.common.rtc.RtcJoinOptions
 import io.agora.flat.common.rtm.*
@@ -50,7 +50,7 @@ class ClassRoomViewModel @Inject constructor(
     private val rtmApi: RtmApi,
     private val rtcApi: RtcApi,
     private val rtcVideoController: RtcVideoController,
-    private val boardRoom: BoardRoom,
+    private val boardRoom: AgoraBoardRoom,
     private val syncedClassState: SyncedClassState,
     private val eventbus: EventBus,
     private val clipboard: ClipboardController,
