@@ -23,7 +23,6 @@ import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.RecordItem
-import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
@@ -175,8 +174,13 @@ class ReplayPlayerComponent(
         lifecycleScope.launch {
             viewModel.state.collect {
                 if (it.recordInfo != null && it.roomInfo != null && clusterPlayer == null) {
-                    createVideoPlayer(it.roomInfo, it.recordInfo.recordInfo)
-                    createWhitePlayer(it.recordInfo.whiteboardRoomUUID, it.recordInfo.whiteboardRoomToken, it.duration)
+                    createVideoPlayer(it.recordInfo.recordInfo, it.beginTime)
+                    createWhitePlayer(
+                        it.recordInfo.whiteboardRoomUUID,
+                        it.recordInfo.whiteboardRoomToken,
+                        it.beginTime,
+                        it.duration
+                    )
                     whiteBinding.playbackTime.text = getPlaybackTime()
                 }
             }
@@ -185,12 +189,12 @@ class ReplayPlayerComponent(
 
     private val itemWidth = activity.resources.getDimensionPixelSize(R.dimen.room_replay_video_width) * 17
 
-    private fun createVideoPlayer(roomInfo: RoomInfo, recordItems: List<RecordItem>) {
+    private fun createVideoPlayer(recordItems: List<RecordItem>, beginTime: Long) {
         if (recordItems.isNotEmpty()) {
             val videoItems = recordItems.map {
                 VideoItem(
-                    beginTime = it.beginTime - roomInfo.beginTime,
-                    endTime = it.endTime - roomInfo.beginTime,
+                    beginTime = it.beginTime - beginTime,
+                    endTime = it.endTime - beginTime,
                     videoURL = it.videoURL
                 )
             }
@@ -200,7 +204,7 @@ class ReplayPlayerComponent(
         }
     }
 
-    private fun createWhitePlayer(roomUUID: String, roomToken: String, duration: Long) {
+    private fun createWhitePlayer(roomUUID: String, roomToken: String, beginTime: Long, duration: Long) {
         val conf = PlayerConfiguration(roomUUID, roomToken).apply {
             val styleMap = hashMapOf(
                 "bottom" to "30px",
@@ -216,6 +220,7 @@ class ReplayPlayerComponent(
             windowParams.scrollVerticalOnly = true
             windowParams.prefersColorScheme = if (activity.isDarkMode()) Dark else Light
         }
+        conf.beginTimestamp = beginTime
         conf.duration = duration
 
         whiteSdk.createPlayer(conf, object : Promise<Player> {
@@ -242,7 +247,8 @@ class ReplayPlayerComponent(
                     override fun onPhaseChanged(atomPlayer: AtomPlayer, phase: AtomPlayerPhase) {
                         when (phase) {
                             AtomPlayerPhase.Idle -> {}
-                            AtomPlayerPhase.Ready -> {}
+                            AtomPlayerPhase.Ready -> {
+                            }
                             AtomPlayerPhase.Paused -> {
                                 setPlaying(false)
                             }

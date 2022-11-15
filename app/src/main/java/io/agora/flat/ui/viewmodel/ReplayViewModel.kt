@@ -75,7 +75,12 @@ data class ReplayUiState(
     val isPlayer: Boolean = false,
 ) {
     val duration: Long
-        get() = (roomInfo?.run { endTime - beginTime }) ?: 0L
+        get() = recordInfo?.recordInfo?.run {
+            this.last().endTime - this.first().beginTime
+        } ?: 0L
+
+    val beginTime: Long
+        get() = (recordInfo?.recordInfo?.first()?.beginTime) ?: roomInfo?.beginTime ?: 0L
 }
 
 data class RelayUiUser(
