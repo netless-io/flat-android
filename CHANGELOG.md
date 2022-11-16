@@ -1,6 +1,13 @@
 # Changelog
 
+## [2.0.0] - November 16, 2022
+
+- New UI Style
+- New Classroom state controller
+- New Cloud Storage Manager
+
 ## [1.4.6] - August 16, 2022
+
 - Fix Bugs
 
 ## [1.4.2] - August 02, 2022
