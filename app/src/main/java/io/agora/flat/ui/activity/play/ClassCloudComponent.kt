@@ -10,12 +10,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.agora.flat.R
 import io.agora.flat.data.model.CLOUD_ROOT_DIR
+import io.agora.flat.data.model.FileConvertStep
 import io.agora.flat.data.model.LoadState
 import io.agora.flat.data.model.ResourceType
 import io.agora.flat.databinding.ComponentCloudBinding
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.FooterAdapter
 import io.agora.flat.util.folderName
+import io.agora.flat.util.showToast
 
 class ClassCloudComponent(
     activity: ClassRoomActivity,
@@ -74,8 +76,12 @@ class ClassCloudComponent(
                     viewModel.enterFolder(it.fileName)
                 }
                 else -> {
-                    viewModel.insertCourseware(it)
-                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
+                    if (it.convertStep == FileConvertStep.Done) {
+                        viewModel.insertCourseware(it)
+                        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_CLOUD_STORAGE, false)
+                    } else {
+                        activity.showToast(R.string.cloud_preview_transcoding_hint)
+                    }
                 }
             }
         }
