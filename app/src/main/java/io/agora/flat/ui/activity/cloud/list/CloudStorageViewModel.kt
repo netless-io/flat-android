@@ -142,7 +142,7 @@ class CloudStorageViewModel @Inject constructor(
     private fun checkConvertState(file: CloudFile) {
         when (file.convertStep) {
             FileConvertStep.None -> {
-                startConvert(file.fileURL)
+                startConvert(file.fileUUID)
             }
             FileConvertStep.Converting -> {
                 if (file.resourceType == ResourceType.WhiteboardConvert) {
