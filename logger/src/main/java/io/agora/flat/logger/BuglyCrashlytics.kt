@@ -6,12 +6,16 @@ import com.tencent.bugly.CrashModule
 import com.tencent.bugly.crashreport.CrashReport
 import com.tencent.bugly.crashreport.CrashReport.UserStrategy
 import io.agora.flat.di.interfaces.Crashlytics
+import io.agora.flat.di.interfaces.StartupInitializer
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
 /**
  * Initialize the Bugly SDK after the user has authorized the Privacy Policy
  */
-internal class BuglyCrashlytics : Crashlytics {
+@Singleton
+class BuglyCrashlytics @Inject constructor() : Crashlytics, StartupInitializer {
     var uid: String? = null
 
     override fun init(context: Context) {

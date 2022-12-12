@@ -4,10 +4,13 @@ import android.content.Context
 import com.aliyun.sls.android.producer.*
 import io.agora.flat.di.interfaces.LogConfig
 import io.agora.flat.di.interfaces.LogReporter
+import io.agora.flat.di.interfaces.StartupInitializer
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig) : LogReporter {
+@Singleton
+class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig) : LogReporter, StartupInitializer {
     private var client: LogProducerClient? = null
     private var uid: String? = null
 

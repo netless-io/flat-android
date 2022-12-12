@@ -31,13 +31,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.AppInitializers
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
 import io.agora.flat.common.rtc.AgoraRtc
 import io.agora.flat.common.version.VersionCheckResult
-import io.agora.flat.di.interfaces.Crashlytics
-import io.agora.flat.di.interfaces.LogReporter
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
@@ -54,10 +53,7 @@ class MainActivity : BaseComposeActivity() {
     lateinit var loginManager: LoginManager
 
     @Inject
-    lateinit var crashlytics: Crashlytics
-
-    @Inject
-    lateinit var logReporter: LogReporter
+    lateinit var initializers: AppInitializers
 
     @Inject
     lateinit var rtcApi: RtcApi
@@ -79,8 +75,7 @@ class MainActivity : BaseComposeActivity() {
                         loginManager.registerApp()
                         loginManager.registerReceiver(this)
                         // init after protocol agreed
-                        crashlytics.init(applicationContext)
-                        logReporter.init(applicationContext)
+                        initializers.init()
                     },
                     onResume = {
                         if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
