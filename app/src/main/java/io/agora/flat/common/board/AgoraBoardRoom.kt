@@ -116,7 +116,6 @@ class AgoraBoardRoom @Inject constructor(
             }
 
             override fun onRoomReadyChanged(fastRoom: FastRoom) {
-                super.onRoomReadyChanged(fastRoom)
                 if (syncedClassState is WhiteSyncedState && fastRoom.isReady) {
                     syncedClassState.resetRoom(fastRoom)
                 }
@@ -193,7 +192,7 @@ class AgoraBoardRoom @Inject constructor(
         }) ?: it.resumeWithException(FlatBoardException("[BoardRoom] room not ready"))
     }
 
-    override fun setAllowDraw(allow: Boolean) {
+    override suspend fun setAllowDraw(allow: Boolean) {
         fastRoom?.room?.disableDeviceInputs(!allow)
         fastboardView.post {
             updateRoomController(allow)

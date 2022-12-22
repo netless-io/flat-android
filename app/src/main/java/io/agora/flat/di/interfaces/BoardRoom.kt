@@ -19,7 +19,7 @@ interface BoardRoom {
 
     suspend fun setWritable(writable: Boolean): Boolean
 
-    fun setAllowDraw(allow: Boolean)
+    suspend fun setAllowDraw(allow: Boolean)
 
     fun hideAllOverlay()
 

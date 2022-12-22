@@ -261,4 +261,12 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="request_common_success">success</string>
 
     <string name="error_string_network">please check your network</string>
+
+    <string name="stage_off_all">off all</string>
+    <string name="mute_mic_all">mute all</string>
+    <string name="user_list_student_size_format">student (%1$s)</string>
+    <string name="on_or_off_stage">on/off</string>
+    <string name="whiteboard_allow_draw">whiteboard</string>
+    <string name="user_list_handup_size_format">handup (%1$s)</string>
+    <string name="user_list_teacher_name_format">teacher：%1$s</string>
 </resources>

@@ -88,7 +88,7 @@ class RtcComponent(
                 adapter.updateUsers(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
-                    val findUser = users.find { it.isOnStage && it.userUUID == userCallOut!!.userUUID }
+                    val findUser = users.find { it.isJoined && it.isOnStage && it.userUUID == userCallOut!!.userUUID }
                     if (findUser == null) {
                         clearCallOutAndNotify()
                         fullScreenAnimator.hide()

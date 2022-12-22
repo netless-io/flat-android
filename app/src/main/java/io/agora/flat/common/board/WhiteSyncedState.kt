@@ -41,6 +41,7 @@ class WhiteSyncedState @Inject constructor(
     private var _whiteboardFlow = MutableStateFlow<Map<String, Boolean>?>(null)
     private var _classroomStateFlow = MutableStateFlow<ClassroomState?>(null)
 
+    private var _readyFlow = MutableStateFlow<Boolean?>(null)
     private var inited = false
 
     fun resetRoom(fastRoom: FastRoom) {
@@ -69,6 +70,7 @@ class WhiteSyncedState @Inject constructor(
         }
 
         inited = true
+        _readyFlow.value = true
     }
 
     private fun <T> connectStorage(
@@ -130,6 +132,10 @@ class WhiteSyncedState @Inject constructor(
         return onStageUsers
     }
 
+    override fun observeSyncedReady(): Flow<Boolean> {
+        return _readyFlow.asStateFlow().filterNotNull()
+    }
+
     override fun observeDeviceState(): Flow<Map<String, DeviceState>> {
         return _devicesFlow.asStateFlow().filterNotNull()
     }
@@ -157,6 +163,7 @@ class WhiteSyncedState @Inject constructor(
         syncedStore.disconnectStorage(CLASSROOM_STORAGE)
         syncedStore.disconnectStorage(WHITEBOARD_STORAGE)
         inited = false
+        _readyFlow.value = false
     }
 
     override fun updateDeviceState(userId: String, camera: Boolean, mic: Boolean) {
@@ -169,14 +176,30 @@ class WhiteSyncedState @Inject constructor(
         syncedStore.setStorageState(DEVICE_STATE_STORAGE, gsonWithNull.toJson(devicesState))
     }
 
+    override fun muteDevicesMic(userIds: List<String>) {
+        val deviceState = _devicesFlow.value?.filter { userIds.contains(it.key) } ?: return
+        val newState = deviceState.mapValues { DeviceState(it.value.camera, false) }
+        syncedStore.setStorageState(DEVICE_STATE_STORAGE, gsonWithNull.toJson(newState))
+    }
+
     override fun updateOnStage(userId: String, onStage: Boolean) {
-        val jsonObj = mapOf(userId to if (onStage) onStage else null)
+        val jsonObj = mapOf(userId to if (onStage) true else null)
         syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gsonWithNull.toJson(jsonObj))
     }
 
+    override fun stageOffAll() {
+        val newState = _onStagesFlow.value?.mapValues { null } ?: return
+        syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gsonWithNull.toJson(newState))
+    }
+
+    override fun updateWhiteboard(userId: String, allowDraw: Boolean) {
+        val jsonObj = mapOf(userId to if (allowDraw) true else null)
+        syncedStore.setStorageState(WHITEBOARD_STORAGE, gsonWithNull.toJson(jsonObj))
+    }
+
     override fun updateRaiseHand(userId: String, raiseHand: Boolean) {
-        val raiseHandUsers = _classroomStateFlow.value?.raiseHandUsers
-        val users = raiseHandUsers?.toMutableSet() ?: mutableSetOf()
+        val raiseHandUsers = _classroomStateFlow.value?.raiseHandUsers ?: return
+        val users = raiseHandUsers.toMutableSet()
         if (raiseHand) {
             users.add(userId)
         } else {

@@ -10,4 +10,6 @@
     <color name="class_room_panel_title">@color/flat_blue_0</color>
     <color name="class_room_icon_gray">@color/flat_gray_3</color>
     <color name="class_room_icon_bg">@color/flat_gray_8</color>
+
+    <color name="class_room_user_list_students_header_bg">#222429</color>
 </resources>

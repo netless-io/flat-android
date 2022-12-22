@@ -22,12 +22,14 @@ class UserManager @Inject constructor(
 
     private var creator: RoomUser? = null
     private var speakingJoiners: MutableList<RoomUser> = mutableListOf()
+    private var allowDrawJoiners: MutableList<RoomUser> = mutableListOf()
     private var handRaisingJoiners: MutableList<RoomUser> = mutableListOf()
     private var otherJoiners: MutableList<RoomUser> = mutableListOf()
 
     // current all users
     private var usersCache = mutableMapOf<String, RoomUser>()
 
+    private var allowDrawState: Map<String, Boolean> = emptyMap()
     private var devicesState: Map<String, DeviceState> = emptyMap()
     private var raiseHandState: List<String> = emptyList()
 
@@ -48,12 +50,18 @@ class UserManager @Inject constructor(
 
         creator = null
         speakingJoiners.clear()
+        allowDrawJoiners.clear()
         handRaisingJoiners.clear()
         otherJoiners.clear()
 
         val updateUsers = mutableMapOf(selfUUID to currentUser)
         if (selfUUID != ownerUUID) {
-            updateUsers[ownerUUID] = RoomUser(rtcUID = RoomUser.NOT_JOIN_RTC_UID, userUUID = ownerUUID, isOwner = true)
+            updateUsers[ownerUUID] = RoomUser(
+                userUUID = ownerUUID,
+                isOwner = true,
+                isOnStage = true,
+                allowDraw = true,
+            )
         }
         updateUserCache(updateUsers)
         sortUser(updateUsers)
@@ -100,22 +108,26 @@ class UserManager @Inject constructor(
         }
 
         speakingJoiners.removeAll { users.containsKey(it.userUUID) }
+        allowDrawJoiners.removeAll { users.containsKey(it.userUUID) }
         handRaisingJoiners.removeAll { users.containsKey(it.userUUID) }
         otherJoiners.removeAll { users.containsKey(it.userUUID) }
 
-        users.forEach { (_, rtcUser) ->
+        users.forEach { (_, user) ->
             when {
-                rtcUser.isOwner -> {
-                    creator = rtcUser
+                user.isOwner -> {
+                    creator = user
                 }
-                rtcUser.isSpeak -> {
-                    speakingJoiners.add(rtcUser)
+                user.isOnStage -> {
+                    speakingJoiners.add(user)
                 }
-                rtcUser.isRaiseHand -> {
-                    handRaisingJoiners.add(rtcUser)
+                user.allowDraw -> {
+                    allowDrawJoiners.add(user)
+                }
+                user.isRaiseHand -> {
+                    handRaisingJoiners.add(user)
                 }
                 else -> {
-                    otherJoiners.add(rtcUser)
+                    otherJoiners.add(user)
                 }
             }
         }
@@ -132,7 +144,8 @@ class UserManager @Inject constructor(
                 avatarURL = it.avatarURL,
                 videoOpen = devicesState[it.userUUID]?.camera ?: false,
                 audioOpen = devicesState[it.userUUID]?.mic ?: false,
-                isRaiseHand = raiseHandState.contains(it.userUUID)
+                isRaiseHand = raiseHandState.contains(it.userUUID),
+                allowDraw = getAllowDraw(it.userUUID)
             ) ?: return
             updateAndNotifyUser(user)
         }
@@ -140,13 +153,14 @@ class UserManager @Inject constructor(
 
     fun removeUser(userUUID: String) {
         val user = usersCache[userUUID] ?: return
-        if (user.isOwner || user.isSpeak) {
+        if (user.isOwner || user.isOnStage) {
             val updateUser = user.copy(rtcUID = RoomUser.NOT_JOIN_RTC_UID)
             updateAndNotifyUser(updateUser)
         } else {
             usersCache.remove(userUUID)
             if (userUUID == ownerUUID) creator = null
             speakingJoiners.removeAll { it.userUUID == userUUID }
+            allowDrawJoiners.removeAll { it.userUUID == userUUID }
             handRaisingJoiners.removeAll { it.userUUID == userUUID }
             otherJoiners.removeAll { it.userUUID == userUUID }
             notifyUsers()
@@ -165,6 +179,7 @@ class UserManager @Inject constructor(
     private fun notifyUsers() {
         val ranked = mutableListOf<RoomUser>()
         ranked += speakingJoiners
+        ranked += allowDrawJoiners
         ranked += handRaisingJoiners
         creator?.run {
             ranked += this
@@ -199,22 +214,33 @@ class UserManager @Inject constructor(
         val updateUsers = mutableListOf<RoomUser>()
         updateUuids.forEach {
             var user = usersCache[it]?.copy(
-                isSpeak = onStages[it] ?: false,
+                isOnStage = onStages[it] ?: false,
                 videoOpen = devicesState[it]?.camera ?: false,
                 audioOpen = devicesState[it]?.mic ?: false,
-                isRaiseHand = raiseHandState.contains(it)
+                isRaiseHand = raiseHandState.contains(it),
+                allowDraw = getAllowDraw(it)
             )
+            // not joined
             if (onStages[it] == true && user == null) {
                 user = RoomUser(
                     userUUID = it,
                     name = userQuery.loadUser(it)?.name,
-                    isSpeak = onStages[it] ?: false,
+                    isOnStage = onStages[it] ?: false,
                     videoOpen = devicesState[it]?.camera ?: false,
                     audioOpen = devicesState[it]?.mic ?: false,
-                    isRaiseHand = raiseHandState.contains(it)
+                    isRaiseHand = raiseHandState.contains(it),
+                    allowDraw = getAllowDraw(it)
                 )
             }
             if (user != null) updateUsers.add(user)
+        }
+        updateAndNotifyUser(updateUsers)
+    }
+
+    fun updateAllowDraw(allowDraws: Map<String, Boolean>) {
+        this.allowDrawState = allowDraws
+        val updateUsers = users.map {
+            it.copy(allowDraw = getAllowDraw(it.userUUID))
         }
         updateAndNotifyUser(updateUsers)
     }
@@ -231,18 +257,6 @@ class UserManager @Inject constructor(
         updateAndNotifyUser(updateUsers)
     }
 
-    fun handleAllOffStage() {
-        val updateUsers = users.filter { it.userUUID != ownerUUID }.map { rtcUser ->
-            rtcUser.copy(
-                videoOpen = false,
-                audioOpen = false,
-                isSpeak = false,
-                isRaiseHand = false,
-            )
-        }
-        updateAndNotifyUser(updateUsers)
-    }
-
     fun isUserSelf(userId: String): Boolean {
         return userId == selfUUID
     }
@@ -252,10 +266,14 @@ class UserManager @Inject constructor(
     }
 
     fun isOwnerOnStage(): Boolean {
-        return creator?.isOnStage ?: false
+        return creator?.isJoined ?: false
     }
 
     fun getOnStageCount(): Int {
-        return users.count { it.isOnStage }
+        return users.count { it.isJoined && it.isOnStage }
+    }
+
+    private fun getAllowDraw(uuid: String): Boolean {
+        return isOwner(uuid) || allowDrawState[uuid] ?: false
     }
 }

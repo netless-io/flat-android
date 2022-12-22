@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -75,9 +76,29 @@ class ToolComponent(
         }
 
         lifecycleScope.launchWhenResumed {
-            viewModel.messageUsers.collect {
+            viewModel.students.collect {
                 userListAdapter.setData(it)
-                binding.userlistDot.isVisible = it.find { user -> user.isRaiseHand } != null
+
+                binding.layoutUserList.studentSize.text = activity.getString(
+                    R.string.user_list_student_size_format,
+                    "${it.size}"
+                )
+
+                val handUpCount = it.count { user -> user.isRaiseHand }
+                binding.userlistDot.isVisible = handUpCount > 0
+                binding.layoutUserList.handupSize.text = activity.getString(
+                    R.string.user_list_student_size_format,
+                    "$handUpCount/${it.size}"
+                )
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            viewModel.teacher.collect {
+                binding.layoutUserList.teacherAvatar.load(it?.avatarURL) {
+                    crossfade(true)
+                    placeholder(R.drawable.ic_class_room_user_avatar)
+                }
             }
         }
 
@@ -102,6 +123,11 @@ class ToolComponent(
 
                 binding.layoutSettings.switchVideo.isChecked = it.videoOpen
                 binding.layoutSettings.switchAudio.isChecked = it.audioOpen
+
+                binding.layoutUserList.teacherName.text =
+                    activity.getString(R.string.user_list_teacher_name_format, it.ownerName)
+                binding.layoutUserList.stageOffAll.isVisible = it.isOwner
+                binding.layoutUserList.muteMicAll.isVisible = it.isOwner
             }
         }
 
@@ -254,6 +280,12 @@ class ToolComponent(
         }
         binding.layoutUserList.root.setOnClickListener {
             // block event
+        }
+        binding.layoutUserList.stageOffAll.setOnClickListener {
+            viewModel.stageOffAll()
+        }
+        binding.layoutUserList.muteMicAll.setOnClickListener {
+            viewModel.muteAllMic()
         }
     }
 

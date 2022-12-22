@@ -26,18 +26,22 @@ class RecordManager @Inject constructor(
     private var recordState = MutableStateFlow<RecordState?>(null)
     private var videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
 
+    companion object {
+        @JvmStatic
+        fun filterOnStages(users: List<RoomUser>): List<RoomUser> {
+            return users.filter { it.isOnStage }.sortedBy { user ->
+                if (user.isOwner) -1 else user.rtcUID
+            }
+        }
+    }
+
     fun reset(roomUUID: String, scope: CoroutineScope) {
         this.roomUUID = roomUUID
         viewModelScope = scope
 
         viewModelScope.launch {
-            userManager.observeUsers().collect { users ->
-                // TODO here ensure isSpeak or onStage contains owners
-                val sortedList = users
-                    .filter { value -> value.isOnStage && !value.isOwner }
-                    .sortedBy { user -> user.rtcUID }
-                val owner = users.filter { it.isOwner }
-                videoUsers.value = owner + sortedList;
+            userManager.observeUsers().collect {
+                videoUsers.value = filterOnStages(it)
             }
         }
     }

@@ -18,6 +18,8 @@ data class RoomInfo(
     val ownerUUID: String,
     // 房间所有者的名称
     val ownerUserName: String? = null,
+    // 房间所有者的名称
+    val ownerName: String,
     // 房间所有者的头像
     val ownerAvatarURL: String,
     // 房间标题

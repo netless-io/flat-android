@@ -71,8 +71,9 @@ class ClassRoomViewModel @Inject constructor(
 
     val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
-    val messageUsers = userManager.observeUsers().map {
-        it.filter { user -> !(user.isLeft && !user.isSpeak) }
+    val teacher = userManager.observeUsers().map { it.firstOrNull { user -> user.isOwner } }
+    val students = userManager.observeUsers().map {
+        it.filter { user -> !user.isOwner && (user.isJoined || user.isOnStage) }
     }
 
     private var _videoAreaShown = MutableStateFlow(true)
@@ -109,9 +110,9 @@ class ClassRoomViewModel @Inject constructor(
     fun loginThirdParty() {
         viewModelScope.launch {
             takeInitState().collect {
-                joinBoard()
                 joinRtm()
                 joinRtc()
+                joinBoard()
                 syncInitState()
                 observerUserState()
                 if (quickStart) startClass()
@@ -134,6 +135,7 @@ class ClassRoomViewModel @Inject constructor(
             userUUID = currentUserUUID,
             userName = currentUserName,
             ownerUUID = roomInfo.ownerUUID,
+            ownerName = roomInfo.ownerName,
             isOwner = isOwner,
 
             roomUUID = roomUUID,
@@ -145,8 +147,9 @@ class ClassRoomViewModel @Inject constructor(
             roomStatus = roomInfo.roomStatus,
             region = roomInfo.region,
 
-            isSpeak = isOwner,
+            isOnStage = isOwner,
             isRaiseHand = false,
+            allowDraw = isOwner,
             videoOpen = isOwner && preferDeviceState.camera,
             audioOpen = isOwner && preferDeviceState.mic,
 
@@ -164,12 +167,12 @@ class ClassRoomViewModel @Inject constructor(
                 name = currentUserName,
                 avatarURL = userRepository.getUserInfo()!!.avatar,
                 rtcUID = initState.rtcUID,
-                isSpeak = initState.isSpeak,
+                isOnStage = isOwner,
                 isRaiseHand = initState.isRaiseHand,
                 videoOpen = initState.videoOpen,
                 audioOpen = initState.audioOpen,
-
                 isOwner = isOwner,
+                allowDraw = isOwner,
             ),
             ownerUUID = roomInfo.ownerUUID
         )
@@ -187,7 +190,7 @@ class ClassRoomViewModel @Inject constructor(
     private suspend fun joinBoard() {
         logger.i("[BOARD] start joining board room")
         state.value?.let {
-            boardRoom.join(it.boardUUID, it.boardToken, it.region, it.allowDraw)
+            boardRoom.join(it.boardUUID, it.boardToken, it.region, it.isOwner)
         }
     }
 
@@ -207,7 +210,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private fun joinRtc() {
         logger.i("[RTC] start join rtc")
-        state.value?.apply {
+        state.value?.run {
             rtcVideoController.setupUid(uid = rtcUID, ssUid = rtcShareScreen.uid)
             rtcApi.joinChannel(RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen))
         }
@@ -233,11 +236,17 @@ class ClassRoomViewModel @Inject constructor(
                 syncedStoreReady = true
             }
         }
+
+        viewModelScope.launch {
+            syncedClassState.observeWhiteboard().collect {
+                userManager.updateAllowDraw(it)
+            }
+        }
     }
 
     private fun updateBanState(ban: Boolean) {
-        if (_state.value != null) {
-            _state.value = _state.value!!.copy(ban = ban)
+        _state.value?.run {
+            _state.value = this.copy(ban = ban)
         }
     }
 
@@ -282,13 +291,16 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private fun syncInitState() {
-        state.value?.run {
-            if (isSpeak) {
-                syncedClassState.updateDeviceState(
-                    userId = userUUID,
-                    camera = videoOpen,
-                    mic = audioOpen
-                )
+        viewModelScope.launch {
+            syncedClassState.observeSyncedReady().collect {
+                val state = _state.value ?: return@collect
+                if (state.isOnStage) {
+                    syncedClassState.updateDeviceState(
+                        userId = state.userUUID,
+                        camera = state.videoOpen,
+                        mic = state.audioOpen
+                    )
+                }
             }
         }
     }
@@ -299,10 +311,9 @@ class ClassRoomViewModel @Inject constructor(
                 logger.d("[USERS] current user state changed $it")
                 val state = _state.value ?: return@collect
                 try {
-                    if (state.isSpeak != it.isSpeak) {
-                        if (it.isSpeak) {
+                    if (state.isOnStage != it.isOnStage) {
+                        if (it.isOnStage) {
                             boardRoom.setWritable(true)
-                            boardRoom.setAllowDraw(true)
                             syncedClassState.updateDeviceState(
                                 userId = it.userUUID,
                                 camera = preferDeviceState.camera,
@@ -310,13 +321,23 @@ class ClassRoomViewModel @Inject constructor(
                             )
                         } else {
                             syncedClassState.deleteDeviceState(it.userUUID)
-                            boardRoom.setAllowDraw(false)
                             boardRoom.setWritable(false)
                         }
                     }
+
+                    if (state.allowDraw != it.allowDraw) {
+                        if (it.allowDraw) {
+                            boardRoom.setWritable(true)
+                            boardRoom.setAllowDraw(true)
+                        } else {
+                            boardRoom.setAllowDraw(false)
+                        }
+                    }
+
                     _state.value = state.copy(
-                        isSpeak = it.isSpeak,
+                        isOnStage = it.isOnStage,
                         isRaiseHand = it.isRaiseHand,
+                        allowDraw = it.allowDraw,
                         videoOpen = it.videoOpen,
                         audioOpen = it.audioOpen,
                     )
@@ -329,7 +350,7 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             userManager.observeUsers().collect {
                 logger.d("[USERS] users changed $it")
-                val users = it.filter { user -> user.isOwner || user.isSpeak }.toMutableList()
+                val users = it.filter { user -> user.isOwner || user.isOnStage }.toMutableList()
                 val devicesMap = getUpdateDevices(videoUsers.value, users)
                 devicesMap.forEach { (rtcUID, state) ->
                     updateRtcStream(rtcUID, audioOpen = state.mic, videoOpen = state.camera)
@@ -347,9 +368,9 @@ class ClassRoomViewModel @Inject constructor(
                     }
                     .collect {
                         if (!syncedStoreReady) return@collect
-                        val count = it.count { user -> user.isSpeak }
+                        val count = it.count { user -> user.isOnStage }
                         if (count == 0) {
-                            it.filter { user -> !user.isSpeak }.randomOrNull()?.run {
+                            it.filter { user -> !user.isOnStage }.randomOrNull()?.run {
                                 syncedClassState.updateOnStage(userUUID, true)
                             }
                         }
@@ -444,7 +465,7 @@ class ClassRoomViewModel @Inject constructor(
     fun raiseHand() {
         viewModelScope.launch {
             userManager.currentUser?.run {
-                if (isSpeak || !userManager.isOwnerOnStage()) return@run
+                if (isOnStage || !userManager.isOwnerOnStage()) return@run
                 val raiseHand = !isRaiseHand
                 rtmApi.sendPeerCommand(
                     RaiseHandEvent(roomUUID = roomUUID, raiseHand = raiseHand),
@@ -494,6 +515,25 @@ class ClassRoomViewModel @Inject constructor(
         clipboard.putText(text)
     }
 
+    fun updateOnStage(uuid: String, onstage: Boolean) {
+        viewModelScope.launch {
+            if (onstage) {
+                acceptRaiseHand(uuid)
+            } else {
+                closeSpeak(uuid)
+            }
+        }
+    }
+
+    fun updateAllowDraw(uuid: String, allowDraw: Boolean) {
+        viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                syncedClassState.updateWhiteboard(uuid, allowDraw)
+            }
+        }
+    }
+
     fun closeSpeak(uuid: String) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
@@ -516,6 +556,13 @@ class ClassRoomViewModel @Inject constructor(
             } else {
                 // notify
             }
+        }
+    }
+
+    fun cancelRaiseHand(uuid: String) {
+        viewModelScope.launch {
+            if (!userManager.isOwner()) return@launch
+            syncedClassState.updateRaiseHand(uuid, false)
         }
     }
 
@@ -546,6 +593,27 @@ class ClassRoomViewModel @Inject constructor(
     fun canShowCallOut(userId: String): Boolean {
         return userManager.isOwner() || userManager.isUserSelf(userId)
     }
+
+    fun stageOffAll() {
+        viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                syncedClassState.stageOffAll()
+            }
+        }
+    }
+
+    fun muteAllMic() {
+        viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            if (state.isOwner) {
+                val userIds = _videoUsers.value.filter { !it.isOwner }.map { user -> user.userUUID }
+                syncedClassState.muteDevicesMic(userIds)
+            }
+        }
+    }
+
+
 }
 
 data class ClassRoomState(
@@ -553,11 +621,13 @@ data class ClassRoomState(
     val userUUID: String,
     val userName: String = "",
     val ownerUUID: String,
+    val ownerName: String,
     val isOwner: Boolean,
 
     // current user state
-    val isSpeak: Boolean,
+    val isOnStage: Boolean,
     val isRaiseHand: Boolean,
+    val allowDraw: Boolean,
     val videoOpen: Boolean,
     val audioOpen: Boolean,
 
@@ -584,19 +654,11 @@ data class ClassRoomState(
     val roomType: RoomType,
     // 房间区域
     val region: String,
-
-    // class room state
     // 禁言
     val ban: Boolean = false,
     // 房间状态
     val roomStatus: RoomStatus,
 ) {
-    val allowDraw: Boolean
-        get() = isOwner || isSpeak
-
-    val isOnStage: Boolean
-        get() = isOwner || isSpeak
-
     val shouldShowRaiseHand: Boolean = !isOnStage && !ban
 
     val shouldShowExitDialog: Boolean

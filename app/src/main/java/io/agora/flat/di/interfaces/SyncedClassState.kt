@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
  * class room global state
  */
 interface SyncedClassState {
+    fun observeSyncedReady(): Flow<Boolean>
+
     fun observeDeviceState(): Flow<Map<String, DeviceState>>
 
     fun observeOnStage(): Flow<Map<String, Boolean>>
@@ -27,9 +29,24 @@ interface SyncedClassState {
     fun deleteDeviceState(userId: String)
 
     /**
+     * 静音用户麦克风
+     */
+    fun muteDevicesMic(userIds: List<String>)
+
+    /**
      * 更新上台状态
      */
     fun updateOnStage(userId: String, onStage: Boolean)
+
+    /**
+     * 所有学生下台
+     */
+    fun stageOffAll()
+
+    /**
+     * 更新白板权限
+     */
+    fun updateWhiteboard(userId: String, allowDraw: Boolean)
 
     /**
      * 更新举手状态
