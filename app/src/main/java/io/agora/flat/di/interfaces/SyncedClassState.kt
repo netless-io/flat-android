@@ -12,6 +12,8 @@ interface SyncedClassState {
 
     fun observeOnStage(): Flow<Map<String, Boolean>>
 
+    fun observeWhiteboard(): Flow<Map<String, Boolean>>
+
     fun observeClassroomState(): Flow<ClassroomState>
 
     /**
