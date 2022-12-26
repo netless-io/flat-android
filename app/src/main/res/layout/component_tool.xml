@@ -208,11 +208,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginVertical="@dimen/room_class_panel_margin_vertical"
-        android:layout_marginStart="@dimen/room_class_panel_margin_horizontal"
         android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_max="560dp"
+        app:layout_constraintWidth_max="@dimen/room_class_user_list_width"
         tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

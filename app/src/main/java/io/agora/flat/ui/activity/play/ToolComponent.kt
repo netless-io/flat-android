@@ -160,9 +160,20 @@ class ToolComponent(
         binding.userlist.isSelected = false
     }
 
+    private val expectedUserListWidth = activity.resources.getDimensionPixelSize(R.dimen.room_class_user_list_width)
+    private val panelMargin = activity.resources.getDimensionPixelSize(R.dimen.room_class_panel_margin_horizontal)
+
     private fun showUserListLayout() {
         binding.layoutUserList.root.isVisible = true
         binding.userlist.isSelected = true
+
+        // resize for small size devices
+        val limitedWidth = binding.root.width - 2 * panelMargin
+        if (expectedUserListWidth > limitedWidth) {
+            val layoutParams = binding.layoutUserList.root.layoutParams
+            layoutParams.width = limitedWidth
+            binding.layoutUserList.root.layoutParams = layoutParams
+        }
     }
 
     private fun initView() {
