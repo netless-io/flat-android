@@ -82,14 +82,19 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     fun handleOffline(uid: Int) {
         releaseVideo(uid)
         if (uid == shareScreenUid) {
-            shareScreenContainer?.isVisible = false
+            shareScreenContainer?.run {
+                removeAllViews()
+                isVisible = false
+            }
         }
     }
 
     fun handlerJoined(uid: Int) {
         if (uid == shareScreenUid) {
             shareScreenContainer?.run {
-                setupUserVideo(this, uid)
+                val textureView = RtcEngine.CreateTextureView(context)
+                rtcApi.setupRemoteVideo(VideoCanvas(textureView, VideoCanvas.RENDER_MODE_FIT, uid))
+                addView(textureView, generateLayoutParams())
                 isVisible = true
             }
         }
