@@ -281,4 +281,5 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="whiteboard_allow_draw">白板权限</string>
     <string name="user_list_handup_size_format">举手 (%1$s)</string>
     <string name="user_list_teacher_name_format">老师：%1$s</string>
+    <string name="view_all">查看全部</string>
 </resources>

@@ -658,11 +658,6 @@ data class ClassRoomState(
     val ban: Boolean = false,
     // 房间状态
     val roomStatus: RoomStatus,
-) {
-    val shouldShowRaiseHand: Boolean = !isOnStage && !ban
-
-    val shouldShowExitDialog: Boolean
-        get() = isOwner && RoomStatus.Idle != roomStatus
-}
+)
 
 data class ImageSize(val width: Int, val height: Int)

@@ -18,6 +18,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
+import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.BoardRoom
 import io.agora.flat.event.RoomsUpdated
@@ -48,6 +49,7 @@ class ToolComponent(
     private lateinit var boardRoom: BoardRoom
     private lateinit var appEnv: AppEnv
     private lateinit var userListAdapter: UserListAdapter
+    private lateinit var acceptHandupAdapter: AcceptHandupAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -72,6 +74,16 @@ class ToolComponent(
                 if (areaId != RoomOverlayManager.AREA_ID_USER_LIST) {
                     hideUserListLayout()
                 }
+                if (areaId == RoomOverlayManager.AREA_ID_USER_LIST) {
+                    showUserListLayout()
+                }
+
+                if (areaId != RoomOverlayManager.AREA_ID_ACCEPT_HANDUP) {
+                    hideAcceptHandUpLayout()
+                }
+                if (areaId == RoomOverlayManager.AREA_ID_ACCEPT_HANDUP) {
+                    showAcceptHandUpLayout()
+                }
             }
         }
 
@@ -84,12 +96,19 @@ class ToolComponent(
                     "${it.size}"
                 )
 
-                val handUpCount = it.count { user -> user.isRaiseHand }
+                val handupUsers = it.filter { user -> user.isRaiseHand }
+                acceptHandupAdapter.setData(handupUsers)
+
+                val handUpCount = handupUsers.size
                 binding.userlistDot.isVisible = handUpCount > 0
                 binding.layoutUserList.handupSize.text = activity.getString(
                     R.string.user_list_student_size_format,
                     "$handUpCount/${it.size}"
                 )
+
+                binding.acceptHandup.isEnabled = handUpCount > 0
+                binding.handupCount.isVisible = handUpCount > 0
+                binding.handupCount.text = "$handUpCount"
             }
         }
 
@@ -115,8 +134,11 @@ class ToolComponent(
                 binding.recordLayout.isVisible = it.isOwner
                 binding.cloudservice.isVisible = it.allowDraw
 
-                binding.handupLayout.isVisible = it.shouldShowRaiseHand
+                binding.handupLayout.isVisible = !it.isOnStage && !it.ban
                 binding.handup.isSelected = it.isRaiseHand
+
+                binding.acceptHandupLayout.isVisible = it.isOwner
+                binding.handupCountLayout.isVisible = it.isOwner
 
                 binding.layoutSettings.switchVideo.isEnabled = it.isOnStage
                 binding.layoutSettings.switchAudio.isEnabled = it.isOnStage
@@ -174,6 +196,16 @@ class ToolComponent(
             layoutParams.width = limitedWidth
             binding.layoutUserList.root.layoutParams = layoutParams
         }
+    }
+
+    private fun showAcceptHandUpLayout() {
+        binding.layoutAcceptHandup.root.isVisible = true
+        binding.acceptHandup.isSelected = true
+    }
+
+    private fun hideAcceptHandUpLayout() {
+        binding.layoutAcceptHandup.root.isVisible = false
+        binding.acceptHandup.isSelected = false
     }
 
     private fun initView() {
@@ -239,6 +271,15 @@ class ToolComponent(
             },
             binding.handup to {
                 viewModel.raiseHand()
+            },
+            binding.acceptHandup to {
+                val target = !binding.layoutAcceptHandup.root.isVisible
+                if (target) {
+                    showAcceptHandUpLayout()
+                } else {
+                    hideAcceptHandUpLayout()
+                }
+                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_ACCEPT_HANDUP, target)
             }
         )
 
@@ -298,11 +339,18 @@ class ToolComponent(
         binding.layoutUserList.muteMicAll.setOnClickListener {
             viewModel.muteAllMic()
         }
+
+        acceptHandupAdapter = AcceptHandupAdapter(viewModel)
+        binding.layoutAcceptHandup.handupList.adapter = acceptHandupAdapter
+        binding.layoutAcceptHandup.handupList.layoutManager = LinearLayoutManager(activity)
+        binding.layoutAcceptHandup.viewAll.setOnClickListener {
+            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_USER_LIST, true)
+        }
     }
 
     private fun handleExit() {
         val state = viewModel.state.value ?: return
-        if (state.shouldShowExitDialog) {
+        if (state.isOwner && RoomStatus.Idle != state.roomStatus) {
             showOwnerExitDialog()
         } else {
             updateRoomsAndFinish()

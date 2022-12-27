@@ -189,6 +189,58 @@
             tools:ignore="ContentDescription" />
     </FrameLayout>
 
+    <FrameLayout
+        android:id="@+id/accept_handup_layout"
+        android:layout_width="@dimen/room_class_button_area_size"
+        android:layout_height="@dimen/room_class_button_area_size"
+        android:layout_marginVertical="@dimen/room_class_layout_gap"
+        android:background="@drawable/shape_gray_border_round_8_bg"
+        app:layout_constraintLeft_toLeftOf="@id/tools_layout"
+        app:layout_constraintRight_toRightOf="@id/tools_layout"
+        app:layout_constraintTop_toBottomOf="@id/tools_layout">
+
+        <ImageView
+            android:id="@+id/accept_handup"
+            android:layout_width="@dimen/room_class_button_size"
+            android:layout_height="@dimen/room_class_button_size"
+            android:layout_gravity="center"
+            android:padding="@dimen/room_class_button_gap"
+            android:src="@drawable/ic_room_hand_up_selector"
+            app:tint="@color/color_class_room_icon"
+            tools:ignore="ContentDescription" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/handup_count_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-6dp"
+        android:layout_marginEnd="-6dp"
+        app:layout_constraintEnd_toEndOf="@id/accept_handup_layout"
+        app:layout_constraintTop_toTopOf="@id/accept_handup_layout">
+
+        <TextView
+            android:id="@+id/handup_count"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/ic_red_dot"
+            android:gravity="center"
+            android:textColor="@color/flat_white"
+            android:textSize="12sp"
+            tools:text="99" />
+    </FrameLayout>
+
+    <include
+        android:id="@+id/layout_accept_handup"
+        layout="@layout/layout_room_accept_handup"
+        android:layout_width="@dimen/room_class_accept_handup_width"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/room_class_panel_margin_horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/accept_handup_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
+
     <include
         android:id="@+id/layout_settings"
         layout="@layout/layout_room_settings"
@@ -213,5 +265,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_max="@dimen/room_class_user_list_width"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

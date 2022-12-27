@@ -18,6 +18,7 @@
     <dimen name="room_class_stroke_seeker">24dp</dimen>
     <dimen name="room_class_overlay_width">400dp</dimen>
     <dimen name="room_class_user_list_width">540dp</dimen>
+    <dimen name="room_class_accept_handup_width">200dp</dimen>
     <dimen name="room_class_message_max_width">300dp</dimen>
 
     <dimen name="room_class_video_user_avatar_size_normal">40dp</dimen>
