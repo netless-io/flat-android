@@ -13,6 +13,7 @@ import io.agora.board.fast.FastRoomListener
 import io.agora.board.fast.Fastboard
 import io.agora.board.fast.FastboardView
 import io.agora.board.fast.extension.FastResource
+import io.agora.board.fast.model.FastAppliance
 import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.ui.RoomControllerGroup
@@ -26,6 +27,7 @@ import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.util.dp
 import io.agora.flat.util.getAppVersion
+import io.agora.flat.util.px2dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -212,7 +214,23 @@ class AgoraBoardRoom @Inject constructor(
     }
 
     override fun insertImage(imageUrl: String, w: Int, h: Int) {
-        fastRoom?.insertImage(imageUrl, w, h)
+        val scale = fastRoom?.room?.roomState?.cameraState?.scale ?: 1.0
+        // Images are limited to a maximum of 1 / 4
+        val limitWidth = (activityContext.px2dp(fastboardView.width) / scale / 4).toInt()
+
+        val targetW: Int
+        val targetH: Int
+        if (w > limitWidth) {
+            targetW = limitWidth
+            targetH = limitWidth * h / w
+        } else {
+            targetW = w
+            targetH = h
+        }
+
+        fastRoom?.insertImage(imageUrl, targetW, targetH)
+        // switch to SELECTOR when insertImage
+        fastRoom?.setAppliance(FastAppliance.SELECTOR)
     }
 
     override fun insertPpt(dir: String, files: ConvertedFiles, title: String) {
