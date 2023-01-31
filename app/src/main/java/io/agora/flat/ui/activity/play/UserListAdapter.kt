@@ -136,11 +136,11 @@ class UserListAdapter(
             val cameraDrawable = StateListDrawable()
             val cameraOn = context.getDrawable(R.drawable.ic_class_room_camera_on)
             val cameraOnDisable = context.getDrawable(R.drawable.ic_class_room_camera_on)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_gray_3))
+                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
             }
             val cameraOff = context.getDrawable(R.drawable.ic_class_room_camera_off)
             val cameraOffDisable = context.getDrawable(R.drawable.ic_class_room_camera_off)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_gray_3))
+                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
             }
             cameraDrawable.addState(intArrayOf(state_enabled, state_selected), cameraOn)
             cameraDrawable.addState(intArrayOf(-state_enabled, state_selected), cameraOnDisable)
@@ -157,11 +157,11 @@ class UserListAdapter(
             val micDrawable = StateListDrawable()
             val micOn = context.getDrawable(R.drawable.ic_class_room_mic_on)
             val micOnDisable = context.getDrawable(R.drawable.ic_class_room_mic_on)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_gray_3))
+                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
             }
             val micOff = context.getDrawable(R.drawable.ic_class_room_mic_off)
             val micOffDisable = context.getDrawable(R.drawable.ic_class_room_mic_off)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_gray_3))
+                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
             }
 
             micDrawable.addState(intArrayOf(state_enabled, state_selected), micOn)

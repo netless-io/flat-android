@@ -80,7 +80,7 @@
             android:id="@+id/switch_video"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:theme="@style/SwitchStyle" />
+            android:theme="@style/SwitchCompatStyle" />
     </LinearLayout>
 
     <View
@@ -120,7 +120,7 @@
             android:id="@+id/switch_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:theme="@style/SwitchStyle" />
+            android:theme="@style/SwitchCompatStyle" />
     </LinearLayout>
 
     <View
@@ -160,7 +160,7 @@
             android:id="@+id/switchVideoArea"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:theme="@style/SwitchStyle" />
+            android:theme="@style/SwitchCompatStyle" />
     </LinearLayout>
 
     <View
