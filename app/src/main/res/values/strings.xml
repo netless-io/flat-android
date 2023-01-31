@@ -270,4 +270,14 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="user_list_handup_size_format">handup (%1$s)</string>
     <string name="user_list_teacher_name_format">teacher：%1$s</string>
     <string name="view_all">view all</string>
+
+    <string name="teacher_send_request_device">devices request send</string>
+    <string name="teacher_request_camera">teacher request camera</string>
+    <string name="teacher_request_mic">teacher request mic</string>
+    <string name="refuse_turn_on_camera_format">%1$s refuse camera</string>
+    <string name="refuse_turn_on_mic_format">%1$s refuse mic</string>
+    <string name="turn_off_camera">turn off camera</string>
+    <string name="turn_off_mic">turn off mic</string>
+    <string name="teacher_turn_off_camera">camera turned off</string>
+    <string name="teacher_turn_off_mic">mic turned off</string>
 </resources>

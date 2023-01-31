@@ -23,6 +23,7 @@ class Constants {
 
         const val URL = "url"
         const val TITLE = "title"
+        const val MESSAGE = "message"
     }
 
     object Login {

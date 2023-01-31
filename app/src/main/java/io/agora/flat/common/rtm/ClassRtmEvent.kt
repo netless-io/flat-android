@@ -17,7 +17,10 @@ sealed class ClassRtmEvent {
         private val eventClasses = mapOf(
             "raise-hand" to RaiseHandEvent::class.java,
             "update-room-status" to RoomStateEvent::class.java,
-            "ban" to RoomBanEvent::class.java
+            "ban" to RoomBanEvent::class.java,
+            "request-device" to RequestDeviceEvent::class.java,
+            "request-device-response" to RequestDeviceResponseEvent::class.java,
+            "notify-device-off" to NotifyDeviceOffEvent::class.java,
         )
 
         private val eventTypes = eventClasses.map { it.value to it.key }.toMap()
@@ -33,7 +36,7 @@ sealed class ClassRtmEvent {
                     }
                     return result as ClassRtmEvent
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
             return UnknownEvent()
         }
@@ -73,6 +76,27 @@ data class RoomBanEvent(
     override var sender: String? = null,
     val roomUUID: String,
     val status: Boolean,
+) : ClassRtmEvent(), EventWithSender
+
+data class RequestDeviceEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val mic: Boolean? = null,
+    val camera: Boolean? = null,
+) : ClassRtmEvent(), EventWithSender
+
+data class RequestDeviceResponseEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val mic: Boolean? = null,
+    val camera: Boolean? = null,
+) : ClassRtmEvent(), EventWithSender
+
+data class NotifyDeviceOffEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val mic: Boolean? = null,
+    val camera: Boolean? = null,
 ) : ClassRtmEvent(), EventWithSender
 
 data class OnMemberJoined(

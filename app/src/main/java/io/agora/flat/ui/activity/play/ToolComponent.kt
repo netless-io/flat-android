@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,18 +17,21 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.BoardRoom
-import io.agora.flat.event.RoomsUpdated
+import io.agora.flat.event.*
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
+import io.agora.flat.ui.view.RequestDeviceDialog
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.showToast
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -40,6 +44,7 @@ class ToolComponent(
     interface ToolComponentEntryPoint {
         fun boardRoom(): BoardRoom
         fun appEnv(): AppEnv
+        fun eventBus(): EventBus
     }
 
     private lateinit var binding: ComponentToolBinding
@@ -48,6 +53,7 @@ class ToolComponent(
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var boardRoom: BoardRoom
     private lateinit var appEnv: AppEnv
+    private lateinit var eventBus: EventBus
     private lateinit var userListAdapter: UserListAdapter
     private lateinit var acceptHandupAdapter: AcceptHandupAdapter
 
@@ -62,6 +68,7 @@ class ToolComponent(
         val entryPoint = EntryPointAccessors.fromActivity(activity, ToolComponentEntryPoint::class.java)
         boardRoom = entryPoint.boardRoom()
         appEnv = entryPoint.appEnv()
+        eventBus = entryPoint.eventBus()
     }
 
     private fun observeState() {
@@ -164,6 +171,52 @@ class ToolComponent(
                 binding.messageDot.isVisible = count > 0 &&
                         RoomOverlayManager.getShowId() != RoomOverlayManager.AREA_ID_MESSAGE
             }
+        }
+
+        lifecycleScope.launch {
+            eventBus.events.filterIsInstance<ClassroomEvent>().collect {
+                when (it) {
+                    is NotifyDeviceOffReceived -> {
+                        if (it.camera == true) {
+                            activity.showToast(R.string.teacher_turn_off_camera)
+                        }
+                        if (it.mic == true) {
+                            activity.showToast(R.string.teacher_turn_off_mic)
+                        }
+                    }
+                    is RequestDeviceResponseReceived -> {
+                        if (it.camera == false) {
+                            activity.showToast(activity.getString(R.string.refuse_turn_on_camera_format, it.username))
+                        }
+                        if (it.mic == false) {
+                            activity.showToast(activity.getString(R.string.refuse_turn_on_mic_format, it.username))
+                        }
+                    }
+                    is RequestDeviceSent -> {
+                        activity.showToast(R.string.teacher_send_request_device)
+                    }
+                    is RequestDeviceReceived -> {
+                        handleRequestDevice(it)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleRequestDevice(it: RequestDeviceReceived) {
+        if (it.camera == true) {
+            showRequestDeviceDialog(
+                activity.getString(R.string.teacher_request_camera),
+                onRefuse = viewModel::refuseCamera,
+                onAgree = viewModel::agreeCamera
+            )
+        }
+        if (it.mic == true) {
+            showRequestDeviceDialog(
+                activity.getString(R.string.teacher_request_mic),
+                onRefuse = viewModel::refuseMic,
+                onAgree = viewModel::agreeMic
+            )
         }
     }
 
@@ -398,6 +451,33 @@ class ToolComponent(
 
     private fun showAudienceExitDialog() {
 
+    }
+
+    private fun showRequestDeviceDialog(
+        message: String,
+        onAgree: () -> Unit,
+        onRefuse: () -> Unit
+    ) {
+        val prev = activity.supportFragmentManager.findFragmentByTag("RequestDeviceDialog")
+        if (prev is DialogFragment) {
+            prev.dismiss()
+        }
+
+        val dialog = RequestDeviceDialog().apply {
+            arguments = Bundle().apply {
+                putString(Constants.IntentKey.MESSAGE, message)
+            }
+        }
+        dialog.setListener(object : RequestDeviceDialog.Listener {
+            override fun onRefuse() {
+                onRefuse()
+            }
+
+            override fun onAgree() {
+                onAgree()
+            }
+        })
+        dialog.show(activity.supportFragmentManager, "RequestDeviceDialog")
     }
 
     private fun showInviteDialog() {

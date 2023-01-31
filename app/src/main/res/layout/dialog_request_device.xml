@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="280dp"
     android:layout_height="wrap_content"
     android:background="@drawable/shape_dialog_bg"
+    android:minWidth="280dp"
     android:orientation="vertical"
     android:paddingHorizontal="24dp"
     android:paddingTop="16dp"
@@ -20,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/room_dialog_exit_title" />
+            android:text="@string/invite" />
 
         <ImageView
             android:id="@+id/close"
@@ -36,12 +38,13 @@
         android:layout_marginTop="20dp">
 
         <TextView
+            android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:text="@string/hangup_room_exit_tip"
             android:textColor="@color/flat_day_night_text_primary"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="@string/teacher_request_camera" />
     </FrameLayout>
 
     <LinearLayout
@@ -58,7 +61,7 @@
             android:layout_weight="1"
             android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
-            android:text="@string/hangup_room"
+            android:text="@string/refuse"
             android:textColor="@color/flat_day_night_text_primary" />
 
         <View
@@ -70,9 +73,9 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
-            android:background="@drawable/shape_red_border_round_4_bg"
+            android:background="@drawable/shape_gray_border_round_4_bg"
             android:gravity="center"
-            android:text="@string/end_room"
-            android:textColor="@color/flat_red" />
+            android:text="@string/agree"
+            android:textColor="@color/flat_day_night_text_primary" />
     </LinearLayout>
 </LinearLayout>

@@ -11,6 +11,7 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.load
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.model.RoomStatus
@@ -103,7 +104,7 @@ class ExtComponent(
         }
         val dialog = RoomExitDialog().apply {
             arguments = Bundle().apply {
-                putString(RoomExitDialog.MESSAGE, message)
+                putString(Constants.IntentKey.MESSAGE, message)
             }
         }
         dialog.setListener { activity.delayAndFinish(250) }

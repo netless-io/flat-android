@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.databinding.DialogRoomExitBinding
 import kotlinx.coroutines.delay
@@ -12,11 +13,6 @@ import kotlinx.coroutines.flow.flow
 class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
     private lateinit var binding: DialogRoomExitBinding
     private var listener: Listener? = null
-
-    companion object {
-        const val TITLE = "title"
-        const val MESSAGE = "message"
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -29,7 +25,7 @@ class RoomExitDialog : ClassDialogFragment(R.layout.dialog_room_exit) {
         super.onViewCreated(view, savedInstanceState)
         binding = DialogRoomExitBinding.bind(view)
 
-        binding.message.text = arguments?.getString(MESSAGE, "")
+        binding.message.text = arguments?.getString(Constants.IntentKey.MESSAGE, "")
 
         binding.centerButton.setOnClickListener {
             listener?.onFinish()

@@ -195,7 +195,9 @@ class AgoraBoardRoom @Inject constructor(
     }
 
     override suspend fun setAllowDraw(allow: Boolean) {
-        fastRoom?.room?.disableDeviceInputs(!allow)
+        if (fastRoom?.isWritable == true) {
+            fastRoom?.room?.disableDeviceInputs(!allow)
+        }
         fastboardView.post {
             updateRoomController(allow)
         }

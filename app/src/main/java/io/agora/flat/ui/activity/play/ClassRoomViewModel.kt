@@ -20,10 +20,7 @@ import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
-import io.agora.flat.event.Event
-import io.agora.flat.event.EventBus
-import io.agora.flat.event.MessagesAppended
-import io.agora.flat.event.NoOptPermission
+import io.agora.flat.event.*
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.RoomOverlayManager
@@ -272,6 +269,23 @@ class ClassRoomViewModel @Inject constructor(
                     _state.value = this.copy(roomStatus = event.status)
                 }
             }
+            is RequestDeviceEvent -> {
+                eventbus.produceEvent(RequestDeviceReceived(mic = event.mic, camera = event.camera))
+            }
+            is RequestDeviceResponseEvent -> {
+                val uuid = event.sender ?: return
+                val name = userManager.findFirstUser(uuid)?.name ?: uuid
+                eventbus.produceEvent(
+                    RequestDeviceResponseReceived(
+                        username = name,
+                        mic = event.mic,
+                        camera = event.camera
+                    )
+                )
+            }
+            is NotifyDeviceOffEvent -> {
+                eventbus.produceEvent(NotifyDeviceOffReceived(mic = event.mic, camera = event.camera))
+            }
             is OnMemberJoined -> {
                 userManager.addUser(event.userId)
             }
@@ -311,27 +325,15 @@ class ClassRoomViewModel @Inject constructor(
                 logger.d("[USERS] current user state changed $it")
                 val state = _state.value ?: return@collect
                 try {
-                    if (state.isOnStage != it.isOnStage) {
-                        if (it.isOnStage) {
-                            boardRoom.setWritable(true)
-                            syncedClassState.updateDeviceState(
-                                userId = it.userUUID,
-                                camera = preferDeviceState.camera,
-                                mic = preferDeviceState.mic
-                            )
-                        } else {
-                            syncedClassState.deleteDeviceState(it.userUUID)
-                            boardRoom.setWritable(false)
-                        }
-                    }
+                    boardRoom.setWritable(it.isOnStage || it.allowDraw)
+                    boardRoom.setAllowDraw(it.allowDraw)
 
-                    if (state.allowDraw != it.allowDraw) {
-                        if (it.allowDraw) {
-                            boardRoom.setWritable(true)
-                            boardRoom.setAllowDraw(true)
-                        } else {
-                            boardRoom.setAllowDraw(false)
-                        }
+                    if (it.isOnStage && !state.isOnStage) {
+                        syncedClassState.updateDeviceState(
+                            userId = it.userUUID,
+                            camera = preferDeviceState.camera,
+                            mic = preferDeviceState.mic
+                        )
                     }
 
                     _state.value = state.copy(
@@ -418,10 +420,15 @@ class ClassRoomViewModel @Inject constructor(
             userManager.findFirstUser(uuid)?.run {
                 if (userManager.isUserSelf(uuid)) {
                     updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
-                } else if (state.isOwner && !enableVideo) {
-                    updateDeviceState(uuid, enableVideo = enableVideo, enableAudio = audioOpen)
                 } else {
-                    sendGlobalEvent(NoOptPermission())
+                    if (state.isOwner) {
+                        if (enableVideo) {
+                            rtmApi.sendPeerCommand(RequestDeviceEvent(roomUUID = roomUUID, camera = true), uuid)
+                            eventbus.produceEvent(RequestDeviceSent(camera = true))
+                        } else {
+                            updateDeviceState(uuid, enableVideo = false, enableAudio = audioOpen)
+                        }
+                    }
                 }
             }
         }
@@ -432,11 +439,14 @@ class ClassRoomViewModel @Inject constructor(
             val state = _state.value ?: return@launch
             userManager.findFirstUser(uuid)?.run {
                 if (userManager.isUserSelf(uuid)) {
-                    updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
-                } else if (state.isOwner && !enableAudio) {
-                    updateDeviceState(uuid, enableVideo = this.videoOpen, enableAudio = enableAudio)
-                } else {
-                    sendGlobalEvent(NoOptPermission())
+                    updateDeviceState(uuid, enableVideo = videoOpen, enableAudio = enableAudio)
+                } else if (state.isOwner) {
+                    if (enableAudio) {
+                        rtmApi.sendPeerCommand(RequestDeviceEvent(roomUUID = roomUUID, mic = true), uuid)
+                        eventbus.produceEvent(RequestDeviceSent(mic = true))
+                    } else {
+                        updateDeviceState(uuid, enableVideo = videoOpen, enableAudio = false)
+                    }
                 }
             }
         }
@@ -476,7 +486,7 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
-    fun startClass() {
+    private fun startClass() {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
@@ -531,17 +541,17 @@ class ClassRoomViewModel @Inject constructor(
             if (state.isOwner) {
                 syncedClassState.updateWhiteboard(uuid, allowDraw)
             }
+            if (userManager.isUserSelf(uuid) && !allowDraw) {
+                syncedClassState.updateWhiteboard(uuid, false)
+            }
         }
     }
 
-    fun closeSpeak(uuid: String) {
+    private fun closeSpeak(uuid: String) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
-            if (state.isOwner) {
-                syncedClassState.updateOnStage(uuid, false)
+            if (state.isOwner || userManager.isUserSelf(uuid)) {
                 syncedClassState.deleteDeviceState(uuid)
-            }
-            if (userManager.isUserSelf(uuid)) {
                 syncedClassState.updateOnStage(uuid, false)
             }
         }
@@ -613,7 +623,43 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun refuseCamera() {
+        viewModelScope.launch {
+            rtmApi.sendPeerCommand(
+                RequestDeviceResponseEvent(roomUUID = roomUUID, camera = false),
+                userManager.ownerUUID
+            )
+        }
+    }
 
+    fun agreeCamera() {
+        viewModelScope.launch {
+            enableVideo(true)
+            rtmApi.sendPeerCommand(
+                RequestDeviceResponseEvent(roomUUID = roomUUID, camera = true),
+                userManager.ownerUUID
+            )
+        }
+    }
+
+    fun refuseMic() {
+        viewModelScope.launch {
+            rtmApi.sendPeerCommand(
+                RequestDeviceResponseEvent(roomUUID = roomUUID, mic = false),
+                userManager.ownerUUID
+            )
+        }
+    }
+
+    fun agreeMic() {
+        viewModelScope.launch {
+            enableAudio(true)
+            rtmApi.sendPeerCommand(
+                RequestDeviceResponseEvent(roomUUID = roomUUID, mic = true),
+                userManager.ownerUUID
+            )
+        }
+    }
 }
 
 data class ClassRoomState(

@@ -89,13 +89,13 @@ class UserListAdapter(
         }
 
         if (viewModel.isOwner()) {
-            holder.onStageSwitch.isEnabled = item.isOnStage
-            holder.allowDrawSwitch.isEnabled = item.isOnStage
-            holder.cameraSwitch.isEnabled = item.isOnStage && item.videoOpen
-            holder.micSwitch.isEnabled = item.isOnStage && item.audioOpen
+            holder.onStageSwitch.isEnabled = true
+            holder.allowDrawSwitch.isEnabled = true
+            holder.cameraSwitch.isEnabled = item.isOnStage
+            holder.micSwitch.isEnabled = item.isOnStage
         } else {
             holder.onStageSwitch.isEnabled = item.isOnStage && viewModel.isSelf(item.userUUID)
-            holder.allowDrawSwitch.isEnabled = false
+            holder.allowDrawSwitch.isEnabled = item.allowDraw && viewModel.isSelf(item.userUUID)
             holder.cameraSwitch.isEnabled = item.isOnStage && viewModel.isSelf(item.userUUID)
             holder.micSwitch.isEnabled = item.isOnStage && viewModel.isSelf(item.userUUID)
         }

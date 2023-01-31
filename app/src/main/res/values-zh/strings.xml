@@ -282,4 +282,14 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="user_list_handup_size_format">举手 (%1$s)</string>
     <string name="user_list_teacher_name_format">老师：%1$s</string>
     <string name="view_all">查看全部</string>
+
+    <string name="teacher_send_request_device">已发送邀请</string>
+    <string name="teacher_request_camera">老师请求开启摄像头</string>
+    <string name="teacher_request_mic">老师请求开启麦克风</string>
+    <string name="refuse_turn_on_camera_format">%1$s 拒绝开启摄像头</string>
+    <string name="refuse_turn_on_mic_format">%1$s 拒绝开启麦克风</string>
+    <string name="turn_off_camera">已关闭该学生的摄像头</string>
+    <string name="turn_off_mic">已关闭该学生的麦克风</string>
+    <string name="teacher_turn_off_camera">老师已关闭你的摄像头</string>
+    <string name="teacher_turn_off_mic">老师已关闭你的麦克风</string>
 </resources>
