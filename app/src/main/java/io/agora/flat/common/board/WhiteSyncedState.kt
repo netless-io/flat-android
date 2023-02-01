@@ -183,18 +183,18 @@ class WhiteSyncedState @Inject constructor(
     }
 
     override fun updateOnStage(userId: String, onStage: Boolean) {
-        val jsonObj = mapOf(userId to if (onStage) true else null)
-        syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gsonWithNull.toJson(jsonObj))
+        val jsonObj = mapOf(userId to onStage)
+        syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gson.toJson(jsonObj))
     }
 
     override fun stageOffAll() {
-        val newState = _onStagesFlow.value?.mapValues { null } ?: return
-        syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gsonWithNull.toJson(newState))
+        val newState = _onStagesFlow.value?.mapValues { false } ?: return
+        syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gson.toJson(newState))
     }
 
     override fun updateWhiteboard(userId: String, allowDraw: Boolean) {
-        val jsonObj = mapOf(userId to if (allowDraw) true else null)
-        syncedStore.setStorageState(WHITEBOARD_STORAGE, gsonWithNull.toJson(jsonObj))
+        val jsonObj = mapOf(userId to allowDraw)
+        syncedStore.setStorageState(WHITEBOARD_STORAGE, gson.toJson(jsonObj))
     }
 
     override fun updateRaiseHand(userId: String, raiseHand: Boolean) {
