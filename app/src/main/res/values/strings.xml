@@ -280,4 +280,5 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="turn_off_mic">turn off mic</string>
     <string name="teacher_turn_off_camera">camera turned off</string>
     <string name="teacher_turn_off_mic">mic turned off</string>
+    <string name="user_offline">Offline</string>
 </resources>

@@ -39,6 +39,7 @@ class UserListAdapter(
         val item = dataSet[position]
 
         holder.username.text = item.name
+        holder.userOffline.isVisible = item.isLeft
         holder.avatar.load(item.avatarURL) {
             crossfade(true)
             placeholder(R.drawable.ic_class_room_user_avatar)
@@ -116,6 +117,7 @@ class UserListAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val avatar: ImageView = view.findViewById(R.id.avatar)
         val username: TextView = view.findViewById(R.id.username)
+        val userOffline: TextView = view.findViewById(R.id.user_offline)
         val onStageSwitch: SwitchCompat = view.findViewById(R.id.switch_on_stage)
         val allowDrawSwitch: SwitchCompat = view.findViewById(R.id.switch_allow_draw)
         val cameraSwitch: ImageView = view.findViewById(R.id.switch_camera)
