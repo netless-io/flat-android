@@ -11,7 +11,7 @@
     <color name="flat_blue_20">#3F3381FF</color>
     <color name="flat_black_50">#7F000000</color>
 
-    <color name="ic_launcher_background">@color/flat_blue_6</color>
+    <color name="ic_launcher_background">#3D57F5</color>
 
     <color name="flat_day_night_text_primary">@color/flat_gray_6</color>
     <color name="flat_day_night_text_secondary">@color/flat_gray_3</color>
