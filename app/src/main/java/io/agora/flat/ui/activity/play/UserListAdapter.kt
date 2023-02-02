@@ -66,7 +66,8 @@ class UserListAdapter(
             val target = !it.isSelected
             viewModel.enableAudio(target, item.userUUID)
         }
-        holder.inRaiseHand.isVisible = item.isRaiseHand
+        holder.inRaiseHandOwner.isVisible = item.isRaiseHand && viewModel.isOwner()
+        holder.inRaiseHandOther.isVisible = item.isRaiseHand && !viewModel.isOwner()
         holder.noRaiseHand.isVisible = !item.isRaiseHand
 
         val context = holder.itemView.context
@@ -84,10 +85,12 @@ class UserListAdapter(
             holder.cancelHandUp.setOnClickListener {
                 viewModel.cancelRaiseHand(item.userUUID)
             }
-        } else {
-            holder.agreeHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_blue_3))
-            holder.cancelHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_blue_3))
         }
+
+        holder.cameraSwitch.isVisible = item.isOnStage
+        holder.forbidCameraSwitch.isVisible = !item.isOnStage
+        holder.micSwitch.isVisible = item.isOnStage
+        holder.forbidMicSwitch.isVisible = !item.isOnStage
 
         if (viewModel.isOwner()) {
             holder.onStageSwitch.isEnabled = true
@@ -121,10 +124,13 @@ class UserListAdapter(
         val onStageSwitch: SwitchCompat = view.findViewById(R.id.switch_on_stage)
         val allowDrawSwitch: SwitchCompat = view.findViewById(R.id.switch_allow_draw)
         val cameraSwitch: ImageView = view.findViewById(R.id.switch_camera)
+        val forbidCameraSwitch: View = view.findViewById(R.id.forbid_switch_camera)
         val micSwitch: ImageView = view.findViewById(R.id.switch_mic)
+        val forbidMicSwitch: View = view.findViewById(R.id.forbid_switch_mic)
         val agreeHandUp: TextView = view.findViewById(R.id.agree_handup)
         val cancelHandUp: TextView = view.findViewById(R.id.cancel_handup)
-        val inRaiseHand: View = view.findViewById(R.id.in_raise_hand)
+        val inRaiseHandOwner: View = view.findViewById(R.id.in_raise_hand_owner)
+        val inRaiseHandOther: View = view.findViewById(R.id.in_raise_hand_other)
         val noRaiseHand: View = view.findViewById(R.id.no_raise_hand)
 
         init {

@@ -102,6 +102,15 @@
                 android:layout_gravity="center"
                 android:padding="4dp"
                 android:src="@drawable/ic_class_room_camera_on" />
+
+            <TextView
+                android:id="@+id/forbid_switch_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="--"
+                android:textColor="@color/flat_day_night_text_secondary"
+                android:visibility="gone" />
         </FrameLayout>
 
         <FrameLayout
@@ -116,6 +125,15 @@
                 android:layout_gravity="center"
                 android:padding="4dp"
                 android:src="@drawable/ic_class_room_mic_on" />
+
+            <TextView
+                android:id="@+id/forbid_switch_mic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="--"
+                android:textColor="@color/flat_day_night_text_secondary"
+                android:visibility="gone" />
         </FrameLayout>
 
         <FrameLayout
@@ -124,7 +142,7 @@
             android:layout_weight="1">
 
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:id="@+id/in_raise_hand"
+                android:id="@+id/in_raise_hand_owner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -164,8 +182,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="- / -"
-                android:textColor="@color/flat_day_night_text_secondary" />
+                android:text="--"
+                android:textColor="@color/flat_day_night_text_secondary"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/in_raise_hand_other"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_handup_ing_disable"
+                android:visibility="visible" />
         </FrameLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
