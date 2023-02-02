@@ -228,7 +228,7 @@ dependencies {
     if (findProject(":syncplayer") != null) {
         implementation project(':syncplayer')
     } else {
-        implementation "com.github.netless-io:sync-player-android:1.1.1"
+        implementation "com.github.netless-io:sync-player-android:1.2.0"
     }
 
     implementation 'io.agora.rtc:full-sdk:3.5.1.2'
