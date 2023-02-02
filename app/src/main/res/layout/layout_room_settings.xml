@@ -78,9 +78,9 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_video"
+            style="@style/SwitchCompatStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:theme="@style/SwitchCompatStyle" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <View
@@ -118,9 +118,9 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_audio"
+            style="@style/SwitchCompatStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:theme="@style/SwitchCompatStyle" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <View
@@ -158,9 +158,9 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchVideoArea"
+            style="@style/SwitchCompatStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:theme="@style/SwitchCompatStyle" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <View

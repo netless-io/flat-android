@@ -50,10 +50,10 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch_on_stage"
+                style="@style/SwitchCompatStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:theme="@style/SwitchCompatStyle" />
+                android:layout_gravity="center" />
         </FrameLayout>
 
         <FrameLayout
@@ -63,10 +63,11 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch_allow_draw"
+                style="@style/SwitchCompatStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:theme="@style/SwitchCompatStyle" />
+                tools:checked="true" />
         </FrameLayout>
 
         <FrameLayout

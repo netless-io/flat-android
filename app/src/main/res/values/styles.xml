@@ -2,9 +2,8 @@
 <resources>
 
     <style name="SwitchCompatStyle" parent="Theme.AppCompat">
-        <item name="colorControlActivated">@color/flat_blue</item>
-        <item name="colorSwitchThumbNormal">@color/flat_white</item>
-        <item name="android:colorForeground">@color/flat_day_night_text_primary</item>
+        <item name="android:thumb">@drawable/switch_custom_thumb_selector</item>
+        <item name="track">@drawable/switch_custom_track_selector</item>
     </style>
 
     <style name="PlaybackSeekbarStyle">

@@ -267,7 +267,7 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="user_list_student_size_format">student (%1$s)</string>
     <string name="on_or_off_stage">on/off</string>
     <string name="whiteboard_allow_draw">whiteboard</string>
-    <string name="user_list_handup_size_format">handup (%1$s)</string>
+    <string name="user_list_handup">handup (%1$s)</string>
     <string name="user_list_teacher_name_format">teacher：%1$s</string>
     <string name="view_all">view all</string>
 

@@ -157,13 +157,12 @@
             android:textColor="@color/flat_day_night_text_primary" />
 
         <TextView
-            android:id="@+id/handup_size"
             style="@style/RoomTextBodyTwo"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/user_list_handup_size_format"
+            android:text="@string/user_list_handup"
             android:textColor="@color/flat_day_night_text_primary" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

@@ -108,11 +108,6 @@ class ToolComponent(
 
                 val handUpCount = handupUsers.size
                 binding.userlistDot.isVisible = handUpCount > 0
-                binding.layoutUserList.handupSize.text = activity.getString(
-                    R.string.user_list_student_size_format,
-                    "$handUpCount/${it.size}"
-                )
-
                 binding.acceptHandup.isEnabled = handUpCount > 0
                 binding.handupCount.isVisible = handUpCount > 0
                 binding.handupCount.text = "$handUpCount"
