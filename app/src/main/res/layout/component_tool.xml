@@ -103,17 +103,6 @@
                 app:tint="@color/color_class_room_icon"
                 tools:ignore="ContentDescription" />
 
-            <ImageView
-                android:id="@+id/setting"
-                android:layout_width="@dimen/room_class_button_size"
-                android:layout_height="@dimen/room_class_button_size"
-                android:layout_margin="@dimen/room_class_button_gap"
-                android:background="@drawable/ic_class_room_icon_bg"
-                android:padding="@dimen/room_class_button_gap"
-                android:src="@drawable/ic_class_room_setting"
-                app:tint="@color/color_class_room_icon"
-                tools:ignore="ContentDescription" />
-
             <FrameLayout
                 android:id="@+id/record_layout"
                 android:layout_width="wrap_content"
@@ -140,6 +129,17 @@
                     app:tint="@color/flat_day_night_primary_blue"
                     tools:ignore="ContentDescription" />
             </FrameLayout>
+
+            <ImageView
+                android:id="@+id/setting"
+                android:layout_width="@dimen/room_class_button_size"
+                android:layout_height="@dimen/room_class_button_size"
+                android:layout_margin="@dimen/room_class_button_gap"
+                android:background="@drawable/ic_class_room_icon_bg"
+                android:padding="@dimen/room_class_button_gap"
+                android:src="@drawable/ic_class_room_setting"
+                app:tint="@color/color_class_room_icon"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
         <FrameLayout
