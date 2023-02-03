@@ -71,6 +71,7 @@ class ClassRoomViewModel @Inject constructor(
     val teacher = userManager.observeUsers().map { it.firstOrNull { user -> user.isOwner } }
     val students = userManager.observeUsers().map {
         it.filter { user -> !user.isOwner && (user.isJoined || user.isOnStage) }
+            .map { user -> user.copy(isRaiseHand = !user.isOnStage && user.isRaiseHand) }
     }
 
     private var _videoAreaShown = MutableStateFlow(true)

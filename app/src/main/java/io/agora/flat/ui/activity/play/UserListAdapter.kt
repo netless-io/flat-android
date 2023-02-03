@@ -2,8 +2,10 @@ package io.agora.flat.ui.activity.play
 
 import android.R.attr.state_enabled
 import android.R.attr.state_selected
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -16,6 +18,7 @@ import coil.load
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.util.inflate
+import io.agora.flat.util.showToast
 
 
 /**
@@ -35,6 +38,7 @@ class UserListAdapter(
         return ViewHolder(view)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = dataSet[position]
 
@@ -45,10 +49,16 @@ class UserListAdapter(
             placeholder(R.drawable.ic_class_room_user_avatar)
         }
         holder.onStageSwitch.isChecked = item.isOnStage
-        holder.onStageSwitch.setOnCheckedChangeListener { it, isChecked ->
-            if (it.isPressed) {
-                viewModel.updateOnStage(item.userUUID, isChecked)
+        holder.onStageSwitch.setOnTouchListener { v, event ->
+            val targetChecked = !(v as SwitchCompat).isChecked
+            if (event.action == MotionEvent.ACTION_UP) {
+                if (targetChecked && !viewModel.isOnStageAllowable()) {
+                    showOnStageSizeLimitedToast(holder)
+                } else {
+                    viewModel.updateOnStage(item.userUUID, targetChecked)
+                }
             }
+            true
         }
         holder.allowDrawSwitch.isChecked = item.allowDraw
         holder.allowDrawSwitch.setOnCheckedChangeListener { it, isChecked ->
@@ -70,16 +80,13 @@ class UserListAdapter(
         holder.inRaiseHandOther.isVisible = item.isRaiseHand && !viewModel.isOwner()
         holder.noRaiseHand.isVisible = !item.isRaiseHand
 
-        val context = holder.itemView.context
+
         if (viewModel.isOwner()) {
-            if (viewModel.isOnStageAllowable()) {
-                holder.agreeHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_blue_6))
-            } else {
-                holder.agreeHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_gray_6))
-            }
             holder.agreeHandUp.setOnClickListener {
                 if (viewModel.isOnStageAllowable()) {
                     viewModel.acceptRaiseHand(item.userUUID)
+                } else {
+                    showOnStageSizeLimitedToast(holder)
                 }
             }
             holder.cancelHandUp.setOnClickListener {
@@ -103,6 +110,10 @@ class UserListAdapter(
             holder.cameraSwitch.isEnabled = item.isOnStage && viewModel.isSelf(item.userUUID)
             holder.micSwitch.isEnabled = item.isOnStage && viewModel.isSelf(item.userUUID)
         }
+    }
+
+    private fun showOnStageSizeLimitedToast(holder: ViewHolder) {
+        holder.itemView.context.showToast(R.string.onstage_size_limited)
     }
 
     override fun getItemId(position: Int): Long {

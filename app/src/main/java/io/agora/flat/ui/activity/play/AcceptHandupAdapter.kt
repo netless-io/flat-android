@@ -4,13 +4,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.util.inflate
+import io.agora.flat.util.showToast
 
 
 /**
@@ -37,16 +37,12 @@ class AcceptHandupAdapter(
             crossfade(true)
             placeholder(R.drawable.ic_class_room_user_avatar)
         }
-        val context = holder.itemView.context
-        if (viewModel.isOnStageAllowable()) {
-            holder.agreeHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_blue_6))
-        } else {
-            holder.agreeHandUp.setTextColor(ContextCompat.getColor(context, R.color.flat_gray_6))
-        }
         holder.agreeHandUp.setOnClickListener {
             if (viewModel.isOnStageAllowable()) {
                 viewModel.acceptRaiseHand(item.userUUID)
                 RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_ACCEPT_HANDUP, false)
+            } else {
+                holder.itemView.context.showToast(R.string.onstage_size_limited)
             }
         }
     }

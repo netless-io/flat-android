@@ -270,7 +270,7 @@ class UserManager @Inject constructor(
     }
 
     fun getOnStageCount(): Int {
-        return users.count { it.isJoined && it.isOnStage }
+        return users.count { it.isOnStage }
     }
 
     private fun getAllowDraw(uuid: String): Boolean {
