@@ -222,9 +222,11 @@ class UserManager @Inject constructor(
             )
             // not joined
             if (onStages[it] == true && user == null) {
+                val remoteUser = userQuery.loadUser(it)
                 user = RoomUser(
                     userUUID = it,
-                    name = userQuery.loadUser(it)?.name,
+                    name = remoteUser?.name,
+                    avatarURL = remoteUser?.avatarURL ?: "",
                     isOnStage = onStages[it] ?: false,
                     videoOpen = devicesState[it]?.camera ?: false,
                     audioOpen = devicesState[it]?.mic ?: false,
