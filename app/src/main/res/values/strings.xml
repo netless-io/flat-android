@@ -283,4 +283,5 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="user_offline">Offline</string>
     <string name="onstage_size_limited">onstage size limited, offstage someone</string>
     <string name="handup_list_empty">Empty</string>
+    <string name="user_list_empty">Empty</string>
 </resources>

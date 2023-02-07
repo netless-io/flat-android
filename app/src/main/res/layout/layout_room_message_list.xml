@@ -84,14 +84,12 @@
             android:id="@+id/list_empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible"
-            tools:visibility="visible">
+            android:visibility="visible">
 
             <TextView
                 style="@style/RoomTextBodyOne"
                 android:layout_gravity="center"
-                android:text="@string/room_class_message_empty_hit"
-                android:visibility="invisible" />
+                android:text="@string/room_class_message_empty_hit" />
         </FrameLayout>
     </FrameLayout>
 

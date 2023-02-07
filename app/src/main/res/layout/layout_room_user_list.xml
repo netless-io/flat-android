@@ -176,6 +176,20 @@
             android:id="@+id/user_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="visible"
             tools:listitem="@layout/item_room_user_list" />
+
+        <FrameLayout
+            android:id="@+id/list_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            tools:visibility="visible">
+
+            <TextView
+                style="@style/RoomTextBodyOne"
+                android:layout_gravity="center"
+                android:text="@string/user_list_empty" />
+        </FrameLayout>
     </FrameLayout>
 </LinearLayout>

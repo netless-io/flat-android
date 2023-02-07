@@ -103,6 +103,8 @@ class ToolComponent(
                     R.string.user_list_student_size_format,
                     "${it.size}"
                 )
+                binding.layoutUserList.userList.isVisible = it.isNotEmpty()
+                binding.layoutUserList.listEmpty.isVisible = it.isEmpty()
 
                 val handupUsers = it.filter { user -> user.isRaiseHand }
                 acceptHandupAdapter.setData(handupUsers)
