@@ -26,6 +26,8 @@
     <dimen name="room_class_item_height">36dp</dimen>
     <dimen name="room_class_cloud_item_height">70dp</dimen>
     <dimen name="room_class_user_list_item_height">48dp</dimen>
+    <dimen name="room_class_handup_list_empty_height">240dp</dimen>
+    <dimen name="room_class_handup_list_max_height">400dp</dimen>
 
     <dimen name="room_replay_sub_tools_margin">56dp</dimen>
     <dimen name="room_replay_seek_bar_width">180dp</dimen>

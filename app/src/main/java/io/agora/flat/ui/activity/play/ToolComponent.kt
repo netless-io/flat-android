@@ -30,6 +30,7 @@ import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.ui.view.RequestDeviceDialog
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.isTabletMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
@@ -108,9 +109,10 @@ class ToolComponent(
 
                 val handUpCount = handupUsers.size
                 binding.userlistDot.isVisible = handUpCount > 0
-                binding.acceptHandup.isEnabled = handUpCount > 0
                 binding.handupCount.isVisible = handUpCount > 0
                 binding.handupCount.text = "$handUpCount"
+                binding.layoutAcceptHandup.listEmpty.isVisible = handUpCount == 0
+                binding.layoutAcceptHandup.handupListContainer.isVisible = handUpCount > 0
             }
         }
 
@@ -370,6 +372,7 @@ class ToolComponent(
         binding.layoutSettings.root.setOnClickListener {
             // block event
         }
+        binding.recordLayout.isVisible = activity.isTabletMode()
 
         userListAdapter = UserListAdapter(viewModel)
         binding.layoutUserList.userList.adapter = userListAdapter
@@ -391,9 +394,6 @@ class ToolComponent(
         acceptHandupAdapter = AcceptHandupAdapter(viewModel)
         binding.layoutAcceptHandup.handupList.adapter = acceptHandupAdapter
         binding.layoutAcceptHandup.handupList.layoutManager = LinearLayoutManager(activity)
-        binding.layoutAcceptHandup.viewAll.setOnClickListener {
-            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_USER_LIST, true)
-        }
     }
 
     private fun handleExit() {

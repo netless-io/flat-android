@@ -25,6 +25,8 @@
     <dimen name="room_class_video_user_avatar_size_normal">60dp</dimen>
     <dimen name="room_class_video_user_avatar_size_fullscreen">180dp</dimen>
     <dimen name="room_class_item_height">48dp</dimen>
+    <dimen name="room_class_handup_list_empty_height">300dp</dimen>
+    <dimen name="room_class_handup_list_max_height">480dp</dimen>
 
     <dimen name="room_replay_sub_tools_margin">72dp</dimen>
     <dimen name="room_replay_seek_bar_width">240dp</dimen>
