@@ -70,10 +70,16 @@ class ClassCloudViewModel @Inject constructor(
                     val files = resp.data.files
                     loadedFiles.value = files
                     delayLaunch {
+                        // when response size less than request size, complete
+                        val appendState = if (files.size < 20) {
+                            LoadState.NotLoading.Complete
+                        } else {
+                            LoadState.NotLoading.Incomplete
+                        }
                         loadUiState.value = loadUiState.value.copy(
                             page = 1,
                             refresh = LoadState.NotLoading(files.isEmpty()),
-                            append = LoadState.NotLoading.Incomplete
+                            append = appendState
                         )
                     }
                 }
