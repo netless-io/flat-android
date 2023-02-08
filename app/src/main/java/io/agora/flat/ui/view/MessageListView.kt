@@ -48,6 +48,7 @@ class MessageListView @JvmOverloads constructor(
                 }
             }
         })
+        updateListEmpty()
 
         binding.messageEdit.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
@@ -119,17 +120,23 @@ class MessageListView @JvmOverloads constructor(
 
     fun setMessages(messages: List<Message>) {
         messageAdapter.setMessages(messages)
-        binding.listEmpty.isVisible = messages.isEmpty()
+        updateListEmpty()
         postDelayed({ binding.messageList.scrollToPosition(messageAdapter.itemCount - 1) }, 100)
     }
 
     fun addMessagesAtHead(messages: List<Message>) {
         messageAdapter.addMessagesAtHead(messages)
+        updateListEmpty()
     }
 
     fun addMessagesAtTail(messages: List<Message>) {
         messageAdapter.addMessagesAtTail(messages)
+        updateListEmpty()
         postDelayed({ binding.messageList.scrollToPosition(messageAdapter.itemCount - 1) }, 100)
+    }
+
+    private fun updateListEmpty() {
+        binding.listEmpty.isVisible = messageAdapter.itemCount == 0
     }
 
     fun setListener(listener: Listener) {

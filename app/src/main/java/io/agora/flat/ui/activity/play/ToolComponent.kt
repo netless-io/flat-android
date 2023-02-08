@@ -137,7 +137,7 @@ class ToolComponent(
 
         lifecycleScope.launchWhenResumed {
             viewModel.state.filterNotNull().collect {
-                binding.recordLayout.isVisible = it.isOwner
+                binding.recordLayout.isVisible = it.isOwner && activity.isTabletMode()
                 binding.cloudservice.isVisible = it.allowDraw
 
                 binding.handupLayout.isVisible = !it.isOnStage && !it.ban

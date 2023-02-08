@@ -83,8 +83,7 @@
         <FrameLayout
             android:id="@+id/list_empty"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible">
+            android:layout_height="match_parent">
 
             <TextView
                 style="@style/RoomTextBodyOne"
