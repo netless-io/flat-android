@@ -10,16 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.ui.theme.FlatTheme
-import io.agora.flat.ui.theme.Green_6
-import io.agora.flat.ui.theme.Green_7
-import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.util.DateUtils
 import io.agora.flat.util.FlatFormatter
 
@@ -34,7 +30,11 @@ fun RoomItem(roomInfo: RoomInfo, modifier: Modifier = Modifier) {
                     Spacer(Modifier.height(12.dp))
                     RoomItemTitle(roomInfo)
                     Spacer(Modifier.height(8.dp))
-                    RoomItemTime(roomInfo.roomStatus, roomInfo.beginTime, roomInfo.endTime)
+                    Row {
+                        FlatRoomStatusText(roomInfo.roomStatus)
+                        Spacer(Modifier.width(4.dp))
+                        RoomItemTime(roomInfo.beginTime, roomInfo.endTime)
+                    }
                     Spacer(Modifier.height(12.dp))
                 }
                 Spacer(Modifier.width(16.dp))
@@ -73,24 +73,12 @@ private fun RoomItemTitle(roomInfo: RoomInfo) {
 }
 
 @Composable
-private fun RoomItemTime(roomStatus: RoomStatus, beginTime: Long, endTime: Long) {
+private fun RoomItemTime(beginTime: Long, endTime: Long) {
     val context = LocalContext.current
-    when (roomStatus) {
-        RoomStatus.Started, RoomStatus.Paused -> {
-            FlatTextBodyTwo(
-                stringResource(
-                    R.string.home_room_info_started_format,
-                    FlatFormatter.timeHM(System.currentTimeMillis() - beginTime)
-                ), color = if (isDarkTheme()) Green_7 else Green_6
-            )
-        }
-        else -> {
-            FlatTextBodyTwo(
-                getDisplayTime(context, beginTime, endTime),
-                color = FlatTheme.colors.textPrimary
-            )
-        }
-    }
+    FlatTextBodyTwo(
+        getDisplayTime(context, beginTime, endTime),
+        color = FlatTheme.colors.textPrimary
+    )
 }
 
 private fun getDisplayTime(context: Context, beginTime: Long, endTime: Long): String {

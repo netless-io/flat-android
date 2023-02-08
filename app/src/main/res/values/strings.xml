@@ -24,7 +24,6 @@
     <string name="home_room_info_today_format">Today %s</string>
     <string name="home_room_info_yesterday_format">Yesterday %s</string>
     <string name="home_room_info_tomorrow_format">Tomorrow %s</string>
-    <string name="home_room_info_started_format">Started %s</string>
     <string name="title_home">Home</string>
     <string name="title_cloud_storage">Cloud</string>
     <string name="title_cloud_pick">Upload</string>

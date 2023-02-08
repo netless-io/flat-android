@@ -11,14 +11,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomStatus
-import io.agora.flat.ui.theme.Blue_6
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Gray_6
-import io.agora.flat.ui.theme.Red_3
+import io.agora.flat.ui.theme.Green_6
+import io.agora.flat.ui.theme.Yellow_6
 
 
 @Composable
-fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier) {
+fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
 
     when (roomStatus) {
@@ -26,13 +26,13 @@ fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier) {
             modifier = modifier,
             text = stringResource(R.string.home_room_state_idle),
             style = typography.body2,
-            color = Red_3
+            color = Yellow_6
         )
         RoomStatus.Started, RoomStatus.Paused -> Text(
             modifier = modifier,
             text = stringResource(R.string.home_room_state_started),
             style = typography.body2,
-            color = Blue_6
+            color = Green_6
         )
         RoomStatus.Stopped -> Text(
             modifier = modifier,
