@@ -364,14 +364,19 @@ class ClassRoomViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (userManager.isOwner() && state.value!!.roomType == RoomType.OneToOne) {
-                userManager.observeUsers()
-                    .map { it.filter { user -> user.rtcUID > 0 && !user.isOwner } }
+                combine(
+                    syncedClassState.observeSyncedReady(),
+                    userManager.observeUsers()
+                ) { ready, users ->
+                    if (ready) users else null
+                }.filterNotNull()
                     .onCompletion {
                         logger.d("[USERS] one to one observeUsers done")
                     }
                     .collect {
-                        if (!syncedStoreReady) return@collect
-                        val count = it.count { user -> user.isOnStage }
+                        val users = it.filter { user -> user.isJoined && !user.isOwner }
+                        if (users.isEmpty()) return@collect
+                        val count = users.count { user -> user.isOnStage }
                         if (count == 0) {
                             it.filter { user -> !user.isOnStage }.randomOrNull()?.run {
                                 syncedClassState.updateOnStage(userUUID, true)
