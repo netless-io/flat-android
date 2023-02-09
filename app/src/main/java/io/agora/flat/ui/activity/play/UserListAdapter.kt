@@ -117,14 +117,14 @@ class UserListAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return dataSet[position].rtcUID.toLong()
+        return dataSet[position].userUUID.hashCode().toLong()
     }
 
     override fun getItemCount() = dataSet.size
 
     fun setData(data: List<RoomUser>) {
         dataSet.clear()
-        dataSet.addAll(data.distinctBy { it.rtcUID })
+        dataSet.addAll(data.distinctBy { it.userUUID })
         notifyDataSetChanged()
     }
 

@@ -48,7 +48,7 @@ class AcceptHandupAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return dataSet[position].rtcUID.toLong()
+        return dataSet[position].userUUID.hashCode().toLong()
     }
 
     override fun getItemCount() = dataSet.size
