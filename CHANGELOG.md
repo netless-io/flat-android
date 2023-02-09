@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.2.0] - March 15, 2023
+- Add independent control of whiteboard permissions
+
 ## [2.0.0] - November 16, 2022
 
 - New UI Style
