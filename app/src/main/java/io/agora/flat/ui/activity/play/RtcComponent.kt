@@ -186,10 +186,15 @@ class RtcComponent(
 
         adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
         adapter.onItemClickListener = UserVideoAdapter.OnItemClickListener { _, view, rtcUser ->
-            if (!viewModel.canShowCallOut(rtcUser.userUUID)) return@OnItemClickListener
-
             start.set(getViewRect(view, fullScreenLayout))
             end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
+
+            if (!viewModel.canShowCallOut(rtcUser.userUUID)) {
+                userCallOut = rtcUser
+                hideVideoListOptArea()
+                fullScreenAnimator.show()
+                return@OnItemClickListener
+            }
 
             if (userCallOut != rtcUser) {
                 userCallOut = rtcUser

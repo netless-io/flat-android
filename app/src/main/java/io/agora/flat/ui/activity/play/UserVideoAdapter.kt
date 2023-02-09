@@ -66,7 +66,7 @@ class UserVideoAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return dataSet[position].userUUID.hashCode().toLong()
+        return dataSet[position].rtcUID.toLong()
     }
 
     override fun getItemCount() = dataSet.size
