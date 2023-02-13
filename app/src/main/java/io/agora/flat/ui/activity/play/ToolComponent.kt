@@ -491,8 +491,8 @@ class ToolComponent(
             R.string.invite_text_format,
             inviteInfo.username,
             roomTitle,
-            datetime,
             roomUuid,
+            datetime,
             inviteLink
         )
 
