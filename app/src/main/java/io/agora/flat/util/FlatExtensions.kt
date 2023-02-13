@@ -20,10 +20,10 @@ fun String.coursewareType(): CoursewareType {
         "jpg", "jpeg", "png", "webp" -> {
             CoursewareType.Image
         }
-        "doc", "docx", "pdf" -> {
+        "doc", "docx", "pdf", "ppt" -> {
             CoursewareType.DocStatic
         }
-        "ppt", "pptx" -> {
+        "pptx" -> {
             CoursewareType.DocDynamic
         }
         "mp3" -> {
