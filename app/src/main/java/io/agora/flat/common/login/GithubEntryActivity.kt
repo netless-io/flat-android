@@ -1,9 +1,11 @@
 package io.agora.flat.common.login
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.ui.activity.LoginActivity
 import javax.inject.Inject
 
 /**
@@ -27,8 +29,15 @@ class GithubEntryActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent != null) {
-            loginManager.handleGithubAuth(this, intent)
+        if (intent?.data?.scheme == "x-agora-flat-client") {
+            // check if the intent is from web to join room
+            if (intent.data?.authority == "joinRoom") {
+                intent.apply { component = ComponentName(this@GithubEntryActivity, LoginActivity::class.java) }
+                startActivity(intent)
+            } else {
+                // handle github auth
+                loginManager.handleGithubAuth(this, intent)
+            }
         }
         finish()
     }
