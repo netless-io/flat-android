@@ -1,7 +1,9 @@
 package io.agora.flat.common.login
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.createChooser
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -65,11 +67,13 @@ class LoginActivityHandler(
                 data = Uri.parse(githubLoginUrl())
             }
 
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(
-                    Intent.createChooser(intent, context.getString(R.string.intent_browser_choose_title))
-                )
-            } else {
+            val chooserIntent = createChooser(
+                intent,
+                context.getString(R.string.intent_browser_choose_title)
+            )
+            try {
+                context.startActivity(chooserIntent)
+            } catch (e: ActivityNotFoundException) {
                 showUiMessage(context.getString(R.string.intent_no_browser))
             }
         }
