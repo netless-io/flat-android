@@ -6,6 +6,7 @@ import android.provider.Settings
 import io.agora.flat.Constants
 import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.RoomPlayInfo
+import io.agora.flat.ui.activity.CallingCodeActivity
 import io.agora.flat.ui.activity.LoginActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
@@ -134,5 +135,10 @@ object Navigator {
     // system
     fun gotoNetworkSetting(context: Context) {
         context.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
+    }
+
+    fun launchCallingCodeActivity(context: Context) {
+        val intent = Intent(context, CallingCodeActivity::class.java)
+        context.startActivity(intent)
     }
 }

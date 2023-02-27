@@ -89,10 +89,8 @@ internal fun parseRoomUUID(text: CharSequence): String? {
     return entire?.value
 }
 
-internal const val PHONE_PATTERN = """1[3456789]\d{9}"""
-
 fun String.isValidPhone(): Boolean {
-    return PHONE_PATTERN.toRegex().matches(this)
+    return this.isNotEmpty()
 }
 
 fun String.isValidSmsCode(): Boolean {

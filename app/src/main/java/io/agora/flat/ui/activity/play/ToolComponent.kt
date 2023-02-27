@@ -455,6 +455,10 @@ class ToolComponent(
         onAgree: () -> Unit,
         onRefuse: () -> Unit
     ) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            return
+        }
+
         val prev = activity.supportFragmentManager.findFragmentByTag("RequestDeviceDialog")
         if (prev is DialogFragment) {
             prev.dismiss()

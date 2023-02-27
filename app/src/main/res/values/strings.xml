@@ -40,6 +40,7 @@
     <string name="title_dark_mode">Dark Mode</string>
     <string name="title_activity_compose_test">ComposeTest</string>
     <string name="title_call_test" translatable="false">CallTest</string>
+    <string name="title_country_or_area">Country/Area</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="term_of_service">Term of Service</string>
     <string name="network_acceleration">Network Acceleration</string>

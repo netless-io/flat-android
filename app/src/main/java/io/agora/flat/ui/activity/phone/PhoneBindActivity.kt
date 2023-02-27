@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
@@ -89,6 +90,7 @@ internal fun PhoneBindScreen(
     actioner: (PhoneBindUiAction) -> Unit,
 ) {
     var phone by remember { mutableStateOf("") }
+    var ccode by remember { mutableStateOf(Constants.DEFAULT_CALLING_CODE) }
     var code by remember { mutableStateOf("") }
     val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !viewState.binding
 
@@ -102,8 +104,10 @@ internal fun PhoneBindScreen(
             onPhoneChange = { phone = it },
             code,
             onCodeChange = { code = it },
+            callingCode = ccode,
+            onCallingCodeChange = { ccode = it },
             onSendCode = {
-                actioner(PhoneBindUiAction.SendCode("+86${phone}"))
+                actioner(PhoneBindUiAction.SendCode("$ccode$phone"))
             }
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -112,7 +116,7 @@ internal fun PhoneBindScreen(
                 text = stringResource(id = R.string.confirm),
                 enabled = buttonEnable,
                 onClick = {
-                    actioner(PhoneBindUiAction.Bind("+86${phone}", code))
+                    actioner(PhoneBindUiAction.Bind("${ccode}${phone}", code))
                 },
             )
         }

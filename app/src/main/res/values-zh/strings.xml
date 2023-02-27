@@ -45,6 +45,7 @@
     <string name="title_language">语言设置</string>
     <string name="title_dark_mode">深色模式</string>
     <string name="title_activity_compose_test">ComposeTest</string>
+    <string name="title_country_or_area">国家/地区</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
     <string name="network_acceleration">网络加速</string>

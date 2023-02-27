@@ -239,17 +239,18 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
 @Composable
 private fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
     var phone by remember { mutableStateOf("") }
+    var ccode by remember { mutableStateOf(Constants.DEFAULT_CALLING_CODE) }
     var code by remember { mutableStateOf("") }
 
     PhoneAndCodeArea(
         phone = phone,
         onPhoneChange = { phone = it },
         code = code,
-        onCodeChange = {
-            code = it
-        },
+        onCodeChange = { code = it },
+        callingCode = ccode,
+        onCallingCodeChange = { ccode = it },
         onSendCode = {
-            actioner(LoginUiAction.PhoneSendCode("+86${phone}"))
+            actioner(LoginUiAction.PhoneSendCode("$ccode$phone"))
         },
     )
     Box(Modifier.padding(16.dp)) {
@@ -257,7 +258,7 @@ private fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
             stringResource(id = R.string.login_sign_in_or_up),
             enabled = phone.isValidPhone() && code.isValidSmsCode(),
         ) {
-            actioner(LoginUiAction.PhoneLogin("+86${phone}", code))
+            actioner(LoginUiAction.PhoneLogin("$ccode$phone", code))
         }
     }
 }

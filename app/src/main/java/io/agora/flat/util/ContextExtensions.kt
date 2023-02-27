@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -18,6 +19,7 @@ import io.agora.flat.R
 import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
     var versionName: String? = null
@@ -108,6 +110,14 @@ fun Context.getActivity(): Activity? {
         is Activity -> this
         is ContextWrapper -> this.baseContext.getActivity()
         else -> null
+    }
+}
+
+fun Context.getCurrentLocale(): Locale {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        resources.configuration.locales.get(0);
+    } else {
+        resources.configuration.locale;
     }
 }
 

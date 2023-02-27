@@ -7,10 +7,13 @@ class Constants {
         const val NETLESS_APP_IDENTIFIER = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug"
 
         const val OSS_ACCESS_KEY_ID = "LTAI5t9Gb6tzQzzLmB6cTVf7"
+
+        const val DEFAULT_CALLING_CODE = "+86"
     }
 
     object URL {
         const val Service = "https://flat.whiteboard.agora.io/service.html"
+
         const val Privacy = "https://flat.whiteboard.agora.io/privacy.html"
     }
 
@@ -24,6 +27,7 @@ class Constants {
         const val URL = "url"
         const val TITLE = "title"
         const val MESSAGE = "message"
+        const val COUNTRY = "country"
     }
 
     object Login {
