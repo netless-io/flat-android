@@ -1,6 +1,12 @@
 # Changelog
 
-## [2.2.0] - March 15, 2023
+## [2.3.0] - February 28, 2023
+- Fix insert ppt bug
+- Fix inter-rome invite info text
+- Fix join room with url
+- Add pick calling code
+
+## [2.2.0] - January 15, 2023
 - Add independent control of whiteboard permissions
 
 ## [2.0.0] - November 16, 2022
