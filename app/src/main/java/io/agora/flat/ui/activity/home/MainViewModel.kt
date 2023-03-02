@@ -10,6 +10,7 @@ import io.agora.flat.common.android.AndroidDownloader
 import io.agora.flat.common.android.IntentHandler
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.common.version.VersionChecker
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
@@ -34,6 +35,7 @@ class MainViewModel @Inject constructor(
     private val roomConfigRepository: RoomConfigRepository,
     private val versionChecker: VersionChecker,
     private val appKVCenter: AppKVCenter,
+    private val appEnv: AppEnv,
     private val downloader: AndroidDownloader,
     private val intentHandler: IntentHandler,
 ) : ViewModel() {
@@ -120,6 +122,13 @@ class MainViewModel @Inject constructor(
     fun clearMessage(id: Long) {
         viewModelScope.launch {
             uiMessageManager.clearMessage(id)
+        }
+    }
+
+    fun handleDeepLink(url: String) {
+        if (url.startsWith("${appEnv.baseInviteUrl}/join")) {
+            val roomUUID = url.substringAfterLast("/")
+            joinRoom(roomUUID, openVideo = false, openAudio = false)
         }
     }
 }

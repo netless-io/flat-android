@@ -80,8 +80,13 @@ class MainActivity : BaseComposeActivity() {
                     onResume = {
                         if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
                             Navigator.launchLoginActivity(this@MainActivity)
+                            return@LifecycleHandler
                         }
                         viewModel.checkVersion()
+                        if (intent?.data != null) {
+                            viewModel.handleDeepLink(intent?.dataString ?: "")
+                            intent.data = null
+                        }
                     },
                     onDestroy = {
                         loginManager.unregisterReceiver(this)
@@ -120,7 +125,13 @@ class MainActivity : BaseComposeActivity() {
             ShowUiMessageEffect(uiMessage = viewState.message, onMessageShown = viewModel::clearMessage)
         }
     }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
 }
+
 
 @Composable
 internal fun UpdateDialog(
