@@ -5,6 +5,7 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
+import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.models.ChannelMediaOptions
 import io.agora.rtc.video.VideoCanvas
@@ -86,6 +87,16 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
 
             override fun onUserJoined(uid: Int, elapsed: Int) {
                 trySend(RtcEvent.UserJoined(uid, elapsed))
+            }
+
+            override fun onAudioVolumeIndication(
+                speakers: Array<out IRtcEngineEventHandler.AudioVolumeInfo>,
+                totalVolume: Int
+            ) {
+                val info = speakers.map {
+                    AudioVolumeInfo(uid = it.uid, volume = it.volume, vad = it.vad)
+                }
+                trySend(RtcEvent.VolumeIndication(info, totalVolume))
             }
         }
         mHandler.addListener(listener)

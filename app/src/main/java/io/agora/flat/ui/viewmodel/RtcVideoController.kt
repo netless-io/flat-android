@@ -14,11 +14,11 @@ import kotlin.collections.set
 @ActivityRetainedScoped
 class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     private var textureMap = HashMap<Int, TextureView>()
-    var fullScreenUid: Int = 0
-
     var shareScreenContainer: FrameLayout? = null
     var localUid: Int = 0
     var shareScreenUid: Int = 0
+    var fullScreenUid: Int = 0
+    var draggingUid: Int = 0
 
     fun setupUid(uid: Int, ssUid: Int) {
         localUid = uid
@@ -40,6 +40,10 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     }
 
     fun setupUserVideo(container: FrameLayout, uid: Int) {
+        if (uid == 0) {
+            container.removeAllViews()
+            return
+        }
         if (textureMap[uid] == null) {
             textureMap[uid] = RtcEngine.CreateTextureView(container.context)
         }
@@ -98,5 +102,17 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
                 isVisible = true
             }
         }
+    }
+
+    fun isDragging(): Boolean {
+        return draggingUid != 0
+    }
+
+    fun startDragging(uid: Int) {
+        draggingUid = uid
+    }
+
+    fun stopDragging() {
+        draggingUid = 0
     }
 }

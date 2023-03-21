@@ -24,6 +24,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
+        android:id="@+id/user_windows_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
         android:id="@+id/shareScreenContainer"
         android:layout_width="0dp"
         android:layout_height="match_parent"

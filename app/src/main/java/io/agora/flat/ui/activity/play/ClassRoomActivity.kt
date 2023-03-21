@@ -23,7 +23,8 @@ class ClassRoomActivity : BaseActivity() {
                 this,
                 binding.videoListContainer,
                 binding.fullVideoContainer,
-                binding.shareScreenContainer
+                binding.shareScreenContainer,
+                binding.userWindowsContainer
             )
         )
         componentSet.add(RtmComponent(this, binding.messageContainer))

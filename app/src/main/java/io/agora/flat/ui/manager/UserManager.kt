@@ -6,6 +6,7 @@ import io.agora.flat.data.model.RoomUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -19,6 +20,12 @@ class UserManager @Inject constructor(
     private var _currentUser = MutableStateFlow<RoomUser?>(null)
     val currentUser: RoomUser?
         get() = _currentUser.value
+
+    private var _ownerUUID = MutableStateFlow<String?>(null)
+
+    // TODO Fix when not ready
+    val ownerUUID: String
+        get() = _ownerUUID.value ?: ""
 
     private var creator: RoomUser? = null
     private var speakingJoiners: MutableList<RoomUser> = mutableListOf()
@@ -34,7 +41,6 @@ class UserManager @Inject constructor(
     private var raiseHandState: List<String> = emptyList()
 
     private lateinit var selfUUID: String
-    lateinit var ownerUUID: String
 
     fun observeUsers(): Flow<List<RoomUser>> {
         return _users.asStateFlow()
@@ -44,9 +50,13 @@ class UserManager @Inject constructor(
         return _currentUser.asStateFlow()
     }
 
+    fun observeOwnerUUID(): Flow<String> {
+        return _ownerUUID.asStateFlow().filterNotNull()
+    }
+
     fun reset(currentUser: RoomUser, ownerUUID: String) {
         this.selfUUID = currentUser.userUUID
-        this.ownerUUID = ownerUUID
+        this._ownerUUID.value = ownerUUID
 
         creator = null
         speakingJoiners.clear()

@@ -75,22 +75,22 @@ class ToolComponent(
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             RoomOverlayManager.observeShowId().collect { areaId ->
-                if (areaId != RoomOverlayManager.AREA_ID_SETTING) {
+                if (areaId == RoomOverlayManager.AREA_ID_SETTING) {
+                    showSettingLayout()
+                } else {
                     hideSettingLayout()
                 }
                 binding.cloudservice.isSelected = areaId == RoomOverlayManager.AREA_ID_CLOUD_STORAGE
-                if (areaId != RoomOverlayManager.AREA_ID_USER_LIST) {
-                    hideUserListLayout()
-                }
                 if (areaId == RoomOverlayManager.AREA_ID_USER_LIST) {
                     showUserListLayout()
+                } else {
+                    hideUserListLayout()
                 }
 
-                if (areaId != RoomOverlayManager.AREA_ID_ACCEPT_HANDUP) {
-                    hideAcceptHandUpLayout()
-                }
                 if (areaId == RoomOverlayManager.AREA_ID_ACCEPT_HANDUP) {
                     showAcceptHandUpLayout()
+                } else {
+                    hideAcceptHandUpLayout()
                 }
             }
         }

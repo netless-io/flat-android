@@ -2,6 +2,8 @@ package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.board.ClassroomState
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.common.board.UserWindows
+import io.agora.flat.common.board.WindowInfo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,6 +19,8 @@ interface SyncedClassState {
     fun observeWhiteboard(): Flow<Map<String, Boolean>>
 
     fun observeClassroomState(): Flow<ClassroomState>
+
+    fun observeUserWindows(): Flow<UserWindows>
 
     /**
      * 更新设备状态
@@ -57,4 +61,14 @@ interface SyncedClassState {
      * 更新禁言状态
      */
     fun updateBan(ban: Boolean)
+
+    fun maximizeWindows(userId: String)
+
+    fun removeMaximizeWindow(userId: String)
+
+    fun normalizeWindows()
+
+    fun updateNormalWindow(userId: String, window: WindowInfo)
+
+    fun removeNormalWindow(userId: String)
 }

@@ -42,21 +42,22 @@ class MessageViewModel @Inject constructor(
     private val messageLoading = ObservableLoadingCounter()
     private val messageAreaShown = RoomOverlayManager.observeShowId().map { it == RoomOverlayManager.AREA_ID_MESSAGE }
 
-    val messageUiState: StateFlow<MessageUiState?> = combine(
+    val messageUiState = combine(
         syncedClassState.observeClassroomState(),
         messageLoading.observable,
+        userManager.observeOwnerUUID(),
         messageAreaShown,
-    ) { classState, loading, messageAreaShown ->
+    ) { classState, loading, ownerUuid, areaShown ->
         MessageUiState(
             ban = classState.ban,
-            isOwner = userManager.isOwner(),
+            isOwner = ownerUuid == userRepository.getUserUUID(),
             loading = loading,
-            messageAreaShown = messageAreaShown,
+            messageAreaShown = areaShown,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null,
+        initialValue = MessageUiState(),
     )
 
     init {
@@ -76,7 +77,7 @@ class MessageViewModel @Inject constructor(
     }
 
     fun loadHistoryMessage() {
-        if (messageUiState.value?.loading == true || !messageQuery.hasMore) {
+        if (messageUiState.value.loading || !messageQuery.hasMore) {
             return
         }
         viewModelScope.launch(SupervisorJob()) {

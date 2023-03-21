@@ -1,22 +1,18 @@
 package io.agora.flat.ui.activity.play
 
-import android.R.attr.state_enabled
-import android.R.attr.state_selected
 import android.annotation.SuppressLint
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.StateListDrawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomUser
+import io.agora.flat.ui.view.FlatDrawables
 import io.agora.flat.util.inflate
 import io.agora.flat.util.showToast
 
@@ -79,7 +75,6 @@ class UserListAdapter(
         holder.inRaiseHandOwner.isVisible = item.isRaiseHand && viewModel.isOwner()
         holder.inRaiseHandOther.isVisible = item.isRaiseHand && !viewModel.isOwner()
         holder.noRaiseHand.isVisible = !item.isRaiseHand
-
 
         if (viewModel.isOwner()) {
             holder.agreeHandUp.setOnClickListener {
@@ -145,51 +140,8 @@ class UserListAdapter(
         val noRaiseHand: View = view.findViewById(R.id.no_raise_hand)
 
         init {
-            cameraSwitch.setImageDrawable(createCameraDrawable())
-            micSwitch.setImageDrawable(createMicDrawable())
-        }
-
-        private fun createCameraDrawable(): Drawable {
-            val context = itemView.context
-
-            val cameraDrawable = StateListDrawable()
-            val cameraOn = context.getDrawable(R.drawable.ic_class_room_camera_on)
-            val cameraOnDisable = context.getDrawable(R.drawable.ic_class_room_camera_on)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
-            }
-            val cameraOff = context.getDrawable(R.drawable.ic_class_room_camera_off)
-            val cameraOffDisable = context.getDrawable(R.drawable.ic_class_room_camera_off)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
-            }
-            cameraDrawable.addState(intArrayOf(state_enabled, state_selected), cameraOn)
-            cameraDrawable.addState(intArrayOf(-state_enabled, state_selected), cameraOnDisable)
-            cameraDrawable.addState(intArrayOf(state_enabled, -state_selected), cameraOff)
-            cameraDrawable.addState(intArrayOf(-state_enabled, -state_selected), cameraOffDisable)
-            cameraDrawable.addState(intArrayOf(), cameraOffDisable)
-
-            return cameraDrawable
-        }
-
-        private fun createMicDrawable(): Drawable {
-            val context = itemView.context
-
-            val micDrawable = StateListDrawable()
-            val micOn = context.getDrawable(R.drawable.ic_class_room_mic_on)
-            val micOnDisable = context.getDrawable(R.drawable.ic_class_room_mic_on)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
-            }
-            val micOff = context.getDrawable(R.drawable.ic_class_room_mic_off)
-            val micOffDisable = context.getDrawable(R.drawable.ic_class_room_mic_off)?.apply {
-                setTint(ContextCompat.getColor(context, R.color.flat_day_night_text_secondary))
-            }
-
-            micDrawable.addState(intArrayOf(state_enabled, state_selected), micOn)
-            micDrawable.addState(intArrayOf(-state_enabled, state_selected), micOnDisable)
-            micDrawable.addState(intArrayOf(state_enabled, -state_selected), micOff)
-            micDrawable.addState(intArrayOf(-state_enabled, -state_selected), micOffDisable)
-            micDrawable.addState(intArrayOf(), micOffDisable)
-
-            return micDrawable
+            cameraSwitch.setImageDrawable(FlatDrawables.createCameraDrawable(view.context))
+            micSwitch.setImageDrawable(FlatDrawables.createMicDrawable(view.context))
         }
     }
 }

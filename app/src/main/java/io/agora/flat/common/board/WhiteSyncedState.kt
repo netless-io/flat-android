@@ -25,6 +25,7 @@ class WhiteSyncedState @Inject constructor(
         const val CLASSROOM_STORAGE = "classroom"
         const val ONSTAGE_USERS_STORAGE = "onStageUsers"
         const val WHITEBOARD_STORAGE = "whiteboard"
+        const val USER_WINDOWS = "userWindows"
 
         const val KEY_RAISE_HAND_USERS = "raiseHandUsers"
         const val KEY_BAN = "ban"
@@ -40,6 +41,7 @@ class WhiteSyncedState @Inject constructor(
     private var _onStagesFlow = MutableStateFlow<Map<String, Boolean>?>(null)
     private var _whiteboardFlow = MutableStateFlow<Map<String, Boolean>?>(null)
     private var _classroomStateFlow = MutableStateFlow<ClassroomState?>(null)
+    private var _userWindowsFlow = MutableStateFlow<UserWindows?>(null)
 
     private var _readyFlow = MutableStateFlow<Boolean?>(null)
     private var inited = false
@@ -69,8 +71,52 @@ class WhiteSyncedState @Inject constructor(
             )
         }
 
+        connectUserWindowsStorage()
+
         inited = true
         _readyFlow.value = true
+    }
+
+    private fun parseUserWindowsState(value: String): UserWindows {
+        val state = gson.fromJson(value, JsonObject::class.java)
+        var grid = listOf<String>()
+        val users = mutableMapOf<String, WindowInfo>()
+        state.entrySet().forEach {
+            if (it.key != "grid") {
+                if (!it.value.isJsonNull) {
+                    val userWindowInfo = gson.fromJson(it.value, WindowInfo::class.java)
+                    users[it.key] = userWindowInfo
+                }
+            } else {
+                if (!it.value.isJsonNull) {
+                    grid = gson.fromJson(it.value, Array<String>::class.java).toList()
+                }
+            }
+        }
+
+        return UserWindows(grid, users)
+    }
+
+    private fun connectUserWindowsStorage() {
+        syncedStore.connectStorage(USER_WINDOWS, "{\"grid\": []}", object : Promise<String> {
+            override fun then(value: String) {
+                logger.d("[SyncedState] $USER_WINDOWS initial state: $value")
+                try {
+                    _userWindowsFlow.value = parseUserWindowsState(value)
+                } catch (e: Exception) {
+                    logger.e("[SyncedState] $USER_WINDOWS initial error: $e")
+                }
+            }
+
+            override fun catchEx(t: SDKError) {
+                logger.e("[SyncedState] $USER_WINDOWS catchEx error: $t")
+            }
+        })
+
+        syncedStore.addOnStateChangedListener(USER_WINDOWS) { value, diff ->
+            logger.d("[SyncedState] $USER_WINDOWS updated: value: $value diff: $diff")
+            _userWindowsFlow.value = parseUserWindowsState(value)
+        }
     }
 
     private fun <T> connectStorage(
@@ -89,7 +135,7 @@ class WhiteSyncedState @Inject constructor(
             }
         })
 
-        syncedStore.addOnStateChangedListener(CLASSROOM_STORAGE) { value, diff ->
+        syncedStore.addOnStateChangedListener(storage) { value, diff ->
             logger.d("[SyncedState] $storage updated: value: $value diff: $diff")
             block(gson.fromJson(value, type))
         }
@@ -152,16 +198,22 @@ class WhiteSyncedState @Inject constructor(
         return _classroomStateFlow.asStateFlow().filterNotNull()
     }
 
+    override fun observeUserWindows(): Flow<UserWindows> {
+        return _userWindowsFlow.asStateFlow().filterNotNull()
+    }
+
     private fun clean() {
         if (!inited) return
         _devicesFlow.value = null
         _onStagesFlow.value = null
         _classroomStateFlow.value = null
         _whiteboardFlow.value = null
+        _userWindowsFlow.value = null
         syncedStore.disconnectStorage(DEVICE_STATE_STORAGE)
         syncedStore.disconnectStorage(ONSTAGE_USERS_STORAGE)
         syncedStore.disconnectStorage(CLASSROOM_STORAGE)
         syncedStore.disconnectStorage(WHITEBOARD_STORAGE)
+        syncedStore.disconnectStorage(USER_WINDOWS)
         inited = false
         _readyFlow.value = false
     }
@@ -212,5 +264,40 @@ class WhiteSyncedState @Inject constructor(
     override fun updateBan(ban: Boolean) {
         val jsonObj = mapOf(KEY_BAN to ban)
         syncedStore.setStorageState(CLASSROOM_STORAGE, gson.toJson(jsonObj))
+    }
+
+    override fun maximizeWindows(userId: String) {
+        val userWindows = _userWindowsFlow.value ?: return
+        val users = (userWindows.users.keys + userWindows.grid).toMutableList()
+        if (!users.contains(userId)) {
+            users.add(0, userId)
+        }
+        val jsonObj = mapOf("grid" to users)
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
+    }
+
+    override fun removeMaximizeWindow(userId: String) {
+        val userWindows = _userWindowsFlow.value ?: return
+        val users = userWindows.grid.filter { it != userId }
+        val jsonObj = mapOf(
+            "grid" to users,
+            userId to null
+        )
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
+    }
+
+    override fun normalizeWindows() {
+        val jsonObj = mapOf("grid" to emptyList<String>())
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
+    }
+
+    override fun updateNormalWindow(userId: String, window: WindowInfo) {
+        val jsonObj = mapOf(userId to window)
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
+    }
+
+    override fun removeNormalWindow(userId: String) {
+        val jsonObj = mapOf(userId to null)
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
     }
 }

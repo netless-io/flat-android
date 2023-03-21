@@ -1,14 +1,19 @@
 package io.agora.flat.ui.activity.play
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.util.Log
+import android.view.DragEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -19,26 +24,39 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ActivityComponent
+import io.agora.flat.Config
 import io.agora.flat.R
+import io.agora.flat.common.board.UserWindows
+import io.agora.flat.common.board.WindowInfo
 import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.databinding.ComponentFullscreenBinding
+import io.agora.flat.databinding.ComponentUserWindowsBinding
 import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
+import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
+import io.agora.flat.ui.manager.WindowsDragManager
 import io.agora.flat.ui.view.PaddingItemDecoration
+import io.agora.flat.ui.view.UserWindowLayout
 import io.agora.flat.ui.viewmodel.RtcVideoController
 import io.agora.flat.util.dp2px
+import io.agora.flat.util.renderTo
 import io.agora.flat.util.showToast
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
+import kotlin.math.min
 
 class RtcComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
     private val fullScreenLayout: FrameLayout,
     private val shareScreenContainer: FrameLayout,
+    private val userWindowsLayout: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
         val REQUESTED_PERMISSIONS = arrayOf(
@@ -52,7 +70,9 @@ class RtcComponent(
     interface RtcComponentEntryPoint {
         fun rtcApi(): RtcApi
         fun rtcVideoController(): RtcVideoController
+        fun windowsDragManager(): WindowsDragManager
         fun logger(): Logger
+        fun syncedState(): SyncedClassState
     }
 
     private lateinit var fullScreenBinding: ComponentFullscreenBinding
@@ -60,13 +80,16 @@ class RtcComponent(
 
     private lateinit var rtcApi: RtcApi
     private lateinit var rtcVideoController: RtcVideoController
+    private lateinit var windowsDragManager: WindowsDragManager
     private lateinit var logger: Logger
+    private lateinit var syncedState: SyncedClassState
     private val viewModel: ClassRoomViewModel by activity.viewModels()
 
     private lateinit var adapter: UserVideoAdapter
 
     private lateinit var videoAreaAnimator: SimpleAnimator
     private lateinit var fullScreenAnimator: SimpleAnimator
+    private lateinit var dragAnimator: SimpleAnimator
 
     override fun onCreate(owner: LifecycleOwner) {
         injectApi()
@@ -78,7 +101,9 @@ class RtcComponent(
         val entryPoint = EntryPointAccessors.fromActivity(activity, RtcComponentEntryPoint::class.java)
         rtcApi = entryPoint.rtcApi()
         rtcVideoController = entryPoint.rtcVideoController()
+        windowsDragManager = entryPoint.windowsDragManager()
         logger = entryPoint.logger()
+        syncedState = entryPoint.syncedState()
     }
 
     private fun observeState() {
@@ -86,6 +111,7 @@ class RtcComponent(
             viewModel.videoUsers.collect { users ->
                 logger.d("[RTC] videoUsers changed to $users")
                 adapter.updateUsers(users)
+                updateUserWindows(users)
                 // 处理用户进出时的显示
                 if (userCallOut != null) {
                     val findUser = users.find { it.isJoined && it.isOnStage && it.userUUID == userCallOut!!.userUUID }
@@ -97,6 +123,7 @@ class RtcComponent(
                         updateCallOutUser()
                     }
                 }
+
             }
         }
 
@@ -137,9 +164,119 @@ class RtcComponent(
                     is RtcEvent.UserOffline -> lifecycleScope.launch {
                         rtcVideoController.handleOffline(event.uid)
                     }
+                    is RtcEvent.VolumeIndication -> {
+                        adapter.updateVolume(event.speakers)
+                    }
                 }
             }
         }
+
+        observeUserWindows()
+    }
+
+    private var windowsState: UserWindows = UserWindows()
+
+    private fun observeUserWindows() {
+        lifecycleScope.launchWhenResumed {
+            combine(syncedState.observeUserWindows(), viewModel.videoUsersMap) { userWindows, videoUsers ->
+                Pair(userWindows, videoUsers)
+            }.collect { pair ->
+                windowsState = pair.first
+                val videoUsers = pair.second
+
+                fullOnStage = windowsState.grid.isNotEmpty()
+                userWindowsBinding.maskView.isVisible = fullOnStage
+                animateStateChanged(windowsDragManager.getWindowsMap(), getWindowsUiState(windowsState), videoUsers)
+            }
+        }
+    }
+
+    private fun getWindowsUiState(windows: UserWindows): MutableMap<String, UserWindowUiState> {
+        val targetState = mutableMapOf<String, UserWindowUiState>()
+        if (windows.grid.isEmpty()) {
+            windows.users.forEach {
+                targetState[it.key] = it.value.toUserWindowUiState()
+            }
+        } else {
+            val windowsInfo = WindowsDragManager.getMaximizeWindowsInfo(windows.grid.size)
+            windows.grid.forEachIndexed { index, uuid ->
+                targetState[uuid] = windowsInfo[index].copy(
+                    z = index,
+                ).toUserWindowUiState()
+            }
+        }
+        return targetState
+    }
+
+    private var fullOnStage = false
+    private val scaledTouchSlop = ViewConfiguration.get(activity).scaledTouchSlop
+
+    private fun animateStateChanged(
+        state: MutableMap<String, UserWindowUiState>,
+        targetState: MutableMap<String, UserWindowUiState>,
+        videoUsers: Map<String, RoomUser>,
+    ) {
+        val toRemove = state.keys - targetState.keys
+        val toAdd = targetState.keys - state.keys
+        val toUpdate = state.keys - toRemove
+
+        // TODO 移除添加动画
+        for (uuid in toRemove) {
+            removeNewUserWindow(uuid)
+            adapter.updateItemByUuid(uuid)
+        }
+
+        for (uuid in toAdd) {
+            videoUsers[uuid]?.let {
+                val rect = adapter.findVideoContainerByUuid(uuid)?.let { container ->
+                    getViewRect(container, userWindowsBinding.root)
+                } ?: Rect(0, 0, 0, 0)
+                addNewUserWindow(
+                    user = it,
+                    windowUiState = UserWindowUiState(
+                        centerX = rect.centerX().toFloat(),
+                        centerY = rect.centerX().toFloat(),
+                        width = rect.width().toFloat(),
+                        height = rect.height().toFloat(),
+                        index = targetState[uuid]?.index ?: atomIndex.getAndIncrement(),
+                    )
+                )
+            }
+        }
+
+        if (toRemove.isEmpty() && toAdd.isEmpty()) {
+            val needAnimate = toUpdate.any {
+                val a = state[it]!!
+                val b = targetState[it]!!
+                abs(a.height - b.height) > scaledTouchSlop ||
+                        abs(a.width - b.width) > scaledTouchSlop ||
+                        abs(a.centerX - b.centerX) > scaledTouchSlop ||
+                        abs(a.centerY - b.centerY) > scaledTouchSlop
+            }
+            if (!needAnimate) {
+                windowsDragManager.setWindowMap(targetState)
+                refreshUserWindows()
+                return
+            }
+        }
+
+        val r = Rect()
+        dragAnimator = SimpleAnimator(
+            onUpdate = { value ->
+                val all = toAdd + toUpdate
+                for (uuid in all) {
+                    val s = state[uuid]?.getRect() ?: Rect(0, 0, 0, 0)
+                    val e = targetState[uuid]?.getRect() ?: Rect(0, 0, 0, 0)
+                    r.lerp(s, e, value)
+                    windowLayoutMap[uuid]?.renderTo(r)
+                }
+            },
+            onShowEnd = {
+                windowsDragManager.setWindowMap(targetState)
+                refreshUserWindows()
+            },
+        )
+        dragAnimator.show()
     }
 
     private val expandWidth = activity.resources.getDimensionPixelSize(R.dimen.room_class_video_area_width)
@@ -148,6 +285,8 @@ class RtcComponent(
         val layoutParams = videoListBinding.root.layoutParams
         layoutParams.width = (value * expandWidth).toInt()
         videoListBinding.root.layoutParams = layoutParams
+
+        updateWindowUsersRect((value * expandWidth).toInt())
     }
 
     private val onClickListener = View.OnClickListener {
@@ -184,26 +323,62 @@ class RtcComponent(
         shareScreenContainer.setOnClickListener { /* disable click pass through */ }
         rtcVideoController.shareScreenContainer = shareScreenContainer
 
-        adapter = UserVideoAdapter(ArrayList(), rtcVideoController)
-        adapter.onItemClickListener = UserVideoAdapter.OnItemClickListener { _, view, rtcUser ->
-            start.set(getViewRect(view, fullScreenLayout))
-            end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
+        adapter = UserVideoAdapter(viewModel = viewModel, windowsDragManager = windowsDragManager)
+        adapter.setOnItemListener(object : UserVideoAdapter.OnItemListener {
+            override fun onItemLongPress(view: View, user: RoomUser): Boolean {
+                if (!viewModel.canDragUser() || windowsDragManager.isOnBoard(user.userUUID)) return false
 
-            if (!viewModel.canShowCallOut(rtcUser.userUUID)) {
-                userCallOut = rtcUser
-                hideVideoListOptArea()
-                fullScreenAnimator.show()
-                return@OnItemClickListener
+                windowsDragManager.startDrag(user.userUUID)
+                val shadow = View.DragShadowBuilder(userWindowsBinding.dragViewShadow)
+                ViewCompat.startDragAndDrop(view, null, shadow, user, 0)
+                return true
             }
 
-            if (userCallOut != rtcUser) {
-                userCallOut = rtcUser
-                showVideoListOptArea(start)
-                RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
-            } else {
-                clearCallOutAndNotify()
+            override fun onItemClick(view: View, position: Int) {
+                val rtcUser = adapter.getUserItem(position)
+
+                start.set(getViewRect(view, fullScreenLayout))
+                end.set(0, 0, fullScreenLayout.width, fullScreenLayout.height)
+
+                if (!viewModel.canShowCallOut(rtcUser.userUUID)) {
+                    userCallOut = rtcUser
+                    hideVideoListOptArea()
+                    fullScreenAnimator.show()
+                    return
+                }
+
+                if (userCallOut != rtcUser) {
+                    userCallOut = rtcUser
+                    showVideoListOptArea(start)
+                    RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_VIDEO_OP_CALL_OUT)
+                } else {
+                    clearCallOutAndNotify()
+                }
             }
-        }
+
+            override fun onItemDoubleClick(view: View, user: RoomUser): Boolean {
+                if (!viewModel.canDragUser() || windowsDragManager.isOnBoard(user.userUUID)) return false
+                syncedState.maximizeWindows(user.userUUID)
+                return true
+            }
+
+            override fun onDrag(v: View, position: Int, event: DragEvent): Boolean {
+                when (event.action) {
+                    DragEvent.ACTION_DRAG_ENDED -> {
+                        windowsDragManager.stopDrag(event.result)
+                    }
+                }
+                return true
+            }
+
+            override fun onSwitchCamera(userId: String, on: Boolean) {
+                viewModel.enableVideo(on, userId)
+            }
+
+            override fun onSwitchMic(userId: String, on: Boolean) {
+                viewModel.enableAudio(enableAudio = on, uuid = userId)
+            }
+        })
 
         videoListBinding.videoList.layoutManager = LinearLayoutManager(activity)
         videoListBinding.videoList.adapter = adapter
@@ -248,6 +423,7 @@ class RtcComponent(
                 clearCallOutAndNotify()
             }
         )
+        initUserWindowsLayout()
     }
 
     private fun getViewRect(view: View, anchorView: View): Rect {
@@ -373,5 +549,339 @@ class RtcComponent(
                 activity.showToast("Permission Not Granted")
             }
         }.launch(permissions)
+    }
+
+
+    private lateinit var userWindowsBinding: ComponentUserWindowsBinding
+    private lateinit var userWindowsContainer: FrameLayout
+
+    private var videoRect = Rect()
+    private var boardRect = Rect()
+    private var windowLayoutMap = mutableMapOf<String, UserWindowLayout>()
+    private val atomIndex = AtomicInteger(0)
+
+    private val onDragListener = View.OnDragListener { _, event ->
+        when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                val user = event.localState as RoomUser
+                addNewUserWindow(
+                    user, UserWindowUiState(
+                        centerX = event.x,
+                        centerY = event.y,
+                        width = boardRect.width() * 0.25f,
+                        height = boardRect.width() * 0.25f * Config.defaultBoardRatio,
+                        index = atomIndex.getAndIncrement(),
+                    )
+                )
+            }
+            DragEvent.ACTION_DRAG_ENTERED -> {}
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                updateCenter(windowsDragManager.currentUUID(), event.x, event.y)
+                showEnterBoardArea()
+            }
+            DragEvent.ACTION_DROP -> {
+                updateCenter(windowsDragManager.currentUUID(), event.x, event.y)
+                clearDragRectShow()
+                handleWindowDragEnd()
+            }
+        }
+        true
+    }
+
+    private fun addNewUserWindow(user: RoomUser, windowUiState: UserWindowUiState) {
+        windowsDragManager.setWindowState(user.userUUID, windowUiState)
+        val windowContainer = UserWindowLayout(activity).apply {
+            setRoomUser(user)
+            if (viewModel.canDragUser()) {
+                setOnWindowDragListener(object : UserWindowLayout.OnWindowDragListener {
+                    override fun onActionStart(uuid: String) {
+                        windowsDragManager.startMove(uuid)
+                        this@apply.bringToFront()
+                    }
+
+                    override fun onWindowScale(uuid: String, scale: Float) {
+                        // TODO MAX_SCALE
+                        val windowState = windowsDragManager.getWindowState(uuid) ?: return
+                        windowsDragManager.scaleWindow(uuid, min(scale, boardRect.width() / windowState.width))
+                        windowLayoutMap[uuid]?.renderTo(windowsDragManager.getWindowRect(uuid))
+                    }
+
+                    override fun onWindowScaleEnd(uuid: String) {
+                        handleWindowTouchEnd(uuid)
+                    }
+
+                    override fun onWindowMove(uuid: String, dx: Float, dy: Float) {
+                        val windowInfo = windowsDragManager.getWindowState(uuid) ?: return
+                        updateCenter(uuid, windowInfo.centerX + dx, windowInfo.centerY + dy)
+                        showEnterVideoArea()
+                    }
+
+                    override fun onWindowMoveEnd(uuid: String) {
+                        clearDragRectShow()
+                        handleWindowTouchEnd(uuid)
+                    }
+
+                    override fun onDoubleTap(userId: String): Boolean {
+                        if (fullOnStage) {
+                            syncedState.normalizeWindows()
+                        } else {
+                            syncedState.maximizeWindows(userId)
+                        }
+                        return true
+                    }
+                })
+            }
+            setUserWindowListener(object : UserWindowLayout.OnUserWindowListener {
+                override fun onUserWindowClick(userWindowLayout: UserWindowLayout) {
+                    if (viewModel.canControlDevice(userWindowLayout.getUserUUID())) {
+                        userWindowLayout.showDeviceControl()
+                    }
+                }
+
+                override fun onSwitchCamera(user: RoomUser, on: Boolean) {
+                    viewModel.enableVideo(on, user.userUUID)
+                }
+
+                override fun onSwitchMic(user: RoomUser, on: Boolean) {
+                    viewModel.enableAudio(on, user.userUUID)
+                }
+            })
+        }
+        windowLayoutMap[user.userUUID] = windowContainer
+        userWindowsContainer.addView(windowContainer)
+
+        windowContainer.renderTo(windowUiState.getRect())
+        rtcVideoController.setupUserVideo(windowContainer.getContainer(), user.rtcUID)
+    }
+
+    private fun handleWindowTouchEnd(uuid: String) {
+        val rect = windowsDragManager.getWindowRect(uuid)
+        if (videoRect.contains(rect.centerX(), rect.centerY())) {
+            animateEnterVideoArea(uuid)
+        } else if (rect != rect.constrainRect(boardRect)) {
+            animateEnterBoardArea(uuid)
+        } else {
+            syncedState.updateNormalWindow(uuid, rect.toWindowInfo())
+        }
+    }
+
+    private fun clearDragRectShow() {
+        userWindowsBinding.dragRectShow.isVisible = false
+    }
+
+    private fun removeNewUserWindow(uuid: String) {
+        windowsDragManager.removeWindowState(uuid)
+        val remove = windowLayoutMap.remove(uuid)
+        userWindowsContainer.removeView(remove)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initUserWindowsLayout() {
+        userWindowsBinding = ComponentUserWindowsBinding.inflate(activity.layoutInflater, userWindowsLayout, true)
+        userWindowsBinding.root.setOnDragListener(onDragListener)
+        userWindowsContainer = userWindowsBinding.userWindowsContainer
+        userWindowsContainer.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            Log.e("UserWindowsLayout", "onLayoutChange: $left, $top, $right, $bottom")
+            if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom) {
+                return@addOnLayoutChangeListener
+            }
+            updateWindowUsersRect(expandWidth)
+        }
+    }
+
+    private fun updateWindowUsersRect(videoWidth: Int) {
+        val vw = userWindowsContainer.width - videoWidth
+        val vh = userWindowsContainer.height
+        if (vw <= 0 || vh <= 0) {
+            return
+        }
+
+        videoRect = Rect(
+            vw,
+            0,
+            vw + videoWidth,
+            vh,
+        )
+
+        val bw = min(vw, vh * 16 / 9)
+        val bh = min(vh, vw * 9 / 16)
+        boardRect = Rect(
+            (vw - bw) / 2,
+            (vh - bh) / 2,
+            (vw + bw) / 2,
+            (vh + bh) / 2,
+        )
+
+        windowsDragManager.setWindowMap(getWindowsUiState(windowsState))
+        refreshUserWindows()
+        userWindowsBinding.maskView.renderTo(Rect(0, 0, vw, vh))
+    }
+
+    private fun refreshUserWindows() {
+        userWindowsContainer.run {
+            val windowsMap = windowsDragManager.getWindowsMap()
+            windowsMap.entries.sortedBy { it.value.index }.forEach { (uuid, windowUiState) ->
+                windowLayoutMap[uuid]?.renderTo(windowUiState.getRect())
+                windowLayoutMap[uuid]?.bringToFront()
+            }
+        }
+    }
+
+    private fun updateUserWindows(users: List<RoomUser>) {
+        userWindowsContainer.run {
+            users.forEach {
+                windowLayoutMap[it.userUUID]?.setRoomUser(it)
+            }
+        }
+    }
+
+    private fun handleWindowDragEnd(): Boolean {
+        val uuid = windowsDragManager.currentUUID()
+        val rect = windowsDragManager.getWindowRect(uuid)
+        if (boardRect.contains(rect.centerX(), rect.centerY())) {
+            animateEnterBoardArea(uuid)
+        } else {
+            animateEnterVideoArea(uuid)
+        }
+        return true
+    }
+
+    private fun animateEnterVideoArea(uuid: String) {
+        val start = windowsDragManager.getWindowRect(uuid)
+        val end = Rect(videoRect.left, videoRect.top, videoRect.left, videoRect.top)
+        adapter.findVideoContainerByUuid(uuid)?.let {
+            end.set(getViewRect(it, userWindowsContainer))
+        }
+
+        val r = Rect()
+        val animator = SimpleAnimator(
+            onUpdate = { value ->
+                r.lerp(start, end, value)
+                windowLayoutMap[uuid]?.renderTo(r)
+            },
+            onShowEnd = {
+                removeNewUserWindow(uuid)
+                adapter.updateItemByUuid(uuid)
+                if (fullOnStage) {
+                    syncedState.removeMaximizeWindow(uuid)
+                } else {
+                    syncedState.removeNormalWindow(uuid)
+                }
+            }
+        )
+        animator.show()
+    }
+
+    private fun animateEnterBoardArea(uuid: String) {
+        val from = windowsDragManager.getWindowRect(uuid)
+        val to = from.constrainRect(boardRect)
+
+        val r = Rect()
+        val animator = SimpleAnimator(
+            onUpdate = { value ->
+                r.lerp(from, to, value)
+                windowLayoutMap[uuid]?.renderTo(r)
+            },
+            onShowEnd = {
+                updateCenter(uuid, to.centerX().toFloat(), to.centerY().toFloat())
+                syncedState.updateNormalWindow(uuid, to.toWindowInfo())
+            },
+        )
+        animator.show()
+    }
+
+    private fun Rect.toWindowInfo(): WindowInfo {
+        return WindowInfo(
+            x = (left - boardRect.left).toFloat() / boardRect.width(),
+            y = (top - boardRect.top).toFloat() / boardRect.height(),
+            width = width().toFloat() / boardRect.width(),
+            height = height().toFloat() / boardRect.height(),
+            z = atomIndex.getAndIncrement(),
+        )
+    }
+
+    private fun UserWindowUiState.toWindowInfo(): WindowInfo {
+        return getRect().toWindowInfo().copy(z = index)
+    }
+
+    private fun WindowInfo.toUserWindowUiState(): UserWindowUiState {
+        return UserWindowUiState(
+            centerX = (x + width / 2) * boardRect.width() + boardRect.left,
+            centerY = (y + height / 2) * boardRect.height() + boardRect.top,
+            width = width * boardRect.width(),
+            height = height * boardRect.height(),
+            index = z,
+        )
+    }
+
+    private fun showEnterVideoArea() {
+        userWindowsBinding.dragRectShow.renderTo(videoRect)
+        userWindowsBinding.dragRectShow.isVisible = run {
+            val rect = windowsDragManager.getWindowRect()
+            videoRect.contains(rect.centerX(), rect.centerY())
+        }
+    }
+
+    private fun showEnterBoardArea() {
+        userWindowsBinding.dragRectShow.renderTo(boardRect)
+        userWindowsBinding.dragRectShow.isVisible = run {
+            val rect = windowsDragManager.getWindowRect()
+            boardRect.contains(rect.centerX(), rect.centerY())
+        }
+    }
+
+    private fun updateCenter(uuid: String, x: Float, y: Float) {
+        windowsDragManager.updateWindowCenter(uuid, x, y)
+        windowLayoutMap[uuid]?.renderTo(windowsDragManager.getWindowRect(uuid))
+    }
+
+    /**
+     * Lerp this rect from start to end by value.
+     *
+     * @param start The start rect.
+     * @param end The end rect.
+     * @param value The value to lerp by. Must be between 0 and 1.
+     */
+    private fun Rect.lerp(start: Rect, end: Rect, value: Float) {
+        this.set(
+            /* left = */ (start.left + (end.left - start.left) * value).toInt(),
+            /* top = */ (start.top + (end.top - start.top) * value).toInt(),
+            /* right = */ (start.right + (end.right - start.right) * value).toInt(),
+            /* bottom = */ (start.bottom + (end.bottom - start.bottom) * value).toInt()
+        )
+    }
+
+    /**
+     * Constrain this rect to be inside the boundary rect.
+     * @param boundary The boundary rect.
+     * @return The constrained rect.
+     */
+    private fun Rect.constrainRect(boundary: Rect): Rect {
+        return Rect(this).apply {
+            val dTop = boundary.top - top
+            val dBottom = boundary.bottom - bottom
+            val dLeft = boundary.left - left
+            val dRight = boundary.right - right
+
+            if (dTop > 0) {
+                offset(0, dTop)
+            } else if (dBottom < 0) {
+                offset(0, dBottom)
+            }
+            if (dLeft > 0) {
+                offset(dLeft, 0)
+            } else if (dRight < 0) {
+                offset(dRight, 0)
+            }
+        }
+    }
+
+    private fun intersectSize(rect1: Rect, rect2: Rect): Int {
+        val intersect = Rect()
+        return if (intersect.setIntersect(rect1, rect2)) {
+            intersect.width() * intersect.height()
+        } else {
+            0
+        }
     }
 }

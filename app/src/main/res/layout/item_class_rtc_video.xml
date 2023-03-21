@@ -9,8 +9,9 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="12dp"
+        android:layout_marginHorizontal="8dp"
         android:layout_marginVertical="4dp"
+        app:cardBackgroundColor="@color/class_room_video_item_bg"
         app:cardCornerRadius="4dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,23 +21,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <FrameLayout
-            android:id="@+id/videoContainer"
+            android:id="@+id/video_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <TextView
-            android:id="@+id/username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_user_profile_head"
-            android:textColor="@color/flat_white"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:text="用户名" />
-
         <FrameLayout
-            android:id="@+id/videoClosedLayout"
+            android:id="@+id/video_closed_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/flat_black"
@@ -66,7 +56,16 @@
             android:padding="@dimen/room_class_button_gap"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_room_mic_closed"
-            android:visibility="invisible" />
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/username"
+            style="@style/RoomTextBodyTwo"
+            android:layout_gravity="start|bottom"
+            android:padding="@dimen/room_class_button_gap"
+            android:textColor="@color/class_room_video_item_text_color"
+            android:visibility="gone"
+            tools:text="用户名" />
 
         <FrameLayout
             android:id="@+id/teacher_leave_ly"
@@ -77,16 +76,15 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_room_teacher_leave" />
+                android:background="@color/flat_gray_1"
+                android:src="@drawable/img_user_left" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/RoomTextBodyTwo"
                 android:layout_gravity="center_horizontal|bottom"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="@dimen/room_class_button_gap"
                 android:text="@string/room_class_teacher_leave"
-                android:textColor="#7A7B7C"
-                android:textSize="12sp" />
+                android:textColor="@color/class_room_video_item_text_color" />
         </FrameLayout>
 
         <FrameLayout
@@ -98,16 +96,57 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_room_teacher_leave" />
+                android:background="@color/flat_gray_1"
+                android:src="@drawable/img_user_left" />
 
             <TextView
+                style="@style/RoomTextBodyTwo"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_marginBottom="@dimen/room_class_button_gap"
+                android:text="@string/room_class_student_left"
+                android:textColor="@color/class_room_video_item_text_color" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/switch_device_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center"
+            android:background="@drawable/shape_gray_border_round_8_bg"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/switch_camera"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_class_room_camera_on" />
+
+            <ImageView
+                android:id="@+id/switch_mic"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_class_room_mic_on" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/onboard_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/onboard_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
-                android:layout_marginBottom="4dp"
-                android:text="@string/room_class_student_left"
-                android:textColor="#7A7B7C"
-                android:textSize="12sp" />
+                android:layout_gravity="center"
+                android:textColor="@color/class_room_video_item_text_color"
+                android:textSize="14sp"
+                tools:text="用户名" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

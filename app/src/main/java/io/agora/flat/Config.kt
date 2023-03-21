@@ -11,5 +11,7 @@ class Config {
         var callVersionCheckInterval = 3_600_000L
 
         val cancelAccountCountTime = if (BuildConfig.DEBUG) 5_000L else 30_000L
+
+        const val defaultBoardRatio = 9f / 16
     }
 }

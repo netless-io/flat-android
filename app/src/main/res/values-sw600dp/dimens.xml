@@ -24,6 +24,7 @@
 
     <dimen name="room_class_video_user_avatar_size_normal">60dp</dimen>
     <dimen name="room_class_video_user_avatar_size_fullscreen">180dp</dimen>
+    <dimen name="room_class_onboard_avatar_size">120dp</dimen>
     <dimen name="room_class_item_height">48dp</dimen>
     <dimen name="room_class_handup_list_empty_height">300dp</dimen>
     <dimen name="room_class_handup_list_max_height">480dp</dimen>

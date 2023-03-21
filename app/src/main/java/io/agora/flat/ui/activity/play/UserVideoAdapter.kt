@@ -1,25 +1,26 @@
 package io.agora.flat.ui.activity.play
 
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.GestureDetector.SimpleOnGestureListener
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import io.agora.flat.R
+import io.agora.flat.common.rtc.AudioVolumeInfo
 import io.agora.flat.data.model.RoomUser
-import io.agora.flat.ui.viewmodel.RtcVideoController
-import io.agora.flat.util.inflate
+import io.agora.flat.databinding.ItemClassRtcVideoBinding
+import io.agora.flat.ui.manager.WindowsDragManager
+import io.agora.flat.ui.view.FlatDrawables
+
 
 /**
  * 用户视频区域
  */
 class UserVideoAdapter(
-    private val dataSet: MutableList<RoomUser>,
-    private val rtcVideoController: RtcVideoController,
+    private val dataSet: MutableList<RoomUser> = mutableListOf(),
+    private val viewModel: ClassRoomViewModel,
+    private val windowsDragManager: WindowsDragManager,
 ) : RecyclerView.Adapter<UserVideoAdapter.ViewHolder>() {
 
     init {
@@ -37,36 +38,80 @@ class UserVideoAdapter(
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = viewGroup.inflate(R.layout.item_class_rtc_video, viewGroup, false)
-        return ViewHolder(view)
+        return ViewHolder(
+            ItemClassRtcVideoBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, false)
+        )
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val context = viewHolder.itemView.context
         val itemData = dataSet[position]
+        val onboard = windowsDragManager.isOnBoard(itemData.userUUID)
 
-        viewHolder.avatar.load(itemData.avatarURL) {
+        val binding = viewHolder.binding
+        binding.avatar.load(itemData.avatarURL) {
             crossfade(true)
             transformations(CircleCropTransformation())
         }
+        binding.teacherLeaveLy.isVisible = itemData.isLeft && itemData.isOwner
+        binding.studentLeaveLy.isVisible = itemData.isLeft && !itemData.isOwner
+        binding.micClosed.isVisible = !itemData.audioOpen
+        binding.username.text = itemData.name
+        binding.onboardUsername.text = itemData.name
+        binding.onboardLayout.isVisible = onboard
+        binding.videoClosedLayout.isVisible = itemData.isJoined && !itemData.videoOpen && !onboard
+        binding.switchCamera.setImageDrawable(FlatDrawables.createCameraDrawable(context))
+        binding.switchCamera.isSelected = itemData.videoOpen
+        binding.switchMic.setImageDrawable(FlatDrawables.createMicDrawable(context))
+        binding.switchMic.isSelected = itemData.audioOpen
 
-        viewHolder.teacherLeaveLy.isVisible = itemData.isLeft && itemData.isOwner
-        viewHolder.studentLeaveLy.isVisible = itemData.isLeft && !itemData.isOwner
-        viewHolder.micClosed.isVisible = !itemData.audioOpen
-
-        if (itemData.isJoined && itemData.rtcUID != rtcVideoController.fullScreenUid) {
-            rtcVideoController.setupUserVideo(viewHolder.videoContainer, itemData.rtcUID)
+        binding.switchCamera.setOnClickListener {
+            onItemListener?.onSwitchCamera(itemData.userUUID, !binding.switchCamera.isSelected)
+        }
+        binding.switchMic.setOnClickListener {
+            onItemListener?.onSwitchMic(itemData.userUUID, !binding.switchMic.isSelected)
         }
 
-        viewHolder.itemView.setOnClickListener {
-            if (itemData.isLeft)
-                return@setOnClickListener
-            onItemClickListener?.onItemClick(position, viewHolder.videoContainer, itemData)
+        if (itemData.isJoined && !onboard) {
+            windowsDragManager.setupUserVideo(viewHolder.binding.videoContainer, itemData.rtcUID)
         }
-        viewHolder.videoClosedLayout.isVisible = !itemData.isLeft && !itemData.videoOpen
+
+        val gestureDetector = GestureDetector(viewHolder.itemView.context, object : SimpleOnGestureListener() {
+            val dismissLayout = Runnable {
+                binding.switchDeviceLayout.isVisible = false
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                return onItemListener?.onItemDoubleClick(
+                    viewHolder.binding.videoContainer,
+                    itemData
+                ) ?: false
+            }
+
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                if (!viewModel.canControlDevice(itemData.userUUID)) return false
+                binding.switchDeviceLayout.isVisible = true
+                binding.switchDeviceLayout.removeCallbacks(dismissLayout)
+                binding.switchDeviceLayout.postDelayed(dismissLayout, 3000)
+                return true
+            }
+
+            override fun onLongPress(e: MotionEvent) {
+                onItemListener?.onItemLongPress(viewHolder.binding.videoContainer, itemData)
+            }
+        })
+        viewHolder.itemView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+
+        viewHolder.itemView.setOnDragListener { _, event ->
+            onItemListener?.onDrag(viewHolder.binding.videoContainer, viewHolder.bindingAdapterPosition, event) ?: false
+        }
     }
 
     override fun getItemId(position: Int): Long {
-        return dataSet[position].rtcUID.toLong()
+        return dataSet[position].userUUID.hashCode().toLong()
     }
 
     override fun getItemCount() = dataSet.size
@@ -77,25 +122,54 @@ class UserVideoAdapter(
         notifyDataSetChanged()
     }
 
+    fun getUserItem(position: Int): RoomUser {
+        return dataSet[position]
+    }
+
     fun updateVideoView(uid: Int) {
         recyclerView?.findViewHolderForItemId(uid.toLong())?.also {
-            rtcVideoController.setupUserVideo((it as ViewHolder).videoContainer, uid)
+            windowsDragManager.setupUserVideo((it as ViewHolder).binding.videoContainer, uid)
         }
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
-        val videoClosedLayout: FrameLayout = view.findViewById(R.id.videoClosedLayout)
-        val avatar: ImageView = view.findViewById(R.id.avatar)
-        val username: TextView = view.findViewById(R.id.username)
-        val micClosed: View = view.findViewById(R.id.mic_closed)
-        val teacherLeaveLy: ViewGroup = view.findViewById(R.id.teacher_leave_ly)
-        val studentLeaveLy: ViewGroup = view.findViewById(R.id.student_leave_ly)
+    private fun findItemIndex(uuid: String): Int {
+        return dataSet.indexOfFirst { it.userUUID == uuid }
     }
 
-    var onItemClickListener: OnItemClickListener? = null
+    fun findVideoContainerByUuid(uuid: String): FrameLayout? {
+        val index = dataSet.indexOfFirst { it.userUUID == uuid }
+        return (recyclerView?.findViewHolderForAdapterPosition(index) as? ViewHolder)?.binding?.videoContainer
+    }
 
-    fun interface OnItemClickListener {
-        fun onItemClick(position: Int, view: ViewGroup, rtcUser: RoomUser)
+    class ViewHolder(val binding: ItemClassRtcVideoBinding) : RecyclerView.ViewHolder(binding.root)
+
+    private var onItemListener: OnItemListener? = null
+
+    fun setOnItemListener(onItemListener: OnItemListener) {
+        this.onItemListener = onItemListener
+    }
+
+    fun updateItemByUuid(uuid: String) {
+        val index = findItemIndex(uuid)
+        if (index >= 0) notifyItemChanged(index)
+    }
+
+    fun updateVolume(speakers: List<AudioVolumeInfo>) {
+
+    }
+
+    interface OnItemListener {
+        fun onItemLongPress(view: View, user: RoomUser): Boolean
+
+        fun onItemClick(view: View, position: Int)
+
+        fun onItemDoubleClick(view: View, user: RoomUser): Boolean
+
+        fun onDrag(v: View, position: Int, event: DragEvent): Boolean
+
+        fun onSwitchCamera(userId: String, on: Boolean) {}
+
+        fun onSwitchMic(userId: String, on: Boolean) {}
     }
 }
+

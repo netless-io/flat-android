@@ -81,15 +81,13 @@ class AgoraBoardRoom @Inject constructor(
             region.toFastRegion(),
             writable
         )
-        val sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
+        fastRoomOptions.sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isLog = true
             isUserCursor = true
             netlessUA = flatNetlessUA
             isEnableSyncedStore = true
         }
-        fastRoomOptions.sdkConfiguration = sdkConfiguration
-
-        val roomParams = fastRoomOptions.roomParams.apply {
+        fastRoomOptions.roomParams = fastRoomOptions.roomParams.apply {
             windowParams.prefersColorScheme = if (darkMode) Dark else Light
             windowParams.collectorStyles = getCollectorStyle()
             windowParams.scrollVerticalOnly = true
@@ -103,7 +101,6 @@ class AgoraBoardRoom @Inject constructor(
             isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
             disableEraseImage = true
         }
-        fastRoomOptions.roomParams = roomParams
 
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
         fastRoom?.addListener(object : FastRoomListener {
@@ -142,6 +139,7 @@ class AgoraBoardRoom @Inject constructor(
                 return ContextCompat.getDrawable(activityContext, R.drawable.shape_gray_border_round_8_bg)
             }
         }
+
         fastRoom?.setResource(fastResource)
         setDarkMode(darkMode)
 

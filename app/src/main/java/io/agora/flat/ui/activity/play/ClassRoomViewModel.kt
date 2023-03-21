@@ -62,6 +62,7 @@ class ClassRoomViewModel @Inject constructor(
 
     private var _videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
     val videoUsers = _videoUsers.asStateFlow()
+    val videoUsersMap = videoUsers.map { it.associateBy { user -> user.userUUID } }
 
     // cloud record state
     val recordState get() = recordManager.observeRecordState()
@@ -420,6 +421,11 @@ class ClassRoomViewModel @Inject constructor(
         }
     }
 
+    fun canControlDevice(uuid: String): Boolean {
+        val state = _state.value ?: return false
+        return state.isOwner || (state.isOnStage && uuid == state.userUUID)
+    }
+
     fun enableVideo(enableVideo: Boolean, uuid: String = currentUserUUID) {
         viewModelScope.launch {
             val state = _state.value ?: return@launch
@@ -608,6 +614,10 @@ class ClassRoomViewModel @Inject constructor(
 
     fun canShowCallOut(userId: String): Boolean {
         return userManager.isOwner() || userManager.isUserSelf(userId)
+    }
+
+    fun canDragUser(): Boolean {
+        return userManager.isOwner()
     }
 
     fun stageOffAll() {

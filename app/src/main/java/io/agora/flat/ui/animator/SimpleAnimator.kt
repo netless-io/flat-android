@@ -12,6 +12,7 @@ class SimpleAnimator(
     val onShowEnd: () -> Unit = {},
     val onHideStart: () -> Unit = {},
     val onHideEnd: () -> Unit = {},
+    private val duration: Long = 300,
 ) {
     private var shown = false
     private var animator: ValueAnimator? = null
@@ -30,7 +31,7 @@ class SimpleAnimator(
     fun show() {
         animator = ValueAnimator.ofFloat(0F, 1F)
         animator?.apply {
-            duration = 300
+            duration = this@SimpleAnimator.duration
             addUpdateListener {
                 onUpdate(it.animatedValue as Float)
             }
@@ -51,7 +52,7 @@ class SimpleAnimator(
     fun hide() {
         animator = ValueAnimator.ofFloat(1F, 0F)
         animator?.apply {
-            duration = 300
+            duration = this@SimpleAnimator.duration
             addUpdateListener {
                 onUpdate(it.animatedValue as Float)
             }

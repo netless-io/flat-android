@@ -84,6 +84,12 @@ internal class RTCEventHandler : IRtcEngineEventHandler() {
             listener.onLastmileProbeResult(result)
         }
     }
+
+    override fun onAudioVolumeIndication(speakers: Array<out AudioVolumeInfo>, totalVolume: Int) {
+        for (listener in listeners) {
+            listener.onAudioVolumeIndication(speakers, totalVolume)
+        }
+    }
 }
 
 internal interface RTCEventListener {
@@ -107,7 +113,9 @@ internal interface RTCEventListener {
 
     fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {}
 
-    fun onRemoteVideoStats(stats: IRtcEngineEventHandler.RemoteVideoStats?) {}
+    fun onRemoteVideoStats(stats: IRtcEngineEventHandler.RemoteVideoStats) {}
 
-    fun onRemoteAudioStats(stats: IRtcEngineEventHandler.RemoteAudioStats?) {}
+    fun onRemoteAudioStats(stats: IRtcEngineEventHandler.RemoteAudioStats) {}
+
+    fun onAudioVolumeIndication(speakers: Array<out IRtcEngineEventHandler.AudioVolumeInfo>, totalVolume: Int) {}
 }
