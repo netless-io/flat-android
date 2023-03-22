@@ -69,6 +69,8 @@ class ClassRoomViewModel @Inject constructor(
 
     val noOptPermission get() = eventbus.events.filterIsInstance<NoOptPermission>()
 
+    val classroomEvent get() = eventbus.events.filterIsInstance<ClassroomEvent>()
+
     val teacher = userManager.observeUsers().map { it.firstOrNull { user -> user.isOwner } }
     val students = userManager.observeUsers().map {
         it.filter { user -> !user.isOwner && (user.isJoined || user.isOnStage) }
@@ -274,6 +276,7 @@ class ClassRoomViewModel @Inject constructor(
             is RequestDeviceEvent -> {
                 eventbus.produceEvent(RequestDeviceReceived(mic = event.mic, camera = event.camera))
             }
+
             is RequestDeviceResponseEvent -> {
                 val uuid = event.sender ?: return
                 val name = userManager.findFirstUser(uuid)?.name ?: uuid
@@ -299,6 +302,9 @@ class ClassRoomViewModel @Inject constructor(
             }
             is ChatMessage -> {
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
+            }
+            OnRemoteLogin -> {
+                eventbus.produceEvent(RemoteLoginEvent)
             }
             else -> {
                 logger.w("[RTM] event not handled: $event")

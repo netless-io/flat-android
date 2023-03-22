@@ -23,4 +23,4 @@ data class NotifyDeviceOffReceived(
     val camera: Boolean? = null,
 ) : ClassroomEvent()
 
-
+object RemoteLoginEvent : ClassroomEvent()

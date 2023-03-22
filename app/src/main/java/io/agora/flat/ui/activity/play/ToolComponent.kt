@@ -32,7 +32,6 @@ import io.agora.flat.ui.view.RequestDeviceDialog
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.isTabletMode
 import io.agora.flat.util.showToast
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -173,30 +172,31 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            eventBus.events.filterIsInstance<ClassroomEvent>().collect {
-                when (it) {
+            viewModel.classroomEvent.collect { event ->
+                when (event) {
                     is NotifyDeviceOffReceived -> {
-                        if (it.camera == true) {
+                        if (event.camera == true) {
                             activity.showToast(R.string.teacher_turn_off_camera)
                         }
-                        if (it.mic == true) {
+                        if (event.mic == true) {
                             activity.showToast(R.string.teacher_turn_off_mic)
                         }
                     }
                     is RequestDeviceResponseReceived -> {
-                        if (it.camera == false) {
-                            activity.showToast(activity.getString(R.string.refuse_turn_on_camera_format, it.username))
+                        if (event.camera == false) {
+                            activity.showToast(activity.getString(R.string.refuse_turn_on_camera_format, event.username))
                         }
-                        if (it.mic == false) {
-                            activity.showToast(activity.getString(R.string.refuse_turn_on_mic_format, it.username))
+                        if (event.mic == false) {
+                            activity.showToast(activity.getString(R.string.refuse_turn_on_mic_format, event.username))
                         }
                     }
                     is RequestDeviceSent -> {
                         activity.showToast(R.string.teacher_send_request_device)
                     }
                     is RequestDeviceReceived -> {
-                        handleRequestDevice(it)
+                        handleRequestDevice(event)
                     }
+                    else -> {}
                 }
             }
         }

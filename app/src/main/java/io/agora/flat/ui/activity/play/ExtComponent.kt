@@ -16,6 +16,8 @@ import io.agora.flat.R
 import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentExtensionBinding
+import io.agora.flat.event.RemoteLoginEvent
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.view.RoomExitDialog
 import io.agora.flat.util.delayAndFinish
@@ -65,13 +67,22 @@ class ExtComponent(
         lifecycleScope.launchWhenCreated {
             classRoomViewModel.loginThirdParty()
         }
+
+        lifecycleScope.launchWhenResumed {
+            classRoomViewModel.classroomEvent.collect { event ->
+                when (event) {
+                    RemoteLoginEvent -> {
+                        showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
+                    }
+                }
+            }
+        }
     }
 
     private fun handleErrorMessage(error: UiMessage) {
         if (error.exception == null) {
             activity.showToast(error.text)
         } else {
-            // TODO
             showRoomExitDialog(FlatErrorHandler.getStringByError(activity, error.exception, ""))
         }
     }
@@ -109,5 +120,11 @@ class ExtComponent(
         }
         dialog.setListener { activity.delayAndFinish(250) }
         dialog.show(activity.supportFragmentManager, "RoomExitDialog")
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        // clear overlay when activity destroy
+        RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_NO_OVERLAY, false)
     }
 }
