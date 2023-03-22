@@ -326,7 +326,7 @@ class RtcComponent(
 
         adapter = UserVideoAdapter(viewModel = viewModel, windowsDragManager = windowsDragManager)
         adapter.setOnItemListener(object : UserVideoAdapter.OnItemListener {
-            override fun onItemLongPress(view: View, user: RoomUser): Boolean {
+            override fun onStartDrag(view: View, user: RoomUser): Boolean {
                 if (!viewModel.canDragUser() || windowsDragManager.isOnBoard(user.userUUID)) return false
 
                 windowsDragManager.startDrag(user.userUUID)

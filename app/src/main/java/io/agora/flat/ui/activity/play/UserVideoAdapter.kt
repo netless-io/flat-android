@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.play
 
+import android.annotation.SuppressLint
 import android.view.*
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.widget.FrameLayout
@@ -11,7 +12,9 @@ import io.agora.flat.data.model.RoomUser
 import io.agora.flat.databinding.ItemClassRtcVideoBinding
 import io.agora.flat.ui.manager.WindowsDragManager
 import io.agora.flat.ui.view.FlatDrawables
+import io.agora.flat.util.dp2px
 import io.agora.flat.util.loadAvatarAny
+import kotlin.math.abs
 
 
 /**
@@ -70,6 +73,7 @@ class UserVideoAdapter(
         binding.switchCamera.setOnClickListener {
             onItemListener?.onSwitchCamera(itemData.userUUID, !binding.switchCamera.isSelected)
         }
+
         binding.switchMic.setOnClickListener {
             onItemListener?.onSwitchMic(itemData.userUUID, !binding.switchMic.isSelected)
         }
@@ -97,15 +101,37 @@ class UserVideoAdapter(
                 binding.switchDeviceLayout.postDelayed(dismissLayout, 3000)
                 return true
             }
+        })
 
-            override fun onLongPress(e: MotionEvent) {
-                onItemListener?.onItemLongPress(viewHolder.binding.videoContainer, itemData)
+        viewHolder.itemView.setOnTouchListener(object : View.OnTouchListener {
+            var lastX: Float = 0f
+            var lastY: Float = 0f
+            var flag: Boolean = false
+
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                gestureDetector.onTouchEvent(event)
+
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        flag = false
+                        lastX = event.rawX
+                        lastY = event.rawY
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        if (flag) return true
+                        val dx: Float = event.rawX - lastX
+                        val dy: Float = event.rawY - lastY
+                        if (abs(dx) >= context.dp2px(16) || abs(dy) >= context.dp2px(16)) {
+                            flag = true
+                            onItemListener?.onStartDrag(v, itemData)
+                        }
+                    }
+                }
+
+                return true
             }
         })
-        viewHolder.itemView.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
-        }
 
         viewHolder.itemView.setOnDragListener { _, event ->
             onItemListener?.onDrag(viewHolder.binding.videoContainer, viewHolder.bindingAdapterPosition, event) ?: false
@@ -161,13 +187,13 @@ class UserVideoAdapter(
     }
 
     interface OnItemListener {
-        fun onItemLongPress(view: View, user: RoomUser): Boolean
+        fun onStartDrag(view: View, user: RoomUser): Boolean
+
+        fun onDrag(v: View, position: Int, event: DragEvent): Boolean
 
         fun onItemClick(view: View, position: Int)
 
         fun onItemDoubleClick(view: View, user: RoomUser): Boolean
-
-        fun onDrag(v: View, position: Int, event: DragEvent): Boolean
 
         fun onSwitchCamera(userId: String, on: Boolean) {}
 
