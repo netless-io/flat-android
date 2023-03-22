@@ -240,7 +240,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/accept_handup_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <include
         android:id="@+id/layout_settings"

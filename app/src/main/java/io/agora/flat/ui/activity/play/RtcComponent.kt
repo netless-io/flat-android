@@ -241,6 +241,7 @@ class RtcComponent(
                         index = targetState[uuid]?.index ?: atomIndex.getAndIncrement(),
                     )
                 )
+                adapter.updateItemByUuid(uuid)
             }
         }
 
@@ -600,7 +601,6 @@ class RtcComponent(
                     }
 
                     override fun onWindowScale(uuid: String, scale: Float) {
-                        // TODO MAX_SCALE
                         val windowState = windowsDragManager.getWindowState(uuid) ?: return
                         windowsDragManager.scaleWindow(uuid, min(scale, boardRect.width() / windowState.width))
                         windowLayoutMap[uuid]?.renderTo(windowsDragManager.getWindowRect(uuid))
@@ -784,6 +784,7 @@ class RtcComponent(
             },
             onShowEnd = {
                 updateCenter(uuid, to.centerX().toFloat(), to.centerY().toFloat())
+                adapter.updateItemByUuid(uuid)
                 syncedState.updateNormalWindow(uuid, to.toWindowInfo())
             },
         )

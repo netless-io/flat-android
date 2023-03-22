@@ -27,9 +27,9 @@
 
     <color name="class_room_video_item_bg">@color/flat_gray_0</color>
     <color name="class_room_video_item_text_color">@color/flat_gray_3</color>
+    <color name="class_room_video_onboard_text_color">@color/flat_white</color>
 
     <color name="class_room_user_list_students_header_bg">#F9F9F9</color>
 
     <color name="switch_track_checked_disable">#3FB7BBC1</color>
-
 </resources>

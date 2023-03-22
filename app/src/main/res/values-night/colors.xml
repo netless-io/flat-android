@@ -14,6 +14,7 @@
 
     <color name="class_room_video_item_bg">@color/flat_gray_7</color>
     <color name="class_room_video_item_text_color">@color/flat_gray_5</color>
+    <color name="class_room_video_onboard_text_color">@color/flat_gray_3</color>
 
     <color name="class_room_user_list_students_header_bg">@color/flat_gray_8</color>
 </resources>

@@ -5,13 +5,13 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.transform.CircleCropTransformation
+import io.agora.flat.R
 import io.agora.flat.common.rtc.AudioVolumeInfo
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.databinding.ItemClassRtcVideoBinding
 import io.agora.flat.ui.manager.WindowsDragManager
 import io.agora.flat.ui.view.FlatDrawables
+import io.agora.flat.util.loadAvatarAny
 
 
 /**
@@ -49,17 +49,19 @@ class UserVideoAdapter(
         val onboard = windowsDragManager.isOnBoard(itemData.userUUID)
 
         val binding = viewHolder.binding
-        binding.avatar.load(itemData.avatarURL) {
-            crossfade(true)
-            transformations(CircleCropTransformation())
+        val data = if (itemData.isJoined) {
+            itemData.avatarURL
+        } else {
+            itemData.avatarURL.ifEmpty { R.drawable.img_user_left }
         }
-        binding.teacherLeaveLy.isVisible = itemData.isLeft && itemData.isOwner
-        binding.studentLeaveLy.isVisible = itemData.isLeft && !itemData.isOwner
+        binding.avatar.loadAvatarAny(data)
+        binding.avatarLayout.isVisible = (!itemData.isJoined || !itemData.videoOpen) && !onboard
+        binding.userOffline.isVisible = !itemData.isJoined
+
         binding.micClosed.isVisible = !itemData.audioOpen
         binding.username.text = itemData.name
         binding.onboardUsername.text = itemData.name
         binding.onboardLayout.isVisible = onboard
-        binding.videoClosedLayout.isVisible = itemData.isJoined && !itemData.videoOpen && !onboard
         binding.switchCamera.setImageDrawable(FlatDrawables.createCameraDrawable(context))
         binding.switchCamera.isSelected = itemData.videoOpen
         binding.switchMic.setImageDrawable(FlatDrawables.createMicDrawable(context))

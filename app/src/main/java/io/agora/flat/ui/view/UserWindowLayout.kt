@@ -5,11 +5,15 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.*
 import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.core.view.isVisible
-import coil.load
+import coil.imageLoader
+import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import io.agora.flat.R
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.databinding.LayoutUserWindowBinding
+import io.agora.flat.util.loadAvatarAny
 import kotlin.math.abs
 
 class UserWindowLayout @JvmOverloads constructor(
@@ -119,15 +123,17 @@ class UserWindowLayout @JvmOverloads constructor(
 
     fun setRoomUser(user: RoomUser) {
         roomUser = user
-        binding.avatar.load(roomUser.avatarURL) {
-            crossfade(true)
-            transformations(CircleCropTransformation())
+        val data = if (roomUser.isJoined) {
+            roomUser.avatarURL
+        } else {
+            roomUser.avatarURL.ifEmpty { R.drawable.img_user_left }
         }
-        binding.teacherLeaveLy.isVisible = roomUser.isLeft && roomUser.isOwner
-        binding.studentLeaveLy.isVisible = roomUser.isLeft && !roomUser.isOwner
+        binding.avatar.loadAvatarAny(data)
+        binding.avatarLayout.isVisible = !roomUser.isJoined || !roomUser.videoOpen
+        binding.userOffline.isVisible = !roomUser.isJoined
+
         binding.micClosed.isVisible = !roomUser.audioOpen
         binding.username.text = roomUser.name
-        binding.videoClosedLayout.isVisible = roomUser.isJoined && !roomUser.videoOpen
         binding.switchCamera.isSelected = roomUser.videoOpen
         binding.switchMic.isSelected = roomUser.audioOpen
         invalidate()

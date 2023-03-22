@@ -16,18 +16,12 @@
         android:layout_height="match_parent" />
 
     <FrameLayout
-        android:id="@+id/video_closed_layout"
+        android:id="@+id/avatar_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/flat_black"
-        android:visibility="invisible">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/img_room_video_closed_head"
-            android:visibility="gone" />
+        android:visibility="invisible"
+        tools:visibility="invisible">
 
         <ImageView
             android:id="@+id/avatar"
@@ -36,6 +30,15 @@
             android:layout_gravity="center"
             android:scaleType="centerCrop"
             android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/user_offline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/user_offline"
+            android:textColor="@color/class_room_video_onboard_text_color"
+            android:textSize="12sp" />
     </FrameLayout>
 
     <ImageView
@@ -53,54 +56,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|bottom"
-        android:padding="4dp"
-        android:textColor="@color/flat_day_night_text_primary"
+        android:padding="8dp"
+        android:textColor="@color/class_room_video_onboard_text_color"
         android:textSize="12sp"
         tools:text="用户名" />
-
-    <FrameLayout
-        android:id="@+id/teacher_leave_ly"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/class_room_video_item_bg"
-            android:src="@drawable/img_user_left" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="4dp"
-            android:text="@string/room_class_teacher_leave"
-            android:textColor="@color/class_room_video_item_text_color"
-            android:textSize="12sp" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/student_leave_ly"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/class_room_video_item_bg"
-            android:src="@drawable/img_user_left" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="4dp"
-            android:text="@string/room_class_student_left"
-            android:textColor="@color/class_room_video_item_text_color"
-            android:textSize="12sp" />
-    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/switch_device_layout"
@@ -125,4 +84,9 @@
             android:padding="4dp"
             android:src="@drawable/ic_class_room_mic_on" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_user_window_border" />
 </merge>
