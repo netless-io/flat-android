@@ -122,7 +122,7 @@ class UserVideoAdapter(
                         if (flag) return true
                         val dx: Float = event.rawX - lastX
                         val dy: Float = event.rawY - lastY
-                        if (abs(dx) >= context.dp2px(16) || abs(dy) >= context.dp2px(16)) {
+                        if (abs(dx) >= context.dp2px(8) || abs(dy) >= context.dp2px(8)) {
                             flag = true
                             onItemListener?.onStartDrag(v, itemData)
                         }

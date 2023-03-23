@@ -13,5 +13,8 @@ class Config {
         val cancelAccountCountTime = if (BuildConfig.DEBUG) 5_000L else 30_000L
 
         const val defaultBoardRatio = 9f / 16
+
+        const val defaultWindowScale = 0.4f
+        const val defaultMinWindowScale = 0.25f
     }
 }

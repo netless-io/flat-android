@@ -235,7 +235,7 @@ class RtcComponent(
                     user = it,
                     windowUiState = UserWindowUiState(
                         centerX = rect.centerX().toFloat(),
-                        centerY = rect.centerX().toFloat(),
+                        centerY = rect.centerY().toFloat(),
                         width = rect.width().toFloat(),
                         height = rect.height().toFloat(),
                         index = targetState[uuid]?.index ?: atomIndex.getAndIncrement(),
@@ -569,8 +569,8 @@ class RtcComponent(
                     user, UserWindowUiState(
                         centerX = event.x,
                         centerY = event.y,
-                        width = boardRect.width() * 0.25f,
-                        height = boardRect.width() * 0.25f * Config.defaultBoardRatio,
+                        width = boardRect.width() * Config.defaultWindowScale,
+                        height = boardRect.width() * Config.defaultWindowScale * Config.defaultBoardRatio,
                         index = atomIndex.getAndIncrement(),
                     )
                 )
@@ -602,7 +602,11 @@ class RtcComponent(
 
                     override fun onWindowScale(uuid: String, scale: Float) {
                         val windowState = windowsDragManager.getWindowState(uuid) ?: return
-                        windowsDragManager.scaleWindow(uuid, min(scale, boardRect.width() / windowState.width))
+                        val scale = scale.coerceIn(
+                            boardRect.width() * Config.defaultMinWindowScale / windowState.width,
+                            boardRect.width() / windowState.width
+                        )
+                        windowsDragManager.scaleWindow(uuid, scale)
                         windowLayoutMap[uuid]?.renderTo(windowsDragManager.getWindowRect(uuid))
                     }
 
