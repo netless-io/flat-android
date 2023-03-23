@@ -54,7 +54,7 @@ class UserManager @Inject constructor(
         return _ownerUUID.asStateFlow().filterNotNull()
     }
 
-    fun reset(currentUser: RoomUser, ownerUUID: String) {
+    suspend fun reset(currentUser: RoomUser, ownerUUID: String) {
         this.selfUUID = currentUser.userUUID
         this._ownerUUID.value = ownerUUID
 
@@ -66,12 +66,11 @@ class UserManager @Inject constructor(
 
         val updateUsers = mutableMapOf(selfUUID to currentUser)
         if (selfUUID != ownerUUID) {
-            updateUsers[ownerUUID] = RoomUser(
-                userUUID = ownerUUID,
-                isOwner = true,
-                isOnStage = true,
-                allowDraw = true,
-            )
+            var owner = RoomUser(userUUID = ownerUUID, isOwner = true, isOnStage = true, allowDraw = true)
+            userQuery.loadUser(ownerUUID)?.let {
+                owner = owner.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
+            }
+            updateUsers[ownerUUID] = owner
         }
         updateUserCache(updateUsers)
         sortUser(updateUsers)

@@ -129,7 +129,7 @@ class ClassRoomViewModel @Inject constructor(
         initRoomState(deferredOne.await(), deferredTwo.await())
     }
 
-    private fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
+    private suspend fun initRoomState(roomInfo: RoomInfo, joinRoomInfo: RoomPlayInfo) {
         val isOwner = roomInfo.ownerUUID == currentUserUUID
 
         val initState = ClassRoomState(
