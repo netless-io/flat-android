@@ -26,10 +26,11 @@
     <color name="class_room_item_layout_bg">@color/flat_blue_0</color>
 
     <color name="class_room_video_item_bg">@color/flat_gray_0</color>
-    <color name="class_room_video_item_text_color">@color/flat_gray_3</color>
-    <color name="class_room_video_onboard_text_color">@color/flat_white</color>
-
+    <color name="class_room_video_item_on_bg">@color/flat_gray_3</color>
     <color name="class_room_user_list_students_header_bg">#F9F9F9</color>
+
+    <color name="class_room_video_text_color">@color/flat_white</color>
+    <color name="class_user_window_border_color">#7F5D6066</color>
 
     <color name="switch_track_checked_disable">#3FB7BBC1</color>
 </resources>

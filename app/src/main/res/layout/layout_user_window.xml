@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/user_offline"
-            android:textColor="@color/class_room_video_onboard_text_color"
+            android:textColor="@color/class_room_video_text_color"
             android:textSize="12sp" />
     </FrameLayout>
 
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start|bottom"
         android:padding="8dp"
-        android:textColor="@color/class_room_video_onboard_text_color"
+        android:textColor="@color/class_room_video_text_color"
         android:textSize="12sp"
         tools:text="用户名" />
 
