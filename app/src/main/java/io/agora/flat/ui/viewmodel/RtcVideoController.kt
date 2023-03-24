@@ -83,7 +83,6 @@ class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     }
 
     fun handleOffline(uid: Int) {
-        releaseVideo(uid)
         if (uid == shareScreenUid) {
             shareScreenContainer?.run {
                 removeAllViews()
