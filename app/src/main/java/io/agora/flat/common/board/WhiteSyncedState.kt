@@ -235,11 +235,17 @@ class WhiteSyncedState @Inject constructor(
     }
 
     override fun updateOnStage(userId: String, onStage: Boolean) {
+        if (!onStage) {
+            removeMaximizeWindow(userId)
+        }
+
         val jsonObj = mapOf(userId to onStage)
         syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gson.toJson(jsonObj))
     }
 
     override fun stageOffAll() {
+        removeAllWindow()
+
         val newState = _onStagesFlow.value?.mapValues { false } ?: return
         syncedStore.setStorageState(ONSTAGE_USERS_STORAGE, gson.toJson(newState))
     }
@@ -298,6 +304,13 @@ class WhiteSyncedState @Inject constructor(
 
     override fun removeNormalWindow(userId: String) {
         val jsonObj = mapOf(userId to null)
+        syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
+    }
+
+    private fun removeAllWindow() {
+        val userWindows = _userWindowsFlow.value ?: return
+        val users = userWindows.users.map { it.key to null }.toMap()
+        val jsonObj = mapOf("grid" to "[]") + users
         syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
     }
 }
