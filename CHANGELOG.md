@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.0] - March 29, 2023
+- Support RTC video drag-and-drop
+- Fix deep link
+- Fix remote login not exit room
+- Fix video missing when rejoin room
+
 ## [2.3.0] - February 28, 2023
 - Fix insert ppt bug
 - Fix inter-rome invite info text
