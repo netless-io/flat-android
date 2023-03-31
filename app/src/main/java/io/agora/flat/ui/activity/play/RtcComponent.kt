@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Rect
-import android.util.Log
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -220,7 +219,6 @@ class RtcComponent(
         val toAdd = targetState.keys - state.keys
         val toUpdate = state.keys - toRemove
 
-        // TODO 移除添加动画
         for (uuid in toRemove) {
             removeNewUserWindow(uuid)
             adapter.updateItemByUuid(uuid)
@@ -228,7 +226,7 @@ class RtcComponent(
 
         for (uuid in toAdd) {
             videoUsers[uuid]?.let {
-                val rect = adapter.findVideoContainerByUuid(uuid)?.let { container ->
+                val rect = adapter.findContainerByUuid(uuid)?.let { container ->
                     getViewRect(container, userWindowsBinding.root)
                 } ?: Rect(0, 0, 0, 0)
                 addNewUserWindow(
@@ -562,6 +560,7 @@ class RtcComponent(
     private val atomIndex = AtomicInteger(0)
 
     private val onDragListener = View.OnDragListener { _, event ->
+        logger.d("RtcComponent", "onDragListener ${event.action}")
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 val user = event.localState as RoomUser
@@ -583,7 +582,7 @@ class RtcComponent(
             DragEvent.ACTION_DROP -> {
                 updateCenter(windowsDragManager.currentUUID(), event.x, event.y)
                 clearDragRectShow()
-                handleWindowDragEnd()
+                handleDragOnBoardEnd()
             }
         }
         true
@@ -611,7 +610,7 @@ class RtcComponent(
                     }
 
                     override fun onWindowScaleEnd(uuid: String) {
-                        handleWindowTouchEnd(uuid)
+                        handleWindowDragEnd(uuid)
                     }
 
                     override fun onWindowMove(uuid: String, dx: Float, dy: Float) {
@@ -622,7 +621,7 @@ class RtcComponent(
 
                     override fun onWindowMoveEnd(uuid: String) {
                         clearDragRectShow()
-                        handleWindowTouchEnd(uuid)
+                        handleWindowDragEnd(uuid)
                     }
 
                     override fun onDoubleTap(userId: String): Boolean {
@@ -658,21 +657,6 @@ class RtcComponent(
         rtcVideoController.setupUserVideo(windowContainer.getContainer(), user.rtcUID)
     }
 
-    private fun handleWindowTouchEnd(uuid: String) {
-        val rect = windowsDragManager.getWindowRect(uuid)
-        if (videoRect.contains(rect.centerX(), rect.centerY())) {
-            animateEnterVideoArea(uuid)
-        } else if (rect != rect.constrainRect(boardRect)) {
-            animateEnterBoardArea(uuid)
-        } else {
-            syncedState.updateNormalWindow(uuid, rect.toWindowInfo())
-        }
-    }
-
-    private fun clearDragRectShow() {
-        userWindowsBinding.dragRectShow.isVisible = false
-    }
-
     private fun removeNewUserWindow(uuid: String) {
         windowsDragManager.removeWindowState(uuid)
         val remove = windowLayoutMap.remove(uuid)
@@ -685,7 +669,6 @@ class RtcComponent(
         userWindowsBinding.root.setOnDragListener(onDragListener)
         userWindowsContainer = userWindowsBinding.userWindowsContainer
         userWindowsContainer.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            Log.e("UserWindowsLayout", "onLayoutChange: $left, $top, $right, $bottom")
             if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom) {
                 return@addOnLayoutChangeListener
             }
@@ -739,44 +722,22 @@ class RtcComponent(
         }
     }
 
-    private fun handleWindowDragEnd(): Boolean {
+    private fun handleDragOnBoardEnd(): Boolean {
         val uuid = windowsDragManager.currentUUID()
         val rect = windowsDragManager.getWindowRect(uuid)
         if (boardRect.contains(rect.centerX(), rect.centerY())) {
-            animateEnterBoardArea(uuid)
+            if (fullOnStage) {
+                syncedState.maximizeWindows(uuid)
+            } else {
+                animateOnBoard(uuid)
+            }
         } else {
-            animateEnterVideoArea(uuid)
+            animateOnBoardExit(uuid)
         }
         return true
     }
 
-    private fun animateEnterVideoArea(uuid: String) {
-        val start = windowsDragManager.getWindowRect(uuid)
-        val end = Rect(videoRect.left, videoRect.top, videoRect.left, videoRect.top)
-        adapter.findVideoContainerByUuid(uuid)?.let {
-            end.set(getViewRect(it, userWindowsContainer))
-        }
-
-        val r = Rect()
-        val animator = SimpleAnimator(
-            onUpdate = { value ->
-                r.lerp(start, end, value)
-                windowLayoutMap[uuid]?.renderTo(r)
-            },
-            onShowEnd = {
-                removeNewUserWindow(uuid)
-                adapter.updateItemByUuid(uuid)
-                if (fullOnStage) {
-                    syncedState.removeMaximizeWindow(uuid)
-                } else {
-                    syncedState.removeNormalWindow(uuid)
-                }
-            }
-        )
-        animator.show()
-    }
-
-    private fun animateEnterBoardArea(uuid: String) {
+    private fun animateOnBoard(uuid: String) {
         val from = windowsDragManager.getWindowRect(uuid)
         val to = from.constrainRect(boardRect)
 
@@ -791,6 +752,92 @@ class RtcComponent(
                 adapter.updateItemByUuid(uuid)
                 syncedState.updateNormalWindow(uuid, to.toWindowInfo())
             },
+        )
+        animator.show()
+    }
+
+    private fun animateOnBoardExit(uuid: String) {
+        val from = windowsDragManager.getWindowRect(uuid)
+        val to = Rect(videoRect.left, videoRect.top, videoRect.left, videoRect.top)
+        adapter.findContainerByUuid(uuid)?.let {
+            to.set(getViewRect(it, userWindowsContainer))
+        }
+
+        val r = Rect()
+        val animator = SimpleAnimator(
+            onUpdate = { value ->
+                r.lerp(from, to, value)
+                windowLayoutMap[uuid]?.renderTo(r)
+            },
+            onShowEnd = {
+                removeNewUserWindow(uuid)
+                adapter.updateItemByUuid(uuid)
+            }
+        )
+        animator.show()
+    }
+
+    private fun handleWindowDragEnd(uuid: String) {
+        val rect = windowsDragManager.getWindowRect(uuid)
+        if (videoRect.contains(rect.centerX(), rect.centerY())) {
+            animateEnterVideoArea(uuid)
+        } else if (rect != rect.constrainRect(boardRect)) {
+            if (fullOnStage) {
+                animateResetMaximize(uuid)
+            } else {
+                animateOnBoard(uuid)
+            }
+        } else {
+            if (fullOnStage) {
+                animateResetMaximize(uuid)
+            } else {
+                syncedState.updateNormalWindow(uuid, rect.toWindowInfo())
+            }
+        }
+    }
+
+    private fun animateResetMaximize(uuid: String) {
+        val from = windowsDragManager.getWindowRect(uuid)
+        val to = windowsState.grid.indexOf(uuid).takeIf { it >= 0 }?.let {
+            WindowsDragManager.getMaximizeWindowsInfo(windowsState.grid.size)[it].toUserWindowUiState().getRect()
+        } ?: return
+
+        val r = Rect()
+        val animator = SimpleAnimator(
+            onUpdate = { value ->
+                r.lerp(from, to, value)
+                windowLayoutMap[uuid]?.renderTo(r)
+            },
+            onShowEnd = {
+                windowLayoutMap[uuid]?.renderTo(to)
+                updateCenter(uuid, to.centerX().toFloat(), to.centerY().toFloat())
+            }
+        )
+        animator.show()
+    }
+
+    private fun animateEnterVideoArea(uuid: String) {
+        val from = windowsDragManager.getWindowRect(uuid)
+        val to = Rect(videoRect.left, videoRect.top, videoRect.left, videoRect.top)
+        adapter.findContainerByUuid(uuid)?.let {
+            to.set(getViewRect(it, userWindowsContainer))
+        }
+
+        val r = Rect()
+        val animator = SimpleAnimator(
+            onUpdate = { value ->
+                r.lerp(from, to, value)
+                windowLayoutMap[uuid]?.renderTo(r)
+            },
+            onShowEnd = {
+                removeNewUserWindow(uuid)
+                adapter.updateItemByUuid(uuid)
+                if (fullOnStage) {
+                    syncedState.removeMaximizeWindow(uuid)
+                } else {
+                    syncedState.removeNormalWindow(uuid)
+                }
+            }
         )
         animator.show()
     }
@@ -833,6 +880,10 @@ class RtcComponent(
             val rect = windowsDragManager.getWindowRect()
             boardRect.contains(rect.centerX(), rect.centerY())
         }
+    }
+
+    private fun clearDragRectShow() {
+        userWindowsBinding.dragRectShow.isVisible = false
     }
 
     private fun updateCenter(uuid: String, x: Float, y: Float) {

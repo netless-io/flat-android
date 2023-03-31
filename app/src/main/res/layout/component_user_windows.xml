@@ -17,8 +17,8 @@
 
     <FrameLayout
         android:id="@+id/drag_view_shadow"
-        android:layout_width="1dp"
-        android:layout_height="1dp" />
+        android:layout_width="100dp"
+        android:layout_height="100dp" />
 
     <View
         android:id="@+id/drag_rect_show"

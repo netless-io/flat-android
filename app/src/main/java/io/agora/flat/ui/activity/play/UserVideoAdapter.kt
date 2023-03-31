@@ -50,14 +50,14 @@ class UserVideoAdapter(
         val context = viewHolder.itemView.context
         val itemData = dataSet[position]
         val onboard = windowsDragManager.isOnBoard(itemData.userUUID)
-
-        val binding = viewHolder.binding
-        val data = if (itemData.isJoined) {
+        val avatar = if (itemData.isJoined) {
             itemData.avatarURL
         } else {
             itemData.avatarURL.ifEmpty { R.drawable.img_user_left }
         }
-        binding.avatar.loadAvatarAny(data)
+
+        val binding = viewHolder.binding
+        binding.avatar.loadAvatarAny(avatar)
         binding.avatarLayout.isVisible = (!itemData.isJoined || !itemData.videoOpen) && !onboard
         binding.userOffline.isVisible = !itemData.isJoined
 
@@ -79,7 +79,9 @@ class UserVideoAdapter(
         }
 
         if (itemData.isJoined && !onboard) {
-            windowsDragManager.setupUserVideo(viewHolder.binding.videoContainer, itemData.rtcUID)
+            viewHolder.binding.videoContainer.let { windowsDragManager.setupUserVideo(it, itemData.rtcUID) }
+        } else {
+            viewHolder.binding.videoContainer.removeAllViews()
         }
 
         val gestureDetector = GestureDetector(viewHolder.itemView.context, object : SimpleOnGestureListener() {
@@ -164,7 +166,7 @@ class UserVideoAdapter(
         return dataSet.indexOfFirst { it.userUUID == uuid }
     }
 
-    fun findVideoContainerByUuid(uuid: String): FrameLayout? {
+    fun findContainerByUuid(uuid: String): FrameLayout? {
         val index = dataSet.indexOfFirst { it.userUUID == uuid }
         return (recyclerView?.findViewHolderForAdapterPosition(index) as? ViewHolder)?.binding?.videoContainer
     }
