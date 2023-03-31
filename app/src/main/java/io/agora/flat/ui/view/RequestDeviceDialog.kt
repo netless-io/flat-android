@@ -41,10 +41,6 @@ class RequestDeviceDialog : ClassDialogFragment(R.layout.dialog_request_device) 
         }
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-
-    }
-
     interface Listener {
         fun onRefuse()
 

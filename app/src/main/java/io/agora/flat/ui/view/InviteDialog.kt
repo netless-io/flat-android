@@ -39,6 +39,7 @@ class InviteDialog : ClassDialogFragment(R.layout.dialog_invite) {
     }
 
     override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
         listener?.onHide()
     }
 

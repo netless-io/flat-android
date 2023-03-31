@@ -22,5 +22,6 @@ class VersionCheckerTest {
         assertFalse(VersionChecker.checkCanUpdate("1.3.6", "1.2.9"))
         assertFalse(VersionChecker.checkForceUpdate("1.3.6", "1.3.6"))
         assertFalse(VersionChecker.checkForceUpdate("1.5.3.112", "1.5.2"))
+        assertFalse(VersionChecker.checkForceUpdate("1.4.0", "1.4.0"))
     }
 }

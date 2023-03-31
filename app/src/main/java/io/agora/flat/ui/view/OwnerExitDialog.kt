@@ -38,6 +38,7 @@ class OwnerExitDialog : ClassDialogFragment(R.layout.dialog_owner_exit) {
     }
 
     override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
         listener?.onDismiss()
     }
 
