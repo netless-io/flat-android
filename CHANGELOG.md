@@ -1,4 +1,9 @@
 # Changelog
+## [2.4.1] - April 03, 2023
+- Fix showRequestDeviceDialog crash
+- Fix window drag bugs when maximized
+- Fix dialog reshow when resumed
+- Fix sync player playback
 
 ## [2.4.0] - March 29, 2023
 - Support RTC video drag-and-drop
