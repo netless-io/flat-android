@@ -171,7 +171,7 @@ class ToolComponent(
             }
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.classroomEvent.collect { event ->
                 when (event) {
                     is NotifyDeviceOffReceived -> {
