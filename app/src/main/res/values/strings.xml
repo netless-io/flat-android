@@ -284,4 +284,5 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="onstage_size_limited">onstage size limited, offstage someone</string>
     <string name="handup_list_empty">Empty</string>
     <string name="user_list_empty">Empty</string>
+    <string name="install_permission_description">For your security, your phone currently isn\'t allowed to install unknown apps from this source. You can change this in Settings.</string>
 </resources>

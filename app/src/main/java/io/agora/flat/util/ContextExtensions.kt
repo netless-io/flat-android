@@ -3,6 +3,7 @@ package io.agora.flat.util
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -14,11 +15,13 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import io.agora.flat.R
 import io.agora.flat.common.android.DarkModeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 
 fun Context.getAppVersion(defaultVersion: String = "1.0.0"): String {
@@ -136,3 +139,18 @@ fun Context.contentInfo(uri: Uri): ContentInfo? {
 
 data class ContentInfo(val uri: Uri, val filename: String, val size: Long, val mediaType: String)
 
+fun Context.installApk(uri: Uri) {
+    try {
+        var apkUri = uri
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            apkUri = FileProvider.getUriForFile(this, "$packageName.provider", File(uri.path))
+        }
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        startActivity(intent)
+    } catch (e: Exception) {
+        // ignore
+    }
+}

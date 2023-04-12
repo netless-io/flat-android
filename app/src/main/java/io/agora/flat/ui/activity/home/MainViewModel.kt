@@ -1,5 +1,6 @@
 package io.agora.flat.ui.activity.home
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +8,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.common.android.AndroidDownloader
-import io.agora.flat.common.android.IntentHandler
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.common.version.VersionChecker
 import io.agora.flat.data.AppEnv
@@ -37,7 +37,6 @@ class MainViewModel @Inject constructor(
     private val appKVCenter: AppKVCenter,
     private val appEnv: AppEnv,
     private val downloader: AndroidDownloader,
-    private val intentHandler: IntentHandler,
 ) : ViewModel() {
     private val uiMessageManager = UiMessageManager()
 
@@ -104,14 +103,9 @@ class MainViewModel @Inject constructor(
         _state.value = _state.value.copy(protocolAgreed = true)
     }
 
-    fun updateApp() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(updating = true)
-            val result = _state.value.versionCheckResult
-            val uri = downloader.download(result.appUrl!!, "${result.appVersion}.apk")
-            intentHandler.installApk(uri)
-            _state.value = _state.value.copy(updating = false)
-        }
+    suspend fun downloadApp(): Uri {
+        val result = _state.value.versionCheckResult
+        return downloader.download(result.appUrl!!, "${result.appVersion}.apk")
     }
 
     fun cancelUpdate() {
@@ -138,7 +132,6 @@ data class MainUiState(
     val loginState: LoginState = LoginState.Init,
     val userAvatar: String? = null,
     val versionCheckResult: VersionCheckResult = VersionCheckResult.Empty,
-    val updating: Boolean = false,
     val message: UiMessage? = null,
 )
 

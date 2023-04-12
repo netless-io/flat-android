@@ -18,11 +18,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -36,13 +34,11 @@ import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
 import io.agora.flat.common.rtc.AgoraRtc
-import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatTheme
-import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import javax.inject.Inject
@@ -82,9 +78,10 @@ class MainActivity : BaseComposeActivity() {
                             Navigator.launchLoginActivity(this@MainActivity)
                             return@LifecycleHandler
                         }
+
                         viewModel.checkVersion()
-                        if (intent?.data != null) {
-                            viewModel.handleDeepLink(intent?.dataString ?: "")
+                        intent?.data?.let { data ->
+                            viewModel.handleDeepLink(data.toString())
                             intent.data = null
                         }
                     },
@@ -108,8 +105,7 @@ class MainActivity : BaseComposeActivity() {
                 if (viewState.versionCheckResult.showUpdate) {
                     UpdateDialog(
                         viewState.versionCheckResult,
-                        viewState.updating,
-                        viewModel::updateApp,
+                        viewModel::downloadApp,
                         viewModel::cancelUpdate,
                     )
                 }
@@ -129,48 +125,6 @@ class MainActivity : BaseComposeActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-    }
-}
-
-
-@Composable
-internal fun UpdateDialog(
-    versionCheckResult: VersionCheckResult,
-    updating: Boolean,
-    onUpdate: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    FlatTheme {
-        val dismissBlocked = {}
-        Dialog(onDismissRequest = if (versionCheckResult.forceUpdate) dismissBlocked else onCancel) {
-            Surface(shape = Shapes.large) {
-                Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                    FlatTextTitle(versionCheckResult.title)
-                    FlatNormalVerticalSpacer()
-                    FlatTextBodyOneSecondary(versionCheckResult.description)
-                    FlatNormalVerticalSpacer()
-
-                    if (updating) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            color = MaterialTheme.colors.primary,
-                        )
-                    } else {
-                        Column {
-                            FlatPrimaryTextButton(stringResource(R.string.update)) {
-                                onUpdate()
-                            }
-                            if (!versionCheckResult.forceUpdate) {
-                                FlatSmallVerticalSpacer()
-                                FlatSecondaryTextButton(stringResource(R.string.cancel)) {
-                                    onCancel()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -396,7 +350,7 @@ internal fun MainPadRail(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit)
 private fun MainBottomBar(
     selectedTab: MainTab,
     modifier: Modifier = Modifier,
-    onTabSelected: (MainTab) -> Unit
+    onTabSelected: (MainTab) -> Unit,
 ) {
     val homeResId = when (selectedTab) {
         MainTab.Home -> R.drawable.ic_main_home_selected
@@ -430,12 +384,4 @@ private fun MainBottomBar(
             }
         }
     }
-}
-
-@Composable
-@Preview
-@Preview(device = Devices.PIXEL_C)
-private fun MainPagePreview() {
-    val mainViewState = MainUiState(true, loginState = LoginState.Login)
-    MainScreen(mainViewState)
 }
