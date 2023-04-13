@@ -2,6 +2,7 @@ package io.agora.flat
 
 import android.app.Application
 import android.webkit.WebView
+import com.herewhite.sdk.WhiteboardView
 import dagger.hilt.android.HiltAndroidApp
 import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.common.android.LanguageManager
@@ -16,5 +17,6 @@ class MainApplication : Application() {
         LanguageManager.init(this)
         DarkModeManager.init(this)
         WebView.setWebContentsDebuggingEnabled(isApkInDebug())
+        WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
     }
 }
