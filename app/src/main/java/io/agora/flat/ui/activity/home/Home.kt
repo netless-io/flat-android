@@ -6,7 +6,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.IconButton
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -15,8 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,7 +24,10 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.RoomInfo
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.*
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Red_1
+import io.agora.flat.ui.theme.Red_3
+import io.agora.flat.ui.theme.isTabletMode
 
 @Composable
 fun HomeScreen(
@@ -115,8 +115,6 @@ private fun OperationItem(
     @StringRes tip: Int,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isDarkTheme()) Blue_8 else Blue_0
-    val icColor = if (isDarkTheme()) Blue_2 else Blue_6
     Box(modifier, Alignment.TopCenter) {
         Column(
             Modifier
@@ -128,19 +126,11 @@ private fun OperationItem(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(bgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painterResource(id),
-                    null,
-                    colorFilter = ColorFilter.tint(icColor)
-                )
-            }
+            Image(
+                painter = painterResource(id = id),
+                contentDescription = null,
+                modifier = Modifier.size(56.dp)
+            )
             Spacer(Modifier.height(8.dp))
             FlatTextCaption(stringResource(tip), color = FlatTheme.colors.textPrimary)
         }
