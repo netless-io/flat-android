@@ -24,7 +24,6 @@ fun View.renderTo(rect: Rect) {
     this.layoutParams = layoutParams
 }
 
-
 fun ImageView.loadAvatarAny(data: Any) {
     val request = ImageRequest.Builder(context)
         .data(data)
@@ -36,3 +35,19 @@ fun ImageView.loadAvatarAny(data: Any) {
         .build()
     context.imageLoader.enqueue(request)
 }
+
+fun View.getViewRect(anchorView: View): Rect {
+    val array = IntArray(2)
+    getLocationOnScreen(array)
+
+    val arrayP = IntArray(2)
+    anchorView.getLocationOnScreen(arrayP)
+
+    return Rect(
+        array[0] - arrayP[0],
+        array[1] - arrayP[1],
+        array[0] - arrayP[0] + this.width,
+        array[1] - arrayP[1] + this.height
+    )
+}
+

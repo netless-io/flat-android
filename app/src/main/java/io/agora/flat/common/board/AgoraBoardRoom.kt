@@ -248,6 +248,10 @@ class AgoraBoardRoom @Inject constructor(
         fastRoom?.insertVideo(videoUrl, title)
     }
 
+    override fun insertApp(kind: String) {
+        fastRoom?.room?.addApp(WindowAppParam(kind, null, null), null)
+    }
+
     override fun observeRoomPhase(): Flow<BoardRoomPhase> {
         return boardRoomPhase.asStateFlow()
     }

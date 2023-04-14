@@ -297,4 +297,12 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="handup_list_empty">暂无学生举手</string>
     <string name="user_list_empty">暂无学生</string>
     <string name="install_permission_description">处于安全的考虑，你的手机目前不允许安装来自此来源的未知应用。你可以在"设置"中对此进行更改。</string>
+
+    <string name="app_name_code">代码</string>
+    <string name="app_name_geometry">几何代数</string>
+    <string name="app_name_clock">计时器</string>
+    <string name="app_name_dice">骰子</string>
+    <string name="app_name_question">答题器</string>
+    <string name="app_name_mindmap">思维导图</string>
+    <string name="app_name_rich_text">富文本</string>
 </resources>

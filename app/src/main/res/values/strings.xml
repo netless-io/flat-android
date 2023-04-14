@@ -285,4 +285,12 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="handup_list_empty">Empty</string>
     <string name="user_list_empty">Empty</string>
     <string name="install_permission_description">For your security, your phone currently isn\'t allowed to install unknown apps from this source. You can change this in Settings.</string>
+
+    <string name="app_name_code">Code</string>
+    <string name="app_name_clock">Clock</string>
+    <string name="app_name_dice">Dice</string>
+    <string name="app_name_question">Question</string>
+    <string name="app_name_geometry">Geometry</string>
+    <string name="app_name_rich_text">Text</string>
+    <string name="app_name_mindmap">Mind</string>
 </resources>

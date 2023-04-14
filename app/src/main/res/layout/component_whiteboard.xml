@@ -19,4 +19,14 @@
         android:id="@+id/flat_controller_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/window_apps_layout"
+        layout="@layout/layout_window_apps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="@dimen/room_class_panel_margin_horizontal"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </FrameLayout>

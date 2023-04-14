@@ -32,5 +32,7 @@ interface BoardRoom {
 
     fun insertVideo(videoUrl: String, title: String)
 
+    fun insertApp(kind: String)
+
     fun observeRoomPhase(): Flow<BoardRoomPhase>
 }

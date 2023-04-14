@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_item_window_app_bg"
+        android:orientation="vertical"
+        android:padding="@dimen/flat_gap_2_0">
+
+        <ImageView
+            android:id="@+id/app_icon"
+            android:layout_width="@dimen/room_class_button_area_size"
+            android:layout_height="@dimen/room_class_button_area_size"
+            android:layout_gravity="center_horizontal"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_apps_clock" />
+
+        <TextView
+            android:id="@+id/app_name"
+            style="@style/RoomTextTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/flat_gap_1_0"
+            android:text="@string/app_name_clock"
+            android:textSize="12sp" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</FrameLayout>

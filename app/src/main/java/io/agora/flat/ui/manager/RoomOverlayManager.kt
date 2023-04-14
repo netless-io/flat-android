@@ -18,6 +18,8 @@ object RoomOverlayManager {
     const val AREA_ID_USER_LIST = 9
     const val AREA_ID_ACCEPT_HANDUP = 10
 
+    const val AREA_ID_APPS = 11
+
     private var showId = MutableStateFlow(AREA_ID_NO_OVERLAY)
 
     fun observeShowId(): Flow<Int> {

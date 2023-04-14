@@ -37,4 +37,5 @@
     <dimen name="room_replay_video_width">96dp</dimen>
 
     <dimen name="room_message_send_height">40dp</dimen>
+    <dimen name="room_apps_layout_width">168dp</dimen>
 </resources>
