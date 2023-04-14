@@ -16,6 +16,7 @@ import io.agora.board.fast.extension.FastResource
 import io.agora.board.fast.model.FastAppliance
 import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
+import io.agora.board.fast.model.FastUserPayload
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.Constants
 import io.agora.flat.R
@@ -45,10 +46,11 @@ class AgoraBoardRoom @Inject constructor(
 ) : BoardRoom {
     private lateinit var fastboard: Fastboard
     private lateinit var fastboardView: FastboardView
+
     private var fastRoom: FastRoom? = null
     private var darkMode: Boolean = false
     private var rootRoomController: RoomControllerGroup? = null
-    private var boardRoomPhase = MutableStateFlow<BoardRoomPhase>(BoardRoomPhase.Init)
+    private var boardPhase = MutableStateFlow<BoardPhase>(BoardPhase.Init)
     private val activityContext: Context by lazy { fastboardView.context }
     private val flatNetlessUA: List<String> by lazy {
         listOf(
@@ -57,7 +59,7 @@ class AgoraBoardRoom @Inject constructor(
         )
     }
 
-    override fun initSdk(fastboardView: FastboardView) {
+    override fun setupView(fastboardView: FastboardView) {
         this.fastboardView = fastboardView
         this.fastboard = fastboardView.fastboard
     }
@@ -80,10 +82,11 @@ class AgoraBoardRoom @Inject constructor(
             userRepository.getUserUUID(),
             region.toFastRegion(),
             writable
-        )
+        ).apply {
+            userPayload = FastUserPayload(userRepository.getUsername())
+        }
         fastRoomOptions.sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isLog = true
-            isUserCursor = true
             netlessUA = flatNetlessUA
             isEnableSyncedStore = true
         }
@@ -93,23 +96,18 @@ class AgoraBoardRoom @Inject constructor(
             windowParams.scrollVerticalOnly = true
             windowParams.stageStyle = "box-shadow: 0 0 0"
 
-            userPayload = UserPayload(
-                userId = userRepository.getUserUUID(),
-                nickName = userRepository.getUsername(),
-                cursorName = userRepository.getUsername(),
-            )
             isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
             disableEraseImage = true
         }
-
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
+
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
                 logger.d("[BOARD] room phase change to ${phase.name}")
                 when (phase) {
-                    RoomPhase.connecting -> boardRoomPhase.value = BoardRoomPhase.Connecting
-                    RoomPhase.connected -> boardRoomPhase.value = BoardRoomPhase.Connected
-                    RoomPhase.disconnected -> boardRoomPhase.value = BoardRoomPhase.Disconnected
+                    RoomPhase.connecting -> boardPhase.value = BoardPhase.Connecting
+                    RoomPhase.connected -> boardPhase.value = BoardPhase.Connected
+                    RoomPhase.disconnected -> boardPhase.value = BoardPhase.Disconnected
                     else -> {}
                 }
             }
@@ -121,12 +119,23 @@ class AgoraBoardRoom @Inject constructor(
             }
         })
 
-        if (rootRoomController != null) {
-            fastRoom?.rootRoomController = rootRoomController
+        rootRoomController?.let {
+            fastRoom?.rootRoomController = it
             updateRoomController(writable)
         }
 
         val fastResource = object : FastResource() {
+            override fun getBackgroundColor(darkMode: Boolean): Int {
+                return ContextCompat.getColor(
+                    activityContext,
+                    if (darkMode) R.color.flat_gray_7 else R.color.flat_blue_0
+                )
+            }
+
+            override fun getBoardBackgroundColor(darkMode: Boolean): Int {
+                return ContextCompat.getColor(activityContext, R.color.flat_day_night_background)
+            }
+
             override fun createApplianceBackground(darkMode: Boolean): Drawable? {
                 return ContextCompat.getDrawable(activityContext, R.drawable.ic_class_room_icon_bg)
             }
@@ -139,10 +148,8 @@ class AgoraBoardRoom @Inject constructor(
                 return ContextCompat.getDrawable(activityContext, R.drawable.shape_gray_border_round_8_bg)
             }
         }
-
         fastRoom?.setResource(fastResource)
         setDarkMode(darkMode)
-
         fastRoom?.join {
             cont.resume(true)
         }
@@ -197,9 +204,7 @@ class AgoraBoardRoom @Inject constructor(
             fastRoom?.room?.disableOperations(!allow)
             fastRoom?.room?.disableWindowOperation(!allow)
         }
-        fastboardView.post {
-            updateRoomController(allow)
-        }
+        fastboardView.post { updateRoomController(allow) }
     }
 
     private fun updateRoomController(writable: Boolean) {
@@ -252,26 +257,9 @@ class AgoraBoardRoom @Inject constructor(
         fastRoom?.room?.addApp(WindowAppParam(kind, null, null), null)
     }
 
-    override fun observeRoomPhase(): Flow<BoardRoomPhase> {
-        return boardRoomPhase.asStateFlow()
+    override fun observeRoomPhase(): Flow<BoardPhase> {
+        return boardPhase.asStateFlow()
     }
-
-    /**
-     * payload example
-     * {
-     *  "uid":"3e092001-eb7e-4da5-a715-90452fde3194",
-     *  "nickName":"aderan",
-     *  "userId":"3e092001-eb7e-4da5-a715-90452fde3194",
-     *  "cursorName":"aderan"
-     *  "avatar":"https://user_avatar_path"
-     * }
-     */
-    private data class UserPayload(
-        val userId: String,
-        val nickName: String,
-        val cursorName: String,
-        val avatar: String? = null,
-    )
 
     private fun String.toFastRegion(): FastRegion {
         val region = FastRegion.values().find { it.name.lowercase().replace('_', '-') == this }

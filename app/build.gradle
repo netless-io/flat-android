@@ -15,7 +15,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 37
-        versionName "2.4.1"
+        versionName "2.5.0-preview"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -222,7 +222,7 @@ dependencies {
     if (findProject(":fastboard") != null) {
         implementation project(':fastboard')
     } else {
-        implementation 'com.github.netless-io:fastboard-android:nl_2.0.0-alpha.2'
+        implementation 'com.github.netless-io:fastboard-android:nl_2.0.0-alpha.3'
     }
     // for local syncplayer debug
     if (findProject(":syncplayer") != null) {

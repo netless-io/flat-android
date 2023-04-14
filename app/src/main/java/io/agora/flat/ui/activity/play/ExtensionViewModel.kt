@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.board.AgoraBoardRoom
-import io.agora.flat.common.board.BoardRoomPhase
+import io.agora.flat.common.board.BoardPhase
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,13 +24,13 @@ class ExtensionViewModel @Inject constructor(
         viewModelScope.launch {
             boardRoom.observeRoomPhase().collect { phase ->
                 when (phase) {
-                    BoardRoomPhase.Connecting -> {
+                    BoardPhase.Connecting -> {
                         _state.value = _state.value.copy(loading = true)
                     }
-                    BoardRoomPhase.Connected -> {
+                    BoardPhase.Connected -> {
                         _state.value = _state.value.copy(loading = false)
                     }
-                    is BoardRoomPhase.Error -> {
+                    is BoardPhase.Error -> {
                         _state.value = _state.value.copy(error = UiMessage(phase.message))
                     }
                     else -> {; }

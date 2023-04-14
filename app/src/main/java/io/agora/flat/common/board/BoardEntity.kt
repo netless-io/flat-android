@@ -1,9 +1,9 @@
 package io.agora.flat.common.board
 
-sealed class BoardRoomPhase {
-    object Init : BoardRoomPhase()
-    object Connecting : BoardRoomPhase()
-    object Connected : BoardRoomPhase()
-    object Disconnected : BoardRoomPhase()
-    data class Error(val message: String) : BoardRoomPhase()
+sealed class BoardPhase {
+    object Init : BoardPhase()
+    object Connecting : BoardPhase()
+    object Connected : BoardPhase()
+    object Disconnected : BoardPhase()
+    data class Error(val message: String) : BoardPhase()
 }

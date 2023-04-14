@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -19,7 +18,6 @@ import io.agora.flat.R.id.fast_tools_addition_layout
 import io.agora.flat.data.model.WindowAppItem
 import io.agora.flat.databinding.ComponentWhiteboardBinding
 import io.agora.flat.di.interfaces.BoardRoom
-import io.agora.flat.ui.manager.RoomLayoutStateManager
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.util.getViewRect
 import io.agora.flat.util.isDarkMode
@@ -78,13 +76,12 @@ class WhiteboardComponent(
     }
 
     private fun initWhiteboard() {
-        boardRoom.initSdk(binding.fastboardView)
-        val flatControllerGroup = FlatControllerGroup(binding.flatControllerLayout)
-        boardRoom.setRoomController(flatControllerGroup)
+        boardRoom.setupView(binding.fastboardView)
+        boardRoom.setRoomController(FlatControllerGroup(binding.flatControllerLayout))
         boardRoom.setDarkMode(activity.isDarkMode())
 
         if (activity.isTabletMode()) {
-            initAdditionLayout(flatControllerGroup.bindView)
+            initAdditionLayout(binding.flatControllerLayout)
         }
     }
 
