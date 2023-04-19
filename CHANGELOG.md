@@ -1,4 +1,8 @@
 # Changelog
+## [2.5.0] - April 18, 2023
+- Fix app update failure when installation permission is canceled
+- Support adding multi-window application extensions on tablet
+
 ## [2.4.1] - April 03, 2023
 - Fix showRequestDeviceDialog crash
 - Fix window drag bugs when maximized
