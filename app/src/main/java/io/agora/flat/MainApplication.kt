@@ -17,6 +17,6 @@ class MainApplication : Application() {
         LanguageManager.init(this)
         DarkModeManager.init(this)
         WebView.setWebContentsDebuggingEnabled(isApkInDebug())
-        WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
+        // WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
     }
 }
