@@ -21,32 +21,25 @@ sed -i "" \
 SHA=$(curl -sSL "https://raw.githubusercontent.com/netless-io/whiteboard-android/$VERSION/carrot.yml" |
   grep commit: | awk '{print $2}')
 
-echo "$SHA"
-
 ZIPNAME="src.zip"
-DIRNAME="Whiteboard-bridge-$SHA"
-TMP_DIR="Whiteboard-bridge-$SHA-tmp"
+ESBUILDNAME="esbuild.mjs"
+WHITEBOARD_DIRNAME="Whiteboard-bridge-$SHA"
 INJECT_CODE_NAME="injectCode.ts"
-INJECT_CODE_PATH="$TMP_DIR/$INJECT_CODE_NAME"
-WEBPACK_CONFIG_NAME="webpack.config.flat.js"
-WEBPACK_CONFIG_PATH="$TMP_DIR/$WEBPACK_CONFIG_NAME"
+INJECT_CODE_PATH="./${WHITEBOARD_DIRNAME}/src/$INJECT_CODE_NAME"
+ESBUILD_SCRIPT_NAME="./${WHITEBOARD_DIRNAME}/$ESBUILDNAME"
 
-# Download
-mkdir "$TMP_DIR"
-curl -o "$INJECT_CODE_PATH" https://raw.githubusercontent.com/netless-io/flat-native-bridge/main/injectCode.ts
-curl -o "$WEBPACK_CONFIG_PATH" https://raw.githubusercontent.com/netless-io/flat-native-bridge/main/webpack.config.flat.js
 curl -o $ZIPNAME https://codeload.github.com/netless-io/Whiteboard-bridge/zip/"$SHA"
 unzip $ZIPNAME
 
-cp $INJECT_CODE_PATH ./Whiteboard-bridge-$SHA/src/$INJECT_CODE_NAME
-cp $WEBPACK_CONFIG_PATH ./Whiteboard-bridge-$SHA/$WEBPACK_CONFIG_NAME
+curl -o "$INJECT_CODE_PATH" https://raw.githubusercontent.com/netless-io/flat-native-bridge/main/injectCode.ts
+curl -o "$ESBUILD_SCRIPT_NAME" https://raw.githubusercontent.com/netless-io/flat-native-bridge/main/esbuild.mjs
 
 # Inject code (macos shell)
 sed -i '' -e "1i\\
 import \'.././injectCode'" ./Whiteboard-bridge-$SHA/src/bridge/SDK.ts
 
 # Build
-cd $DIRNAME || exit
+cd $WHITEBOARD_DIRNAME || exit
 
 apps=(
   "@netless/app-countdown@0.0.7"
@@ -63,7 +56,8 @@ for item in "${apps[@]}"; do
   yarn add "$item"
 done
 
-yarn buildWithoutGitHash --config ./webpack.config.flat.js
+yarn add esbuild
+node esbuild.mjs
 
 touch ./build/$SHA
 echo "here are what injected into build" >>./build/$SHA
@@ -71,6 +65,7 @@ for item in "${apps[@]}"; do
   echo "$item" >>./build/$SHA
 done
 
+rm -rf "$SCRIPT_BASE/../app/src/main/assets/flatboard/*"
 cp -rf ./build/* "$SCRIPT_BASE/../app/src/main/assets/flatboard/"
 
-cd .. && rm -rf "$DIRNAME" $ZIPNAME "$TMP_DIR"
+cd .. && rm -rf "$WHITEBOARD_DIRNAME" $ZIPNAME && cd ..
