@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
@@ -15,15 +16,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Config
+import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.viewmodel.UserViewModel
 import io.agora.flat.util.showDebugToast
 import kotlinx.coroutines.delay
@@ -51,6 +56,7 @@ class DevToolsActivity : BaseComposeActivity() {
                         UserLoginFlag()
                         MockEnableFlag()
                         EnvSwitch()
+                        RemoveAllRoom()
                     }
                 }
             }
@@ -138,6 +144,61 @@ private fun EnvSwitch() {
                         Spacer(modifier = Modifier.width(16.dp))
                         FlatTextBodyOne(text = "$k ${v.serviceUrl}", modifier = Modifier.weight(1f))
                         Spacer(modifier = Modifier.width(16.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RemoveAllRoom() {
+    val devToolViewModel: DevToolViewModel = viewModel()
+
+    val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clickable { showDialog = !showDialog },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.width(16.dp))
+            FlatTextBodyOne(text = "Remove all rooms")
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+    }
+
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(shape = Shapes.large) {
+                Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                    FlatTextTitle(
+                        "REMOVE ALL ?",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Row {
+                        FlatSecondaryTextButton(
+                            text = stringResource(R.string.cancel),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp),
+                        ) { showDialog = false }
+                        Spacer(Modifier.width(12.dp))
+                        FlatPrimaryTextButton(
+                            text = stringResource(R.string.confirm), modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        ) {
+                            scope.launch {
+                                devToolViewModel.removeAllRooms()
+                            }
+                            showDialog = false
+                        }
                     }
                 }
             }
@@ -241,7 +302,6 @@ fun ClearLastCancelUpdate() {
 fun PreviewDevTools() {
     FlatColumnPage {
         BackTopAppBar(title = "DevTools", onBackPressed = { })
-
         LazyColumn(
             Modifier
                 .fillMaxWidth()
