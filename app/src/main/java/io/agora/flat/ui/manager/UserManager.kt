@@ -68,7 +68,7 @@ class UserManager @Inject constructor(
         if (selfUUID != ownerUUID) {
             var owner = RoomUser(userUUID = ownerUUID, isOwner = true, isOnStage = true, allowDraw = true)
             userQuery.loadUser(ownerUUID)?.let {
-                owner = owner.copy(rtcUID = it.rtcUID, name = it.name, avatarURL = it.avatarURL)
+                owner = owner.copy(name = it.name, avatarURL = it.avatarURL)
             }
             updateUsers[ownerUUID] = owner
         }
