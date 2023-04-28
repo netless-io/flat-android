@@ -134,6 +134,18 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 tip = stringResource(R.string.term_of_service),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
             SettingItemDivider()
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_settings_info_gathering,
+                tip = stringResource(R.string.info_gathering),
+                onClick = { Navigator.launchWebViewActivity(context, state.infoUrl) })
+            SettingItemDivider()
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_settings_info_third_party,
+                tip = stringResource(R.string.info_third_party),
+                onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Libraries) })
+            SettingItemDivider()
             if (context.isApkInDebug()) {
                 // Device Test
                 // SettingItem(

@@ -2,6 +2,7 @@ package io.agora.flat.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,8 +13,15 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val appKVCenter: AppKVCenter,
+    env: AppEnv
 ) : ViewModel() {
-    private val _state = MutableStateFlow(SettingsUiState(networkAcceleration = appKVCenter.isNetworkAcceleration()))
+    private val _state = MutableStateFlow(
+        SettingsUiState(
+            networkAcceleration = appKVCenter.isNetworkAcceleration(),
+            infoUrl = "${env.baseInviteUrl}/sensitive?token=${appKVCenter.getToken()}"
+        )
+    )
+
     val state: StateFlow<SettingsUiState>
         get() = _state
 
@@ -29,4 +37,5 @@ class SettingsViewModel @Inject constructor(
 
 data class SettingsUiState(
     val networkAcceleration: Boolean = false,
+    val infoUrl: String = ""
 )

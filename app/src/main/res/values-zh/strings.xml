@@ -48,6 +48,8 @@
     <string name="title_country_or_area">国家/地区</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="term_of_service">服务协议</string>
+    <string name="info_gathering">个人信息收集公示</string>
+    <string name="info_third_party">第三方信息数据共享</string>
     <string name="network_acceleration">网络加速</string>
     <string name="account_security">账户安全</string>
     <string name="cancel_account">注销账户</string>

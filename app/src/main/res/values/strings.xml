@@ -43,6 +43,8 @@
     <string name="title_country_or_area">Country/Area</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="term_of_service">Term of Service</string>
+    <string name="info_gathering">Information Gathering</string>
+    <string name="info_third_party">Third-party Information</string>
     <string name="network_acceleration">Network Acceleration</string>
     <string name="bind_phone">Bind Phone</string>
     <string name="account_security">Account Security</string>
