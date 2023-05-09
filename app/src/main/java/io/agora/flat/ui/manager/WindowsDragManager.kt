@@ -98,10 +98,6 @@ class WindowsDragManager @Inject constructor(
         rtcVideoController.setupUserVideo(container, uid)
     }
 
-    fun setCurrentUUID(userUUID: String) {
-        uuid = userUUID
-    }
-
     fun currentUUID(): String {
         return uuid
     }

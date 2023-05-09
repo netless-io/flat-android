@@ -295,4 +295,6 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="app_name_geometry">Geometry</string>
     <string name="app_name_rich_text">Text</string>
     <string name="app_name_mindmap">Mind</string>
+
+    <string name="toast_mute_all_mic">All students muted</string>
 </resources>

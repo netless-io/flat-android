@@ -9,7 +9,7 @@
     <dimen name="room_class_button_size">32dp</dimen>
     <dimen name="room_class_button_content_size">24dp</dimen>
     <dimen name="room_class_button_gap">4dp</dimen>
-    <dimen name="room_class_video_area_width">120dp</dimen>
+    <dimen name="room_class_video_area_width">128dp</dimen>
     <dimen name="room_class_layout_gap">12dp</dimen>
     <dimen name="room_class_panel_title_height">40dp</dimen>
     <dimen name="room_class_panel_margin_vertical">30dp</dimen>

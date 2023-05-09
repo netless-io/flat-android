@@ -70,12 +70,40 @@ class UserVideoAdapter(
         binding.switchMic.setImageDrawable(FlatDrawables.createMicDrawable(context))
         binding.switchMic.isSelected = itemData.audioOpen
 
+        if (viewModel.isOwner()) {
+            binding.allowDraw.isVisible = !itemData.isOwner && !itemData.allowDraw
+            binding.forbidDraw.isVisible = !itemData.isOwner && itemData.allowDraw
+            binding.sendReward.isVisible = !itemData.isOwner
+            binding.restoreUserWindow.isVisible = itemData.isOwner
+            binding.muteMicAll.isVisible = itemData.isOwner
+        } else {
+            binding.allowDraw.isVisible = false
+            binding.forbidDraw.isVisible = false
+            binding.sendReward.isVisible = false
+            binding.restoreUserWindow.isVisible = false
+            binding.muteMicAll.isVisible = false
+        }
+
         binding.switchCamera.setOnClickListener {
             onItemListener?.onSwitchCamera(itemData.userUUID, !binding.switchCamera.isSelected)
         }
-
         binding.switchMic.setOnClickListener {
             onItemListener?.onSwitchMic(itemData.userUUID, !binding.switchMic.isSelected)
+        }
+        binding.allowDraw.setOnClickListener {
+            onItemListener?.onAllowDraw(itemData.userUUID, true)
+        }
+        binding.forbidDraw.setOnClickListener {
+            onItemListener?.onAllowDraw(itemData.userUUID, false)
+        }
+        binding.sendReward.setOnClickListener {
+            onItemListener?.onSendReward(itemData.userUUID)
+        }
+        binding.restoreUserWindow.setOnClickListener {
+            onItemListener?.onRestoreUserWindow()
+        }
+        binding.muteMicAll.setOnClickListener {
+            onItemListener?.onMuteAll()
         }
 
         if (itemData.isJoined && !onboard) {
@@ -97,7 +125,7 @@ class UserVideoAdapter(
             }
 
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                if (!viewModel.canControlDevice(itemData.userUUID)) return false
+                if (!viewModel.canControlDevice(itemData.userUUID) || !itemData.isJoined) return false
                 binding.switchDeviceLayout.isVisible = true
                 binding.switchDeviceLayout.removeCallbacks(dismissLayout)
                 binding.switchDeviceLayout.postDelayed(dismissLayout, 3000)
@@ -200,6 +228,14 @@ class UserVideoAdapter(
         fun onSwitchCamera(userId: String, on: Boolean) {}
 
         fun onSwitchMic(userId: String, on: Boolean) {}
+
+        fun onAllowDraw(userUUID: String, allow: Boolean) {}
+
+        fun onMuteAll() {}
+
+        fun onRestoreUserWindow() {}
+
+        fun onSendReward(userUUID: String) {}
     }
 }
 

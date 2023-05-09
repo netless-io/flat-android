@@ -196,6 +196,9 @@ class ToolComponent(
                     is RequestDeviceReceived -> {
                         handleRequestDevice(event)
                     }
+                    RequestMuteAllSent -> {
+                        activity.showToast(R.string.toast_mute_all_mic)
+                    }
                     else -> {}
                 }
             }

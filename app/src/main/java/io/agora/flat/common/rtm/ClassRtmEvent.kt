@@ -21,6 +21,7 @@ sealed class ClassRtmEvent {
             "request-device" to RequestDeviceEvent::class.java,
             "request-device-response" to RequestDeviceResponseEvent::class.java,
             "notify-device-off" to NotifyDeviceOffEvent::class.java,
+            "reward" to RewardEvent::class.java,
         )
 
         private val eventTypes = eventClasses.map { it.value to it.key }.toMap()
@@ -97,6 +98,12 @@ data class NotifyDeviceOffEvent(
     val roomUUID: String,
     val mic: Boolean? = null,
     val camera: Boolean? = null,
+) : ClassRtmEvent(), EventWithSender
+
+data class RewardEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val userUUID: String,
 ) : ClassRtmEvent(), EventWithSender
 
 data class OnMemberJoined(

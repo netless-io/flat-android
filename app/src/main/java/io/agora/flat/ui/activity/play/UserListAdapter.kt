@@ -39,7 +39,7 @@ class UserListAdapter(
         val item = dataSet[position]
 
         holder.username.text = item.name
-        holder.userOffline.isVisible = item.isLeft
+        holder.userOffline.isVisible = !item.isJoined
         holder.avatar.load(item.avatarURL) {
             crossfade(true)
             placeholder(R.drawable.ic_class_room_user_avatar)

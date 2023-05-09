@@ -69,32 +69,6 @@
             android:visibility="gone"
             tools:text="用户名" />
 
-        <LinearLayout
-            android:id="@+id/switch_device_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center"
-            android:background="@drawable/shape_gray_border_round_8_bg"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <ImageView
-                android:id="@+id/switch_camera"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_class_room_camera_on" />
-
-            <ImageView
-                android:id="@+id/switch_mic"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                android:padding="4dp"
-                android:src="@drawable/ic_class_room_mic_on" />
-        </LinearLayout>
-
         <FrameLayout
             android:id="@+id/onboard_layout"
             android:layout_width="match_parent"
@@ -111,4 +85,85 @@
                 tools:text="用户名" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
+
+    <HorizontalScrollView
+        android:id="@+id/switch_device_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/flat_gap_2_0"
+        android:background="@drawable/shape_gray_border_round_8_bg"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/allow_draw"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_s_draw_forbidden"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/forbid_draw"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_s_draw_allowed"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/send_reward"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_send_reward"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/mute_mic_all"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_mute_all"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/restore_user_window"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_restore_userwindow"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/switch_camera"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_class_room_camera_on" />
+
+            <ImageView
+                android:id="@+id/switch_mic"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_class_room_mic_on" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

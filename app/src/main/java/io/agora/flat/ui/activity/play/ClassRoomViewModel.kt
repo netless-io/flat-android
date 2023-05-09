@@ -291,6 +291,10 @@ class ClassRoomViewModel @Inject constructor(
             is NotifyDeviceOffEvent -> {
                 eventbus.produceEvent(NotifyDeviceOffReceived(mic = event.mic, camera = event.camera))
             }
+            is RewardEvent -> {
+                if (event.sender != state.value?.ownerUUID) return
+                eventbus.produceEvent(RewardReceived(event.userUUID))
+            }
             is OnMemberJoined -> {
                 userManager.addUser(event.userId)
             }
@@ -641,6 +645,7 @@ class ClassRoomViewModel @Inject constructor(
             if (state.isOwner) {
                 val userIds = _videoUsers.value.filter { !it.isOwner }.map { user -> user.userUUID }
                 syncedClassState.muteDevicesMic(userIds)
+                eventbus.produceEvent(RequestMuteAllSent)
             }
         }
     }
@@ -679,6 +684,14 @@ class ClassRoomViewModel @Inject constructor(
             rtmApi.sendPeerCommand(
                 RequestDeviceResponseEvent(roomUUID = roomUUID, mic = true),
                 userManager.ownerUUID
+            )
+        }
+    }
+
+    fun sendReward(userUUID: String) {
+        viewModelScope.launch {
+            rtmApi.sendChannelCommand(
+                RewardEvent(roomUUID = roomUUID, userUUID = userUUID)
             )
         }
     }

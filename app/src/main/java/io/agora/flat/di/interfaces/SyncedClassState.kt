@@ -71,4 +71,6 @@ interface SyncedClassState {
     fun updateNormalWindow(userId: String, window: WindowInfo)
 
     fun removeNormalWindow(userId: String)
+
+    fun removeAllWindow()
 }

@@ -1,9 +1,13 @@
 package io.agora.flat.ui.activity.play
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.media.SoundPool
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -11,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
@@ -19,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.airbnb.lottie.LottieAnimationView
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -35,6 +41,7 @@ import io.agora.flat.databinding.ComponentVideoListBinding
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.SyncedClassState
+import io.agora.flat.event.*
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.WindowsDragManager
@@ -49,6 +56,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.min
+
 
 class RtcComponent(
     activity: ClassRoomActivity,
@@ -89,6 +97,16 @@ class RtcComponent(
     private lateinit var videoAreaAnimator: SimpleAnimator
     private lateinit var fullScreenAnimator: SimpleAnimator
     private lateinit var dragAnimator: SimpleAnimator
+
+    private val soundPool: SoundPool by lazy {
+        SoundPool.Builder().apply {
+            setMaxStreams(1)
+        }.build()
+    }
+
+    private val rewardSoundId: Int by lazy {
+        soundPool.load(activity.assets.openFd("reward.mp3"), 1)
+    }
 
     override fun onCreate(owner: LifecycleOwner) {
         injectApi()
@@ -166,6 +184,17 @@ class RtcComponent(
                     is RtcEvent.VolumeIndication -> {
                         adapter.updateVolume(event.speakers)
                     }
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            viewModel.classroomEvent.collect { event ->
+                when (event) {
+                    is RewardReceived -> {
+                        handleReward(event.userUUID)
+                    }
+                    else -> {}
                 }
             }
         }
@@ -376,6 +405,23 @@ class RtcComponent(
 
             override fun onSwitchMic(userId: String, on: Boolean) {
                 viewModel.enableAudio(enableAudio = on, uuid = userId)
+            }
+
+            override fun onAllowDraw(userUUID: String, allow: Boolean) {
+                viewModel.updateAllowDraw(userUUID, allow)
+            }
+
+            override fun onMuteAll() {
+                viewModel.muteAllMic()
+            }
+
+            override fun onSendReward(userUUID: String) {
+                handleReward(userUUID)
+                viewModel.sendReward(userUUID)
+            }
+
+            override fun onRestoreUserWindow() {
+                syncedState.removeAllWindow()
             }
         })
 
@@ -852,10 +898,6 @@ class RtcComponent(
         )
     }
 
-    private fun UserWindowUiState.toWindowInfo(): WindowInfo {
-        return getRect().toWindowInfo().copy(z = index)
-    }
-
     private fun WindowInfo.toUserWindowUiState(): UserWindowUiState {
         return UserWindowUiState(
             centerX = (x + width / 2) * boardRect.width() + boardRect.left,
@@ -939,5 +981,46 @@ class RtcComponent(
         } else {
             0
         }
+    }
+
+    private fun handleReward(userUUID: String) {
+        val rewardAnimationView = LottieAnimationView(activity).apply {
+            imageAssetsFolder = "lottie/images"
+            setAnimation("lottie/reward.json")
+        }
+        rewardAnimationView.addAnimatorListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                val targetContainer = adapter.findContainerByUuid(userUUID)
+                val end = targetContainer?.let { getViewRect(it, userWindowsBinding.root) } ?: Rect()
+                val start = getViewRect(rewardAnimationView, userWindowsBinding.root)
+
+                val r = Rect()
+                ValueAnimator.ofFloat(0f, 2f).apply {
+                    duration = 2000
+                    addUpdateListener {
+                        val time = it.animatedValue as Float
+                        if (time < 0.5f) {
+                            r.lerp(start, end, time / 0.5f)
+                            rewardAnimationView.renderTo(r)
+                        } else {
+                            rewardAnimationView.renderTo(end)
+                        }
+                        if (time > 1.5f && time < 2f) {
+                            rewardAnimationView.alpha = 1 - (time - 1.5f) / 0.5f
+                        }
+                    }
+                    addListener(
+                        onEnd = {
+                            userWindowsBinding.root.removeView(rewardAnimationView)
+                        }
+                    )
+                    start()
+                }
+            }
+        })
+        rewardAnimationView.playAnimation()
+        userWindowsBinding.root.addView(rewardAnimationView)
+
+        soundPool.play(rewardSoundId, 1f, 1f, 0, 0, 1f)
     }
 }

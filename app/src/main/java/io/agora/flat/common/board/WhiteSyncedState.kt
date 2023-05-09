@@ -307,10 +307,10 @@ class WhiteSyncedState @Inject constructor(
         syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
     }
 
-    private fun removeAllWindow() {
+    override fun removeAllWindow() {
         val userWindows = _userWindowsFlow.value ?: return
         val users = userWindows.users.map { it.key to null }.toMap()
-        val jsonObj = mapOf("grid" to "[]") + users
+        val jsonObj = mapOf("grid" to emptyList<String>()) + users
         syncedStore.setStorageState(USER_WINDOWS, gsonWithNull.toJson(jsonObj))
     }
 }

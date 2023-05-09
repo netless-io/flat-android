@@ -201,6 +201,8 @@ dependencies {
     implementation "io.coil-kt:coil:1.4.0"
     implementation "io.coil-kt:coil-gif:1.4.0"
 
+    implementation 'com.airbnb.android:lottie:5.2.0'
+
     // Google Accompanist (Compose Extensions)
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.12.0'
     implementation "com.google.accompanist:accompanist-insets:0.16.1"
