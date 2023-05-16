@@ -991,7 +991,11 @@ class RtcComponent(
         rewardAnimationView.addAnimatorListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 val targetContainer = adapter.findContainerByUuid(userUUID)
-                val end = targetContainer?.let { getViewRect(it, userWindowsBinding.root) } ?: Rect()
+                val end = if (windowsDragManager.isOnBoard(userUUID)) {
+                    windowsDragManager.getWindowRect(userUUID)
+                } else {
+                    targetContainer?.let { getViewRect(it, userWindowsBinding.root) } ?: Rect()
+                }
                 val start = getViewRect(rewardAnimationView, userWindowsBinding.root)
 
                 val r = Rect()
