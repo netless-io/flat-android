@@ -204,6 +204,7 @@ class CameraFragment : Fragment() {
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             .setTargetAspectRatio(screenAspectRatio)
             .setTargetRotation(rotation)
+            .setJpegQuality(80)
             .build()
 
         imageAnalyzer = ImageAnalysis.Builder()
