@@ -221,8 +221,8 @@ class AgoraBoardRoom @Inject constructor(
 
     override fun insertImage(imageUrl: String, w: Int, h: Int) {
         val scale = fastRoom?.room?.roomState?.cameraState?.scale ?: 1.0
-        // Images are limited to a maximum of 1 / 4
-        val limitWidth = (activityContext.px2dp(fastboardView.width) / scale / 4).toInt()
+        // Images are limited to a maximum of 0.4 times the width of the screen.
+        val limitWidth = (activityContext.px2dp(fastboardView.width) / scale * 0.4).toInt()
 
         val targetW: Int
         val targetH: Int
