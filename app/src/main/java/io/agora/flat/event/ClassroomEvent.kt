@@ -1,5 +1,7 @@
 package io.agora.flat.event
 
+import io.agora.flat.util.ContentInfo
+
 sealed class ClassroomEvent : Event()
 
 data class RequestDeviceSent(
@@ -30,3 +32,5 @@ data class RewardReceived(
 ) : ClassroomEvent()
 
 object RemoteLoginEvent : ClassroomEvent()
+
+data class TakePhotoEvent(val info: ContentInfo) : ClassroomEvent()

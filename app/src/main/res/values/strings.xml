@@ -18,6 +18,7 @@
     <string name="done">Done</string>
     <string name="preview">Preview</string>
     <string name="rename">Rename</string>
+    <string name="send">Send</string>
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>

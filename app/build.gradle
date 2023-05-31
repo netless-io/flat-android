@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
+    id "androidx.navigation.safeargs"
 }
 
 android {
@@ -15,7 +16,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 40
-        versionName "2.5.0"
+        versionName "2.6.0-beta.01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -149,6 +150,11 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.android.material:material:1.4.0'
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:1.1.0"
+
+    // Navigation library
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.nav_version"
 
     // LifeCycle
     def lifecycle_version = "2.4.1"
@@ -174,6 +180,9 @@ dependencies {
     def room_version = "2.4.0-alpha03"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+
+    // Concurrent library for asynchronous coroutines
+    implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
 
     // Network
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -244,4 +253,8 @@ dependencies {
 
     implementation project(":base")
     implementation project(":logger")
+
+    // WindowManager
+    implementation "androidx.window:window:1.0.0"
+    implementation "androidx.exifinterface:exifinterface:1.3.6"
 }

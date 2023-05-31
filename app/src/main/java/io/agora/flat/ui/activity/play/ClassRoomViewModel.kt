@@ -741,4 +741,4 @@ data class ClassRoomState(
     val roomStatus: RoomStatus,
 )
 
-data class ImageSize(val width: Int, val height: Int)
+data class ImageInfo(val width: Int, val height: Int, val orientation: Int)

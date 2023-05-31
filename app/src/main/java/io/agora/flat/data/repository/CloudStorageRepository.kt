@@ -46,6 +46,11 @@ class CloudStorageRepository @Inject constructor(
         }
     }
 
+    /**
+     * @param fileName
+     * @param fileSize
+     * @param path DirectoryPath
+     */
     suspend fun updateStart(fileName: String, fileSize: Long, path: String): Result<CloudUploadStartResp> {
         return withContext(Dispatchers.IO) {
             cloudStorageService.updateStart(
@@ -57,6 +62,20 @@ class CloudStorageRepository @Inject constructor(
     suspend fun updateFinish(fileUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             cloudStorageService.updateFinish(CloudUploadFinishReq(fileUUID)).toResult()
+        }
+    }
+
+    suspend fun uploadTempFileStart(fileName: String, fileSize: Long): Result<CloudUploadStartResp> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.uploadTempFileStart(
+                CloudUploadTempFileStartReq(fileName = fileName, fileSize = fileSize)
+            ).toResult()
+        }
+    }
+
+    suspend fun uploadTempFileFinish(fileUUID: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            cloudStorageService.uploadTempFileFinish(CloudUploadFinishReq(fileUUID)).toResult()
         }
     }
 
@@ -80,7 +99,7 @@ class CloudStorageRepository @Inject constructor(
 
     suspend fun updateAvatarStart(fileName: String, fileSize: Long): Result<CloudUploadStartResp> {
         return withContext(Dispatchers.IO) {
-            val result = cloudStorageService.updateAvatarStart(CloudUploadAvatarStartReq(fileName, fileSize)).toResult()
+            val result = cloudStorageService.updateAvatarStart(CloudUploadTempFileStartReq(fileName, fileSize)).toResult()
             if (result is Success) {
                 avatarUrl = result.data.run { "$ossDomain/$ossFilePath" }
             }

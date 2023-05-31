@@ -16,6 +16,10 @@
 
 package io.agora.flat.data
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 sealed class Result<T> {
     open fun get(): T? = null
 
@@ -35,6 +39,22 @@ data class Success<T>(val data: T) : Result<T>() {
     override fun get(): T = data
 }
 
-data class Failure<T>(
-    val exception: Throwable,
-) : Result<T>()
+data class Failure<T>(val exception: Throwable) : Result<T>()
+
+@OptIn(ExperimentalContracts::class)
+inline fun <T> Result<T>.onSuccess(action: (value: T) -> Unit): Result<T> {
+    contract {
+        callsInPlace(action, InvocationKind.AT_MOST_ONCE)
+    }
+    if (isSuccess) action(get() as T)
+    return this
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun <T> Result<T>.onFailure(action: (exception: Throwable) -> Unit): Result<T> {
+    contract {
+        callsInPlace(action, InvocationKind.AT_MOST_ONCE)
+    }
+    if (isFailure) action(asFailure().exception)
+    return this
+}

@@ -43,6 +43,16 @@ interface CloudStorageServiceV2 {
         @Body req: CloudUploadFinishReq,
     ): Call<BaseResp<RespNoData>>
 
+    @POST("/v2/temp-photo/upload/start")
+    fun uploadTempFileStart(
+        @Body req: CloudUploadTempFileStartReq,
+    ): Call<BaseResp<CloudUploadStartResp>>
+
+    @POST("/v2/temp-photo/upload/finish")
+    fun uploadTempFileFinish(
+        @Body req: CloudUploadFinishReq,
+    ): Call<BaseResp<RespNoData>>
+
     @POST("v2/cloud-storage/convert/start")
     fun convertStart(
         @Body req: CloudConvertStartReq,
@@ -55,7 +65,7 @@ interface CloudStorageServiceV2 {
 
     @POST("v2/user/upload-avatar/start")
     fun updateAvatarStart(
-        @Body req: CloudUploadAvatarStartReq,
+        @Body req: CloudUploadTempFileStartReq,
     ): Call<BaseResp<CloudUploadStartResp>>
 
     @POST("v2/user/upload-avatar/finish")

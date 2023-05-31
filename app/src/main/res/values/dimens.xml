@@ -38,4 +38,9 @@
 
     <dimen name="room_message_send_height">40dp</dimen>
     <dimen name="room_apps_layout_width">168dp</dimen>
+
+    <dimen name="camera_functional_button_size">64dp</dimen>
+
+    <dimen name="shutter_button_size">92dp</dimen>
+    <dimen name="shutter_button_margin">80dp</dimen>
 </resources>

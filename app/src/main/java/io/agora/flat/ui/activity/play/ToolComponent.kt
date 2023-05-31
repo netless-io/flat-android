@@ -1,10 +1,14 @@
 package io.agora.flat.ui.activity.play
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -23,13 +27,16 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentToolBinding
 import io.agora.flat.di.interfaces.BoardRoom
+import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.event.*
+import io.agora.flat.ui.activity.camera.CameraActivity
 import io.agora.flat.ui.animator.SimpleAnimator
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.InviteDialog
 import io.agora.flat.ui.view.OwnerExitDialog
 import io.agora.flat.ui.view.RequestDeviceDialog
 import io.agora.flat.util.FlatFormatter
+import io.agora.flat.util.contentInfo
 import io.agora.flat.util.isTabletMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.filterNotNull
@@ -43,31 +50,55 @@ class ToolComponent(
     @InstallIn(ActivityComponent::class)
     interface ToolComponentEntryPoint {
         fun boardRoom(): BoardRoom
+        fun rtcApi(): RtcApi
         fun appEnv(): AppEnv
         fun eventBus(): EventBus
     }
 
+    private lateinit var takePhotoLauncher: ActivityResultLauncher<Intent>
     private lateinit var binding: ComponentToolBinding
     private lateinit var toolAnimator: SimpleAnimator
 
     private val viewModel: ClassRoomViewModel by activity.viewModels()
     private lateinit var boardRoom: BoardRoom
     private lateinit var appEnv: AppEnv
+    private lateinit var rtcApi: RtcApi
     private lateinit var eventBus: EventBus
     private lateinit var userListAdapter: UserListAdapter
     private lateinit var acceptHandupAdapter: AcceptHandupAdapter
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        registerForActivityResult()
         injectApi()
         initView()
         observeState()
+    }
+
+    private fun registerForActivityResult() {
+        takePhotoLauncher =
+            activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                rtcApi.enableLocalVideo(true)
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val uri = result.data?.data ?: return@registerForActivityResult
+                    lifecycleScope.launch {
+                        val contentInfo = activity.contentInfo(uri) ?: return@launch
+                        eventBus.produceEvent(TakePhotoEvent(contentInfo))
+                    }
+                }
+            }
+    }
+
+    private fun launchTakePhoto() {
+        rtcApi.enableLocalVideo(false)
+        takePhotoLauncher.launch(Intent(activity, CameraActivity::class.java))
     }
 
     private fun injectApi() {
         val entryPoint = EntryPointAccessors.fromActivity(activity, ToolComponentEntryPoint::class.java)
         boardRoom = entryPoint.boardRoom()
         appEnv = entryPoint.appEnv()
+        rtcApi = entryPoint.rtcApi()
         eventBus = entryPoint.eventBus()
     }
 
@@ -184,7 +215,12 @@ class ToolComponent(
                     }
                     is RequestDeviceResponseReceived -> {
                         if (event.camera == false) {
-                            activity.showToast(activity.getString(R.string.refuse_turn_on_camera_format, event.username))
+                            activity.showToast(
+                                activity.getString(
+                                    R.string.refuse_turn_on_camera_format,
+                                    event.username
+                                )
+                            )
                         }
                         if (event.mic == false) {
                             activity.showToast(activity.getString(R.string.refuse_turn_on_mic_format, event.username))
@@ -335,6 +371,9 @@ class ToolComponent(
                     hideAcceptHandUpLayout()
                 }
                 RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_ACCEPT_HANDUP, target)
+            },
+            binding.takePhoto to {
+                launchTakePhoto()
             }
         )
 

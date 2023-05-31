@@ -10,6 +10,8 @@ interface RtcApi {
 
     fun leaveChannel()
 
+    fun enableLocalVideo(enabled: Boolean)
+
     fun setupLocalVideo(local: VideoCanvas)
 
     fun setupRemoteVideo(remote: VideoCanvas)

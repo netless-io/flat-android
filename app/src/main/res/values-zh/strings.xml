@@ -20,6 +20,7 @@
     <string name="done">完成</string>
     <string name="preview">预览</string>
     <string name="rename">重命名</string>
+    <string name="send">发送</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>

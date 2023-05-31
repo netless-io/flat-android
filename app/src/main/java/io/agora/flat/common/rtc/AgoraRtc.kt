@@ -60,6 +60,10 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
         rtcEngine.leaveChannel()
     }
 
+    override fun enableLocalVideo(enabled: Boolean) {
+        rtcEngine.enableLocalVideo(enabled)
+    }
+
     override fun setupLocalVideo(local: VideoCanvas) {
         rtcEngine.setupLocalVideo(local)
     }

@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.play
 
 import android.graphics.BitmapFactory
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.herewhite.sdk.ConverterCallbacks
@@ -12,11 +13,20 @@ import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.board.AgoraBoardRoom
+import io.agora.flat.common.upload.UploadManager
+import io.agora.flat.common.upload.UploadRequest
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
+import io.agora.flat.data.onFailure
+import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.CloudStorageRepository
+import io.agora.flat.event.EventBus
+import io.agora.flat.event.TakePhotoEvent
+import io.agora.flat.http.model.CloudUploadStartResp
 import io.agora.flat.ui.activity.cloud.list.LoadUiState
+import io.agora.flat.ui.manager.RoomErrorManager
+import io.agora.flat.util.ContentInfo
 import io.agora.flat.util.coursewareType
 import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.parentFolder
@@ -24,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.URL
 import java.util.*
@@ -33,10 +45,14 @@ import javax.inject.Inject
 class ClassCloudViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
     private val boardRoom: AgoraBoardRoom,
+    private val eventbus: EventBus,
+    private val roomErrorManager: RoomErrorManager,
 ) : ViewModel() {
     private val dirPath = MutableStateFlow(CLOUD_ROOT_DIR)
     private val loadUiState = MutableStateFlow(LoadUiState.Init)
     private val loadedFiles = MutableStateFlow(listOf<CloudFile>())
+
+    private val uploadingFiles = mutableMapOf<String, CloudUploadStartResp>()
 
     val state = combine(
         loadUiState,
@@ -60,6 +76,35 @@ class ClassCloudViewModel @Inject constructor(
                 reloadFileList()
             }
         }
+
+        viewModelScope.launch {
+            eventbus.events.filterIsInstance<TakePhotoEvent>().collect {
+                insertTakePhoto(it.info)
+            }
+        }
+
+        viewModelScope.launch {
+            UploadManager.uploadSuccess.filterNotNull().collect {
+                handleUploadSuccess(it)
+            }
+        }
+    }
+
+    private fun handleUploadSuccess(it: UploadRequest) {
+        viewModelScope.launch {
+            // insert image by camera image
+            uploadingFiles[it.uuid]?.run {
+                val fileUrl = "${ossDomain}/${ossFilePath}"
+                cloudStorageRepository.uploadTempFileFinish(it.uuid)
+                    .onSuccess {
+                        insertImage(fileUrl)
+                    }.onFailure {
+                        roomErrorManager.notifyError("insert photo error", it)
+                    }
+                uploadingFiles.remove(it.uuid)
+            }
+        }
+
     }
 
     fun reloadFileList() {
@@ -123,13 +168,38 @@ class ClassCloudViewModel @Inject constructor(
         }
     }
 
+    private fun insertTakePhoto(info: ContentInfo) {
+        viewModelScope.launch {
+            cloudStorageRepository.uploadTempFileStart(
+                info.filename,
+                info.size
+            ).onSuccess { data ->
+                val request = UploadRequest(
+                    uuid = data.fileUUID,
+                    policyURL = data.ossDomain,
+                    filepath = data.ossFilePath,
+                    policy = data.policy,
+                    signature = data.signature,
+
+                    filename = info.filename,
+                    size = info.size,
+                    mediaType = info.mediaType,
+                    uri = info.uri
+                )
+                uploadingFiles[data.fileUUID] = data
+                UploadManager.upload(request)
+            }.onFailure {
+                roomErrorManager.notifyError("upload file error", it)
+            }
+        }
+    }
+
     fun insertCourseware(file: CloudFile) {
         viewModelScope.launch {
             // "正在插入课件……"
             when (file.fileURL.coursewareType()) {
                 CoursewareType.Image -> {
-                    val imageSize = loadImageSize(file.fileURL)
-                    boardRoom.insertImage(file.fileURL, w = imageSize.width, h = imageSize.height)
+                    insertImage(file.fileURL)
                 }
                 CoursewareType.Audio, CoursewareType.Video -> {
                     boardRoom.insertVideo(file.fileURL, file.fileName)
@@ -151,24 +221,48 @@ class ClassCloudViewModel @Inject constructor(
         }
     }
 
+    private suspend fun insertImage(fileUrl: String) {
+        val imageInfo = loadImageInfo(fileUrl)
+        val change = imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_90
+                || imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_270
+        if (change) {
+            boardRoom.insertImage(fileUrl, w = imageInfo.height, h = imageInfo.width)
+        } else {
+            boardRoom.insertImage(fileUrl, w = imageInfo.width, h = imageInfo.height)
+        }
+    }
+
     /**
      * This code is used as an example, the application needs to manage io and async itself.
      * The application may get the image width and height from the api
      *
      * @param src
      */
-    private suspend fun loadImageSize(src: String): ImageSize {
+    private suspend fun loadImageInfo(src: String): ImageInfo {
         return withContext(Dispatchers.IO) {
             return@withContext try {
                 URL(src).openStream().use {
+                    val bos = ByteArrayOutputStream().apply {
+                        it.copyTo(this)
+                    }
+                    val firstClone = ByteArrayInputStream(bos.toByteArray())
                     val options = BitmapFactory.Options().apply {
                         inJustDecodeBounds = true
                     }
-                    BitmapFactory.decodeStream(it, null, options)
-                    ImageSize(options.outWidth, options.outHeight)
+                    BitmapFactory.decodeStream(firstClone, null, options)
+                    firstClone.close()
+
+                    val secondClone = ByteArrayInputStream(bos.toByteArray())
+                    val exifInterface = ExifInterface(secondClone)
+                    val orientation = exifInterface.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL
+                    )
+                    secondClone.close()
+                    ImageInfo(options.outWidth, options.outHeight, orientation)
                 }
             } catch (e: IOException) {
-                ImageSize(720, 360)
+                ImageInfo(720, 360, ExifInterface.ORIENTATION_NORMAL)
             }
         }
     }
