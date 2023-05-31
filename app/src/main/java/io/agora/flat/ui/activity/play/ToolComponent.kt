@@ -69,10 +69,10 @@ class ToolComponent(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        registerForActivityResult()
         injectApi()
         initView()
         observeState()
+        registerForActivityResult()
     }
 
     private fun registerForActivityResult() {

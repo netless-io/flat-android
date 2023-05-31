@@ -276,6 +276,8 @@ class CameraFragment : Fragment() {
         )
 
         cameraUiContainerBinding?.cameraCaptureButton?.setOnClickListener {
+            // Disable camera controls, as a simple implementation of loading state.
+            cameraUiContainerBinding?.cameraCaptureButton?.isEnabled = false
 
             imageCapture?.let { imageCapture ->
                 val name = SimpleDateFormat(FILENAME, Locale.US).format(System.currentTimeMillis())
@@ -298,10 +300,18 @@ class CameraFragment : Fragment() {
 
                 imageCapture.takePicture(outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                     override fun onError(exc: ImageCaptureException) {
+                        cameraUiContainerBinding?.cameraCaptureButton?.run {
+                            post { isEnabled = true }
+                        }
+
                         logger.e("[$TAG] Photo capture failed: ${exc.message}", exc)
                     }
 
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                        cameraUiContainerBinding?.cameraCaptureButton?.run {
+                            post { isEnabled = true }
+                        }
+
                         val savedUri = output.savedUri ?: return
                         logger.d("[$TAG] Photo capture succeeded: $savedUri")
 
