@@ -1,4 +1,7 @@
 # Changelog
+## [2.6.0] - June 02, 2023
+- Add take-photo in classroom
+
 ## [2.5.0] - April 18, 2023
 - Fix app update failure when installation permission is canceled
 - Support adding multi-window application extensions on tablet
