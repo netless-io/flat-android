@@ -56,6 +56,10 @@ class UserRepository @Inject constructor(
         return getUserInfo()!!.name
     }
 
+    fun getUserAvatar(): String {
+        return getUserInfo()!!.avatar
+    }
+
     fun getUserUUID(): String {
         return getUserInfo()!!.uuid
     }

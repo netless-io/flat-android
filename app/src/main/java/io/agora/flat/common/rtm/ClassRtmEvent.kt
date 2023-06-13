@@ -22,6 +22,7 @@ sealed class ClassRtmEvent {
             "request-device-response" to RequestDeviceResponseEvent::class.java,
             "notify-device-off" to NotifyDeviceOffEvent::class.java,
             "reward" to RewardEvent::class.java,
+            "enter" to EnterRoomEvent::class.java,
         )
 
         private val eventTypes = eventClasses.map { it.value to it.key }.toMap()
@@ -105,6 +106,19 @@ data class RewardEvent(
     val roomUUID: String,
     val userUUID: String,
 ) : ClassRtmEvent(), EventWithSender
+
+data class EnterRoomEvent(
+    override var sender: String? = null,
+    val roomUUID: String,
+    val userUUID: String,
+    val userInfo: EventUserInfo,
+) : ClassRtmEvent(), EventWithSender
+
+data class EventUserInfo(
+    var rtcUID: Int,
+    var name: String,
+    var avatarURL: String,
+)
 
 data class OnMemberJoined(
     val channelId: String,

@@ -34,6 +34,7 @@ class UserQuery @Inject constructor(
                     }
                     userMap.putAll(result.data)
                 }
+
                 is Failure -> return emptyMap()
             }
         }
@@ -46,6 +47,11 @@ class UserQuery @Inject constructor(
             Log.e("UserQuery", "should not hint here")
         }
         return user
+    }
+
+    fun cacheUser(uuid: String, user: NetworkRoomUser) {
+        Log.d("UserQuery", "cacheUser $uuid")
+        userMap[uuid] = user
     }
 
     fun hasCache(userUUID: String): Boolean {

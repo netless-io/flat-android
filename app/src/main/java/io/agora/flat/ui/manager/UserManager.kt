@@ -2,6 +2,7 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.data.model.NetworkRoomUser
 import io.agora.flat.data.model.RoomUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -286,5 +287,16 @@ class UserManager @Inject constructor(
 
     private fun getAllowDraw(uuid: String): Boolean {
         return isOwner(uuid) || allowDrawState[uuid] ?: false
+    }
+
+    fun cacheUser(userUUID: String, roomUser: RoomUser) {
+        userQuery.cacheUser(
+            userUUID, NetworkRoomUser(
+                userUUID = roomUser.userUUID,
+                name = roomUser.name ?: "",
+                avatarURL = roomUser.avatarURL,
+                rtcUID = roomUser.rtcUID,
+            )
+        )
     }
 }

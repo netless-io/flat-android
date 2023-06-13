@@ -31,6 +31,7 @@ import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -166,7 +167,7 @@ class ClassRoomViewModel @Inject constructor(
             currentUser = RoomUser(
                 userUUID = currentUserUUID,
                 name = currentUserName,
-                avatarURL = userRepository.getUserInfo()!!.avatar,
+                avatarURL = userRepository.getUserAvatar(),
                 rtcUID = initState.rtcUID,
                 isOnStage = isOwner,
                 isRaiseHand = initState.isRaiseHand,
@@ -201,8 +202,11 @@ class ClassRoomViewModel @Inject constructor(
             try {
                 rtmApi.login(rtmToken = rtmToken, channelId = roomUUID, userUUID = userUUID)
                 observerRtmEvent()
-                val userIds = rtmApi.getMembers().map { it.userId }
-                userManager.initUsers(userIds)
+                val filterIds = rtmApi.getMembers()
+                    .map { it.userId }
+                    .filter { it != userUUID }
+                userManager.initUsers(filterIds)
+                sendEnterRoomEvent()
             } catch (e: FlatException) {
                 roomErrorManager.notifyError("rtm join exception", e)
             }
@@ -268,11 +272,13 @@ class ClassRoomViewModel @Inject constructor(
                     syncedClassState.updateRaiseHand(userId = event.sender!!, event.raiseHand)
                 }
             }
+
             is RoomStateEvent -> {
                 state.value?.run {
                     _state.value = this.copy(roomStatus = event.status)
                 }
             }
+
             is RequestDeviceEvent -> {
                 eventbus.produceEvent(RequestDeviceReceived(mic = event.mic, camera = event.camera))
             }
@@ -288,28 +294,54 @@ class ClassRoomViewModel @Inject constructor(
                     )
                 )
             }
+
             is NotifyDeviceOffEvent -> {
                 eventbus.produceEvent(NotifyDeviceOffReceived(mic = event.mic, camera = event.camera))
             }
+
             is RewardEvent -> {
                 if (event.sender != state.value?.ownerUUID) return
                 eventbus.produceEvent(RewardReceived(event.userUUID))
             }
-            is OnMemberJoined -> {
-                userManager.addUser(event.userId)
+
+            is EnterRoomEvent -> {
+                if (event.sender == event.userUUID) {
+                    userManager.cacheUser(
+                        userUUID = event.userUUID,
+                        roomUser = RoomUser(
+                            userUUID = event.userUUID,
+                            name = event.userInfo.name,
+                            avatarURL = event.userInfo.avatarURL,
+                            rtcUID = event.userInfo.rtcUID,
+                        )
+                    )
+                }
             }
+
+            is OnMemberJoined -> {
+                viewModelScope.launch {
+                    // workaround: wait for EnterRoomEvent for user info
+                    delay(500)
+                    userManager.addUser(event.userId)
+                }
+            }
+
             is OnMemberLeft -> {
                 userManager.removeUser(event.userId)
             }
+
             is RoomBanEvent -> {
                 appendMessage(MessageFactory.createNotice(ban = event.status))
             }
+
             is ChatMessage -> {
                 appendMessage(MessageFactory.createText(sender = event.sender, event.message))
             }
+
             OnRemoteLogin -> {
                 eventbus.produceEvent(RemoteLoginEvent)
             }
+
             else -> {
                 logger.w("[RTM] event not handled: $event")
             }
@@ -692,6 +724,23 @@ class ClassRoomViewModel @Inject constructor(
         viewModelScope.launch {
             rtmApi.sendChannelCommand(
                 RewardEvent(roomUUID = roomUUID, userUUID = userUUID)
+            )
+        }
+    }
+
+    private fun sendEnterRoomEvent() {
+        viewModelScope.launch {
+            val state = _state.value ?: return@launch
+            rtmApi.sendChannelCommand(
+                EnterRoomEvent(
+                    roomUUID = roomUUID,
+                    userUUID = currentUserUUID,
+                    userInfo = EventUserInfo(
+                        rtcUID = state.rtcUID,
+                        name = currentUserName,
+                        avatarURL = userRepository.getUserAvatar()
+                    )
+                )
             )
         }
     }
