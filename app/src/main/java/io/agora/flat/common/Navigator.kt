@@ -1,5 +1,6 @@
 package io.agora.flat.common
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
@@ -25,13 +26,12 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    // join room
-    fun launchHomeActivity(context: Context, roomUUID: String) {
-        val intent = Intent(context, MainActivity::class.java).apply {
+    fun launchHomeActivity(context: Context, intent: Intent) {
+        val newIntent = Intent(intent).apply {
+            component = ComponentName(context, MainActivity::class.java)
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra(Constants.IntentKey.ROOM_UUID, roomUUID)
         }
-        context.startActivity(intent)
+        context.startActivity(newIntent)
     }
 
     fun launchLoginActivity(context: Context) {

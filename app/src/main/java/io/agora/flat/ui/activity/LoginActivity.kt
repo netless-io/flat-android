@@ -133,19 +133,6 @@ class LoginActivity : BaseComposeActivity() {
         super.onResume()
         if (intent != null) {
             loginHandler.handleResult(intent)
-            handleRoomJump(intent)
-        }
-    }
-
-    private fun handleRoomJump(intent: Intent) {
-        lifecycleScope.launch {
-            if (intent.data?.scheme == "x-agora-flat-client" && intent.data?.authority == "joinRoom") {
-                val roomUUID = intent.data?.getQueryParameter("roomUUID")
-                if (viewModel.isLoggedIn() && roomUUID != null) {
-                    Navigator.launchHomeActivity(this@LoginActivity, roomUUID)
-                    finish()
-                }
-            }
         }
     }
 }

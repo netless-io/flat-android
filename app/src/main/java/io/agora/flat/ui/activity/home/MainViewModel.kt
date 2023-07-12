@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
-import io.agora.flat.Constants
 import io.agora.flat.common.android.AndroidDownloader
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.common.version.VersionChecker
@@ -44,7 +43,7 @@ class MainViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     val roomPlayInfo = MutableStateFlow<RoomPlayInfo?>(null)
-    private val roomUUID: String? = savedStateHandle[Constants.IntentKey.ROOM_UUID]
+    val replayInfo = MutableStateFlow<String?>(null)
 
     init {
         viewModelScope.launch {
@@ -67,8 +66,6 @@ class MainViewModel @Inject constructor(
                 _state.value = _state.value.copy(message = it)
             }
         }
-
-        roomUUID?.let { joinRoom(it, openVideo = false, openAudio = false) }
     }
 
     fun checkVersion() {
@@ -119,10 +116,42 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun handleDeepLink(url: String) {
-        if (url.startsWith("${appEnv.baseInviteUrl}/join")) {
-            val roomUUID = url.substringAfterLast("/")
-            joinRoom(roomUUID, openVideo = false, openAudio = false)
+    fun cleanRoomPlayInfo() {
+        roomPlayInfo.value = null
+    }
+
+    fun clearReplayInfo() {
+        replayInfo.value = null
+    }
+
+    fun handleDeepLink(uri: Uri) {
+        if (uri.toString().startsWith(appEnv.baseInviteUrl)) {
+            val pathSegments = uri.pathSegments
+            // https://flat-web.whiteboard.agora.io/join/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/
+            if (pathSegments.size == 2 && pathSegments[0] == "join") {
+                val roomUUID = pathSegments[1]
+                joinRoom(roomUUID, openVideo = false, openAudio = false)
+            }
+            // https://flat-web.whiteboard.agora.io/replay/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/855c8d51-b5a5-439f-a74b-2eb1a0284036/
+            if (pathSegments.size == 4 && pathSegments[0] == "replay") {
+                val roomUUID = pathSegments[2]
+                replayInfo.value = roomUUID
+            }
+        }
+        if (uri.scheme == "x-agora-flat-client") {
+            when (uri.authority) {
+                // x-agora-flat-client://joinRoom?roomUUID=6827e45b-e7b4-4744-b62f-24a31d5e1381
+                "joinRoom" -> {
+                    val roomUUID = uri.getQueryParameter("roomUUID")
+                    joinRoom(roomUUID!!, openVideo = false, openAudio = false)
+                }
+
+                "replayRoom" -> {
+                    // x-agora-flat-client://replayRoom?roomUUID=245361ea-1cf4-4a03-9cdd-6170f9e8d9e3&ownerUUID=6a8fa51b-4d94-4d2f-92e3-2504065641ac&roomType=BigClass
+                    val roomUUID = uri.getQueryParameter("roomUUID")
+                    replayInfo.value = roomUUID
+                }
+            }
         }
     }
 }

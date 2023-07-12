@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -41,6 +42,7 @@ import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,6 +63,8 @@ class MainActivity : BaseComposeActivity() {
             val viewModel: MainViewModel by viewModels()
             val viewState by viewModel.state.collectAsState()
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
+            val replayInfo by viewModel.replayInfo.collectAsState()
+
 
             if (viewState.protocolAgreed) {
                 CompositionLocalProvider(LocalAgoraRtc provides rtcApi as? AgoraRtc) {
@@ -80,8 +84,9 @@ class MainActivity : BaseComposeActivity() {
                         }
 
                         viewModel.checkVersion()
+
                         intent?.data?.let { data ->
-                            viewModel.handleDeepLink(data.toString())
+                            viewModel.handleDeepLink(data)
                             intent.data = null
                         }
                     },
@@ -92,7 +97,15 @@ class MainActivity : BaseComposeActivity() {
 
                 LaunchedEffect(roomPlayInfo) {
                     roomPlayInfo?.let {
+                        viewModel.cleanRoomPlayInfo()
                         Navigator.launchRoomPlayActivity(this@MainActivity, it)
+                    }
+                }
+
+                LaunchedEffect(replayInfo) {
+                    replayInfo?.let {
+                        viewModel.clearReplayInfo()
+                        Navigator.launchPlaybackActivity(this@MainActivity, it)
                     }
                 }
 
@@ -157,6 +170,7 @@ private fun NavController.currentTabAsState(): State<MainTab> {
                 destination.hierarchy.any { it.route == Screen.Home.route || it.route == Screen.HomeExt.route } -> {
                     currentTab.value = MainTab.Home
                 }
+
                 destination.hierarchy.any { it.route == Screen.Cloud.route || it.route == Screen.CloudExt.route } -> {
                     currentTab.value = MainTab.Cloud
                 }
@@ -287,6 +301,7 @@ internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avat
                         }
                     }
                 )
+
                 MainTab.Cloud -> CloudScreen(
                     onOpenUploading = {
                         navController.navigate(LeafScreen.CloudUploading.createRoute(Screen.CloudExt)) {

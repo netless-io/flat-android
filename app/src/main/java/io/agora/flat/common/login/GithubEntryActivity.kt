@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.LoginActivity
 import javax.inject.Inject
 
@@ -31,9 +32,8 @@ class GithubEntryActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent?) {
         if (intent?.data?.scheme == "x-agora-flat-client") {
             // check if the intent is from web to join room
-            if (intent.data?.authority == "joinRoom") {
-                intent.apply { component = ComponentName(this@GithubEntryActivity, LoginActivity::class.java) }
-                startActivity(intent)
+            if (listOf("joinRoom", "replayRoom").contains(intent.data?.authority)) {
+                Navigator.launchHomeActivity(this@GithubEntryActivity, intent)
             } else {
                 // handle github auth
                 loginManager.handleGithubAuth(this, intent)
