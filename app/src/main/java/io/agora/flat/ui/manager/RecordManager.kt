@@ -2,7 +2,11 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
-import io.agora.flat.data.model.*
+import io.agora.flat.data.model.BackgroundConfig
+import io.agora.flat.data.model.LayoutConfig
+import io.agora.flat.data.model.RoomUser
+import io.agora.flat.data.model.TranscodingConfig
+import io.agora.flat.data.model.UpdateLayoutClientRequest
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.util.Ticker
 import kotlinx.coroutines.CoroutineScope
@@ -27,11 +31,19 @@ class RecordManager @Inject constructor(
     private var videoUsers = MutableStateFlow<List<RoomUser>>(emptyList())
 
     companion object {
+        // for config limit, change max user size to 15
+        private const val MAX_USER_SIZE = 15
+
+        const val width = 144 * MAX_USER_SIZE
+        const val height = 108
+
         @JvmStatic
         fun filterOnStages(users: List<RoomUser>): List<RoomUser> {
-            return users.filter { it.isOnStage }.sortedBy { user ->
-                if (user.isOwner) -1 else user.rtcUID
-            }
+            return users.filter { it.isOnStage }
+                .sortedBy { user ->
+                    if (user.isOwner) -1 else user.rtcUID
+                }
+                .take(MAX_USER_SIZE)
         }
     }
 
@@ -107,9 +119,6 @@ class RecordManager @Inject constructor(
             )
         }
     }
-
-    private val width = 144 * 17
-    private val height = 108
 
     private fun transcodingConfig() = TranscodingConfig(
         width,
