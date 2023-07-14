@@ -96,7 +96,7 @@ class AgoraBoardRoom @Inject constructor(
             windowParams.scrollVerticalOnly = true
             windowParams.stageStyle = "box-shadow: 0 0 0"
 
-            isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
+            // isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
             disableEraseImage = true
         }
         fastRoom = fastboard.createFastRoom(fastRoomOptions)

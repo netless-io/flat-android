@@ -101,12 +101,12 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 tip = stringResource(R.string.title_dark_mode),
                 onClick = { Navigator.launchDarkModeActivity(context) })
             SettingItemDivider()
-            SettingItemSwitch(
-                id = R.drawable.ic_settings_network_acceleration,
-                tip = stringResource(R.string.network_acceleration),
-                checked = state.networkAcceleration,
-                onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
-            )
+            // SettingItemSwitch(
+            //     id = R.drawable.ic_settings_network_acceleration,
+            //     tip = stringResource(R.string.network_acceleration),
+            //     checked = state.networkAcceleration,
+            //     onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
+            // )
             SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_app_version,
