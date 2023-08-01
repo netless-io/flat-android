@@ -6,7 +6,7 @@ class Constants {
 
         const val NETLESS_APP_IDENTIFIER = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug"
 
-        const val OSS_ACCESS_KEY_ID = "LTAI5t9Gb6tzQzzLmB6cTVf7"
+        const val OSS_ACCESS_KEY_ID = "LTAI5tMwHQ1xyroeneA9XLh4"
 
         const val DEFAULT_CALLING_CODE = "+86"
     }
