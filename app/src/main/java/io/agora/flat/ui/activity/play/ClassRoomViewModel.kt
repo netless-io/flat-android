@@ -93,6 +93,7 @@ class ClassRoomViewModel @Inject constructor(
     private val preferDeviceState = appKVCenter.getDeviceStatePreference()
     private var syncedStoreReady = false
     private var onStageLimit = RtcApi.MAX_CAPACITY
+    private var autoStageOn = false
 
     init {
         viewModelScope.launch {
@@ -425,6 +426,24 @@ class ClassRoomViewModel @Inject constructor(
                                 syncedClassState.updateOnStage(userUUID, true)
                             }
                         }
+                        cancel()
+                    }
+            }
+        }
+
+        // small class auto stage
+        viewModelScope.launch {
+            if (!autoStageOn && !userManager.isOwner() && state.value!!.roomType == RoomType.SmallClass) {
+                syncedClassState.observeOnStage()
+                    .onCompletion {
+                        logger.d("[USERS] small class observeOnStage done")
+                    }
+                    .collect { onStageUsers ->
+                        if (onStageUsers.keys.size < onStageLimit && onStageUsers[currentUserUUID] != true) {
+                            boardRoom.setWritable(true)
+                            syncedClassState.updateOnStage(currentUserUUID, true)
+                        }
+                        autoStageOn = true
                         cancel()
                     }
             }
