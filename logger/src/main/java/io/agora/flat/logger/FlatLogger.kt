@@ -156,17 +156,36 @@ private class CrashlyticsTree(
 private class LogReporterTree(
     private val logReporter: LogReporter,
 ) : Timber.Tree() {
+
+    companion object {
+        val priorityToLogLevel = mapOf(
+            Log.VERBOSE to "VERBOSE",
+            Log.DEBUG to "DEBUG",
+            Log.INFO to "INFO",
+            Log.WARN to "WARN",
+            Log.ERROR to "ERROR",
+            Log.ASSERT to "ASSERT"
+        )
+    }
+
     override fun isLoggable(tag: String?, priority: Int): Boolean {
         return priority >= Log.INFO
     }
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        logReporter.report(
-            mapOf(
-                "message" to message,
-                "priority" to priority.toString(),
-                "t" to t?.stackTraceToString(),
-            )
+        val logLevel = priorityToLogLevel[priority]?.lowercase() ?: "UNKNOWN"
+        val logMap = mutableMapOf(
+            "message" to message,
+            "priority" to logLevel,
         )
+        tag?.let {
+            logMap["tag"] = tag
+        }
+        t?.let {
+            logMap["t"] = t.stackTraceToString()
+        }
+        logReporter.report(logMap)
     }
+
+
 }

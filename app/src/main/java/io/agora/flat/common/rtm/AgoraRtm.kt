@@ -131,12 +131,12 @@ class AgoraRtm @Inject constructor(
         val channel = rtmClient.createChannel(channelId, listener)
         channel.join(object : ResultCallback<Void?> {
             override fun onSuccess(v: Void?) {
-                logger.d("rtm join channel success")
+                logger.i("[RTM] join channel success")
                 it.resume(channel)
             }
 
             override fun onFailure(e: ErrorInfo) {
-                logger.w("rtm join channel fail")
+                logger.w("[RTM] join channel fail")
                 it.resumeWithException(e.toFlatException())
             }
         })
@@ -145,12 +145,12 @@ class AgoraRtm @Inject constructor(
     override suspend fun getMembers(): List<RtmMember> = suspendCoroutine { cont ->
         messageChannel?.getMembers(object : ResultCallback<List<RtmChannelMember>> {
             override fun onSuccess(members: List<RtmChannelMember>) {
-                logger.d("get member success $members")
+                logger.d("[RTM] get member success $members")
                 cont.resume(members.map { RtmMember(it.userId, it.channelId) })
             }
 
             override fun onFailure(e: ErrorInfo) {
-                logger.w("get member failure $e")
+                logger.w("[RTM] get member failure $e")
                 cont.resume(listOf())
             }
         }) ?: cont.resume(listOf())
@@ -266,7 +266,7 @@ class AgoraRtm @Inject constructor(
         }
         rtmListeners.add(listener)
         awaitClose {
-            logger.d("[RTM] rtm event flow closed")
+            logger.i("[RTM] rtm event flow closed")
             rtmListeners.remove(listener)
         }
     }

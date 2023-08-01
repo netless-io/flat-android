@@ -7,5 +7,5 @@ interface LogReporter {
 
     fun setUserId(id: String) {}
 
-    fun report(item: Map<String, String?>)
+    fun report(item: Map<String, String>)
 }

@@ -103,7 +103,7 @@ class AgoraBoardRoom @Inject constructor(
 
         fastRoom?.addListener(object : FastRoomListener {
             override fun onRoomPhaseChanged(phase: RoomPhase) {
-                logger.d("[BOARD] room phase change to ${phase.name}")
+                logger.i("[BOARD] room phase change to ${phase.name}")
                 when (phase) {
                     RoomPhase.connecting -> boardPhase.value = BoardPhase.Connecting
                     RoomPhase.connected -> boardPhase.value = BoardPhase.Connected
@@ -113,6 +113,7 @@ class AgoraBoardRoom @Inject constructor(
             }
 
             override fun onRoomReadyChanged(fastRoom: FastRoom) {
+                logger.i("[BOARD] room ready changed ${fastRoom.isReady}")
                 if (syncedClassState is WhiteSyncedState && fastRoom.isReady) {
                     syncedClassState.resetRoom(fastRoom)
                 }
@@ -168,8 +169,8 @@ class AgoraBoardRoom @Inject constructor(
     }
 
     override fun setDarkMode(dark: Boolean) {
+        logger.i("[BOARD] set dark mode $dark, fastboard ${::fastboard.isInitialized}")
         this.darkMode = dark
-
         if (::fastboard.isInitialized) {
             val fastStyle = fastboard.fastStyle.apply { isDarkMode = dark }
             fastRoom?.fastStyle = fastStyle
@@ -182,13 +183,14 @@ class AgoraBoardRoom @Inject constructor(
     }
 
     override suspend fun setWritable(writable: Boolean): Boolean = suspendCoroutine {
+        logger.i("[BoardRoom] set writable $writable, when isWritable ${fastRoom?.isWritable}")
         if (fastRoom?.isWritable == writable) {
             it.resume(writable)
             return@suspendCoroutine
         }
         fastRoom?.room?.setWritable(writable, object : Promise<Boolean> {
             override fun then(success: Boolean) {
-                logger.d("[BoardRoom] set writable result $success")
+                logger.i("[BoardRoom] set writable result $success")
                 it.resume(success)
             }
 
@@ -200,6 +202,7 @@ class AgoraBoardRoom @Inject constructor(
     }
 
     override suspend fun setAllowDraw(allow: Boolean) {
+        logger.i("[BoardRoom] set allow draw $allow, when isWritable ${fastRoom?.isWritable}")
         if (fastRoom?.isWritable == true) {
             fastRoom?.room?.disableOperations(!allow)
             fastRoom?.room?.disableWindowOperation(!allow)
@@ -207,8 +210,8 @@ class AgoraBoardRoom @Inject constructor(
         fastboardView.post { updateRoomController(allow) }
     }
 
-    private fun updateRoomController(writable: Boolean) {
-        if (writable) {
+    private fun updateRoomController(allow: Boolean) {
+        if (allow) {
             fastRoom?.rootRoomController?.show()
         } else {
             fastRoom?.rootRoomController?.hide()

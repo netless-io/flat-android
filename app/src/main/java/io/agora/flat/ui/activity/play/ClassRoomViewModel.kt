@@ -100,6 +100,7 @@ class ClassRoomViewModel @Inject constructor(
             try {
                 loadAndInitRoomState()
             } catch (e: Exception) {
+                logger.e(e, "fetch class room state error")
                 roomErrorManager.notifyError("fetch class room state error", e)
             }
         }
@@ -188,6 +189,8 @@ class ClassRoomViewModel @Inject constructor(
         }
 
         _state.value = initState
+
+        logger.i("[ROOM] init room state: $initState")
     }
 
     private suspend fun joinBoard() {
@@ -209,6 +212,7 @@ class ClassRoomViewModel @Inject constructor(
                 userManager.initUsers(filterIds)
                 sendEnterRoomEvent()
             } catch (e: FlatException) {
+                logger.e(e, "rtm join exception")
                 roomErrorManager.notifyError("rtm join exception", e)
             }
         }
@@ -218,7 +222,11 @@ class ClassRoomViewModel @Inject constructor(
         logger.i("[RTC] start join rtc")
         state.value?.run {
             rtcVideoController.setupUid(uid = rtcUID, ssUid = rtcShareScreen.uid)
-            rtcApi.joinChannel(RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen))
+            rtcApi.joinChannel(
+                RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen)
+            ).also {
+                logger.i("[RTC] join rtc result: $it")
+            }
         }
     }
 
@@ -265,7 +273,8 @@ class ClassRoomViewModel @Inject constructor(
     }
 
     private suspend fun handleRtmEvent(event: ClassRtmEvent) {
-        logger.d("[RTM] handle event $event")
+        logger.i("[RTM] handle event $event")
+
         when (event) {
             is RaiseHandEvent -> {
                 val state = state.value ?: return
@@ -367,7 +376,8 @@ class ClassRoomViewModel @Inject constructor(
     private fun observerUserState() {
         viewModelScope.launch {
             userManager.observeSelf().filterNotNull().collect {
-                logger.d("[USERS] current user state changed $it")
+                logger.i("[USERS] current user state changed $it, state: ${_state.value}")
+
                 val state = _state.value ?: return@collect
                 try {
                     boardRoom.setWritable(it.isOnStage || it.allowDraw)
@@ -415,7 +425,7 @@ class ClassRoomViewModel @Inject constructor(
                     if (ready) users else null
                 }.filterNotNull()
                     .onCompletion {
-                        logger.d("[USERS] one to one observeUsers done")
+                        logger.i("[USERS] one to one observeUsers done")
                     }
                     .collect {
                         val users = it.filter { user -> user.isJoined && !user.isOwner }
@@ -436,7 +446,7 @@ class ClassRoomViewModel @Inject constructor(
             if (!autoStageOn && !userManager.isOwner() && state.value!!.roomType == RoomType.SmallClass) {
                 syncedClassState.observeOnStage()
                     .onCompletion {
-                        logger.d("[USERS] small class observeOnStage done")
+                        logger.i("[USERS] small class observeOnStage done")
                     }
                     .collect { onStageUsers ->
                         if (onStageUsers.keys.size < onStageLimit && onStageUsers[currentUserUUID] != true) {

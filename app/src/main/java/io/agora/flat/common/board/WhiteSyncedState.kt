@@ -47,6 +47,7 @@ class WhiteSyncedState @Inject constructor(
     private var inited = false
 
     fun resetRoom(fastRoom: FastRoom) {
+        logger.i("[SyncedState] resetRoom, inited: $inited")
         if (inited) {
             clean()
         }
@@ -100,7 +101,7 @@ class WhiteSyncedState @Inject constructor(
     private fun connectUserWindowsStorage() {
         syncedStore.connectStorage(USER_WINDOWS, "{\"grid\": []}", object : Promise<String> {
             override fun then(value: String) {
-                logger.d("[SyncedState] $USER_WINDOWS initial state: $value")
+                logger.i("[SyncedState] $USER_WINDOWS initial state: $value")
                 try {
                     _userWindowsFlow.value = parseUserWindowsState(value)
                 } catch (e: Exception) {
@@ -114,7 +115,7 @@ class WhiteSyncedState @Inject constructor(
         })
 
         syncedStore.addOnStateChangedListener(USER_WINDOWS) { value, diff ->
-            logger.d("[SyncedState] $USER_WINDOWS updated: value: $value diff: $diff")
+            logger.i("[SyncedState] $USER_WINDOWS updated: value: $value diff: $diff")
             _userWindowsFlow.value = parseUserWindowsState(value)
         }
     }
@@ -127,16 +128,17 @@ class WhiteSyncedState @Inject constructor(
     ) {
         syncedStore.connectStorage(storage, defaultJson, object : Promise<String> {
             override fun then(value: String) {
-                logger.d("[SyncedState] $storage initial state: $value")
+                logger.i("[SyncedState] $storage initial state: $value")
                 block(gson.fromJson(value, type))
             }
 
             override fun catchEx(t: SDKError) {
+                logger.e("[SyncedState] $storage catchEx error: $t")
             }
         })
 
         syncedStore.addOnStateChangedListener(storage) { value, diff ->
-            logger.d("[SyncedState] $storage updated: value: $value diff: $diff")
+            logger.i("[SyncedState] $storage updated: value: $value diff: $diff")
             block(gson.fromJson(value, type))
         }
     }
@@ -149,16 +151,17 @@ class WhiteSyncedState @Inject constructor(
     ) {
         syncedStore.connectStorage(storage, defaultJson, object : Promise<String> {
             override fun then(state: String) {
-                logger.d("[SyncedState] $storage initial state: $state")
+                logger.i("[SyncedState] $storage initial state: $state")
                 block(getMapState(state, itemType))
             }
 
             override fun catchEx(t: SDKError) {
+                logger.e("[SyncedState] $storage catchEx error: $t")
             }
         })
 
         syncedStore.addOnStateChangedListener(storage) { value, diff ->
-            logger.d("[SyncedState] $storage updated: value: $value diff: $diff")
+            logger.i("[SyncedState] $storage updated: value: $value diff: $diff")
             block(getMapState(value, itemType))
         }
     }
@@ -173,7 +176,7 @@ class WhiteSyncedState @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            logger.e(e, "[SyncedState] onstage users parse error!")
+            logger.e(e, "[SyncedState] onStage users parse error!")
         }
         return onStageUsers
     }

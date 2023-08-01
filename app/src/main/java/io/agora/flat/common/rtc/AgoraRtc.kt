@@ -105,7 +105,7 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
         }
         mHandler.addListener(listener)
         awaitClose {
-            logger.d("[RTC] rtc event flow closed")
+            logger.i("[RTC] rtc event flow closed")
             mHandler.removeListener(listener)
         }
     }

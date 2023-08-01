@@ -126,7 +126,7 @@ class RtcComponent(
     private fun observeState() {
         lifecycleScope.launchWhenResumed {
             viewModel.videoUsers.collect { users ->
-                logger.d("[RTC] videoUsers changed to $users")
+                logger.i("[RTC] videoUsers changed to ${users.size}")
                 adapter.updateUsers(users)
                 updateUserWindows(users)
                 // 处理用户进出时的显示
@@ -174,6 +174,8 @@ class RtcComponent(
 
         lifecycleScope.launchWhenResumed {
             rtcApi.observeRtcEvent().collect { event ->
+                logger.i("[RTC] event: $event")
+
                 when (event) {
                     is RtcEvent.UserJoined -> lifecycleScope.launch {
                         rtcVideoController.handlerJoined(event.uid)
@@ -606,7 +608,7 @@ class RtcComponent(
     private val atomIndex = AtomicInteger(0)
 
     private val onDragListener = View.OnDragListener { _, event ->
-        logger.d("RtcComponent", "onDragListener ${event.action}")
+        logger.i("RtcComponent", "onDragListener ${event.action}")
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 val user = event.localState as RoomUser

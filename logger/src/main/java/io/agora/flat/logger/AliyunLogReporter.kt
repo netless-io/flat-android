@@ -6,13 +6,16 @@ import io.agora.flat.di.interfaces.LogConfig
 import io.agora.flat.di.interfaces.LogReporter
 import io.agora.flat.di.interfaces.StartupInitializer
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig) : LogReporter, StartupInitializer {
+
     private var client: LogProducerClient? = null
     private var uid: String? = null
+    private var sessionId: String? = null
 
     override fun init(context: Context) {
         try {
@@ -60,18 +63,24 @@ class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig) : 
 
     override fun setUserId(id: String) {
         this.uid = id
+        this.sessionId = UUID.randomUUID().toString()
     }
 
-    override fun report(item: Map<String, String?>) {
+    override fun report(item: Map<String, String>) {
         // debug mode not report
         if (BuildConfig.DEBUG) {
             return
         }
-        val log = Log()
-        log.putContent("uid", uid)
-        item.forEach { (k, v) ->
-            log.putContent(k, v)
+
+        val log = Log().apply {
+            putContent("uid", uid)
+            putContent("session_id", sessionId)
+
+            item.forEach { (k, v) ->
+                putContent(k, v)
+            }
         }
+
         client?.addLog(log)
     }
 }
