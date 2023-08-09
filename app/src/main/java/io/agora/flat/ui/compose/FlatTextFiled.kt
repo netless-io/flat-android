@@ -97,13 +97,19 @@ fun BindPhoneTextField(
                     PlaceholderText(placeholderValue, darkMode)
                 }
                 innerTextField()
+
+                if (value.isNotBlank()) {
+                    IconButton(onClick = { onValueChange("") }, modifier = Modifier.align(Alignment.CenterEnd)) {
+                        Icon(painterResource(id = R.drawable.ic_text_filed_clear), "", tint = FlatTheme.colors.textPrimary)
+                    }
+                }
             }
         }
     )
 }
 
 @Composable
-private fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
+fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
     Text(placeholderValue, style = MaterialTheme.typography.body1, color = if (darkMode) Gray_7 else Gray_3)
 }
 

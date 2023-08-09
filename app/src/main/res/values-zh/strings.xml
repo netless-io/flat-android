@@ -115,6 +115,7 @@
 
     <string name="login_phone_input_placeholder">请输入手机号</string>
     <string name="login_phone_invalid_tip">请填写正确手机号</string>
+    <string name="login_email_invalid_tip">请填写正确的邮箱</string>
     <string name="login_code_input_placeholder">请输入验证码</string>
     <string name="login_code_invalid_tip">请填写正确验证码</string>
     <string name="login_send_sms_code">发送验证码</string>
@@ -129,6 +130,16 @@
     <string name="login_verification_code_invalid">验证码无效</string>
     <string name="wechat">WeChat</string>
     <string name="github">Github</string>
+    <string name="google">Google</string>
+
+    <string name="login_sign_in">登录</string>
+    <string name="login_sign_up">注册</string>
+    <string name="login_use_sms_login">短信登录</string>
+    <string name="login_use_password_login">密码登录</string>
+    <string name="login_forgot_pwd">忘记密码？</string>
+    <string name="login_password_input_hint">请输入密码</string>
+    <string name="login_email_input_hint">请输入邮箱</string>
+    <string name="login_phone_or_email_input_hint">请输入邮箱和手机号</string>
 
     <!-- bind -->
     <string name="bind">绑定</string>

@@ -2,6 +2,7 @@ package io.agora.flat.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -9,13 +10,32 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Checkbox
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.TextButton
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
@@ -28,7 +48,6 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
@@ -39,14 +58,29 @@ import io.agora.flat.common.login.LoginType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.login.LoginUiAction
 import io.agora.flat.ui.activity.phone.PhoneBindDialog
-import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.compose.AgreementDialog
+import io.agora.flat.ui.compose.ClickableItem
+import io.agora.flat.ui.compose.FlatClickableText
+import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.FlatPrimaryTextButton
+import io.agora.flat.ui.compose.FlatSecondaryTextButton
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
+import io.agora.flat.ui.compose.FlatTextBodyTwo
+import io.agora.flat.ui.compose.FlatTextTitle
+import io.agora.flat.ui.compose.PhoneAndCodeArea
+import io.agora.flat.ui.compose.PhoneOrEmailPasswordArea
 import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.viewmodel.LoginViewModel
-import io.agora.flat.util.*
+import io.agora.flat.util.isApkInDebug
+import io.agora.flat.util.isPhoneMode
+import io.agora.flat.util.isValidPhone
+import io.agora.flat.util.isValidSmsCode
+import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -69,24 +103,32 @@ class LoginActivity : BaseComposeActivity() {
                     LoginUiAction.WeChatLogin -> {
                         loginHandler.loginWithType(LoginType.WeChat)
                     }
+
                     LoginUiAction.GithubLogin -> {
                         loginHandler.loginWithType(LoginType.Github)
                     }
+
                     LoginUiAction.OpenServiceProtocol -> {
                         Navigator.launchWebViewActivity(this, Constants.URL.Service)
                     }
+
                     LoginUiAction.OpenPrivacyProtocol -> {
                         Navigator.launchWebViewActivity(this, Constants.URL.Privacy)
                     }
+
                     LoginUiAction.AgreementHint -> {
                         showToast(R.string.login_agreement_unchecked_hint)
                     }
+
                     is LoginUiAction.PhoneLogin -> {
                         loginHandler.loginWithPhone(action.phone, action.code)
                     }
+
                     is LoginUiAction.PhoneSendCode -> {
                         loginHandler.sendPhoneCode(action.phone)
                     }
+
+                    else -> {}
                 }
             }
 
@@ -95,6 +137,7 @@ class LoginActivity : BaseComposeActivity() {
                     is LoginState.Process -> {
                         showToast((loginState as LoginState.Process).message.text)
                     }
+
                     LoginState.Init -> {}
                     LoginState.Success -> {
                         if (viewModel.needBindPhone()) {
@@ -131,9 +174,7 @@ class LoginActivity : BaseComposeActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (intent != null) {
-            loginHandler.handleResult(intent)
-        }
+        intent?.let { loginHandler.handleResult(it) }
     }
 }
 
@@ -177,25 +218,61 @@ internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
     }
 }
 
+@Parcelize
+data class LoginInputState(
+    // phone or email
+    val value: String = "",
+    val password: String = "",
+    val smsCode: String = "",
+    val cc: String = Constants.DEFAULT_CALLING_CODE,
+) : Parcelable
+
 @Composable
 private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
-    var agreementChecked by remember { mutableStateOf(false) }
+    var agreementChecked by rememberSaveable { mutableStateOf(false) }
     var showAgreement by rememberSaveable { mutableStateOf(false) }
+    var passwordMode by rememberSaveable { mutableStateOf(true) }
+    var inputState by rememberSaveable { mutableStateOf(LoginInputState()) }
 
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(120.dp))
         LoginSlogan()
-        Spacer(Modifier.weight(1f))
-        PhoneLoginArea(actioner = {
-            if (agreementChecked.not() && it is LoginUiAction.PhoneLogin) {
-                showAgreement = true
-                return@PhoneLoginArea
-            }
-            actioner(it)
-        })
+        Spacer(modifier = Modifier.height(32.dp))
+        if (passwordMode) {
+            PasswordLoginArea(
+                inputState = inputState,
+                onLoginInputChange = { inputState = it },
+                actioner = {
+                    if (it is LoginUiAction.SMSLoginClick) {
+                        passwordMode = false
+                        return@PasswordLoginArea
+                    }
+                    if (agreementChecked.not()) {
+                        showAgreement = true
+                        return@PasswordLoginArea
+                    }
+                    actioner(it)
+                }
+            )
+        } else {
+            PhoneLoginArea(
+                inputState = inputState,
+                onLoginInputChange = { inputState = it },
+                actioner = {
+                    if (it is LoginUiAction.PasswordLoginClick) {
+                        passwordMode = true
+                        return@PhoneLoginArea
+                    }
+                    if (agreementChecked.not() && it is LoginUiAction.PhoneLogin) {
+                        showAgreement = true
+                        return@PhoneLoginArea
+                    }
+                    actioner(it)
+                })
+        }
         LoginAgreement(
             Modifier.padding(horizontal = 24.dp),
             checked = agreementChecked,
@@ -224,28 +301,91 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
 }
 
 @Composable
-private fun PhoneLoginArea(actioner: (LoginUiAction) -> Unit) {
-    var phone by remember { mutableStateOf("") }
-    var ccode by remember { mutableStateOf(Constants.DEFAULT_CALLING_CODE) }
-    var code by remember { mutableStateOf("") }
+private fun PasswordLoginArea(
+    inputState: LoginInputState,
+    onLoginInputChange: (LoginInputState) -> Unit,
+    actioner: (LoginUiAction) -> Unit
+) {
+    PhoneOrEmailPasswordArea(
+        value = inputState.value,
+        onValueChange = { onLoginInputChange(inputState.copy(value = it)) },
+        password = inputState.password,
+        onPasswordChange = { onLoginInputChange(inputState.copy(password = it)) },
+        callingCode = inputState.cc,
+        onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
+    )
 
+    Row(
+        Modifier
+            .fillMaxWidth(1f)
+            .padding(horizontal = 8.dp)
+    ) {
+        TextButton(
+            onClick = { actioner(LoginUiAction.SMSLoginClick) }) {
+            FlatTextBodyTwo(stringResource(R.string.login_use_sms_login), color = MaterialTheme.colors.primary)
+        }
+        Spacer(Modifier.weight(1f))
+        TextButton(
+            onClick = { actioner(LoginUiAction.ForgotPwdClick) },
+        ) {
+            FlatTextBodyTwo(stringResource(R.string.login_forgot_pwd), color = MaterialTheme.colors.primary)
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+    Box(Modifier.padding(horizontal = 16.dp)) {
+        FlatPrimaryTextButton(
+            text = stringResource(id = R.string.login_sign_in),
+            enabled = inputState.value.isNotEmpty() && inputState.password.isNotEmpty(),
+        ) {
+            actioner(LoginUiAction.PasswordLoginClick)
+        }
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Box(Modifier.padding(horizontal = 16.dp)) {
+        FlatSecondaryTextButton(text = stringResource(id = R.string.login_sign_up)) {
+
+        }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun PhoneLoginArea(
+    inputState: LoginInputState,
+    onLoginInputChange: (LoginInputState) -> Unit,
+    actioner: (LoginUiAction) -> Unit
+) {
     PhoneAndCodeArea(
-        phone = phone,
-        onPhoneChange = { phone = it },
-        code = code,
-        onCodeChange = { code = it },
-        callingCode = ccode,
-        onCallingCodeChange = { ccode = it },
+        phone = inputState.value,
+        onPhoneChange = { onLoginInputChange(inputState.copy(value = it)) },
+        code = inputState.smsCode,
+        onCodeChange = { onLoginInputChange(inputState.copy(smsCode = it)) },
+        callingCode = inputState.cc,
+        onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
         onSendCode = {
-            actioner(LoginUiAction.PhoneSendCode("$ccode$phone"))
+            actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}"))
         },
     )
+
+    Row(
+        Modifier
+            .fillMaxWidth(1f)
+            .padding(horizontal = 8.dp)
+    ) {
+        TextButton(
+            onClick = { actioner(LoginUiAction.PasswordLoginClick) }) {
+            FlatTextBodyTwo(stringResource(R.string.login_use_password_login), color = MaterialTheme.colors.primary)
+        }
+        Spacer(Modifier.weight(1f))
+    }
+
     Box(Modifier.padding(16.dp)) {
         FlatPrimaryTextButton(
             stringResource(id = R.string.login_sign_in_or_up),
-            enabled = phone.isValidPhone() && code.isValidSmsCode(),
+            enabled = inputState.value.isValidPhone() && inputState.smsCode.isValidSmsCode(),
         ) {
-            actioner(LoginUiAction.PhoneLogin("$ccode$phone", code))
+            actioner(LoginUiAction.PhoneLogin(inputState.cc + inputState.value, inputState.smsCode))
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.agora.flat.util
 
+import android.util.Patterns.EMAIL_ADDRESS
 import io.agora.flat.R
 import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
@@ -20,18 +21,23 @@ fun String.coursewareType(): CoursewareType {
         "jpg", "jpeg", "png", "webp" -> {
             CoursewareType.Image
         }
+
         "doc", "docx", "pdf", "ppt" -> {
             CoursewareType.DocStatic
         }
+
         "pptx" -> {
             CoursewareType.DocDynamic
         }
+
         "mp3" -> {
             CoursewareType.Audio
         }
+
         "mp4" -> {
             CoursewareType.Video
         }
+
         else -> {
             CoursewareType.Unknown
         }
@@ -69,6 +75,7 @@ fun String.toInviteCodeDisplay() = if (length == 10) {
 
 internal const val ROOM_UUID_PATTERN = """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
 internal const val INVITE_CODE_PATTERN = """[0-9]{3} [0-9a-fA-F]{3} [0-9a-fA-F]{4}"""
+internal const val SIMPLE_PHONE_PATTERN = """^([0-9]+)${'$'}"""
 
 fun String.parseRoomID(): String? {
     if (this.isBlank()) {
@@ -90,8 +97,10 @@ internal fun parseRoomUUID(text: CharSequence): String? {
 }
 
 fun String.isValidPhone(): Boolean {
-    return this.isNotEmpty()
+    return SIMPLE_PHONE_PATTERN.toRegex().matches(this)
 }
+
+fun String.isValidEmail(): Boolean = this.contains("@")
 
 fun String.isValidSmsCode(): Boolean {
     return this.length == 6

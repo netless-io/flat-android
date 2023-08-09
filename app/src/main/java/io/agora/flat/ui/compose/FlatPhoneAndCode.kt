@@ -72,8 +72,6 @@ fun PhoneAndCodeArea(
     )
 
     Column(Modifier.padding(horizontal = 16.dp)) {
-        FlatTextCaption(text = stringResource(id = R.string.bind_phone))
-        Spacer(Modifier.height(4.dp))
         Row(Modifier.height(40.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(
                 modifier = Modifier
@@ -122,9 +120,7 @@ fun PhoneAndCodeArea(
             FlatDivider(color = Red_6, thickness = 1.dp)
             FlatTextBodyTwo(stringResource(R.string.login_phone_invalid_tip), color = Red_6)
         }
-        Spacer(Modifier.height(16.dp))
-        FlatTextCaption(stringResource(R.string.verification_code))
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
             Spacer(Modifier.width(8.dp))

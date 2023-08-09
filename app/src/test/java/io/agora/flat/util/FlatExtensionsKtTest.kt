@@ -28,4 +28,10 @@ class FlatExtensionsKtTest {
         assertEquals("/", "/root/".parentFolder())
         assertEquals("/root/", "/root/file".parentFolder())
     }
+
+    @Test
+    fun isValidEmail() {
+        assertTrue("c@c.cc".isValidEmail())
+        assertFalse("a".isValidEmail())
+    }
 }
