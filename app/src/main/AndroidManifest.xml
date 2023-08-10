@@ -66,6 +66,12 @@
             android:name=".ui.activity.phone.PhoneBindActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+
+        <activity
+            android:name=".ui.activity.register.RegisterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
         <activity
             android:name=".ui.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

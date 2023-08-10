@@ -3,14 +3,31 @@ package io.agora.flat.data.repository
 import android.os.SystemClock
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatNetException
-import io.agora.flat.data.*
-import io.agora.flat.data.model.*
+import io.agora.flat.data.AppKVCenter
+import io.agora.flat.data.Failure
+import io.agora.flat.data.Result
+import io.agora.flat.data.Success
+import io.agora.flat.data.model.AuthUUIDReq
+import io.agora.flat.data.model.EmailCodeReq
+import io.agora.flat.data.model.EmailRegisterReq
+import io.agora.flat.data.model.LoginPlatform
+import io.agora.flat.data.model.PhoneRegisterReq
+import io.agora.flat.data.model.PhoneReq
+import io.agora.flat.data.model.PhoneSmsCodeReq
+import io.agora.flat.data.model.RemoveBindingReq
+import io.agora.flat.data.model.RespNoData
+import io.agora.flat.data.model.RoomCount
+import io.agora.flat.data.model.UserBindings
+import io.agora.flat.data.model.UserInfo
+import io.agora.flat.data.model.UserInfoWithToken
+import io.agora.flat.data.model.UserRenameReq
+import io.agora.flat.data.toResult
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.http.api.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,6 +53,7 @@ class UserRepository @Inject constructor(
                 logger.setUserId(result.data.uuid)
                 Success(true)
             }
+
             is Failure -> Failure(result.exception)
         }
     }
@@ -84,6 +102,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(result.data.toUserInfo())
                 Success(true)
             }
+
             is Failure -> Failure(result.exception)
         }
     }
@@ -131,6 +150,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.setUserInfo(callResult.data.toUserInfo())
                 Success(true)
             }
+
             is Failure -> Failure(callResult.exception)
         }
     }
@@ -152,6 +172,7 @@ class UserRepository @Inject constructor(
                 }
                 Success(true)
             }
+
             is Failure -> Failure(callResult.exception)
         }
     }
@@ -167,6 +188,7 @@ class UserRepository @Inject constructor(
                 }
                 Success(true)
             }
+
             is Failure -> Failure(callResult.exception)
         }
     }
@@ -206,6 +228,7 @@ class UserRepository @Inject constructor(
                 bindings = bindings?.copy(wechat = true)
                 Success(true)
             }
+
             is Failure -> {
                 Failure(result.exception)
             }
@@ -220,6 +243,7 @@ class UserRepository @Inject constructor(
                         bindings = bindings?.copy(github = true)
                         return@withContext Success(true)
                     }
+
                     is Failure -> {
                         // state == 1 error; state == 2 loop
                         val exception = result.exception as FlatNetException
@@ -245,6 +269,7 @@ class UserRepository @Inject constructor(
                     }
                     Success(true)
                 }
+
                 is Failure -> Failure(result.exception)
             }
         }
@@ -265,6 +290,50 @@ class UserRepository @Inject constructor(
                     RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web.ExhaustiveAttack
                 )
             )
+        }
+    }
+
+    suspend fun requestRegisterSmsCode(phone: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            limitSendCode {
+                userService.requestRegisterSmsCode(PhoneReq(phone)).toResult()
+            }
+        }
+    }
+
+    suspend fun registerWithPhone(phone: String, code: String, password: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            when (val result = userService.registerWithPhone(PhoneRegisterReq(phone, code, password)).toResult()) {
+                is Success -> {
+                    appKVCenter.setToken(result.data.token)
+                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    Success(true)
+                }
+
+                is Failure -> Failure(result.exception)
+            }
+        }
+    }
+
+    suspend fun requestRegisterEmailCode(email: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            limitSendCode {
+                userService.requestRegisterEmailCode(EmailCodeReq(email)).toResult()
+            }
+        }
+    }
+
+    suspend fun registerWithEmail(email: String, code: String, password: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            when (val result = userService.registerWithEmail(EmailRegisterReq(email, code, password)).toResult()) {
+                is Success -> {
+                    appKVCenter.setToken(result.data.token)
+                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    Success(true)
+                }
+
+                is Failure -> Failure(result.exception)
+            }
         }
     }
 }

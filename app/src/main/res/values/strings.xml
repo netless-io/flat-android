@@ -99,6 +99,7 @@
     <string name="login_success_and_jump">Successful login, jump…</string>
     <string name="login_fail">Login failed</string>
 
+    <!-- login -->
     <string name="login_agreement_message">Have read and agree Privacy Policy and Term of Service</string>
     <string name="login_agreement_unchecked_hint">Please agree to the terms of service first</string>
     <string name="login_agreement_dialog_title">Service Agreement and Privacy Protection</string>
@@ -132,6 +133,7 @@
     <string name="login_email_input_hint">Email</string>
     <string name="login_phone_or_email_input_hint">Phone or Email</string>
 
+    <!-- bind -->
     <string name="bind">bind</string>
     <string name="unbind">unbind</string>
     <string name="bind_fail">bind fail</string>
@@ -141,6 +143,9 @@
 
     <string name="phone_number">Phone Number</string>
     <string name="verification_code">Verification Code</string>
+
+    <!-- register -->
+    <string name="register">Register</string>
 
     <string name="agreement_global_dialog_message">Thank you for trusting and using Flat.\n\nWe rely on the Flat User Agreement and Flat Privacy Policy to help you understand how we collect,use,and store your personal information and what rights you have with respect to it.\n\nWhen you use Flat, we collect information about your device, logs and browsing history, and to ensure a positive experience in class, you may grant Flat access to your device\'s camera, microphone, and other information.\n\nYou can read the full Flat User Agreement and Flat Privacy Policy for more information.</string>
     <string name="agreement_global_recheck_dialog_message">You need to agree to the User Agreement and Privacy Policy before you can use Flat.\n\nIf you do not agree, we regret that we cannot provide you with the Services.\n\nYou can find out more by reading the full Flat User Agreement and Flat Privacy Policy.</string>

@@ -8,4 +8,5 @@ data class UserInfoWithToken(
     @SerializedName("userUUID") val uuid: String,
     val token: String,
     val hasPhone: Boolean,
+    val hasPassword: Boolean,
 )

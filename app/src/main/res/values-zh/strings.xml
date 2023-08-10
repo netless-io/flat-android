@@ -153,6 +153,9 @@
     <string name="phone_number">手机号</string>
     <string name="verification_code">验证码</string>
 
+    <!-- register -->
+    <string name="register">注册新账号</string>
+
     <string name="agreement_global_dialog_message">感谢您信任并使用 Flat。\n\n我们将依据《Flat 用户协议》及《Flat 隐私政策》来帮助您了解我们在收集、使用、存储您个人信息的情况以及您享有的相关权利。\n\n在您使用 Flat 时，我们将收集您的设备信息、操作日志及浏览记录等信息，同时为了保证上课的体验，你可以授予 Flat 获取您设备的摄像头权限、麦克风权限等信息。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_recheck_dialog_message">您需要同意用户协议与隐私政策后才能使 Flat。\n\n如您不同意，很遗憾我们无法为您提供服务。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_privacy">《Flat 隐私政策》</string>

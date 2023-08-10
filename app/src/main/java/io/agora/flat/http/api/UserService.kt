@@ -93,4 +93,24 @@ interface UserService {
     fun removeBinding(
         @Body req: RemoveBindingReq,
     ): Call<BaseResp<UserTokenData>>
+
+    @POST("v2/register/phone/send-message")
+    fun requestRegisterSmsCode(
+        @Body req: PhoneReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/register/phone")
+    fun registerWithPhone(
+        @Body req: PhoneRegisterReq,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v2/register/email/send-message")
+    fun requestRegisterEmailCode(
+        @Body req: EmailCodeReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/register/email")
+    fun registerWithEmail(
+        @Body req: EmailRegisterReq,
+    ): Call<BaseResp<UserInfoWithToken>>
 }
