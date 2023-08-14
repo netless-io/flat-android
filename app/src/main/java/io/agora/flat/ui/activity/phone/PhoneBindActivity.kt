@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
@@ -90,7 +91,7 @@ internal fun PhoneBindScreen(
     actioner: (PhoneBindUiAction) -> Unit,
 ) {
     var phone by remember { mutableStateOf("") }
-    var ccode by remember { mutableStateOf(Constants.DEFAULT_CALLING_CODE) }
+    var ccode by remember { mutableStateOf(CallingCodeManager.getDefaultCC()) }
     var code by remember { mutableStateOf("") }
     val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !viewState.binding
 

@@ -8,9 +8,11 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Result
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.AuthUUIDReq
-import io.agora.flat.data.model.EmailCodeReq
+import io.agora.flat.data.model.EmailReq
+import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
 import io.agora.flat.data.model.LoginPlatform
+import io.agora.flat.data.model.PhonePasswordReq
 import io.agora.flat.data.model.PhoneRegisterReq
 import io.agora.flat.data.model.PhoneReq
 import io.agora.flat.data.model.PhoneSmsCodeReq
@@ -275,29 +277,27 @@ class UserRepository @Inject constructor(
         }
     }
 
-    private var lastSendCodeTime = 0L
-
-    private suspend fun limitSendCode(
-        failure: Failure<RespNoData>? = null,
-        block: suspend () -> Result<RespNoData>,
-    ): Result<RespNoData> {
-        return if (SystemClock.elapsedRealtime() - lastSendCodeTime > 60_000) {
-            lastSendCodeTime = SystemClock.elapsedRealtime()
-            block()
-        } else {
-            failure ?: Failure(
-                FlatNetException(
-                    RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web.ExhaustiveAttack
-                )
-            )
-        }
-    }
+//    private var lastSendCodeTime = 0L
+//
+//    private suspend fun limitSendCode(
+//        failure: Failure<RespNoData>? = null,
+//        block: suspend () -> Result<RespNoData>,
+//    ): Result<RespNoData> {
+//        return if (SystemClock.elapsedRealtime() - lastSendCodeTime > 60_000) {
+//            lastSendCodeTime = SystemClock.elapsedRealtime()
+//            block()
+//        } else {
+//            failure ?: Failure(
+//                FlatNetException(
+//                    RuntimeException("limit send code"), status = 404, code = FlatErrorCode.Web.ExhaustiveAttack
+//                )
+//            )
+//        }
+//    }
 
     suspend fun requestRegisterSmsCode(phone: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            limitSendCode {
-                userService.requestRegisterSmsCode(PhoneReq(phone)).toResult()
-            }
+            userService.requestRegisterSmsCode(PhoneReq(phone)).toResult()
         }
     }
 
@@ -317,15 +317,19 @@ class UserRepository @Inject constructor(
 
     suspend fun requestRegisterEmailCode(email: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            limitSendCode {
-                userService.requestRegisterEmailCode(EmailCodeReq(email)).toResult()
-            }
+            userService.requestRegisterEmailCode(EmailReq(email)).toResult()
         }
     }
 
     suspend fun registerWithEmail(email: String, code: String, password: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            when (val result = userService.registerWithEmail(EmailRegisterReq(email, code, password)).toResult()) {
+            when (val result = userService.registerWithEmail(
+                EmailRegisterReq(
+                    email = email,
+                    code = code,
+                    password = password
+                )
+            ).toResult()) {
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.toUserInfo())
@@ -334,6 +338,59 @@ class UserRepository @Inject constructor(
 
                 is Failure -> Failure(result.exception)
             }
+        }
+    }
+
+
+    suspend fun loginWithPhonePassword(phone: String, password: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            when (val result = userService.loginWithPhonePassword(PhonePasswordReq(phone, password)).toResult()) {
+                is Success -> {
+                    appKVCenter.setToken(result.data.token)
+                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    Success(true)
+                }
+
+                is Failure -> Failure(result.exception)
+            }
+        }
+    }
+
+    suspend fun loginWithEmailPassword(email: String, password: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            when (val result = userService.loginWithEmailPassword(EmailPasswordReq(email, password)).toResult()) {
+                is Success -> {
+                    appKVCenter.setToken(result.data.token)
+                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    Success(true)
+                }
+
+                is Failure -> Failure(result.exception)
+            }
+        }
+    }
+
+    suspend fun requestResetEmailCode(email: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestResetEmailCode(EmailReq(email)).toResult()
+        }
+    }
+
+    suspend fun resetWithEmail(email: String, code: String, password: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.resetEmailPassword(EmailRegisterReq(email, code, password)).toResult()
+        }
+    }
+
+    suspend fun requestResetPhoneCode(phone: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestResetPhoneCode(PhoneReq(phone)).toResult()
+        }
+    }
+
+    suspend fun resetWithPhone(phone: String, code: String, password: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.resetPhonePassword(PhoneRegisterReq(phone, code, password)).toResult()
         }
     }
 }

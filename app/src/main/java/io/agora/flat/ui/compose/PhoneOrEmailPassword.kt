@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.Country
@@ -55,29 +56,7 @@ import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.util.isValidEmail
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
-
-// Dynamically switch between phone and email input modes
-// Use the same text field component for both modes
-@Composable
-fun PhoneOrEmailPasswordArea(
-    value: String,
-    onValueChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    callingCode: String,
-    onCallingCodeChange: (String) -> Unit,
-) {
-    Column(Modifier.padding(horizontal = 16.dp)) {
-        PhoneOrEmailInput(
-            value = value,
-            onValueChange = onValueChange,
-            callingCode = callingCode,
-            onCallingCodeChange = onCallingCodeChange
-        )
-        Spacer(Modifier.height(8.dp))
-        PasswordInput(password, onPasswordChange)
-    }
-}
+import io.agora.flat.util.showPhoneMode
 
 @Composable
 fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -> Unit, ready: Boolean) {
@@ -162,7 +141,7 @@ fun PasswordInput(
             value = password,
             onValueChange = onPasswordChange,
             modifier = Modifier
-                .height(40.dp)
+                .height(48.dp)
                 .weight(1f),
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             placeholderValue = stringResource(R.string.login_password_input_hint),
@@ -180,6 +159,8 @@ fun PasswordInput(
     FlatDivider(thickness = 1.dp)
 }
 
+// Dynamically switch between phone and email input modes
+// Use the same text field component for both modes
 @Composable
 fun PhoneOrEmailInput(
     callingCode: String,
@@ -198,24 +179,22 @@ fun PhoneOrEmailInput(
         }
     )
 
-    val isPhone = value.isValidPhone() || "" == value
+    val isPhone = value.showPhoneMode()
 
     var isValidEmail by remember { mutableStateOf(true) }
     var hasEmailFocused by remember { mutableStateOf(false) }
 
-    Row(Modifier.height(40.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         if (isPhone) {
             Row(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {
-                            val intent = Intent(context, CallingCodeActivity::class.java)
-                            callingCodeLauncher.launch(intent)
-                        }
-                    ),
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {
+                        val intent = Intent(context, CallingCodeActivity::class.java)
+                        callingCodeLauncher.launch(intent)
+                    }
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(Modifier.width(8.dp))
@@ -224,8 +203,8 @@ fun PhoneOrEmailInput(
             }
         } else {
             Image(painterResource(R.drawable.ic_login_email), contentDescription = "")
+            Spacer(Modifier.width(8.dp))
         }
-        Spacer(Modifier.width(8.dp))
         BindPhoneTextField(
             value = value,
             onValueChange = {
@@ -239,7 +218,7 @@ fun PhoneOrEmailInput(
                 }
             },
             modifier = Modifier
-                .fillMaxHeight()
+                .height(48.dp)
                 .weight(1f),
             onFocusChanged = {
                 // TODO handle first un focus
@@ -309,12 +288,17 @@ fun PasswordTextField(
 @Composable
 @Preview
 private fun PhonePasswordAreaPreview() {
-    PhoneOrEmailPasswordArea(
-        value = "c@c.cc",
-        onValueChange = {},
-        password = "",
-        onPasswordChange = {},
-        callingCode = "+1",
-        onCallingCodeChange = {},
-    )
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        PhoneOrEmailInput(
+            callingCode = "+86",
+            value = "",
+            onValueChange = {},
+            onCallingCodeChange = {},
+        )
+        Spacer(Modifier.height(8.dp))
+        PasswordInput(
+            password = "",
+            onPasswordChange = {},
+        )
+    }
 }

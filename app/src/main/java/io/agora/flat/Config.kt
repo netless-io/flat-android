@@ -4,6 +4,8 @@ class Config {
     companion object {
         var forceBindPhone = !BuildConfig.DEBUG
 
+        var defaultShowPhone = false
+
         // three days in milliseconds
         const val INTERVAL_VERSION_CHECK = 259_200_000L
 
@@ -15,6 +17,7 @@ class Config {
         const val defaultBoardRatio = 9f / 16
 
         const val defaultWindowScale = 0.4f
+
         const val defaultMinWindowScale = 0.25f
     }
 }

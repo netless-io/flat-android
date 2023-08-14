@@ -1,6 +1,7 @@
 package io.agora.flat.util
 
 import android.util.Patterns.EMAIL_ADDRESS
+import io.agora.flat.Config
 import io.agora.flat.R
 import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
@@ -104,6 +105,16 @@ fun String.isValidEmail(): Boolean = this.contains("@")
 
 fun String.isValidSmsCode(): Boolean {
     return this.length == 6
+}
+
+fun String.isValidVerifyCode(): Boolean {
+    return this.isNotEmpty()
+}
+
+fun String.showPhoneMode(): Boolean = isValidPhone() || ("" == this && Config.defaultShowPhone)
+
+fun String.isValidPassword(): Boolean {
+    return this.length >= 8
 }
 
 /**

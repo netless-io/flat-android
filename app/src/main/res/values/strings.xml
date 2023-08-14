@@ -19,6 +19,8 @@
     <string name="preview">Preview</string>
     <string name="rename">Rename</string>
     <string name="send">Send</string>
+    <string name="next">Next</string>
+
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>
@@ -146,6 +148,9 @@
 
     <!-- register -->
     <string name="register">Register</string>
+
+    <string name="reset_password">Reset Password</string>
+    <string name="new_password">New Password</string>
 
     <string name="agreement_global_dialog_message">Thank you for trusting and using Flat.\n\nWe rely on the Flat User Agreement and Flat Privacy Policy to help you understand how we collect,use,and store your personal information and what rights you have with respect to it.\n\nWhen you use Flat, we collect information about your device, logs and browsing history, and to ensure a positive experience in class, you may grant Flat access to your device\'s camera, microphone, and other information.\n\nYou can read the full Flat User Agreement and Flat Privacy Policy for more information.</string>
     <string name="agreement_global_recheck_dialog_message">You need to agree to the User Agreement and Privacy Policy before you can use Flat.\n\nIf you do not agree, we regret that we cannot provide you with the Services.\n\nYou can find out more by reading the full Flat User Agreement and Flat Privacy Policy.</string>
@@ -275,12 +280,6 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="account_cancel_and_exit">Cancel And Exit</string>
     <string name="account_cancel_agree_tip">Agree</string>
 
-    <string name="error_request_too_frequently">request too frequently</string>
-    <string name="error_request_common_fail">request fail</string>
-    <string name="request_common_success">success</string>
-
-    <string name="error_string_network">please check your network</string>
-
     <string name="stage_off_all">off all</string>
     <string name="mute_mic_all">mute all</string>
     <string name="user_list_student_size_format">student (%1$s)</string>
@@ -314,4 +313,27 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="app_name_mindmap">Mind</string>
 
     <string name="toast_mute_all_mic">All students muted</string>
+
+    <!-- errors -->
+    <string name="error_request_too_frequently">request too frequently</string>
+    <string name="error_request_common_fail">request fail</string>
+    <string name="request_common_success">success</string>
+    <string name="error_string_network">network error</string>
+
+    <string name="error_user_not_found">user not found</string>
+    <string name="error_user_room_list_not_empty">room list not empty</string>
+    <string name="error_user_already_binding">user already binding</string>
+    <string name="error_user_password_incorrect">user password incorrect</string>
+    <string name="error_user_or_password_incorrect">user or password incorrect</string>
+
+    <string name="error_email_verification_code_invalid">verification code invalid</string>
+    <string name="error_email_already_exist">email already exist</string>
+    <string name="error_email_already_binding">email are binding</string>
+    <string name="error_email_failed_to_send_code">send code failed</string>
+
+    <string name="error_params_check_failed">parameter verification failed</string>
+    <!--messages -->
+    <string name="message_code_send_success">Code Send..</string>
+    <string name="message_reset_success">Reset Success</string>
+
 </resources>

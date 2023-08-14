@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.data.model.Country
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
@@ -55,21 +56,7 @@ data class AllCountry(
 
 @Composable
 fun CallingCodeScreen(onBackPressed: () -> Unit, onPickCountry: (Country) -> Unit) {
-    var countries by remember { mutableStateOf(emptyList<Country>()) }
-    val context = LocalContext.current
-    LaunchedEffect(true) {
-        kotlin.runCatching {
-            context.assets.open("countries.json").use {
-                it.bufferedReader().use { reader ->
-                    val all = JsonUtils.fromJson(reader.readText(), AllCountry::class.java)
-                    countries = when (context.getCurrentLocale().language) {
-                        Locale("zh").language -> all.zh
-                        else -> all.en
-                    }
-                }
-            }
-        }
-    }
+    val countries = CallingCodeManager.countries
 
     Column {
         BackTopAppBar(
@@ -110,7 +97,7 @@ fun CallingCodeItem(country: Country, modifier: Modifier) {
 @Preview(widthDp = 400, uiMode = 0x20)
 fun CallingCodeItemPreview() {
     CallingCodeItem(
-        country = Country("China", "+86"),
+        country = Country("China", "+86", "CN"),
         Modifier.height(44.dp)
     )
 }

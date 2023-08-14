@@ -11,6 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -19,7 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
+import io.agora.flat.common.Navigator
+import io.agora.flat.common.error.FlatErrorHandler
+import io.agora.flat.ui.activity.LoginAgreement
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.compose.AgreementDialog
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
@@ -36,7 +44,13 @@ class RegisterActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FlatPage {
-                RegisterScreen(onClose = { finish() })
+                RegisterScreen(
+                    onClose = { finish() },
+                    onRegisterSuccess = {
+                        Navigator.launchHomeActivity(this)
+                        finish()
+                    }
+                )
             }
         }
     }
@@ -45,6 +59,7 @@ class RegisterActivity : BaseComposeActivity() {
 @Composable
 fun RegisterScreen(
     onClose: () -> Unit,
+    onRegisterSuccess: () -> Unit = {},
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -53,6 +68,21 @@ fun RegisterScreen(
     LaunchedEffect(viewState) {
         viewState.message?.let {
             context.showToast(it.text)
+            viewModel.clearUiMessage()
+        }
+    }
+
+    LaunchedEffect(viewState) {
+        viewState.error?.let {
+            context.showToast(FlatErrorHandler.getErrorStr(context, it.exception))
+            viewModel.clearError()
+        }
+    }
+
+    LaunchedEffect(viewState) {
+        if (viewState.success) {
+            context.showToast("注册成功")
+            onRegisterSuccess()
         }
     }
 
@@ -79,6 +109,9 @@ internal fun RegisterScreen(
     onConfirm: () -> Unit,
     onSendCode: () -> Unit,
 ) {
+    var agreementChecked by rememberSaveable { mutableStateOf(false) }
+    var showAgreement by rememberSaveable { mutableStateOf(false) }
+
     val info = viewState.registerInfo
     val buttonEnable = (info.value.isValidPhone() || info.value.isValidEmail())
             && info.password.isNotEmpty() && info.code.isNotEmpty()
@@ -111,15 +144,39 @@ internal fun RegisterScreen(
             )
         }
 
+        Spacer(Modifier.height(24.dp))
+
+        LoginAgreement(
+            Modifier
+                .padding(horizontal = 24.dp)
+                .align(alignment = Alignment.CenterHorizontally),
+            checked = agreementChecked,
+            onCheckedChange = { agreementChecked = it },
+        )
+
         Box(modifier = Modifier.padding(16.dp)) {
             FlatPrimaryTextButton(
                 text = stringResource(id = R.string.confirm),
                 enabled = buttonEnable,
                 onClick = {
+                    if (!agreementChecked) {
+                        showAgreement = true
+                        return@FlatPrimaryTextButton
+                    }
                     onConfirm()
                 },
             )
         }
+    }
+
+    if (showAgreement) {
+        AgreementDialog(
+            onAgree = {
+                agreementChecked = true
+                showAgreement = false
+            },
+            onRefuse = { showAgreement = false },
+        )
     }
 }
 
@@ -129,7 +186,7 @@ internal fun RegisterScreen(
 internal fun PhoneBindScreenPreview() {
     FlatPage {
         RegisterScreen(
-            viewState = RegisterUiState.Empty.copy(
+            viewState = RegisterUiState.Init.copy(
                 registerInfo = RegisterInfo(
                     value = "12345678901",
                     cc = "86",

@@ -13,9 +13,11 @@ import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
+import io.agora.flat.ui.activity.password.PasswordResetActivity
 import io.agora.flat.ui.activity.phone.PhoneBindActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
+import io.agora.flat.ui.activity.register.RegisterActivity
 import io.agora.flat.ui.activity.setting.*
 
 object Navigator {
@@ -140,5 +142,15 @@ object Navigator {
     fun launchCallingCodeActivity(context: Context) {
         val intent = Intent(context, CallingCodeActivity::class.java)
         context.startActivity(intent)
+    }
+
+    fun launchRegisterActivity(loginActivity: LoginActivity) {
+        val intent = Intent(loginActivity, RegisterActivity::class.java)
+        loginActivity.startActivity(intent)
+    }
+
+    fun launchForgotPwdActivity(loginActivity: LoginActivity) {
+        val intent = Intent(loginActivity, PasswordResetActivity::class.java)
+        loginActivity.startActivity(intent)
     }
 }

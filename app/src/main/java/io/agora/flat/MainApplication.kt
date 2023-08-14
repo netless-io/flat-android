@@ -7,6 +7,7 @@ import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraXConfig
 import com.herewhite.sdk.WhiteboardView
 import dagger.hilt.android.HiltAndroidApp
+import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.upload.UploadManager
@@ -19,6 +20,7 @@ class MainApplication : Application(), CameraXConfig.Provider {
         UploadManager.init(this)
         LanguageManager.init(this)
         DarkModeManager.init(this)
+        CallingCodeManager.init(this)
         WebView.setWebContentsDebuggingEnabled(isApkInDebug())
         WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
     }

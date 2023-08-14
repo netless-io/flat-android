@@ -28,11 +28,31 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
 
+enum class UiMessageType {
+    Info,
+    Error,
+}
+
 class UiMessage(
-    val text: String,
+    val text: String = "",
     val exception: Throwable? = null,
+    val type: UiMessageType = UiMessageType.Info,
     val id: Long = UUID.randomUUID().mostSignificantBits,
-)
+) {
+    val isError: Boolean
+        get() = type == UiMessageType.Error
+
+    val isInfo: Boolean
+        get() = type == UiMessageType.Info
+}
+
+fun UiInfoMessage(
+    text: String,
+): UiMessage = UiMessage(text = text, type = UiMessageType.Info)
+
+fun UiErrorMessage(
+    exception: Throwable,
+): UiMessage = UiMessage(exception = exception, type = UiMessageType.Error)
 
 class UiMessageManager {
     private val mutex = Mutex()
@@ -66,7 +86,7 @@ fun ShowUiMessageEffect(
     uiMessage?.let { message ->
         LaunchedEffect(message) {
             context.showToast(
-                FlatErrorHandler.getStringByError(
+                FlatErrorHandler.getErrorStr(
                     context = context,
                     error = message.exception,
                     defaultValue = message.text

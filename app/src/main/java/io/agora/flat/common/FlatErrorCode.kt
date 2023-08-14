@@ -32,6 +32,8 @@ class FlatErrorCode {
         const val UserNotFound = 400000 // user not found
         const val UserRoomListNotEmpty = 400001 // user room list is not empty.
         const val UserAlreadyBinding = 400002 // user already binding.
+        const val UserPasswordIncorrect = 400003 // user password (for update) incorrect
+        const val UserOrPasswordIncorrect = 400004 // user or password (for login) incorrect
 
         const val RecordNotFound = 500000 // record info not found
 
@@ -47,6 +49,8 @@ class FlatErrorCode {
         const val FileConvertFailed = 800001// file convert failed
         const val FileIsConverting = 800002 // file is converting
         const val FileIsConvertWaiting = 800003 // file convert is in waiting status
+        const val FileNotIsConvertNone = 800004 // file convert not is none
+        const val FileNotIsConverting = 800005 // file convert is processing
 
         // https://docs.github.com/en/developers/apps/troubleshooting-authorization-request-errors
         const val LoginGithubSuspended = 900000
@@ -56,6 +60,18 @@ class FlatErrorCode {
         const val SMSVerificationCodeInvalid = 110000// verification code invalid
         const val SMSAlreadyExist = 110001 // phone already exist by current user
         const val SMSAlreadyBinding = 110002 // phone are binding by other users
+        const val SMSFailedToSendCode = 110003 // failed to send verification code
+
+        const val EmailVerificationCodeInvalid = 115000  // verification code invalid
+        const val EmailAlreadyExist = 115001  // email already exist by current user
+        const val EmailAlreadyBinding = 115002  // email are binding by other users
+        const val EmailFailedToSendCode = 115003 // failed to send verification code
+
+        const val CensorshipFailed = 120000 // censorship failed
+
+        const val OAuthUUIDNotFound = 130000 // oauth uuid not found
+        const val OAuthClientIDNotFound = 130001 // oauth client id not found
+        const val OAuthSecretUUIDNotFound = 130002 // oauth secret uuid not found
     }
 
     object RTM {

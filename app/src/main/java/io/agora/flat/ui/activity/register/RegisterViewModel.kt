@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -22,7 +23,7 @@ class RegisterViewModel @Inject constructor(
 ) : ViewModel() {
     private val loading = ObservableLoadingCounter()
 
-    private var _state = MutableStateFlow(RegisterUiState.Empty)
+    private var _state = MutableStateFlow(RegisterUiState.Init)
     val state: StateFlow<RegisterUiState>
         get() = _state
 
@@ -44,7 +45,6 @@ class RegisterViewModel @Inject constructor(
                 .onFailure {
                     notifyError(it)
                 }
-
             loading.removeLoader()
         }
     }
@@ -91,10 +91,6 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun showUiMessage(message: String) {
-        _state.value = _state.value.copy(message = UiMessage(message))
-    }
-
     fun updateRegisterInfo(it: RegisterInfo) {
         _state.value = _state.value.copy(registerInfo = it)
     }
@@ -119,11 +115,19 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun notifyError(throwable: Throwable) {
-        _state.value = _state.value.copy(error = UiMessage(throwable.message ?: ""))
+    private fun showUiMessage(message: String) {
+        _state.value = _state.value.copy(message = UiMessage(message))
     }
 
-    private fun clearError() {
+    fun clearUiMessage() {
+        _state.value = _state.value.copy(message = null)
+    }
+
+    private fun notifyError(throwable: Throwable) {
+        _state.value = _state.value.copy(error = UiMessage(throwable.message ?: "", throwable))
+    }
+
+    fun clearError() {
         _state.value = _state.value.copy(error = null)
     }
 }
@@ -147,12 +151,14 @@ data class RegisterInfo(
 
 data class RegisterUiState(
     val success: Boolean = false,
-    val registerInfo: RegisterInfo = RegisterInfo(),
+    val registerInfo: RegisterInfo = RegisterInfo(
+        cc = CallingCodeManager.getDefaultCC(),
+    ),
     val loading: Boolean = false,
     val message: UiMessage? = null,
     val error: UiMessage? = null
 ) {
     companion object {
-        val Empty = RegisterUiState()
+        val Init = RegisterUiState()
     }
 }

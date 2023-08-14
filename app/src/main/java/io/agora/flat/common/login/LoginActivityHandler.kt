@@ -160,7 +160,7 @@ class LoginActivityHandler(
                 is Success -> notifySuccess()
                 is Failure -> {
                     showUiMessage(
-                        FlatErrorHandler.getStringByError(
+                        FlatErrorHandler.getErrorStr(
                             context,
                             loginResult.exception,
                             context.getString(R.string.error_request_common_fail)

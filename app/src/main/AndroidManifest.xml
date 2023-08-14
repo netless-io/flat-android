@@ -62,6 +62,7 @@
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity android:name=".ui.activity.dev.DevSettingsActivity" />
         <activity android:name=".ui.activity.CallingCodeActivity" />
+
         <activity
             android:name=".ui.activity.phone.PhoneBindActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -69,6 +70,11 @@
 
         <activity
             android:name=".ui.activity.register.RegisterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
+        <activity
+            android:name=".ui.activity.password.PasswordResetActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 

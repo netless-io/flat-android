@@ -2,7 +2,6 @@ package io.agora.flat.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -56,7 +55,9 @@ import io.agora.flat.common.login.LoginActivityHandler
 import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.activity.login.LoginInputState
 import io.agora.flat.ui.activity.login.LoginUiAction
+import io.agora.flat.ui.activity.login.LoginViewModel
 import io.agora.flat.ui.activity.phone.PhoneBindDialog
 import io.agora.flat.ui.compose.AgreementDialog
 import io.agora.flat.ui.compose.ClickableItem
@@ -68,19 +69,19 @@ import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
 import io.agora.flat.ui.compose.FlatTextBodyTwo
 import io.agora.flat.ui.compose.FlatTextTitle
+import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneAndCodeArea
-import io.agora.flat.ui.compose.PhoneOrEmailPasswordArea
+import io.agora.flat.ui.compose.PhoneOrEmailInput
 import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
-import io.agora.flat.ui.viewmodel.LoginViewModel
+import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.util.isApkInDebug
 import io.agora.flat.util.isPhoneMode
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.delay
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -96,6 +97,7 @@ class LoginActivity : BaseComposeActivity() {
 
         setContent {
             val loginState by loginHandler.observeLoginState().collectAsState()
+            val uiState by viewModel.state.collectAsState()
             var showPhoneBind by remember { mutableStateOf(false) }
 
             val actioner: (LoginUiAction) -> Unit = { action ->
@@ -128,7 +130,17 @@ class LoginActivity : BaseComposeActivity() {
                         loginHandler.sendPhoneCode(action.phone)
                     }
 
-                    else -> {}
+                    is LoginUiAction.SignUpClick -> {
+                        Navigator.launchRegisterActivity(this)
+                    }
+
+                    LoginUiAction.ForgotPwdClick -> {
+                        Navigator.launchForgotPwdActivity(this)
+                    }
+
+                    is LoginUiAction.PasswordLoginClick -> {
+                        viewModel.login(action.state)
+                    }
                 }
             }
 
@@ -152,6 +164,18 @@ class LoginActivity : BaseComposeActivity() {
                             Navigator.launchHomeActivity(this@LoginActivity)
                         }
                     }
+                }
+            }
+
+            ShowUiMessageEffect(uiMessage = uiState.message, onMessageShown = {
+                viewModel.clearUiMessage(it)
+            })
+
+            LaunchedEffect(uiState) {
+                if (uiState.success) {
+                    showToast(R.string.login_success_and_jump)
+                    delay(2000)
+                    Navigator.launchHomeActivity(this@LoginActivity)
                 }
             }
 
@@ -218,15 +242,6 @@ internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
     }
 }
 
-@Parcelize
-data class LoginInputState(
-    // phone or email
-    val value: String = "",
-    val password: String = "",
-    val smsCode: String = "",
-    val cc: String = Constants.DEFAULT_CALLING_CODE,
-) : Parcelable
-
 @Composable
 private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
     var agreementChecked by rememberSaveable { mutableStateOf(false) }
@@ -245,12 +260,11 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
             PasswordLoginArea(
                 inputState = inputState,
                 onLoginInputChange = { inputState = it },
+                onSmsClick = {
+                    passwordMode = false
+                },
                 actioner = {
-                    if (it is LoginUiAction.SMSLoginClick) {
-                        passwordMode = false
-                        return@PasswordLoginArea
-                    }
-                    if (agreementChecked.not()) {
+                    if (agreementChecked.not() && it is LoginUiAction.PasswordLoginClick) {
                         showAgreement = true
                         return@PasswordLoginArea
                     }
@@ -304,16 +318,22 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
 private fun PasswordLoginArea(
     inputState: LoginInputState,
     onLoginInputChange: (LoginInputState) -> Unit,
+    onSmsClick: () -> Unit,
     actioner: (LoginUiAction) -> Unit
 ) {
-    PhoneOrEmailPasswordArea(
-        value = inputState.value,
-        onValueChange = { onLoginInputChange(inputState.copy(value = it)) },
-        password = inputState.password,
-        onPasswordChange = { onLoginInputChange(inputState.copy(password = it)) },
-        callingCode = inputState.cc,
-        onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
-    )
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        PhoneOrEmailInput(
+            value = inputState.value,
+            onValueChange = { onLoginInputChange(inputState.copy(value = it)) },
+            callingCode = inputState.cc,
+            onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
+        )
+        Spacer(Modifier.height(8.dp))
+        PasswordInput(
+            password = inputState.password,
+            onPasswordChange = { onLoginInputChange(inputState.copy(password = it)) },
+        )
+    }
 
     Row(
         Modifier
@@ -321,7 +341,8 @@ private fun PasswordLoginArea(
             .padding(horizontal = 8.dp)
     ) {
         TextButton(
-            onClick = { actioner(LoginUiAction.SMSLoginClick) }) {
+            onClick = onSmsClick
+        ) {
             FlatTextBodyTwo(stringResource(R.string.login_use_sms_login), color = MaterialTheme.colors.primary)
         }
         Spacer(Modifier.weight(1f))
@@ -338,13 +359,13 @@ private fun PasswordLoginArea(
             text = stringResource(id = R.string.login_sign_in),
             enabled = inputState.value.isNotEmpty() && inputState.password.isNotEmpty(),
         ) {
-            actioner(LoginUiAction.PasswordLoginClick)
+            actioner(LoginUiAction.PasswordLoginClick(inputState))
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
     Box(Modifier.padding(horizontal = 16.dp)) {
         FlatSecondaryTextButton(text = stringResource(id = R.string.login_sign_up)) {
-
+            actioner(LoginUiAction.SignUpClick)
         }
     }
     Spacer(modifier = Modifier.height(16.dp))
@@ -374,7 +395,7 @@ private fun PhoneLoginArea(
             .padding(horizontal = 8.dp)
     ) {
         TextButton(
-            onClick = { actioner(LoginUiAction.PasswordLoginClick) }) {
+            onClick = { actioner(LoginUiAction.PasswordLoginClick(inputState)) }) {
             FlatTextBodyTwo(stringResource(R.string.login_use_password_login), color = MaterialTheme.colors.primary)
         }
         Spacer(Modifier.weight(1f))
@@ -444,7 +465,7 @@ private fun LoginSlogan() {
 }
 
 @Composable
-private fun LoginAgreement(
+fun LoginAgreement(
     modifier: Modifier = Modifier,
     checked: Boolean,
     onCheckedChange: ((Boolean) -> Unit)?,

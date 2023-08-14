@@ -21,6 +21,7 @@
     <string name="preview">预览</string>
     <string name="rename">重命名</string>
     <string name="send">发送</string>
+    <string name="next">下一步</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -156,6 +157,10 @@
     <!-- register -->
     <string name="register">注册新账号</string>
 
+    <string name="reset_password">重置密码</string>
+    <string name="new_password">新密码</string>
+
+
     <string name="agreement_global_dialog_message">感谢您信任并使用 Flat。\n\n我们将依据《Flat 用户协议》及《Flat 隐私政策》来帮助您了解我们在收集、使用、存储您个人信息的情况以及您享有的相关权利。\n\n在您使用 Flat 时，我们将收集您的设备信息、操作日志及浏览记录等信息，同时为了保证上课的体验，你可以授予 Flat 获取您设备的摄像头权限、麦克风权限等信息。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_recheck_dialog_message">您需要同意用户协议与隐私政策后才能使 Flat。\n\n如您不同意，很遗憾我们无法为您提供服务。\n\n您可通过阅读完整的《Flat 用户协议》及《Flat 隐私政策》来了解详细信息。</string>
     <string name="agreement_global_privacy">《Flat 隐私政策》</string>
@@ -285,12 +290,6 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="account_cancel_and_exit">注销并退出登录</string>
     <string name="account_cancel_agree_tip">我已完全知晓并同意</string>
 
-    <string name="error_request_too_frequently">请求太过频繁</string>
-    <string name="error_request_common_fail">请求失败</string>
-    <string name="request_common_success">操作成功</string>
-
-    <string name="error_string_network">请求失败，请检查网络</string>
-
     <string name="stage_off_all">全员下台</string>
     <string name="mute_mic_all">全员静音</string>
     <string name="user_list_student_size_format">学生 (%1$s)</string>
@@ -324,4 +323,27 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="app_name_rich_text">富文本</string>
 
     <string name="toast_mute_all_mic">全体学生已静音</string>
+
+
+    <!-- errors -->
+    <string name="error_request_too_frequently">请求太过频繁</string>
+    <string name="error_request_common_fail">请求失败</string>
+    <string name="request_common_success">操作成功</string>
+    <string name="error_string_network">请求失败，请检查网络</string>
+
+    <string name="error_user_not_found">用户不存在</string>
+    <string name="error_user_room_list_not_empty">房间列表非空</string>
+    <string name="error_user_already_binding">用户已绑定</string>
+    <string name="error_user_password_incorrect">用户密码错误</string>
+    <string name="error_user_or_password_incorrect">用户或密码错误</string>
+
+    <string name="error_email_verification_code_invalid">验证码错误</string>
+    <string name="error_email_already_exist">邮箱已存在</string>
+    <string name="error_email_already_binding">邮箱已绑定</string>
+    <string name="error_email_failed_to_send_code">发送验证码失败</string>
+
+    <string name="error_params_check_failed">参数错误</string>
+    <!--messages -->
+    <string name="message_code_send_success">验证码已发送</string>
+    <string name="message_reset_success">密码重置成功</string>
 </resources>

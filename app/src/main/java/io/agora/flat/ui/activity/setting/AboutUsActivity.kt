@@ -4,7 +4,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -19,7 +26,11 @@ import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.compose.BackTopAppBar
+import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextBodyTwo
+import io.agora.flat.ui.compose.FlatTextTitle
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.util.getAppVersion
 
@@ -35,6 +46,7 @@ class AboutUsActivity : BaseComposeActivity() {
                         is AboutUiAction.OpenServiceProtocol -> {
                             Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Service)
                         }
+
                         is AboutUiAction.OpenPrivacyProtocol -> {
                             Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Privacy)
                         }

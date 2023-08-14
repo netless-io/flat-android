@@ -9,4 +9,6 @@ data class Country(
     val name: String,
     // calling code
     val cc: String,
+    // country code
+    val code: String,
 ) : Parcelable

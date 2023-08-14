@@ -1,5 +1,5 @@
 package io.agora.flat.data.model
 
-data class EmailCodeReq(
+data class EmailReq(
     val email: String,
 )

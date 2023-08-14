@@ -12,7 +12,8 @@ import java.util.*
 
 object LanguageManager {
     private const val KEY_LANGUAGE = "key_language"
-    private lateinit var store: SharedPreferences
+
+    private var store: SharedPreferences? = null
 
     /**
      * language: Country code
@@ -35,13 +36,17 @@ object LanguageManager {
     }
 
     fun current(): String {
-        return store.getString(KEY_LANGUAGE, "") ?: ""
+        return store?.getString(KEY_LANGUAGE, "") ?: ""
     }
 
     fun update(language: String) {
-        store.edit(commit = true) {
+        store?.edit(commit = true) {
             putString(KEY_LANGUAGE, language)
         }
+    }
+
+    fun currentLocale(): Locale {
+        return getLocale(current())
     }
 
     fun onAttach(context: Context): Context {
@@ -63,6 +68,7 @@ object LanguageManager {
         return context.createConfigurationContext(configuration)
     }
 
+    @Suppress("DEPRECATION")
     private fun configLanguageLegacy(context: Context, language: String): Context {
         val resources = context.resources
         val configuration = resources.configuration

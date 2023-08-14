@@ -106,11 +106,41 @@ interface UserService {
 
     @POST("v2/register/email/send-message")
     fun requestRegisterEmailCode(
-        @Body req: EmailCodeReq,
+        @Body req: EmailReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v2/register/email")
     fun registerWithEmail(
         @Body req: EmailRegisterReq,
     ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v2/login/phone")
+    fun loginWithPhonePassword(
+        @Body req: PhonePasswordReq,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v2/login/email")
+    fun loginWithEmailPassword(
+        @Body req: EmailPasswordReq,
+    ): Call<BaseResp<UserInfoWithToken>>
+
+    @POST("v2/reset/email/send-message")
+    fun requestResetEmailCode(
+        @Body req: EmailReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/reset/email")
+    fun resetEmailPassword(
+        @Body req: EmailRegisterReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/reset/phone/send-message")
+    fun requestResetPhoneCode(
+        @Body req: PhoneReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/reset/phone")
+    fun resetPhonePassword(
+        @Body req: PhoneRegisterReq,
+    ): Call<BaseResp<RespNoData>>
 }
