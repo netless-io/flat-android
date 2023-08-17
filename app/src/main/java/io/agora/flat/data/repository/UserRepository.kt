@@ -1,16 +1,14 @@
 package io.agora.flat.data.repository
 
-import android.os.SystemClock
-import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatNetException
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Result
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.AuthUUIDReq
-import io.agora.flat.data.model.EmailReq
 import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
+import io.agora.flat.data.model.EmailReq
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.PhonePasswordReq
 import io.agora.flat.data.model.PhoneRegisterReq
@@ -19,10 +17,12 @@ import io.agora.flat.data.model.PhoneSmsCodeReq
 import io.agora.flat.data.model.RemoveBindingReq
 import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.RoomCount
+import io.agora.flat.data.model.SetPasswordReq
 import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import io.agora.flat.data.model.UserRenameReq
+import io.agora.flat.data.onSuccess
 import io.agora.flat.data.toResult
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.http.api.UserService
@@ -130,6 +130,7 @@ class UserRepository @Inject constructor(
             uuid = this.uuid,
             avatar = this.avatar,
             hasPhone = hasPhone,
+            hasPassword = this.hasPassword,
         )
     }
 
@@ -391,6 +392,49 @@ class UserRepository @Inject constructor(
     suspend fun resetWithPhone(phone: String, code: String, password: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
             userService.resetPhonePassword(PhoneRegisterReq(phone, code, password)).toResult()
+        }
+    }
+
+    suspend fun requestRebindPhoneCode(phone: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestRebindPhoneCode(PhoneReq(phone)).toResult()
+        }
+    }
+
+    suspend fun rebindWithPhone(phone: String, code: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.rebindPhone(PhoneSmsCodeReq(phone, code))
+                .toResult()
+                .onSuccess {
+                    appKVCenter.setToken(it.token)
+                    appKVCenter.setUserInfo(it.toUserInfo())
+                    bindings = it.bindings
+                }
+                .toNoData()
+        }
+    }
+
+    suspend fun setPassword(password: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.setPassword(SetPasswordReq(null, password)).toResult()
+                .onSuccess {
+                    appKVCenter.getUserInfo()?.let { userInfo ->
+                        appKVCenter.setUserInfo(userInfo.copy(hasPassword = true))
+                    }
+                }
+        }
+    }
+
+    suspend fun changePassword(oldPassword: String, newPassword: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.setPassword(SetPasswordReq(oldPassword, newPassword)).toResult()
+        }
+    }
+
+    private inline fun <T> Result<T>.toNoData(): Result<RespNoData> {
+        return when (this) {
+            is Success -> Success(RespNoData)
+            is Failure -> Failure(this.exception)
         }
     }
 }

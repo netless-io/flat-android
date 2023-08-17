@@ -3,6 +3,7 @@ package io.agora.flat.common.android
 import android.app.Application
 import android.os.Build
 import android.os.LocaleList
+import io.agora.flat.BuildConfig
 import io.agora.flat.Constants.Companion.DEFAULT_CALLING_CODE
 import io.agora.flat.data.model.Country
 import io.agora.flat.util.JsonUtils
@@ -33,6 +34,9 @@ object CallingCodeManager {
     }
 
     fun getDefaultCC(): String {
+        if (BuildConfig.DEBUG) {
+            return DEFAULT_CALLING_CODE
+        }
         return countries.find { it.code.equals(getSystemDefaultLocale().country, true) }?.cc ?: DEFAULT_CALLING_CODE
     }
 

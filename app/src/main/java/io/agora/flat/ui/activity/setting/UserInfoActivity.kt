@@ -85,12 +85,15 @@ internal fun UserInfoScreen(
             UserInfoUiAction.Finish -> {
                 onBackPressed()
             }
+
             UserInfoUiAction.BindGithub -> {
                 onBindGithub()
             }
+
             UserInfoUiAction.BindWeChat -> {
                 onBindWeChat()
             }
+
             else -> viewModel.processAction(action)
         }
     }
@@ -99,8 +102,13 @@ internal fun UserInfoScreen(
         viewModel.clearMessage(it)
     }
 
+    LifecycleHandler(
+        onResume = {
+            viewModel.refreshUser()
+        }
+    )
+
     UserInfoScreen(state, actioner)
-    LifecycleHandler(onResume = { viewModel.refreshUser() })
 }
 
 @Composable
@@ -118,6 +126,7 @@ private fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> 
     val bindingGithub = state.bindings?.github == true
     // avatar may be image uri string or android content uri
     var avatar by remember { mutableStateOf<Any?>(state.userInfo?.avatar) }
+    var hasPassword = state.userInfo?.hasPassword == true
 
     val launcherPickAvatar = launcherPickContent {
         avatar = it.uri
@@ -158,6 +167,24 @@ private fun SettingList(state: UserInfoUiState, actioner: (UserInfoUiAction) -> 
                 } else {
                     actioner(UserInfoUiAction.BindWeChat)
                 }
+            }
+
+            if (hasPassword) {
+                SettingItem(
+                    id = R.drawable.ic_login_password,
+                    tip = stringResource(R.string.change_password),
+                    onClick = {
+                        Navigator.launchPasswordChangeActivity(context)
+                    }
+                )
+            } else {
+                SettingItem(
+                    id = R.drawable.ic_login_password,
+                    tip = stringResource(R.string.set_password),
+                    onClick = {
+                        Navigator.launchPasswordSetActivity(context)
+                    }
+                )
             }
         }
     }
@@ -211,9 +238,20 @@ private fun BindingItem(
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
 fun DefaultPreview() {
-    val userInfo = UserInfo("name", "", "uuid", false)
-    val userBindings = UserBindings(wechat = false, phone = true, github = false, google = true)
-    FlatPage {
-        UserInfoScreen(UserInfoUiState(userInfo, userBindings)) { }
-    }
+    val uiState = UserInfoUiState(
+        UserInfo(
+            name = "name",
+            avatar = "",
+            uuid = "uuid",
+            hasPhone = false,
+            hasPassword = true,
+        ),
+        UserBindings(
+            wechat = false,
+            phone = true,
+            github = false,
+            google = true
+        )
+    )
+    FlatPage { UserInfoScreen(state = uiState) { } }
 }

@@ -131,6 +131,7 @@ fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -
 fun PasswordInput(
     password: String,
     onPasswordChange: (String) -> Unit,
+    placeholderValue: String? = stringResource(R.string.login_password_input_hint),
 ) {
     var showPassword by remember { mutableStateOf(false) }
 
@@ -144,7 +145,7 @@ fun PasswordInput(
                 .height(48.dp)
                 .weight(1f),
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholderValue = stringResource(R.string.login_password_input_hint),
+            placeholderValue = placeholderValue,
         )
 
         val image = if (showPassword)
@@ -230,11 +231,6 @@ fun PhoneOrEmailInput(
                         isValidEmail = value.isValidEmail()
                     }
                 }
-            },
-            keyboardOptions = if (isPhone) {
-                KeyboardOptions.Default
-            } else {
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
             },
             placeholderValue = stringResource(R.string.login_phone_or_email_input_hint)
         )

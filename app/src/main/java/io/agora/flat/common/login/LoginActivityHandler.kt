@@ -71,6 +71,7 @@ class LoginActivityHandler(
                 intent,
                 context.getString(R.string.intent_browser_choose_title)
             )
+
             try {
                 context.startActivity(chooserIntent)
             } catch (e: ActivityNotFoundException) {

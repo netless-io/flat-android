@@ -13,7 +13,9 @@ import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
 import io.agora.flat.ui.activity.home.MainActivity
+import io.agora.flat.ui.activity.password.PasswordChangeActivity
 import io.agora.flat.ui.activity.password.PasswordResetActivity
+import io.agora.flat.ui.activity.password.PasswordSetActivity
 import io.agora.flat.ui.activity.phone.PhoneBindActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
@@ -152,5 +154,15 @@ object Navigator {
     fun launchForgotPwdActivity(loginActivity: LoginActivity) {
         val intent = Intent(loginActivity, PasswordResetActivity::class.java)
         loginActivity.startActivity(intent)
+    }
+
+    fun launchPasswordChangeActivity(context: Context) {
+        val intent = Intent(context, PasswordChangeActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchPasswordSetActivity(context: Context) {
+        val intent = Intent(context, PasswordSetActivity::class.java)
+        context.startActivity(intent)
     }
 }

@@ -1,3 +1,3 @@
 package io.agora.flat.data.model
 
-class RespNoData
+object RespNoData

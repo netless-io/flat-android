@@ -7,4 +7,5 @@ data class UserInfo(
     val avatar: String,
     @SerializedName("userUUID") val uuid: String,
     val hasPhone: Boolean = false,
+    val hasPassword: Boolean = false,
 )

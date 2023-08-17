@@ -143,4 +143,19 @@ interface UserService {
     fun resetPhonePassword(
         @Body req: PhoneRegisterReq,
     ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/user/rebind-phone/send-message")
+    fun requestRebindPhoneCode(
+        @Body req: PhoneReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/user/rebind-phone")
+    fun rebindPhone(
+        @Body req: PhoneSmsCodeReq,
+    ): Call<BaseResp<UserInfoRebind>>
+
+    @POST("v2/user/password")
+    fun setPassword(
+        @Body req: SetPasswordReq,
+    ): Call<BaseResp<RespNoData>>
 }

@@ -131,4 +131,7 @@ sealed class UserInfoUiAction {
     object UnbindWeChat : UserInfoUiAction()
     object UnbindGithub : UserInfoUiAction()
     data class PickedAvatar(val info: ContentInfo) : UserInfoUiAction()
+
+//    object ResetPassword : UserInfoUiAction()
+//    object ChangePassword : UserInfoUiAction()
 }

@@ -26,6 +26,7 @@
     </queries>
 
     <application
+        android:usesCleartextTraffic="true"
         android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -166,5 +167,7 @@
             android:screenOrientation="fullUser"
             android:theme="@style/Theme.FlatAndroid.Camera"
             tools:targetApi="O" />
+        <activity android:name=".ui.activity.password.PasswordChangeActivity" />
+        <activity android:name=".ui.activity.password.PasswordSetActivity" />
     </application>
 </manifest>
