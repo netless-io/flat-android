@@ -169,5 +169,6 @@
             tools:targetApi="O" />
         <activity android:name=".ui.activity.password.PasswordChangeActivity" />
         <activity android:name=".ui.activity.password.PasswordSetActivity" />
+        <activity android:name=".ui.activity.bind.EmailBindActivity" />
     </application>
 </manifest>

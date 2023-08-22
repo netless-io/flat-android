@@ -49,7 +49,6 @@
     <string name="info_gathering">Information Gathering</string>
     <string name="info_third_party">Third-party Information</string>
     <string name="network_acceleration">Network Acceleration</string>
-    <string name="bind_phone">Bind Phone</string>
     <string name="account_security">Account Security</string>
     <string name="cancel_account">Cancel Account</string>
 
@@ -125,6 +124,8 @@
     <string name="wechat">WeChat</string>
     <string name="github">Github</string>
     <string name="google">Google</string>
+    <string name="email">Email</string>
+    <string name="phone">Phone</string>
 
     <string name="login_sign_in">Sign In</string>
     <string name="login_sign_up">Sign Up</string>
@@ -143,8 +144,16 @@
     <string name="user_avatar">User Avatar</string>
     <string name="bind_info">Bindings</string>
 
+    <string name="bind_phone">Bind Phone</string>
     <string name="phone_number">Phone Number</string>
     <string name="verification_code">Verification Code</string>
+
+    <string name="bind_email">Bind Email</string>
+
+    <string name="not_bound">Not bound</string>
+    <string name="check_unbind_title">Unbind</string>
+    <string name="check_unbind_message">Unbinding your account will prevent you from continuing to log in with it</string>
+    <string name="unbind_limit_message">Current login is unique and cannot be unbound</string>
 
     <!-- register -->
     <string name="register">Register</string>

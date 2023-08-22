@@ -182,11 +182,14 @@ class LoginActivity : BaseComposeActivity() {
             LoginPage(actioner = actioner)
 
             if (showPhoneBind) {
-                PhoneBindDialog(onBindSuccess = {
-                    Navigator.launchHomeActivity(this)
-                }, onDismissRequest = {
-                    // should not cancel dialog
-                })
+                PhoneBindDialog(
+                    onBindSuccess = {
+                        Navigator.launchHomeActivity(this)
+                    },
+                    onDismissRequest = {
+                        // should not cancel dialog
+                    }
+                )
             }
         }
     }

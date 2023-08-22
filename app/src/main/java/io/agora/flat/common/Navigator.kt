@@ -9,6 +9,7 @@ import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.CallingCodeActivity
 import io.agora.flat.ui.activity.LoginActivity
+import io.agora.flat.ui.activity.bind.EmailBindActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
 import io.agora.flat.ui.activity.dev.DevToolsActivity
@@ -131,8 +132,14 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchPhoneBindActivity(context: Context) {
+    fun launchPhoneBindActivity(context: Context, from :String = Constants.From.Login) {
         val intent = Intent(context, PhoneBindActivity::class.java)
+        intent.putExtra(Constants.IntentKey.FROM, from)
+        context.startActivity(intent)
+    }
+
+    fun launchEmailBindActivity(context: Context) {
+        val intent = Intent(context, EmailBindActivity::class.java)
         context.startActivity(intent)
     }
 

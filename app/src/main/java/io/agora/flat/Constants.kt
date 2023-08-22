@@ -30,6 +30,8 @@ class Constants {
         const val TITLE = "title"
         const val MESSAGE = "message"
         const val COUNTRY = "country"
+
+        const val FROM = "from"
     }
 
     object Login {
@@ -42,5 +44,10 @@ class Constants {
         const val KEY_LOGIN_RESP = "login_resp"
         const val KEY_ERROR_CODE = "error_code"
         const val KEY_ERROR_MESSAGE = "error_message"
+    }
+
+    object From {
+        const val UserSecurity = "user_security"
+        const val Login = "third_party_login"
     }
 }

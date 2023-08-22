@@ -2,9 +2,20 @@ package io.agora.flat.ui.activity.phone
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -23,20 +34,45 @@ import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.PhoneAndCodeArea
 import io.agora.flat.ui.theme.Shapes
-import io.agora.flat.util.getActivity
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
 class PhoneBindActivity : BaseComposeActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             FlatPage {
-                PhoneBindScreen(onBindSuccess = {
-                    Navigator.launchHomeActivity(this@PhoneBindActivity)
-                })
+                PhoneBindScreen(
+                    onBindSuccess = {
+                        when (intent?.getStringExtra(Constants.IntentKey.FROM)) {
+                            Constants.From.Login -> {
+                                Navigator.launchHomeActivity(this@PhoneBindActivity)
+                                finish()
+                            }
+
+                            Constants.From.UserSecurity -> {
+                                this@PhoneBindActivity.showToast(R.string.bind_success)
+                                finish()
+                            }
+                        }
+                    },
+                    onBindClose = {
+                        when (intent?.getStringExtra(Constants.IntentKey.FROM)) {
+                            Constants.From.Login -> {
+                                Navigator.launchLoginActivity(this@PhoneBindActivity)
+                                finish()
+                            }
+
+                            Constants.From.UserSecurity -> {
+                                finish()
+                            }
+                        }
+                    }
+                )
             }
         }
     }
@@ -59,6 +95,7 @@ fun PhoneBindDialog(onBindSuccess: () -> Unit, onDismissRequest: () -> Unit) {
 @Composable
 fun PhoneBindScreen(
     onBindSuccess: () -> Unit,
+    onBindClose: () -> Unit = {},
     viewModel: PhoneBindViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -66,22 +103,23 @@ fun PhoneBindScreen(
 
     val actioner: (PhoneBindUiAction) -> Unit = { action ->
         when (action) {
-            PhoneBindUiAction.Close -> {
-                Navigator.launchLoginActivity(context)
-                context.getActivity()?.finish()
-            }
+            PhoneBindUiAction.Close -> onBindClose()
+
             is PhoneBindUiAction.Bind -> viewModel.bindPhone(action.phone, action.code)
             is PhoneBindUiAction.SendCode -> viewModel.sendSmsCode(action.phone)
         }
     }
+
     LaunchedEffect(viewState) {
         if (viewState.bindSuccess) {
             onBindSuccess()
         }
+
         viewState.message?.let {
             context.showToast(it.text)
         }
     }
+
     PhoneBindScreen(viewState = viewState, actioner = actioner)
 }
 
@@ -111,7 +149,6 @@ internal fun PhoneBindScreen(
                 actioner(PhoneBindUiAction.SendCode("$ccode$phone"))
             }
         )
-        Spacer(modifier = Modifier.weight(1f))
         Box(modifier = Modifier.padding(16.dp)) {
             FlatPrimaryTextButton(
                 text = stringResource(id = R.string.confirm),

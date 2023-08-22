@@ -245,6 +245,49 @@ fun PhoneOrEmailInput(
 }
 
 @Composable
+fun EmailInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    var isValidEmail by remember { mutableStateOf(true) }
+    var hasEmailFocused by remember { mutableStateOf(false) }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Image(painterResource(R.drawable.ic_login_email), contentDescription = "")
+        Spacer(Modifier.width(8.dp))
+        BindPhoneTextField(
+            value = value,
+            onValueChange = {
+                if (isValidEmail.not() && it.isValidEmail()) {
+                    isValidEmail = true
+                }
+                onValueChange(it)
+            },
+            modifier = Modifier
+                .height(48.dp)
+                .weight(1f),
+            onFocusChanged = {
+                if (!hasEmailFocused && it.isFocused) {
+                    hasEmailFocused = true
+                }
+                if (hasEmailFocused && !it.isFocused) {
+                    isValidEmail = value.isValidEmail()
+                }
+            },
+            placeholderValue = stringResource(R.string.login_email_input_hint)
+        )
+    }
+
+    if (isValidEmail) {
+        FlatDivider(thickness = 1.dp)
+    } else {
+        FlatDivider(color = Red_6, thickness = 1.dp)
+        FlatTextBodyTwo(stringResource(R.string.login_email_invalid_tip), color = Red_6)
+    }
+}
+
+
+@Composable
 fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,

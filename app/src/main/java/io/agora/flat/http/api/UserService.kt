@@ -40,14 +40,24 @@ interface UserService {
         @Body req: PhoneSmsCodeReq,
     ): Call<BaseResp<UserInfoWithToken>>
 
-    @POST("v1/user/bindingPhone/sendMessage")
+    @POST("v1/user/binding/platform/phone/sendMessage")
     fun requestBindSmsCode(
         @Body req: PhoneReq,
     ): Call<BaseResp<RespNoData>>
 
-    @POST("v1/user/bindingPhone")
+    @POST("v1/user/binding/platform/phone")
     fun bindPhone(
         @Body req: PhoneSmsCodeReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/binding/platform/email/sendMessage")
+    fun requestBindEmailCode(
+        @Body req: EmailReq,
+    ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/user/binding/platform/email")
+    fun bindEmail(
+        @Body req: EmailCodeReq,
     ): Call<BaseResp<RespNoData>>
 
     /**

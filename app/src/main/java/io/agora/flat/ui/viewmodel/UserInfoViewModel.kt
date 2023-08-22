@@ -10,11 +10,13 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
+import io.agora.flat.data.onFailure
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.event.UserUpdated
+import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import io.agora.flat.util.ContentInfo
@@ -74,19 +76,16 @@ class UserInfoViewModel @Inject constructor(
         }
     }
 
-    fun processAction(action: UserInfoUiAction) {
+    fun processUnbindAction(platform: LoginPlatform) {
         viewModelScope.launch {
-            when (action) {
-                UserInfoUiAction.UnbindGithub -> userRepository.removeBinding(LoginPlatform.Github)
-                UserInfoUiAction.UnbindWeChat -> userRepository.removeBinding(LoginPlatform.WeChat)
-                is UserInfoUiAction.PickedAvatar -> handlePickedAvatar(action.info)
-                else -> {}
+            userRepository.removeBinding(platform).onFailure {
+                uiMessageManager.emitMessage(UiErrorMessage(it))
             }
             _userBindings.value = userRepository.getBindings()
         }
     }
 
-    private fun handlePickedAvatar(info: ContentInfo) {
+    fun handlePickedAvatar(info: ContentInfo) {
         viewModelScope.launch {
             when (val resp = cloudStorageRepository.updateAvatarStart(info.filename, info.size)) {
                 is Success -> {
@@ -105,6 +104,7 @@ class UserInfoViewModel @Inject constructor(
                     )
                     UploadManager.upload(request)
                 }
+
                 is Failure -> uiMessageManager.emitMessage(UiMessage("", exception = resp.exception))
             }
         }
@@ -121,17 +121,28 @@ data class UserInfoUiState(
     val userInfo: UserInfo? = null,
     val bindings: UserBindings? = null,
     val message: UiMessage? = null,
-)
+) {
+    val bindingCount
+        get() = bindings?.run {
+            listOf(wechat, phone, email, agora, apple, github, google).count { it }
+        } ?: 0
+}
 
 sealed class UserInfoUiAction {
     object Finish : UserInfoUiAction()
-    object BindGithub : UserInfoUiAction()
-    object BindWeChat : UserInfoUiAction()
-
-    object UnbindWeChat : UserInfoUiAction()
-    object UnbindGithub : UserInfoUiAction()
     data class PickedAvatar(val info: ContentInfo) : UserInfoUiAction()
 
-//    object ResetPassword : UserInfoUiAction()
-//    object ChangePassword : UserInfoUiAction()
+    object BindGithub : UserInfoUiAction()
+    object BindWeChat : UserInfoUiAction()
+    object BindPhone : UserInfoUiAction()
+    object BindEmail : UserInfoUiAction()
+    object BindGoogle : UserInfoUiAction()
+
+    data class UnbindAction(val platform: LoginPlatform) : UserInfoUiAction()
+
+//    object UnbindWeChat : UserInfoUiAction()
+//    object UnbindGithub : UserInfoUiAction()
+//    object UnbindPhone : UserInfoUiAction()
+//    object UnbindEmail : UserInfoUiAction()
+//    object UnbindGoogle : UserInfoUiAction()
 }

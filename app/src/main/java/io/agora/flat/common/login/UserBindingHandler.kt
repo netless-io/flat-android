@@ -1,5 +1,6 @@
 package io.agora.flat.common.login
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -63,14 +64,14 @@ class UserBindingHandler @Inject constructor(
                 data = Uri.parse(getGithubBindingUrl())
             }
 
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(
-                    Intent.createChooser(
-                        intent,
-                        context.getString(R.string.intent_browser_choose_title),
-                    )
-                )
-            } else {
+            val chooserIntent = Intent.createChooser(
+                intent,
+                context.getString(R.string.intent_browser_choose_title)
+            )
+
+            try {
+                context.startActivity(chooserIntent)
+            } catch (e: ActivityNotFoundException) {
                 showUiMessage(context.getString(R.string.intent_no_browser))
             }
         }

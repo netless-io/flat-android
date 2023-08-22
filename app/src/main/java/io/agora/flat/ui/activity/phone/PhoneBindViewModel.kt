@@ -9,6 +9,8 @@ import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.event.EventBus
+import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiMessage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,7 @@ import javax.inject.Inject
 class PhoneBindViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val stringFetcher: StringFetcher,
+    private val eventBus: EventBus,
 ) : ViewModel() {
     private val bindingState = ObservableLoadingCounter()
     private val bindSuccess = MutableStateFlow(false)
@@ -53,9 +56,11 @@ class PhoneBindViewModel @Inject constructor(
                     FlatErrorCode.Web.SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
+
                     FlatErrorCode.Web.SMSAlreadyBinding -> {
                         showUiMessage(stringFetcher.phoneBound())
                     }
+
                     else -> {
                         showUiMessage(stringFetcher.commonFail())
                     }
@@ -70,6 +75,7 @@ class PhoneBindViewModel @Inject constructor(
             val bindResult = userRepository.bindPhone(phone = phone, code = code)
             bindingState.removeLoader()
             if (bindResult is Success) {
+                eventBus.produceEvent(UserBindingsUpdated())
                 notifyBindSuccess()
             } else {
                 val exception = (bindResult as Failure).exception as FlatNetException
@@ -77,12 +83,15 @@ class PhoneBindViewModel @Inject constructor(
                     FlatErrorCode.Web.SMSAlreadyExist -> {
                         showUiMessage(stringFetcher.alreadyHasPhone())
                     }
+
                     FlatErrorCode.Web.SMSVerificationCodeInvalid -> {
                         showUiMessage(stringFetcher.invalidVerificationCode())
                     }
+
                     FlatErrorCode.Web.ExhaustiveAttack -> {
                         showUiMessage(stringFetcher.frequentRequest())
                     }
+
                     else -> {
                         showUiMessage(stringFetcher.commonFail())
                     }

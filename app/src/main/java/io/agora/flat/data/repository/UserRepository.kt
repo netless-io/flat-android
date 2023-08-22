@@ -6,6 +6,7 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Result
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.AuthUUIDReq
+import io.agora.flat.data.model.EmailCodeReq
 import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
 import io.agora.flat.data.model.EmailReq
@@ -173,6 +174,7 @@ class UserRepository @Inject constructor(
                 appKVCenter.getUserInfo()?.let {
                     appKVCenter.setUserInfo(it.copy(hasPhone = true))
                 }
+                updateBindingState()
                 Success(true)
             }
 
@@ -228,7 +230,7 @@ class UserRepository @Inject constructor(
         }
         return when (result) {
             is Success -> {
-                bindings = bindings?.copy(wechat = true)
+                updateBindingState()
                 Success(true)
             }
 
@@ -243,7 +245,7 @@ class UserRepository @Inject constructor(
             repeat(times) {
                 when (val result = userService.bindingProcess(AuthUUIDReq(authUUID)).toResult()) {
                     is Success -> {
-                        bindings = bindings?.copy(github = true)
+                        updateBindingState()
                         return@withContext Success(true)
                     }
 
@@ -261,14 +263,48 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun requestBindEmailCode(email: String): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            userService.requestBindEmailCode(EmailReq(email)).toResult()
+        }
+    }
+
+    suspend fun bindEmail(email: String, code: String): Result<Boolean> {
+        val result = withContext(Dispatchers.IO) {
+            userService.bindEmail(EmailCodeReq(email, code)).toResult()
+        }
+        return when (result) {
+            is Success -> {
+                updateBindingState()
+                Success(true)
+            }
+
+            is Failure -> {
+                Failure(result.exception)
+            }
+        }
+    }
+
+    private suspend fun updateBindingState() {
+        withContext(Dispatchers.IO) {
+            userService.listBindings().toResult().onSuccess {
+                bindings = it
+            }
+        }
+    }
+
     suspend fun removeBinding(loginPlatform: LoginPlatform): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             when (val result = userService.removeBinding(RemoveBindingReq(loginPlatform)).toResult()) {
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
-                    when (loginPlatform) {
-                        LoginPlatform.WeChat -> bindings = bindings?.copy(wechat = false)
-                        LoginPlatform.Github -> bindings = bindings?.copy(github = false)
+                    bindings = when (loginPlatform) {
+                        LoginPlatform.WeChat -> bindings?.copy(wechat = false)
+                        LoginPlatform.Github -> bindings?.copy(github = false)
+                        LoginPlatform.Apple -> bindings?.copy(apple = false)
+                        LoginPlatform.Google -> bindings?.copy(google = false)
+                        LoginPlatform.Email -> bindings?.copy(email = false)
+                        LoginPlatform.Phone -> bindings?.copy(phone = false)
                     }
                     Success(true)
                 }

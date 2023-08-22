@@ -132,6 +132,8 @@
     <string name="wechat">WeChat</string>
     <string name="github">Github</string>
     <string name="google">Google</string>
+    <string name="email">邮箱</string>
+    <string name="phone">手机号</string>
 
     <string name="login_sign_in">登录</string>
     <string name="login_sign_up">注册</string>
@@ -153,6 +155,13 @@
     <string name="bind_phone">绑定手机号</string>
     <string name="phone_number">手机号</string>
     <string name="verification_code">验证码</string>
+
+    <string name="bind_email">绑定邮箱</string>
+
+    <string name="not_bound">未绑定</string>
+    <string name="check_unbind_title">确认解绑</string>
+    <string name="check_unbind_message">解绑账号后将无法继续使用它登录</string>
+    <string name="unbind_limit_message">当前登录方式为唯一方式，无法解绑</string>
 
     <!-- register -->
     <string name="register">注册新账号</string>
