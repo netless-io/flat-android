@@ -117,6 +117,7 @@
     <string name="login_phone_input_placeholder">请输入手机号</string>
     <string name="login_phone_invalid_tip">请填写正确手机号</string>
     <string name="login_email_invalid_tip">请填写正确的邮箱</string>
+    <string name="login_password_invalid_tip">密码至少8位，包含字母和数字</string>
     <string name="login_code_input_placeholder">请输入验证码</string>
     <string name="login_code_invalid_tip">请填写正确验证码</string>
     <string name="login_send_sms_code">发送验证码</string>
@@ -339,7 +340,6 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
 
     <string name="toast_mute_all_mic">全体学生已静音</string>
 
-
     <!-- errors -->
     <string name="error_request_too_frequently">请求太过频繁</string>
     <string name="error_request_common_fail">请求失败</string>
@@ -358,8 +358,14 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="error_email_failed_to_send_code">发送验证码失败</string>
 
     <string name="error_params_check_failed">参数错误</string>
+
+    <string name="error_verification_code_invalid">验证码错误</string>
+    <string name="error_phone_already_binding">手机已绑定</string>
+    <string name="error_phone_already_exist">手机已存在</string>
+    <string name="error_send_verification_code">发送验证码失败</string>
+
     <!--messages -->
     <string name="message_code_send_success">验证码已发送</string>
     <string name="message_reset_success">密码重置成功</string>
-    <string name="message_set_password_success">设置密码失败</string>
+    <string name="message_set_password_success">设置密码成功</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,6 +30,7 @@ import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
+import io.agora.flat.ui.compose.FlatTextCaption
 import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
 import io.agora.flat.ui.compose.SendCodeInput
@@ -183,12 +185,13 @@ private fun ConfirmScreen(
         Column(Modifier.padding(horizontal = 16.dp)) {
             PasswordInput(
                 password = state.password,
-                onPasswordChange = { onPhoneOrEmailChange(state.copy(password = it)) }
+                onPasswordChange = { onPhoneOrEmailChange(state.copy(password = it)) },
             )
 
             PasswordInput(
                 password = confirmPassword,
-                onPasswordChange = { confirmPassword = it }
+                onPasswordChange = { confirmPassword = it },
+                checkValid = true,
             )
         }
 
@@ -201,6 +204,8 @@ private fun ConfirmScreen(
                 onClick = { onConfirm() },
             )
         }
+
+        FlatTextCaption(stringResource(R.string.password_rule_tips), Modifier.align(Alignment.CenterHorizontally))
     }
 }
 

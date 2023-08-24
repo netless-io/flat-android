@@ -52,12 +52,12 @@ interface UserService {
 
     @POST("v1/user/binding/platform/email/sendMessage")
     fun requestBindEmailCode(
-        @Body req: EmailReq,
+        @Body req: EmailCodeReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v1/user/binding/platform/email")
     fun bindEmail(
-        @Body req: EmailCodeReq,
+        @Body req: EmailBindReq,
     ): Call<BaseResp<RespNoData>>
 
     /**
@@ -116,7 +116,7 @@ interface UserService {
 
     @POST("v2/register/email/send-message")
     fun requestRegisterEmailCode(
-        @Body req: EmailReq,
+        @Body req: EmailCodeReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v2/register/email")
@@ -136,7 +136,7 @@ interface UserService {
 
     @POST("v2/reset/email/send-message")
     fun requestResetEmailCode(
-        @Body req: EmailReq,
+        @Body req: EmailCodeReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v2/reset/email")

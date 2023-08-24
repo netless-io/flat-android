@@ -31,6 +31,7 @@ import io.agora.flat.ui.compose.AgreementDialog
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
+import io.agora.flat.ui.compose.FlatTextCaption
 import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
 import io.agora.flat.ui.compose.SendCodeInput
@@ -141,6 +142,7 @@ internal fun RegisterScreen(
             PasswordInput(
                 password = info.password,
                 onPasswordChange = { onInfoUpdate(info.copy(password = it)) },
+                checkValid = true,
             )
         }
 

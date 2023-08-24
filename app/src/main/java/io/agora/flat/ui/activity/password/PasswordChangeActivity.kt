@@ -94,13 +94,14 @@ fun PasswordChangeScreen(
             PasswordInput(
                 password = newPassword,
                 onPasswordChange = { newPassword = it },
-                placeholderValue = stringResource(R.string.new_password_input_hint)
+                placeholderValue = stringResource(R.string.new_password_input_hint),
+                checkValid = true,
             )
 
             PasswordInput(
                 password = confirmPassword,
                 onPasswordChange = { confirmPassword = it },
-                placeholderValue = stringResource(R.string.new_password_input_hint_again)
+                placeholderValue = stringResource(R.string.new_password_input_hint_again),
             )
         }
 

@@ -77,6 +77,8 @@ fun String.toInviteCodeDisplay() = if (length == 10) {
 internal const val ROOM_UUID_PATTERN = """[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"""
 internal const val INVITE_CODE_PATTERN = """[0-9]{3} [0-9a-fA-F]{3} [0-9a-fA-F]{4}"""
 internal const val SIMPLE_PHONE_PATTERN = """^([0-9]+)${'$'}"""
+internal const val PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}\$" // 8位以上，包含字母和数字
+internal const val SIMPLE_EMAIl_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$" // 8位以上，包含字母和数字
 
 fun String.parseRoomID(): String? {
     if (this.isBlank()) {
@@ -101,20 +103,22 @@ fun String.isValidPhone(): Boolean {
     return SIMPLE_PHONE_PATTERN.toRegex().matches(this)
 }
 
-fun String.isValidEmail(): Boolean = this.contains("@")
+fun String.isValidEmail(): Boolean {
+    return SIMPLE_EMAIl_PATTERN.toRegex().matches(this)
+}
 
 fun String.isValidSmsCode(): Boolean {
     return this.length == 6
 }
 
 fun String.isValidVerifyCode(): Boolean {
-    return this.isNotEmpty()
+    return this.length == 6
 }
 
 fun String.showPhoneMode(): Boolean = isValidPhone() || ("" == this && Config.defaultShowPhone)
 
 fun String.isValidPassword(): Boolean {
-    return this.length >= 8
+    return PASSWORD_PATTERN.toRegex().matches(this)
 }
 
 /**

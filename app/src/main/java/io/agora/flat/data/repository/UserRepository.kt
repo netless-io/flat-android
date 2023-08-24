@@ -1,15 +1,16 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.common.FlatNetException
+import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Result
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.AuthUUIDReq
+import io.agora.flat.data.model.EmailBindReq
 import io.agora.flat.data.model.EmailCodeReq
 import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
-import io.agora.flat.data.model.EmailReq
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.PhonePasswordReq
 import io.agora.flat.data.model.PhoneRegisterReq
@@ -265,13 +266,13 @@ class UserRepository @Inject constructor(
 
     suspend fun requestBindEmailCode(email: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestBindEmailCode(EmailReq(email)).toResult()
+            userService.requestBindEmailCode(EmailCodeReq(email, LanguageManager.currentLocale().language)).toResult()
         }
     }
 
     suspend fun bindEmail(email: String, code: String): Result<Boolean> {
         val result = withContext(Dispatchers.IO) {
-            userService.bindEmail(EmailCodeReq(email, code)).toResult()
+            userService.bindEmail(EmailBindReq(email, code)).toResult()
         }
         return when (result) {
             is Success -> {
@@ -354,7 +355,7 @@ class UserRepository @Inject constructor(
 
     suspend fun requestRegisterEmailCode(email: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestRegisterEmailCode(EmailReq(email)).toResult()
+            userService.requestRegisterEmailCode(EmailCodeReq(email, LanguageManager.currentLocale().language)).toResult()
         }
     }
 
@@ -409,7 +410,7 @@ class UserRepository @Inject constructor(
 
     suspend fun requestResetEmailCode(email: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestResetEmailCode(EmailReq(email)).toResult()
+            userService.requestResetEmailCode(EmailCodeReq(email, LanguageManager.currentLocale().language)).toResult()
         }
     }
 

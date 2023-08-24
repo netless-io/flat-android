@@ -331,7 +331,6 @@ private fun PasswordLoginArea(
             callingCode = inputState.cc,
             onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
         )
-        Spacer(Modifier.height(8.dp))
         PasswordInput(
             password = inputState.password,
             onPasswordChange = { onLoginInputChange(inputState.copy(password = it)) },

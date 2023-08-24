@@ -79,7 +79,8 @@ fun PasswordSetScreen(
             PasswordInput(
                 password = password,
                 onPasswordChange = { password = it },
-                placeholderValue = stringResource(R.string.new_password_input_hint)
+                placeholderValue = stringResource(R.string.new_password_input_hint),
+                checkValid = true,
             )
 
             PasswordInput(

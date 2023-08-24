@@ -1,6 +1,6 @@
 package io.agora.flat.data.model
 
-data class EmailCodeReq(
+data class EmailBindReq(
     val email: String,
-    val language: String,
+    val code: String,
 )

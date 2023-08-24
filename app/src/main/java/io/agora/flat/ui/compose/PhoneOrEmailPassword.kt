@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.model.Country
@@ -54,6 +52,7 @@ import io.agora.flat.ui.theme.Blue_7
 import io.agora.flat.ui.theme.Red_6
 import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.util.isValidEmail
+import io.agora.flat.util.isValidPassword
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showPhoneMode
@@ -61,7 +60,6 @@ import io.agora.flat.util.showPhoneMode
 @Composable
 fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -> Unit, ready: Boolean) {
     var isValidCode by remember { mutableStateOf(true) }
-
     var hasCodeFocused by remember { mutableStateOf(false) }
 
     var remainTime by remember { mutableStateOf(0L) }
@@ -95,7 +93,7 @@ fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -
                 onCodeChange(it)
             },
             modifier = Modifier
-                .height(40.dp)
+                .height(48.dp)
                 .weight(1f),
             onFocusChanged = {
                 if (hasCodeFocused.not() && it.isFocused) {
@@ -132,8 +130,11 @@ fun PasswordInput(
     password: String,
     onPasswordChange: (String) -> Unit,
     placeholderValue: String? = stringResource(R.string.login_password_input_hint),
+    checkValid: Boolean = false,
 ) {
+    var isValid by remember { mutableStateOf(true) }
     var showPassword by remember { mutableStateOf(false) }
+    var hasFocused by remember { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.ic_login_password), contentDescription = "")
@@ -144,6 +145,17 @@ fun PasswordInput(
             modifier = Modifier
                 .height(48.dp)
                 .weight(1f),
+            onFocusChanged = {
+                if (!checkValid) return@PasswordTextField
+
+                if (hasFocused.not() && it.isFocused) {
+                    hasFocused = true
+                }
+
+                if (hasFocused && it.isFocused.not()) {
+                    isValid = password.isValidPassword()
+                }
+            },
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             placeholderValue = placeholderValue,
         )
@@ -157,7 +169,12 @@ fun PasswordInput(
             Icon(painterResource(image), "")
         }
     }
-    FlatDivider(thickness = 1.dp)
+    if (isValid) {
+        FlatDivider(thickness = 1.dp)
+    } else {
+        FlatDivider(color = Red_6, thickness = 1.dp)
+        FlatTextBodyTwo(stringResource(R.string.login_password_invalid_tip), color = Red_6)
+    }
 }
 
 // Dynamically switch between phone and email input modes
@@ -188,14 +205,16 @@ fun PhoneOrEmailInput(
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (isPhone) {
             Row(
-                modifier = Modifier.clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        val intent = Intent(context, CallingCodeActivity::class.java)
-                        callingCodeLauncher.launch(intent)
-                    }
-                ),
+                modifier = Modifier
+                    .height(48.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            val intent = Intent(context, CallingCodeActivity::class.java)
+                            callingCodeLauncher.launch(intent)
+                        }
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(Modifier.width(8.dp))
@@ -288,6 +307,100 @@ fun EmailInput(
 
 
 @Composable
+fun PhoneInput(
+    phone: String,
+    onPhoneChange: (String) -> Unit,
+    callingCode: String,
+    onCallingCodeChange: (String) -> Unit,
+) {
+    var isValidPhone by remember { mutableStateOf(true) }
+    var hasPhoneFocused by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val callingCodeLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            if (it.resultCode == Activity.RESULT_OK) {
+                val country: Country = it.data!!.getParcelableExtra(Constants.IntentKey.COUNTRY)!!
+                onCallingCodeChange(country.cc)
+            }
+        }
+    )
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .height(48.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {
+                        val intent = Intent(context, CallingCodeActivity::class.java)
+                        callingCodeLauncher.launch(intent)
+                    }
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(Modifier.width(8.dp))
+            FlatTextBodyOne(text = callingCode)
+            Image(painterResource(R.drawable.ic_login_arrow_down), contentDescription = "")
+            Spacer(Modifier.width(8.dp))
+        }
+        BindPhoneTextField(
+            value = phone,
+            onValueChange = {
+                if (isValidPhone.not() && it.isValidPhone()) {
+                    isValidPhone = true
+                }
+                onPhoneChange(it)
+            },
+            modifier = Modifier
+                .height(48.dp)
+                .weight(1f),
+            onFocusChanged = {
+                if (hasPhoneFocused.not() && it.isFocused) {
+                    hasPhoneFocused = true
+                }
+                if (hasPhoneFocused && it.isFocused.not()) {
+                    isValidPhone = phone.isValidPhone()
+                }
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            placeholderValue = stringResource(R.string.login_phone_input_placeholder),
+        )
+    }
+    if (isValidPhone) {
+        FlatDivider(thickness = 1.dp)
+    } else {
+        FlatDivider(color = Red_6, thickness = 1.dp)
+        FlatTextBodyTwo(stringResource(R.string.login_phone_invalid_tip), color = Red_6)
+    }
+}
+
+@Composable
+fun PhoneAndCodeArea(
+    phone: String,
+    onPhoneChange: (String) -> Unit,
+    code: String,
+    onCodeChange: (String) -> Unit,
+    callingCode: String,
+    onCallingCodeChange: (String) -> Unit,
+    onSendCode: () -> Unit,
+) {
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        PhoneInput(
+            phone = phone,
+            onPhoneChange = onPhoneChange,
+            callingCode = callingCode,
+            onCallingCodeChange = onCallingCodeChange
+        )
+
+        SendCodeInput(code = code, onCodeChange = onCodeChange, onSendCode = onSendCode, ready = phone.isValidPhone())
+    }
+}
+
+@Composable
 fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -330,7 +443,7 @@ private fun PhonePasswordAreaPreview() {
     Column(Modifier.padding(horizontal = 16.dp)) {
         PhoneOrEmailInput(
             callingCode = "+86",
-            value = "",
+            value = "1234567890",
             onValueChange = {},
             onCallingCodeChange = {},
         )
@@ -339,5 +452,21 @@ private fun PhonePasswordAreaPreview() {
             password = "",
             onPasswordChange = {},
         )
+        Spacer(Modifier.height(8.dp))
+        EmailInput(value = "a@a", onValueChange = {})
     }
+}
+
+@Composable
+@Preview
+private fun PhoneAndCodeAreaPreview() {
+    PhoneAndCodeArea(
+        phone = "",
+        onPhoneChange = {},
+        code = "",
+        onCodeChange = {},
+        callingCode = "+1",
+        onCallingCodeChange = {},
+        {},
+    )
 }

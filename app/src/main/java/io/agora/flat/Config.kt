@@ -2,9 +2,9 @@ package io.agora.flat
 
 class Config {
     companion object {
-        var forceBindPhone = !BuildConfig.DEBUG
+        var forceBindPhone = true
 
-        var defaultShowPhone = false
+        var defaultShowPhone = true
 
         // three days in milliseconds
         const val INTERVAL_VERSION_CHECK = 259_200_000L
@@ -12,7 +12,7 @@ class Config {
         // ten minutes in milliseconds
         var callVersionCheckInterval = 10 * 60_000L
 
-        val cancelAccountCountTime = if (BuildConfig.DEBUG) 5_000L else 30_000L
+        val cancelAccountCountTime = if (BuildConfig.DEBUG) 3_000L else 30_000L
 
         const val defaultBoardRatio = 9f / 16
 

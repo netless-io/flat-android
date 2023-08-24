@@ -37,6 +37,11 @@ object FlatErrorHandler {
             FlatErrorCode.Web.UserPasswordIncorrect -> context.getString(R.string.error_user_password_incorrect)
             FlatErrorCode.Web.UserOrPasswordIncorrect -> context.getString(R.string.error_user_or_password_incorrect)
 
+            FlatErrorCode.Web.SMSVerificationCodeInvalid -> context.getString(R.string.error_verification_code_invalid)
+            FlatErrorCode.Web.SMSAlreadyExist -> context.getString(R.string.error_phone_already_exist)
+            FlatErrorCode.Web.SMSAlreadyBinding -> context.getString(R.string.error_phone_already_binding)
+            FlatErrorCode.Web.SMSFailedToSendCode -> context.getString(R.string.error_send_verification_code)
+
             FlatErrorCode.Web.EmailVerificationCodeInvalid -> context.getString(R.string.error_email_verification_code_invalid)
             FlatErrorCode.Web.EmailAlreadyExist -> context.getString(R.string.error_email_already_exist)
             FlatErrorCode.Web.EmailAlreadyBinding -> context.getString(R.string.error_email_already_binding)
