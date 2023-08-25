@@ -57,6 +57,7 @@ import io.agora.flat.common.login.LoginType
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.login.LoginInputState
 import io.agora.flat.ui.activity.login.LoginUiAction
+import io.agora.flat.ui.activity.login.LoginUiState
 import io.agora.flat.ui.activity.login.LoginViewModel
 import io.agora.flat.ui.activity.phone.PhoneBindDialog
 import io.agora.flat.ui.compose.AgreementDialog
@@ -118,10 +119,6 @@ class LoginActivity : BaseComposeActivity() {
                         Navigator.launchWebViewActivity(this, Constants.URL.Privacy)
                     }
 
-                    LoginUiAction.AgreementHint -> {
-                        showToast(R.string.login_agreement_unchecked_hint)
-                    }
-
                     is LoginUiAction.PhoneLogin -> {
                         loginHandler.loginWithPhone(action.phone, action.code)
                     }
@@ -140,6 +137,10 @@ class LoginActivity : BaseComposeActivity() {
 
                     is LoginUiAction.PasswordLoginClick -> {
                         viewModel.login(action.state)
+                    }
+
+                    is LoginUiAction.LoginInputChange -> {
+                        viewModel.updateLoginInput(action.state)
                     }
                 }
             }
@@ -179,7 +180,7 @@ class LoginActivity : BaseComposeActivity() {
                 }
             }
 
-            LoginPage(actioner = actioner)
+            LoginPage(uiState, actioner = actioner)
 
             if (showPhoneBind) {
                 PhoneBindDialog(
@@ -206,23 +207,23 @@ class LoginActivity : BaseComposeActivity() {
 }
 
 @Composable
-internal fun LoginPage(actioner: (LoginUiAction) -> Unit) {
+internal fun LoginPage(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit) {
     FlatPage(statusBarColor = Transparent) {
         if (isTabletMode()) {
-            LoginMainPad(actioner)
+            LoginMainPad(uiState, actioner)
         } else {
-            LoginMain(actioner)
+            LoginMain(uiState, actioner)
         }
     }
 }
 
 @Composable
-internal fun LoginMain(actioner: (LoginUiAction) -> Unit) {
-    LoginArea(Modifier.fillMaxSize(), actioner = actioner)
+internal fun LoginMain(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit) {
+    LoginArea(uiState, Modifier.fillMaxSize(), actioner = actioner)
 }
 
 @Composable
-internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
+internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit) {
     val img = if (isDarkTheme()) R.drawable.img_pad_login_dark else R.drawable.img_pad_login_light
 
     Row {
@@ -240,17 +241,17 @@ internal fun LoginMainPad(actioner: (LoginUiAction) -> Unit) {
                 .weight(1f),
             contentAlignment = Alignment.TopCenter,
         ) {
-            LoginArea(modifier = Modifier.width(360.dp), actioner = actioner)
+            LoginArea(uiState = uiState, modifier = Modifier.width(360.dp), actioner = actioner)
         }
     }
 }
 
 @Composable
-private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
+private fun LoginArea(uiState: LoginUiState, modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
     var agreementChecked by rememberSaveable { mutableStateOf(false) }
     var showAgreement by rememberSaveable { mutableStateOf(false) }
     var passwordMode by rememberSaveable { mutableStateOf(true) }
-    var inputState by rememberSaveable { mutableStateOf(LoginInputState()) }
+    val inputState = uiState.loginInputState
 
     Column(
         modifier,
@@ -262,11 +263,11 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
         if (passwordMode) {
             PasswordLoginArea(
                 inputState = inputState,
-                onLoginInputChange = { inputState = it },
+                onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
                 onSmsClick = {
                     // clear email code when switch to phone mode
                     if (!inputState.value.isValidPhone()) {
-                        inputState = inputState.copy(value = "")
+                        actioner(LoginUiAction.LoginInputChange(inputState.copy(value = "")))
                     }
                     passwordMode = false
                 },
@@ -281,7 +282,7 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
         } else {
             PhoneLoginArea(
                 inputState = inputState,
-                onLoginInputChange = { inputState = it },
+                onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
                 actioner = {
                     if (it is LoginUiAction.PasswordLoginClick) {
                         passwordMode = true
@@ -516,5 +517,14 @@ private fun LoginImageButton(
 @Preview(device = PIXEL_C, widthDp = 800, heightDp = 600)
 @Preview(widthDp = 400, heightDp = 600)
 private fun LoginPagePreview() {
-    LoginPage { }
+    LoginPage(
+        LoginUiState(
+            loginInputState = LoginInputState(
+                value = "12345678901",
+                password = "123456",
+                smsCode = "123456",
+                cc = "+86",
+            ),
+        )
+    ) { }
 }

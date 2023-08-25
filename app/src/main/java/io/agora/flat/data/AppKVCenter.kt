@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.data.model.LoginHistory
+import io.agora.flat.data.model.LoginHistoryItem
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import javax.inject.Inject
@@ -60,6 +62,23 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
             return null
         return gson.fromJson(userInfoJson, UserInfo::class.java)
     }
+
+    fun addLoginHistoryItem(item: LoginHistoryItem) {
+        val updatedItems = (listOf(item) + getLoginHistory().items).take(5)
+        store.edit().apply {
+            putString(KEY_LOGIN_HISTORY, gson.toJson(LoginHistory(updatedItems)))
+        }.apply()
+    }
+
+    fun getLastLoginHistoryItem(): LoginHistoryItem? {
+        return getLoginHistory().items.firstOrNull()
+    }
+
+    private fun getLoginHistory(): LoginHistory {
+        val json = store.getString(KEY_LOGIN_HISTORY, null) ?: return LoginHistory()
+        return gson.fromJson(json, LoginHistory::class.java)
+    }
+
     // endregion
 
     // TODO 临时全局变量的存放
@@ -157,6 +176,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_SESSION_ID = "key_session_id"
 
         const val KEY_DEVICE_STATE = "key_device_state"
+
+        const val KEY_LOGIN_HISTORY = "key_login_history"
     }
 
     class MockData {

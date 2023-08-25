@@ -4,7 +4,6 @@ package io.agora.flat.ui.activity.login
 sealed class LoginUiAction {
     object WeChatLogin : LoginUiAction()
     object GithubLogin : LoginUiAction()
-    object AgreementHint : LoginUiAction()
 
     object OpenServiceProtocol : LoginUiAction()
     object OpenPrivacyProtocol : LoginUiAction()
@@ -15,6 +14,7 @@ sealed class LoginUiAction {
     object SignUpClick : LoginUiAction()
 
     class PasswordLoginClick(val state: LoginInputState) : LoginUiAction()
+    class LoginInputChange(val state: LoginInputState) : LoginUiAction()
 
     object ForgotPwdClick : LoginUiAction()
 }

@@ -11,6 +11,7 @@ import io.agora.flat.data.model.EmailBindReq
 import io.agora.flat.data.model.EmailCodeReq
 import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
+import io.agora.flat.data.model.LoginHistoryItem
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.PhonePasswordReq
 import io.agora.flat.data.model.PhoneRegisterReq
@@ -355,7 +356,8 @@ class UserRepository @Inject constructor(
 
     suspend fun requestRegisterEmailCode(email: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestRegisterEmailCode(EmailCodeReq(email, LanguageManager.currentLocale().language)).toResult()
+            userService.requestRegisterEmailCode(EmailCodeReq(email, LanguageManager.currentLocale().language))
+                .toResult()
         }
     }
 
@@ -386,6 +388,7 @@ class UserRepository @Inject constructor(
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.toUserInfo())
+                    appKVCenter.addLoginHistoryItem(LoginHistoryItem(phone, password))
                     Success(true)
                 }
 
@@ -400,6 +403,7 @@ class UserRepository @Inject constructor(
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.toUserInfo())
+                    appKVCenter.addLoginHistoryItem(LoginHistoryItem(email, password))
                     Success(true)
                 }
 

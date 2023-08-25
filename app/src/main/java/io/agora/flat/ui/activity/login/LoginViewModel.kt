@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
@@ -22,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val appKVCenter: AppKVCenter,
 ) : ViewModel() {
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
@@ -40,6 +42,23 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             messageManager.message.collect {
                 _state.value = _state.value.copy(message = it)
+            }
+        }
+
+        viewModelScope.launch {
+            appKVCenter.getLastLoginHistoryItem()?.let {
+                val inputState = state.value.loginInputState
+                val value = if (it.value.startsWith(inputState.cc)) {
+                    it.value.substring(inputState.cc.length)
+                } else {
+                    it.value
+                }
+                _state.value = _state.value.copy(
+                    loginInputState = inputState.copy(
+                        value = value,
+                        password = it.password
+                    )
+                )
             }
         }
     }
@@ -85,6 +104,10 @@ class LoginViewModel @Inject constructor(
         } else {
             loginEmail(state.email, state.password)
         }
+    }
+
+    fun updateLoginInput(state: LoginInputState) {
+        _state.value = _state.value.copy(loginInputState = state)
     }
 
     private fun notifyError(it: Throwable) {
