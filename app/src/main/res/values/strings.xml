@@ -169,6 +169,9 @@
     <string name="new_password_input_hint_again">New Password Again</string>
     <string name="password_rule_tips">Password must have at least 8 characters, letters and numbers.</string>
 
+    <string name="merge_account">Merge Account</string>
+    <string name="merge_account_message">Phone number is bound to another account. Do you want to merge? The merge operation will clear all the data of the newly created account</string>
+
     <string name="agreement_global_dialog_message">Thank you for trusting and using Flat.\n\nWe rely on the Flat User Agreement and Flat Privacy Policy to help you understand how we collect,use,and store your personal information and what rights you have with respect to it.\n\nWhen you use Flat, we collect information about your device, logs and browsing history, and to ensure a positive experience in class, you may grant Flat access to your device\'s camera, microphone, and other information.\n\nYou can read the full Flat User Agreement and Flat Privacy Policy for more information.</string>
     <string name="agreement_global_recheck_dialog_message">You need to agree to the User Agreement and Privacy Policy before you can use Flat.\n\nIf you do not agree, we regret that we cannot provide you with the Services.\n\nYou can find out more by reading the full Flat User Agreement and Flat Privacy Policy.</string>
     <string name="agreement_global_privacy">Flat Privacy Policy</string>

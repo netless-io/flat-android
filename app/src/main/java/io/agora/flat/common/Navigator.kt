@@ -9,6 +9,7 @@ import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.CallingCodeActivity
 import io.agora.flat.ui.activity.LoginActivity
+import io.agora.flat.ui.activity.account.MergeAccountActivity
 import io.agora.flat.ui.activity.bind.EmailBindActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
@@ -21,7 +22,14 @@ import io.agora.flat.ui.activity.phone.PhoneBindActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
 import io.agora.flat.ui.activity.register.RegisterActivity
-import io.agora.flat.ui.activity.setting.*
+import io.agora.flat.ui.activity.setting.AboutUsActivity
+import io.agora.flat.ui.activity.setting.AccountSecurityActivity
+import io.agora.flat.ui.activity.setting.DarkModeActivity
+import io.agora.flat.ui.activity.setting.EditNameActivity
+import io.agora.flat.ui.activity.setting.FeedbackActivity
+import io.agora.flat.ui.activity.setting.LanguageActivity
+import io.agora.flat.ui.activity.setting.UserInfoActivity
+import io.agora.flat.ui.activity.setting.WebViewActivity
 
 object Navigator {
     fun launchHomeActivity(context: Context) {
@@ -132,7 +140,7 @@ object Navigator {
         context.startActivity(intent)
     }
 
-    fun launchPhoneBindActivity(context: Context, from :String = Constants.From.Login) {
+    fun launchPhoneBindActivity(context: Context, from: String = Constants.From.Login) {
         val intent = Intent(context, PhoneBindActivity::class.java)
         intent.putExtra(Constants.IntentKey.FROM, from)
         context.startActivity(intent)
@@ -170,6 +178,13 @@ object Navigator {
 
     fun launchPasswordSetActivity(context: Context) {
         val intent = Intent(context, PasswordSetActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    fun launchMergeAccountActivity(context: Context, ccode: String, phone: String) {
+        val intent = Intent(context, MergeAccountActivity::class.java)
+        intent.putExtra(Constants.IntentKey.CALLING_CODE, ccode)
+        intent.putExtra(Constants.IntentKey.PHONE, phone)
         context.startActivity(intent)
     }
 }

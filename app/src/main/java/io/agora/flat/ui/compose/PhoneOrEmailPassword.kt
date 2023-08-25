@@ -312,6 +312,7 @@ fun PhoneInput(
     onPhoneChange: (String) -> Unit,
     callingCode: String,
     onCallingCodeChange: (String) -> Unit,
+    enabled: Boolean = true,
 ) {
     var isValidPhone by remember { mutableStateOf(true) }
     var hasPhoneFocused by remember { mutableStateOf(false) }
@@ -338,14 +339,14 @@ fun PhoneInput(
                     onClick = {
                         val intent = Intent(context, CallingCodeActivity::class.java)
                         callingCodeLauncher.launch(intent)
-                    }
+                    },
+                    enabled = enabled,
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.width(8.dp))
             FlatTextBodyOne(text = callingCode)
             Image(painterResource(R.drawable.ic_login_arrow_down), contentDescription = "")
-            Spacer(Modifier.width(8.dp))
         }
         BindPhoneTextField(
             value = phone,
@@ -358,6 +359,7 @@ fun PhoneInput(
             modifier = Modifier
                 .height(48.dp)
                 .weight(1f),
+            enabled = enabled,
             onFocusChanged = {
                 if (hasPhoneFocused.not() && it.isFocused) {
                     hasPhoneFocused = true
@@ -393,7 +395,7 @@ fun PhoneAndCodeArea(
             phone = phone,
             onPhoneChange = onPhoneChange,
             callingCode = callingCode,
-            onCallingCodeChange = onCallingCodeChange
+            onCallingCodeChange = onCallingCodeChange,
         )
 
         SendCodeInput(code = code, onCodeChange = onCodeChange, onSendCode = onSendCode, ready = phone.isValidPhone())

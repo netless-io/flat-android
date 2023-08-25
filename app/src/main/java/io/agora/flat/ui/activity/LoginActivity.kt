@@ -264,6 +264,10 @@ private fun LoginArea(modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
                 inputState = inputState,
                 onLoginInputChange = { inputState = it },
                 onSmsClick = {
+                    // clear email code when switch to phone mode
+                    if (!inputState.value.isValidPhone()) {
+                        inputState = inputState.copy(value = "")
+                    }
                     passwordMode = false
                 },
                 actioner = {

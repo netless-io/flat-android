@@ -32,6 +32,9 @@ class Constants {
         const val COUNTRY = "country"
 
         const val FROM = "from"
+
+        const val PHONE: String = "phone"
+        const val CALLING_CODE: String = "calling_code"
     }
 
     object Login {

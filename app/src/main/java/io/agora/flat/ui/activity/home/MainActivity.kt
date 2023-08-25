@@ -18,11 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -39,10 +36,8 @@ import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
-import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -78,8 +73,13 @@ class MainActivity : BaseComposeActivity() {
                         initializers.init()
                     },
                     onResume = {
-                        if (!viewModel.isLoggedIn() || viewModel.needBindPhone()) {
+                        if (!viewModel.isLoggedIn()) {
                             Navigator.launchLoginActivity(this@MainActivity)
+                            return@LifecycleHandler
+                        }
+
+                        if (viewModel.needBindPhone()) {
+                            Navigator.launchPhoneBindActivity(this@MainActivity)
                             return@LifecycleHandler
                         }
 

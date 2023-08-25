@@ -445,7 +445,7 @@ class UserRepository @Inject constructor(
                 .onSuccess {
                     appKVCenter.setToken(it.token)
                     appKVCenter.setUserInfo(it.toUserInfo())
-                    bindings = it.bindings
+                    // bindings = it.bindings
                 }
                 .toNoData()
         }

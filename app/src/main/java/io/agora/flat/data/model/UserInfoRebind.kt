@@ -9,8 +9,7 @@ data class UserInfoRebind(
     val token: String,
     val hasPhone: Boolean,
     val hasPassword: Boolean,
-    @SerializedName("rebind")
-    val bindings: UserBindings,
+    val rebind: RebindExt,
 ) {
     fun toUserInfo(): UserInfo {
         return UserInfo(
@@ -22,3 +21,12 @@ data class UserInfoRebind(
         )
     }
 }
+
+data class RebindExt(
+    val agora: Int,
+    val apple: Int,
+    val github: Int,
+    val google: Int,
+    val wechat: Int,
+    val email: Int
+)

@@ -1,14 +1,14 @@
-package io.agora.flat.ui.activity.phone
+package io.agora.flat.ui.activity.account
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Constants
 import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
-import io.agora.flat.event.EventBus
-import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
@@ -20,36 +20,43 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PhoneBindViewModel @Inject constructor(
+class MergeAccountViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val stringFetcher: StringFetcher,
-    private val eventBus: EventBus,
 ) : ViewModel() {
     private val uiMessageManager = UiMessageManager()
     private val bindingState = ObservableLoadingCounter()
     private val bindSuccess = MutableStateFlow(false)
 
-    private var _state = MutableStateFlow(PhoneBindUiViewState.Empty)
-    val state: StateFlow<PhoneBindUiViewState>
+    private var _state = MutableStateFlow(MergeAccountUiState.Empty)
+    val state: StateFlow<MergeAccountUiState>
         get() = _state
+
+    private val phone: String = checkNotNull(savedStateHandle[Constants.IntentKey.PHONE])
+    private val ccode: String = checkNotNull(savedStateHandle[Constants.IntentKey.CALLING_CODE])
 
     init {
         viewModelScope.launch {
             combine(bindSuccess, bindingState.observable, uiMessageManager.message) { bindSuccess, binding, message ->
-                PhoneBindUiViewState(
+                MergeAccountUiState(
                     bindSuccess = bindSuccess,
                     binding = binding,
                     message = message,
+                    phone = phone,
+                    ccode = ccode,
                 )
             }.collect {
                 _state.value = it
             }
         }
+
+        sendPhoneCode("$ccode$phone")
     }
 
-    fun sendSmsCode(phone: String) {
+    fun sendPhoneCode(phone: String) {
         viewModelScope.launch {
-            userRepository.requestBindSmsCode(phone = phone)
+            userRepository.requestRebindPhoneCode(phone = phone)
                 .onSuccess {
                     showUiMessage(stringFetcher.loginCodeSend())
                 }.onFailure {
@@ -58,11 +65,10 @@ class PhoneBindViewModel @Inject constructor(
         }
     }
 
-    fun bindPhone(phone: String, code: String) {
+    fun mergeAccountByPhone(phone: String, code: String) {
         viewModelScope.launch {
             bindingState.addLoader()
-            userRepository.bindPhone(phone = phone, code = code).onSuccess {
-                eventBus.produceEvent(UserBindingsUpdated())
+            userRepository.rebindWithPhone(phone = phone, code = code).onSuccess {
                 bindSuccess.value = true
             }.onFailure {
                 uiMessageManager.emitMessage(UiErrorMessage(it))
@@ -79,5 +85,22 @@ class PhoneBindViewModel @Inject constructor(
         viewModelScope.launch {
             uiMessageManager.clearMessage(id)
         }
+    }
+}
+
+data class MergeAccountUiState(
+    val bindSuccess: Boolean,
+    val binding: Boolean,
+    val message: UiMessage?,
+
+    val phone: String = "",
+    val ccode: String = "",
+) {
+    companion object {
+        val Empty = MergeAccountUiState(
+            bindSuccess = false,
+            binding = false,
+            message = null,
+        )
     }
 }
