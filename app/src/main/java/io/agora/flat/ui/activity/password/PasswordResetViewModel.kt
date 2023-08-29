@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
-import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -22,7 +21,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PasswordResetViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val stringFetcher: StringFetcher,
 ) : ViewModel() {
     private val loading = ObservableLoadingCounter()
     private val uiMessageManager = UiMessageManager()
@@ -50,7 +48,7 @@ class PasswordResetViewModel @Inject constructor(
             loading.addLoader()
             userRepository.requestResetPhoneCode(phone)
                 .onSuccess {
-                    showUiInfo(stringFetcher.codeSendSuccess())
+                    showSendCodeSuccess()
                 }
                 .onFailure {
                     showUiError(it)
@@ -64,7 +62,7 @@ class PasswordResetViewModel @Inject constructor(
             loading.addLoader()
             userRepository.requestResetEmailCode(email)
                 .onSuccess {
-                    showUiInfo(stringFetcher.codeSendSuccess())
+                    showSendCodeSuccess()
                 }
                 .onFailure {
                     showUiError(it)
@@ -141,6 +139,18 @@ class PasswordResetViewModel @Inject constructor(
         }
     }
 
+    private fun showSendCodeSuccess() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(sendCodeSuccess = true)
+        }
+    }
+
+    fun clearSendCodeSuccess() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(sendCodeSuccess = false)
+        }
+    }
+
     private fun showUiError(e: Throwable) {
         viewModelScope.launch {
             uiMessageManager.emitMessage(UiErrorMessage(e))
@@ -158,6 +168,7 @@ data class PasswordResetUiState(
     val loading: Boolean = false,
     val success: Boolean = false,
     val message: UiMessage? = null,
+    val sendCodeSuccess: Boolean = false,
 
     val step: Step = Step.FetchCode,
     val info: PhoneOrEmailInfo = PhoneOrEmailInfo(

@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import io.agora.flat.ui.compose.SendCodeInput
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
+import io.agora.flat.util.showToast
 
 @AndroidEntryPoint
 class MergeAccountActivity : BaseComposeActivity() {
@@ -61,10 +63,18 @@ fun MergeAccountScreen(
     viewModel: MergeAccountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(state) {
         if (state.bindSuccess) {
             onSuccess()
+        }
+    }
+
+    LaunchedEffect(state) {
+        if (state.codeSuccess) {
+            context.showToast(R.string.message_code_send_success)
+            viewModel.clearCodeSuccess()
         }
     }
 

@@ -10,9 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import io.agora.flat.common.android.AndroidClipboardController
 import io.agora.flat.common.android.AppCoroutineDispatchers
 import io.agora.flat.common.android.ClipboardController
-import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.common.login.LoginManager
-import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.data.AppDatabase
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
@@ -77,12 +75,6 @@ object AppModule {
     @Provides
     fun providerClipboardController(@ApplicationContext context: Context): ClipboardController {
         return AndroidClipboardController(context)
-    }
-
-    @Singleton
-    @Provides
-    fun providerStringFetcher(@ApplicationContext context: Context): StringFetcher {
-        return StringFetcher(context)
     }
 
     @Singleton

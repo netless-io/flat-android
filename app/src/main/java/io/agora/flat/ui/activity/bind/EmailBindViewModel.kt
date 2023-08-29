@@ -3,7 +3,6 @@ package io.agora.flat.ui.activity.bind
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
@@ -11,7 +10,6 @@ import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiErrorMessage
-import io.agora.flat.ui.util.UiInfoMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,11 +21,11 @@ import javax.inject.Inject
 @HiltViewModel
 class EmailBindViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val stringFetcher: StringFetcher,
     private val eventBus: EventBus,
 ) : ViewModel() {
     private val bindingState = ObservableLoadingCounter()
     private val bindSuccess = MutableStateFlow(false)
+    private val codeSuccess = MutableStateFlow(false)
     private val uiMessageManager = UiMessageManager()
 
     private var _state = MutableStateFlow(EmailBindUiState.Empty)
@@ -36,9 +34,15 @@ class EmailBindViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(bindSuccess, bindingState.observable, uiMessageManager.message) { bindSuccess, binding, message ->
+            combine(
+                bindSuccess,
+                codeSuccess,
+                bindingState.observable,
+                uiMessageManager.message
+            ) { bindSuccess, codeSuccess, binding, message ->
                 EmailBindUiState(
                     bindSuccess = bindSuccess,
+                    codeSuccess = codeSuccess,
                     binding = binding,
                     message = message,
                 )
@@ -52,7 +56,7 @@ class EmailBindViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.requestBindEmailCode(email = email)
                 .onSuccess {
-                    notifyMessage(UiInfoMessage(stringFetcher.loginCodeSend()))
+                    codeSuccess.value = true
                 }
                 .onFailure {
                     notifyMessage(UiErrorMessage(it))
@@ -85,18 +89,21 @@ class EmailBindViewModel @Inject constructor(
             uiMessageManager.clearMessage(id)
         }
     }
+
+    fun clearCodeSuccess() {
+        viewModelScope.launch {
+            codeSuccess.value = false
+        }
+    }
 }
 
 data class EmailBindUiState(
-    val bindSuccess: Boolean,
-    val binding: Boolean,
-    val message: UiMessage?,
+    val bindSuccess: Boolean = false,
+    val codeSuccess: Boolean = false,
+    val binding: Boolean = false,
+    val message: UiMessage? = null,
 ) {
     companion object {
-        val Empty = EmailBindUiState(
-            bindSuccess = false,
-            binding = false,
-            message = null,
-        )
+        val Empty = EmailBindUiState()
     }
 }

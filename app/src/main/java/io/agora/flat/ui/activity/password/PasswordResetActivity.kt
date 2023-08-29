@@ -77,6 +77,13 @@ fun PasswordResetScreen(
         }
     }
 
+    LaunchedEffect(viewState) {
+        if (viewState.sendCodeSuccess) {
+            context.showToast(R.string.message_code_send_success)
+            viewModel.clearSendCodeSuccess()
+        }
+    }
+
     PasswordResetScreen(
         uiState = viewState,
         onPhoneOrEmailChange = { viewModel.changePhoneOrEmailState(it) },

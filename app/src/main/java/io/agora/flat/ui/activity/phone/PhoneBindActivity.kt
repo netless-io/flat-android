@@ -1,6 +1,7 @@
 package io.agora.flat.ui.activity.phone
 
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -128,6 +130,7 @@ fun PhoneBindScreen(
     viewModel: PhoneBindViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     val showMergeAccount = (state.message?.exception as? FlatNetException)?.code == FlatErrorCode.Web.SMSAlreadyBinding
 
     var lastPhone by remember { mutableStateOf("") }
@@ -136,6 +139,13 @@ fun PhoneBindScreen(
     LaunchedEffect(state) {
         if (state.bindSuccess) {
             onBindSuccess()
+        }
+    }
+
+    LaunchedEffect(state) {
+        if (state.codeSuccess) {
+            context.showToast(R.string.message_code_send_success)
+            viewModel.clearCodeSuccess()
         }
     }
 
@@ -167,6 +177,8 @@ fun PhoneBindScreen(
             viewModel.bindPhone(phone, code)
         },
     )
+
+    BackHandler(onBack = onBindClose)
 }
 
 @Composable

@@ -34,8 +34,6 @@ import io.agora.flat.ui.compose.SendCodeInput
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.util.isValidEmail
-import io.agora.flat.util.isValidPhone
-import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.isValidVerifyCode
 import io.agora.flat.util.showToast
 
@@ -82,10 +80,18 @@ fun EmailBindScreen(
     viewModel: EmailBindViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(state) {
         if (state.bindSuccess) {
             onBindSuccess()
+        }
+    }
+
+    LaunchedEffect(state) {
+        if (state.bindSuccess) {
+            context.showToast(R.string.message_code_send_success)
+            viewModel.clearCodeSuccess()
         }
     }
 

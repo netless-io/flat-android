@@ -66,9 +66,9 @@ fun RegisterScreen(
     val viewState by viewModel.state.collectAsState()
 
     LaunchedEffect(viewState) {
-        viewState.message?.let {
-            context.showToast(it.text)
-            viewModel.clearUiMessage()
+        if (viewState.sendCodeSuccess) {
+            context.showToast(R.string.login_code_send)
+            viewModel.clearSendCodeState()
         }
     }
 

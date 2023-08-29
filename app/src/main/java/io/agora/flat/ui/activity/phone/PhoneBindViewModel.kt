@@ -3,7 +3,6 @@ package io.agora.flat.ui.activity.phone
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
@@ -22,12 +21,12 @@ import javax.inject.Inject
 @HiltViewModel
 class PhoneBindViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val stringFetcher: StringFetcher,
     private val eventBus: EventBus,
 ) : ViewModel() {
     private val uiMessageManager = UiMessageManager()
     private val bindingState = ObservableLoadingCounter()
     private val bindSuccess = MutableStateFlow(false)
+    private val codeSuccess = MutableStateFlow(false)
 
     private var _state = MutableStateFlow(PhoneBindUiViewState.Empty)
     val state: StateFlow<PhoneBindUiViewState>
@@ -35,9 +34,15 @@ class PhoneBindViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(bindSuccess, bindingState.observable, uiMessageManager.message) { bindSuccess, binding, message ->
+            combine(
+                bindSuccess,
+                codeSuccess,
+                bindingState.observable,
+                uiMessageManager.message
+            ) { bindSuccess, codeSuccess, binding, message ->
                 PhoneBindUiViewState(
                     bindSuccess = bindSuccess,
+                    codeSuccess = codeSuccess,
                     binding = binding,
                     message = message,
                 )
@@ -51,7 +56,7 @@ class PhoneBindViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.requestBindSmsCode(phone = phone)
                 .onSuccess {
-                    showUiMessage(stringFetcher.loginCodeSend())
+                    codeSuccess.value = true
                 }.onFailure {
                     uiMessageManager.emitMessage(UiErrorMessage(it))
                 }
@@ -79,5 +84,20 @@ class PhoneBindViewModel @Inject constructor(
         viewModelScope.launch {
             uiMessageManager.clearMessage(id)
         }
+    }
+
+    fun clearCodeSuccess() {
+        codeSuccess.value = false
+    }
+}
+
+data class PhoneBindUiViewState(
+    val bindSuccess: Boolean = false,
+    val codeSuccess: Boolean = false,
+    val binding: Boolean = false,
+    val message: UiMessage? = null,
+) {
+    companion object {
+        val Empty = PhoneBindUiViewState()
     }
 }

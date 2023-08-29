@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
-import io.agora.flat.common.android.StringFetcher
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
@@ -19,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val stringFetcher: StringFetcher,
 ) : ViewModel() {
     private val loading = ObservableLoadingCounter()
 
@@ -40,7 +38,7 @@ class RegisterViewModel @Inject constructor(
             loading.addLoader()
             userRepository.requestRegisterSmsCode(phone = phone)
                 .onSuccess {
-                    showUiMessage(stringFetcher.loginCodeSend())
+                    notifySendCodeSuccess()
                 }
                 .onFailure {
                     notifyError(it)
@@ -68,7 +66,7 @@ class RegisterViewModel @Inject constructor(
             loading.addLoader()
             userRepository.requestRegisterEmailCode(email = email)
                 .onSuccess {
-                    showUiMessage(stringFetcher.loginCodeSend())
+                    notifySendCodeSuccess()
                 }
                 .onFailure {
                     notifyError(it)
@@ -115,12 +113,12 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun showUiMessage(message: String) {
-        _state.value = _state.value.copy(message = UiMessage(message))
+    private fun notifySendCodeSuccess() {
+        _state.value = _state.value.copy(sendCodeSuccess = true)
     }
 
-    fun clearUiMessage() {
-        _state.value = _state.value.copy(message = null)
+    fun clearSendCodeState() {
+        _state.value = _state.value.copy(sendCodeSuccess = false)
     }
 
     private fun notifyError(throwable: Throwable) {
@@ -151,11 +149,11 @@ data class RegisterInfo(
 
 data class RegisterUiState(
     val success: Boolean = false,
+    val sendCodeSuccess: Boolean = false,
     val registerInfo: RegisterInfo = RegisterInfo(
         cc = CallingCodeManager.getDefaultCC(),
     ),
     val loading: Boolean = false,
-    val message: UiMessage? = null,
     val error: UiMessage? = null
 ) {
     companion object {
