@@ -111,6 +111,10 @@ class LoginActivity : BaseComposeActivity() {
                         loginHandler.loginWithType(LoginType.Github)
                     }
 
+                    LoginUiAction.GoogleLogin -> {
+                        loginHandler.loginWithType(LoginType.Google)
+                    }
+
                     LoginUiAction.OpenServiceProtocol -> {
                         Navigator.launchWebViewActivity(this, Constants.URL.Service)
                     }
@@ -441,12 +445,17 @@ private fun LoginButtonsArea(
     }
     Spacer(Modifier.height(32.dp))
     Row {
+
         LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
             Image(painterResource(R.drawable.ic_wechat_login), "")
         }
         Spacer(Modifier.width(48.dp))
         LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
             Image(painterResource(R.drawable.ic_github_login), "")
+        }
+        Spacer(Modifier.width(48.dp))
+        LoginImageButton(onClick = { actioner(LoginUiAction.GoogleLogin) }) {
+            Image(painterResource(R.drawable.ic_google_login), "")
         }
     }
 }

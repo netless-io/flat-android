@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 class LoginActivityHandler(
     val context: Context,
@@ -41,7 +41,9 @@ class LoginActivityHandler(
         scope.launch {
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
-                LoginType.Github -> callGithubLogin()
+                LoginType.Github -> callWebViewLogin(::githubLoginUrl)
+
+                LoginType.Google -> callWebViewLogin(::googleLoginUrl)
                 else -> {}
             }
         }
@@ -59,12 +61,12 @@ class LoginActivityHandler(
         }
     }
 
-    private suspend fun callGithubLogin() {
+    private suspend fun callWebViewLogin(getUrl: () -> String) {
         // ensure authUUID the same as githubLoginUrl
         if (loginSetAuthUUID()) {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
-                data = Uri.parse(githubLoginUrl())
+                data = Uri.parse(getUrl())
             }
 
             val chooserIntent = createChooser(
@@ -83,9 +85,24 @@ class LoginActivityHandler(
     private fun githubLoginUrl(): String {
         val redirectUri = "${appEnv.githubCallback}?platform=android&state=${appKVCenter.getAuthUUID()}"
         return "https://github.com/login/oauth/authorize?" +
-                "client_id=${appEnv.githubClientID}&" +
-                "redirect_uri=${Uri.encode(redirectUri)}"
+                "client_id=${appEnv.githubClientID}" +
+                "&redirect_uri=${Uri.encode(redirectUri)}"
     }
+
+    private fun googleLoginUrl(): String {
+        val scopes = listOf("openid", "https://www.googleapis.com/auth/userinfo.profile")
+        val scope = Uri.encode(scopes.joinToString(" "))
+        val redirectUri = appEnv.googleCallback
+
+        return "https://accounts.google.com/o/oauth2/v2/auth?" +
+                "response_type=code" +
+                "&access_type=online" +
+                "&scope=$scope" +
+                "&client_id=${appEnv.googleClientId}" +
+                "&redirect_uri=$redirectUri" +
+                "&state=${appKVCenter.getAuthUUID()}"
+    }
+
 
     private suspend fun loginProcess(): Boolean {
         return userRepository.loginProcess(appKVCenter.getAuthUUID()) is Success
@@ -115,6 +132,7 @@ class LoginActivityHandler(
                         showUiMessage(context.getString(R.string.login_fail))
                     }
                 }
+
                 LoginType.Github -> {
                     if (intent.data?.scheme != "x-agora-flat-client") {
                         return@launch
@@ -125,6 +143,19 @@ class LoginActivityHandler(
                         showUiMessage(context.getString(R.string.login_fail))
                     }
                 }
+
+                LoginType.Google -> {
+                    if (intent.data?.scheme != "x-agora-flat-client") {
+                        return@launch
+                    }
+                    if (loginProcess()) {
+                        notifySuccess()
+                    } else {
+                        showUiMessage(context.getString(R.string.login_fail))
+                    }
+                }
+
+
                 else -> {
                 }
             }

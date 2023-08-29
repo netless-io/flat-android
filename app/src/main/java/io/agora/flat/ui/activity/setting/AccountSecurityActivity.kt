@@ -57,7 +57,7 @@ class AccountSecurityActivity : BaseComposeActivity() {
                 AccountSecurityScreen(
                     onBindGithub = { bindingHandler.bindWithType(LoginType.Github) },
                     onBindWeChat = { bindingHandler.bindWithType(LoginType.WeChat) },
-                    onBindGoogle = {},
+                    onBindGoogle = { bindingHandler.bindWithType(LoginType.Google) },
                     onBindPhone = { Navigator.launchPhoneBindActivity(this, Constants.From.UserSecurity) },
                     onBindEmail = { Navigator.launchEmailBindActivity(this) },
                 )
@@ -68,6 +68,13 @@ class AccountSecurityActivity : BaseComposeActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        intent?.run {
+            bindingHandler.handleResult(this)
+        }
     }
 }
 

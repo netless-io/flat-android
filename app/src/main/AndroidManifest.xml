@@ -26,7 +26,6 @@
     </queries>
 
     <application
-        android:usesCleartextTraffic="true"
         android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -34,7 +33,8 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FlatAndroid">
+        android:theme="@style/Theme.FlatAndroid"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".ui.activity.play.ClassRoomActivity"
@@ -59,7 +59,6 @@
         <activity android:name=".ui.activity.setting.WebViewActivity" />
         <activity android:name=".ui.activity.setting.DarkModeActivity" />
         <activity android:name=".ui.activity.setting.EditNameActivity" />
-        <activity android:name=".ui.activity.setting.AccountSecurityActivity" />
         <activity android:name=".ui.activity.dev.DevToolsActivity" />
         <activity android:name=".ui.activity.dev.DevSettingsActivity" />
         <activity android:name=".ui.activity.CallingCodeActivity" />
@@ -123,7 +122,10 @@
             android:name=".ui.activity.setting.UserInfoActivity"
             android:exported="true"
             android:launchMode="singleTask" />
-
+        <activity
+            android:name=".ui.activity.setting.AccountSecurityActivity"
+            android:exported="true"
+            android:launchMode="singleTask" />
         <activity
             android:name=".common.login.GithubEntryActivity"
             android:exported="true"

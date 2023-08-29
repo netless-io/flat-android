@@ -43,6 +43,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             ossKey = "LTAI5tD4WSVBxAyfwVoaKTWr",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
+            googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
         )
 
         envMap[ENV_PROD] = EnvItem(
@@ -61,6 +62,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
+            googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
         )
 
         envMap[ENV_SG_PROD] = EnvItem(
@@ -118,6 +120,10 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val githubBindingCallback get() = "${flatServiceUrl}/v1/login/github/callback/binding"
 
+    val googleCallback get() = "${flatServiceUrl}/v1/login/google/callback"
+
+    val googleBindingCallback get() = "${flatServiceUrl}/v1/user/binding/platform/google"
+
     val baseInviteUrl = run {
         currentEnvItem.baseInviteUrl
     }
@@ -133,6 +139,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     val whiteAppId get() = currentEnvItem.whiteAppId
 
     val wechatId get() = currentEnvItem.wechatId
+
+    val googleClientId get() = currentEnvItem.googleClientId
 
     val loginConfig get() = currentEnvItem.loginConfig
 

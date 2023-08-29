@@ -112,7 +112,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun loginProcess(authUUID: String, times: Int = 5): Result<Boolean> {
+    suspend fun loginProcess(authUUID: String, times: Int = 10): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             repeat(times) {
                 val result = userService.loginProcess(AuthUUIDReq(authUUID)).toResult()

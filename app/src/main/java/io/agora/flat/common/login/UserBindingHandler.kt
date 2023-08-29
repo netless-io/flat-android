@@ -17,10 +17,9 @@ import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.ui.activity.setting.AccountSecurityActivity
-import io.agora.flat.ui.activity.setting.UserInfoActivity
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -44,7 +43,9 @@ class UserBindingHandler @Inject constructor(
         scope.launch {
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
-                LoginType.Github -> callGithubBinding()
+                LoginType.Github -> callWebViewBinding(::getGithubBindingUrl)
+                LoginType.Google -> callWebViewBinding(::getGoogleBindingUrl)
+                else -> {}
             }
         }
     }
@@ -61,11 +62,11 @@ class UserBindingHandler @Inject constructor(
         }
     }
 
-    private suspend fun callGithubBinding() {
+    private suspend fun callWebViewBinding(getUrl: () -> String) {
         if (bindingSetAuthUUID()) {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
-                data = Uri.parse(getGithubBindingUrl())
+                data = Uri.parse(getUrl())
             }
 
             val chooserIntent = Intent.createChooser(
@@ -86,6 +87,20 @@ class UserBindingHandler @Inject constructor(
         return "https://github.com/login/oauth/authorize?" +
                 "client_id=${appEnv.githubClientID}&" +
                 "redirect_uri=${Uri.encode(redirectUri)}"
+    }
+
+    private fun getGoogleBindingUrl(): String {
+        val scopes = listOf("openid", "https://www.googleapis.com/auth/userinfo.profile")
+        val scope = Uri.encode(scopes.joinToString(" "))
+        val redirectUri = appEnv.googleBindingCallback
+
+        return "https://accounts.google.com/o/oauth2/v2/auth?" +
+                "response_type=code" +
+                "&access_type=online" +
+                "&scope=$scope" +
+                "&client_id=${appEnv.googleClientId}" +
+                "&redirect_uri=$redirectUri" +
+                "&state=${appKVCenter.getAuthUUID()}"
     }
 
     private suspend fun bindingProcess(): Boolean {
@@ -118,6 +133,17 @@ class UserBindingHandler @Inject constructor(
                 }
 
                 LoginType.Github -> {
+                    if (intent.data?.scheme != "x-agora-flat-client") {
+                        return@launch
+                    }
+                    if (bindingProcess()) {
+                        notifySuccess()
+                    } else {
+                        showUiMessage(context.getString(R.string.bind_fail))
+                    }
+                }
+
+                LoginType.Google -> {
                     if (intent.data?.scheme != "x-agora-flat-client") {
                         return@launch
                     }
