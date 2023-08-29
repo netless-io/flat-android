@@ -81,11 +81,11 @@ fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
         Spacer(Modifier.width(8.dp))
-        BindPhoneTextField(
+        FlatBasicTextField(
             value = code,
             onValueChange = {
                 if (it.length > 6) {
-                    return@BindPhoneTextField
+                    return@FlatBasicTextField
                 }
                 if (isValidCode.not() && it.isValidSmsCode()) {
                     isValidCode = true
@@ -225,7 +225,7 @@ fun PhoneOrEmailInput(
             Image(painterResource(R.drawable.ic_login_email), contentDescription = "")
             Spacer(Modifier.width(8.dp))
         }
-        BindPhoneTextField(
+        FlatBasicTextField(
             value = value,
             onValueChange = {
                 if (isPhone) {
@@ -274,7 +274,7 @@ fun EmailInput(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.ic_login_email), contentDescription = "")
         Spacer(Modifier.width(8.dp))
-        BindPhoneTextField(
+        FlatBasicTextField(
             value = value,
             onValueChange = {
                 if (isValidEmail.not() && it.isValidEmail()) {
@@ -348,7 +348,7 @@ fun PhoneInput(
             FlatTextBodyOne(text = callingCode)
             Image(painterResource(R.drawable.ic_login_arrow_down), contentDescription = "")
         }
-        BindPhoneTextField(
+        FlatBasicTextField(
             value = phone,
             onValueChange = {
                 if (isValidPhone.not() && it.isValidPhone()) {

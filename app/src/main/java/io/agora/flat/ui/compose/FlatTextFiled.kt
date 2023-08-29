@@ -90,7 +90,7 @@ fun FlatPrimaryTextField(
 }
 
 @Composable
-fun BindPhoneTextField(
+fun FlatBasicTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -271,7 +271,7 @@ private fun FlatTextButtonPreview() {
             FlatNormalVerticalSpacer()
             FlatPrimaryTextField("TextButton", enabled = false, onValueChange = {})
             FlatNormalVerticalSpacer()
-            BindPhoneTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
+            FlatBasicTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
             FlatNormalVerticalSpacer()
         }
     }

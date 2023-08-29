@@ -9,19 +9,20 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.LoginPlatform
-import io.agora.flat.data.model.UserBindings
 import io.agora.flat.data.model.UserInfo
-import io.agora.flat.data.onFailure
 import io.agora.flat.data.repository.CloudStorageRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.event.EventBus
-import io.agora.flat.event.UserBindingsUpdated
 import io.agora.flat.event.UserUpdated
-import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import io.agora.flat.util.ContentInfo
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,8 +33,7 @@ class UserInfoViewModel @Inject constructor(
     private val appEnv: AppEnv,
     private val eventBus: EventBus,
 ) : ViewModel() {
-    private val _userInfo = MutableStateFlow(userRepository.getUserInfo())
-    private val _userBindings = MutableStateFlow<UserBindings?>(null)
+    private val userInfo = MutableStateFlow(userRepository.getUserInfo())
     private val uiMessageManager = UiMessageManager()
 
     private val _state = MutableStateFlow(UserInfoUiState())
@@ -43,20 +43,15 @@ class UserInfoViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(_userInfo, _userBindings, uiMessageManager.message) { userInfo, bindings, message ->
-                UserInfoUiState(userInfo, bindings, message = message)
+            combine(userInfo, uiMessageManager.message) { userInfo, message ->
+                UserInfoUiState(
+                    userInfo = userInfo,
+                    message = message
+                )
             }.collect {
                 _state.value = it
             }
         }
-
-        viewModelScope.launch {
-            eventBus.events.filterIsInstance<UserBindingsUpdated>().collect {
-                _userBindings.value = userRepository.getBindings()
-            }
-        }
-
-        loadBindings()
 
         viewModelScope.launch {
             UploadManager.uploadSuccess.filterNotNull().filter { it.uuid == uploadingUUID }.collect {
@@ -66,24 +61,9 @@ class UserInfoViewModel @Inject constructor(
         }
     }
 
-    private fun loadBindings() {
-        viewModelScope.launch {
-            _userBindings.value = userRepository.listBindings().get()
-        }
-    }
-
     fun refreshUser() {
         viewModelScope.launch {
-            _userInfo.value = userRepository.getUserInfo()
-        }
-    }
-
-    fun processUnbindAction(platform: LoginPlatform) {
-        viewModelScope.launch {
-            userRepository.removeBinding(platform).onFailure {
-                uiMessageManager.emitMessage(UiErrorMessage(it))
-            }
-            _userBindings.value = userRepository.getBindings()
+            userInfo.value = userRepository.getUserInfo()
         }
     }
 
@@ -122,14 +102,8 @@ class UserInfoViewModel @Inject constructor(
 
 data class UserInfoUiState(
     val userInfo: UserInfo? = null,
-    val bindings: UserBindings? = null,
     val message: UiMessage? = null,
-) {
-    val bindingCount
-        get() = bindings?.run {
-            listOf(wechat, phone, email, agora, apple, github, google).count { it }
-        } ?: 0
-}
+)
 
 sealed class UserInfoUiAction {
     object Finish : UserInfoUiAction()
@@ -142,10 +116,4 @@ sealed class UserInfoUiAction {
     object BindGoogle : UserInfoUiAction()
 
     data class UnbindAction(val platform: LoginPlatform) : UserInfoUiAction()
-
-//    object UnbindWeChat : UserInfoUiAction()
-//    object UnbindGithub : UserInfoUiAction()
-//    object UnbindPhone : UserInfoUiAction()
-//    object UnbindEmail : UserInfoUiAction()
-//    object UnbindGoogle : UserInfoUiAction()
 }

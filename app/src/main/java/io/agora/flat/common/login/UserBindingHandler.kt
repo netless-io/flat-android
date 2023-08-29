@@ -16,12 +16,16 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.event.EventBus
 import io.agora.flat.event.UserBindingsUpdated
+import io.agora.flat.ui.activity.setting.AccountSecurityActivity
 import io.agora.flat.ui.activity.setting.UserInfoActivity
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
+/**
+ * bindingHandler -> thirdParty(webview, wechat) -> XXXEntryActivity -> LoginManager -> bindingHandler.handleResult
+ */
 @ActivityScoped
 class UserBindingHandler @Inject constructor(
     @ActivityContext val context: Context,
@@ -36,7 +40,7 @@ class UserBindingHandler @Inject constructor(
 
     fun bindWithType(type: LoginType) {
         loginType = type
-        loginManager.actionClazz = UserInfoActivity::class.java
+        loginManager.actionClazz = AccountSecurityActivity::class.java
         scope.launch {
             when (loginType) {
                 LoginType.WeChat -> callWeChatLogin()
@@ -112,6 +116,7 @@ class UserBindingHandler @Inject constructor(
                         showUiMessage(context.getString(R.string.bind_fail))
                     }
                 }
+
                 LoginType.Github -> {
                     if (intent.data?.scheme != "x-agora-flat-client") {
                         return@launch
@@ -122,6 +127,7 @@ class UserBindingHandler @Inject constructor(
                         showUiMessage(context.getString(R.string.bind_fail))
                     }
                 }
+
                 else -> {
                 }
             }

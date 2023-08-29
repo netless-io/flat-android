@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,12 +30,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.compose.BindPhoneTextField
+import io.agora.flat.ui.compose.FlatBasicTextField
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatAvatar
 import io.agora.flat.ui.compose.FlatDivider
+import io.agora.flat.ui.compose.FlatFullPageLoading
 import io.agora.flat.ui.compose.FlatPage
-import io.agora.flat.ui.compose.FlatPageLoading
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.FlatTextBodyTwo
 import io.agora.flat.ui.compose.launcherPickContent
@@ -123,7 +122,7 @@ internal fun RegisterProfileScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(painterResource(R.drawable.ic_user_profile_head), contentDescription = "")
                 Spacer(Modifier.width(8.dp))
-                BindPhoneTextField(
+                FlatBasicTextField(
                     value = name,
                     onValueChange = {
                         name = it
@@ -148,12 +147,7 @@ internal fun RegisterProfileScreen(
     }
 
     if (viewState.loading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            FlatPageLoading()
-        }
+        FlatFullPageLoading()
     }
 }
 
