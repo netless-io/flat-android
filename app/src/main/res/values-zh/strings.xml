@@ -166,6 +166,10 @@
 
     <!-- register -->
     <string name="register">注册新账号</string>
+    <string name="register_success">注册成功</string>
+    <string name="register_profile_title">设置信息</string>
+    <string name="register_profile_avatar_tip">上传头像(可选)</string>
+    <string name="register_profile_username_tip">请输入昵称(可选)</string>
 
     <string name="reset_password">重置密码</string>
     <string name="new_password">新密码</string>

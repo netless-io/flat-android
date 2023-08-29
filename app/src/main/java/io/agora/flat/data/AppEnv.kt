@@ -39,7 +39,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 project = "hz-flat-dev",
                 logstore = "android",
                 endpoint = "cn-hangzhou.log.aliyuncs.com",
-            )
+            ),
+            ossKey = "LTAI5tD4WSVBxAyfwVoaKTWr",
         )
         envMap[ENV_PROD] = EnvItem(
             AGORA_APP_ID,
@@ -53,7 +54,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 project = "flat-prod",
                 logstore = "android",
                 endpoint = "cn-hangzhou.log.aliyuncs.com",
-            )
+            ),
+            ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
         )
     }
 
@@ -91,6 +93,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val logConfig get() = currentEnvItem.logConfig
 
+    val ossKey get() = currentEnvItem.ossKey
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
@@ -98,5 +102,6 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         val baseInviteUrl: String,
         val versionCheckUrl: String,
         val logConfig: LogConfig,
+        val ossKey: String,
     )
 }

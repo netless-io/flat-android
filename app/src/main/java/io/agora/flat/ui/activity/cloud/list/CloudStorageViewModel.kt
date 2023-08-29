@@ -13,6 +13,7 @@ import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
@@ -29,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CloudStorageViewModel @Inject constructor(
     private val cloudStorageRepository: CloudStorageRepository,
+    private val appEnv: AppEnv
 ) : ViewModel() {
     private val loadUiState = MutableStateFlow(LoadUiState.Init)
     private val loadedFiles = MutableStateFlow(listOf<CloudUiFile>())
@@ -213,6 +215,8 @@ class CloudStorageViewModel @Inject constructor(
                         filepath = data.ossFilePath,
                         policy = data.policy,
                         signature = data.signature,
+
+                        ossKey = appEnv.ossKey,
 
                         filename = info.filename,
                         size = info.size,

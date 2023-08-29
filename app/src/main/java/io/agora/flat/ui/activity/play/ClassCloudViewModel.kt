@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
@@ -47,6 +48,7 @@ class ClassCloudViewModel @Inject constructor(
     private val boardRoom: AgoraBoardRoom,
     private val eventbus: EventBus,
     private val roomErrorManager: RoomErrorManager,
+    private val appEnv: AppEnv,
 ) : ViewModel() {
     private val dirPath = MutableStateFlow(CLOUD_ROOT_DIR)
     private val loadUiState = MutableStateFlow(LoadUiState.Init)
@@ -180,6 +182,8 @@ class ClassCloudViewModel @Inject constructor(
                     filepath = data.ossFilePath,
                     policy = data.policy,
                     signature = data.signature,
+
+                    ossKey = appEnv.ossKey,
 
                     filename = info.filename,
                     size = info.size,

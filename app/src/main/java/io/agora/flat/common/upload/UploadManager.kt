@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import io.agora.flat.Constants
 import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -62,7 +61,6 @@ object UploadManager {
         }
     }
 
-
     var uploadFiles = MutableStateFlow(listOf<UploadFile>())
     var uploadSuccess = MutableStateFlow<UploadRequest?>(null)
 
@@ -82,6 +80,7 @@ object UploadManager {
                 uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
             }
         }
+
         is UploadStateEvent -> {
             uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
                 if (index < 0) return
@@ -98,6 +97,8 @@ data class UploadRequest constructor(
     val policy: String,
     val policyURL: String,
     val signature: String,
+
+    val ossKey: String,
 
     // local info
     val filename: String,
@@ -144,7 +145,7 @@ private class UploadTask(
             addFormDataPart("key", request.filepath)
             addFormDataPart("name", filename)
             addFormDataPart("policy", request.policy)
-            addFormDataPart("OSSAccessKeyId", Constants.OSS_ACCESS_KEY_ID)
+            addFormDataPart("OSSAccessKeyId", request.ossKey)
             addFormDataPart("success_action_status", "200")
             addFormDataPart("callback", "")
             addFormDataPart("signature", request.signature)

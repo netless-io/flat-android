@@ -158,6 +158,11 @@
 
     <!-- register -->
     <string name="register">Register</string>
+    <string name="register_success">Register Success</string>
+
+    <string name="register_profile_title">Profile</string>
+    <string name="register_profile_avatar_tip">Avatar (optional)</string>
+    <string name="register_profile_username_tip">Nickname (optional)</string>
 
     <string name="reset_password">Reset Password</string>
     <string name="new_password">New Password</string>

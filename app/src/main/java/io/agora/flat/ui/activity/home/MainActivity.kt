@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -226,6 +227,8 @@ internal fun Main(navController: NavHostController, mainTab: MainTab) {
 
 @Composable
 internal fun MainTablet(navController: NavHostController, mainTab: MainTab, avatar: String?) {
+    val context = LocalContext.current
+
     val onOpenSetting = {
         navController.navigate(LeafScreen.Settings.createRoute(Screen.HomeExt)) {
             popUpTo(LeafScreen.HomeExtInit.createRoute(Screen.HomeExt))

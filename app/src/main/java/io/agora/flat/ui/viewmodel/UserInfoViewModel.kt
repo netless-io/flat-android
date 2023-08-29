@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.LoginPlatform
@@ -28,6 +29,7 @@ import javax.inject.Inject
 class UserInfoViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val cloudStorageRepository: CloudStorageRepository,
+    private val appEnv: AppEnv,
     private val eventBus: EventBus,
 ) : ViewModel() {
     private val _userInfo = MutableStateFlow(userRepository.getUserInfo())
@@ -97,6 +99,7 @@ class UserInfoViewModel @Inject constructor(
                         policyURL = result.ossDomain,
                         filepath = result.ossFilePath,
                         signature = result.signature,
+                        ossKey = appEnv.ossKey,
                         filename = info.filename,
                         size = info.size,
                         mediaType = info.mediaType,

@@ -171,5 +171,6 @@
         <activity android:name=".ui.activity.password.PasswordSetActivity" />
         <activity android:name=".ui.activity.bind.EmailBindActivity" />
         <activity android:name=".ui.activity.account.MergeAccountActivity" />
+        <activity android:name=".ui.activity.register.RegisterProfileActivity" />
     </application>
 </manifest>

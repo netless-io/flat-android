@@ -22,6 +22,7 @@ import io.agora.flat.ui.activity.phone.PhoneBindActivity
 import io.agora.flat.ui.activity.play.ClassRoomActivity
 import io.agora.flat.ui.activity.playback.ReplayActivity
 import io.agora.flat.ui.activity.register.RegisterActivity
+import io.agora.flat.ui.activity.register.RegisterProfileActivity
 import io.agora.flat.ui.activity.setting.AboutUsActivity
 import io.agora.flat.ui.activity.setting.AccountSecurityActivity
 import io.agora.flat.ui.activity.setting.DarkModeActivity
@@ -185,6 +186,11 @@ object Navigator {
         val intent = Intent(context, MergeAccountActivity::class.java)
         intent.putExtra(Constants.IntentKey.CALLING_CODE, ccode)
         intent.putExtra(Constants.IntentKey.PHONE, phone)
+        context.startActivity(intent)
+    }
+
+    fun launchRegisterProfile(context: Context) {
+        val intent = Intent(context, RegisterProfileActivity::class.java)
         context.startActivity(intent)
     }
 }

@@ -14,10 +14,10 @@ import io.agora.flat.R
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun FlatAvatar(avatar: String?, size: Dp) {
+fun FlatAvatar(avatar: Any?, size: Dp) {
     Image(
         painter = rememberImagePainter(avatar) {
-            placeholder(R.drawable.ic_user_profile_head)
+            placeholder(R.drawable.ic_register_avatar)
         },
         contentDescription = null,
         modifier = Modifier
