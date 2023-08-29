@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Config
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val appKVCenter: AppKVCenter,
+    private val appEnv: AppEnv,
 ) : ViewModel() {
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
@@ -65,7 +67,7 @@ class LoginViewModel @Inject constructor(
 
     fun needBindPhone(): Boolean {
         val bound = userRepository.getUserInfo()?.hasPhone ?: false
-        return !bound && Config.forceBindPhone
+        return !bound && appEnv.loginConfig.forceBindPhone()
     }
 
     private fun loginEmail(email: String, password: String) {

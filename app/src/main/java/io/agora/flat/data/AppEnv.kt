@@ -18,20 +18,20 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         const val ENV_PROD = "prod"
         const val ENV_DEV = "dev"
 
-        const val STORE_KEY_ENV = "key_env"
+        const val ENV_SG_PROD = "sg_prod"
+        const val ENV_SG_DEV = "sg_dev"
 
-        const val AGORA_APP_ID = "931b86d6781e49a2a255db4ce6e8e804"
-        const val AGORA_APP_ID_DEV = "a185de0a777f4c159e302abcc0f03b64"
+        const val STORE_KEY_ENV = "key_env"
     }
 
     val envMap = mutableMapOf<String, EnvItem>()
 
     init {
         envMap[ENV_DEV] = EnvItem(
-            AGORA_APP_ID_DEV,
-            "https://flat-api-dev.whiteboard.agora.io",
-            "9821657775fbc74773f1",
-            "https://flat-web-dev.whiteboard.agora.io",
+            agoraAppId = "a185de0a777f4c159e302abcc0f03b64",
+            serviceUrl = "https://flat-api-dev.whiteboard.agora.io",
+            githubClientId = "9821657775fbc74773f1",
+            baseInviteUrl = "https://flat-web-dev.whiteboard.agora.io",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/beta/android/checkVersion.json",
             logConfig = LogConfig(
                 ak = BuildConfig.ALIYUN_LOG_DEV_AK,
@@ -41,12 +41,15 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 endpoint = "cn-hangzhou.log.aliyuncs.com",
             ),
             ossKey = "LTAI5tD4WSVBxAyfwVoaKTWr",
+            wechatId = "wx09437693798bc108",
+            whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
         )
+
         envMap[ENV_PROD] = EnvItem(
-            AGORA_APP_ID,
-            "https://flat-api.whiteboard.agora.io",
-            "71a29285a437998bdfe0",
-            "https://flat-web.whiteboard.agora.io",
+            agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
+            serviceUrl = "https://flat-api.whiteboard.agora.io",
+            githubClientId = "71a29285a437998bdfe0",
+            baseInviteUrl = "https://flat-web.whiteboard.agora.io",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/checkVersion.json",
             logConfig = LogConfig(
                 ak = BuildConfig.ALIYUN_LOG_PROD_AK,
@@ -56,6 +59,38 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 endpoint = "cn-hangzhou.log.aliyuncs.com",
             ),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
+            wechatId = "wx09437693798bc108",
+            whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
+        )
+
+        envMap[ENV_SG_PROD] = EnvItem(
+            agoraAppId = "549c8a24c1e64852bd163f853f5fe14f",
+            serviceUrl = "https://api.flat.agora.io",
+            githubClientId = "da83d7e14217594fba46",
+            baseInviteUrl = "https://flat-web.whiteboard.agora.io",
+            versionCheckUrl = "",
+            ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
+            wechatId = "wx09437693798bc108",
+            whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/kndLTOWdG2qYcQ",
+            googleClientId = "273996094508-2rpraucen77a1o5dul5ftrua5k3og157.apps.googleusercontent.com",
+            loginConfig = LoginConfig(
+                smsForce = false,
+            )
+        )
+
+        envMap[ENV_SG_DEV] = EnvItem(
+            agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
+            serviceUrl = "https://flat-api-dev-sg.whiteboard.agora.io",
+            githubClientId = "0ac608815326aead5db7",
+            baseInviteUrl = "https://flat-web-dev-sg.whiteboard.agora.io",
+            versionCheckUrl = "",
+            ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
+            wechatId = "wx09437693798bc108",
+            whiteAppId = "n9q1oBxDEeyuBMn1qc0iFw/fLgNSEvdwKjlig",
+            googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
+            loginConfig = LoginConfig(
+                smsForce = false,
+            )
         )
     }
 
@@ -95,13 +130,39 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val ossKey get() = currentEnvItem.ossKey
 
+    val whiteAppId get() = currentEnvItem.whiteAppId
+
+    val wechatId get() = currentEnvItem.wechatId
+
+    val loginConfig get() = currentEnvItem.loginConfig
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
         val githubClientId: String,
         val baseInviteUrl: String,
         val versionCheckUrl: String,
-        val logConfig: LogConfig,
+        val logConfig: LogConfig? = null,
         val ossKey: String,
+
+        val googleClientId: String? = null,
+        val wechatId: String? = null,
+        val whiteAppId: String? = null,
+
+        val loginConfig: LoginConfig = LoginConfig(),
     )
+
+    data class LoginConfig(
+        val wechat: Boolean = true,
+        val github: Boolean = true,
+        val google: Boolean = true,
+        val apple: Boolean = true,
+        val agora: Boolean = false,
+        val sms: Boolean = true,
+        val smsForce: Boolean = true,
+    ) {
+        fun forceBindPhone(): Boolean {
+            return sms && smsForce
+        }
+    }
 }

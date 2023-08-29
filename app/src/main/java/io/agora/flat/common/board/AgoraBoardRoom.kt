@@ -18,9 +18,9 @@ import io.agora.board.fast.model.FastRegion
 import io.agora.board.fast.model.FastRoomOptions
 import io.agora.board.fast.model.FastUserPayload
 import io.agora.board.fast.ui.RoomControllerGroup
-import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.FlatBoardException
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.BoardRoom
@@ -42,7 +42,8 @@ class AgoraBoardRoom @Inject constructor(
     val userRepository: UserRepository,
     val syncedClassState: SyncedClassState,
     val appKVCenter: AppKVCenter,
-    val logger: Logger
+    val appEnv: AppEnv,
+    val logger: Logger,
 ) : BoardRoom {
     private lateinit var fastboard: Fastboard
     private lateinit var fastboardView: FastboardView
@@ -76,7 +77,7 @@ class AgoraBoardRoom @Inject constructor(
         writable: Boolean
     ): Boolean = suspendCoroutine { cont ->
         val fastRoomOptions = FastRoomOptions(
-            Constants.NETLESS_APP_IDENTIFIER,
+            appEnv.whiteAppId,
             roomUUID,
             roomToken,
             userRepository.getUserUUID(),

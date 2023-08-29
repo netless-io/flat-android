@@ -22,6 +22,7 @@ import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import io.agora.flat.BuildConfig
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.RecordItem
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
@@ -47,11 +48,11 @@ class ReplayPlayerComponent(
     private lateinit var videoBinding: ComponentReplayVideoBinding
     private lateinit var whiteSdk: WhiteSdk
 
+    private val appEnv = AppEnv(activity.applicationContext)
     private val viewModel: ReplayViewModel by activity.viewModels()
     private var whiteboardPlayer: WhiteboardPlayer? = null
     private var videoCombinePlayer: AtomPlayer? = null
     private var clusterPlayer: AtomPlayer? = null
-
     private var isSeeking = false
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -137,7 +138,7 @@ class ReplayPlayerComponent(
     private fun initWhiteboard() {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
-        val configuration = WhiteSdkConfiguration(Constants.NETLESS_APP_IDENTIFIER, true).apply {
+        val configuration = WhiteSdkConfiguration(appEnv.whiteAppId, true).apply {
             isUserCursor = true
             useMultiViews = true
         }

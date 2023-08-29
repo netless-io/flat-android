@@ -64,7 +64,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRoomService(@NetworkModule.NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): RoomService {
+    fun provideRoomService(@NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): RoomService {
         return Retrofit.Builder()
             .baseUrl(appEnv.flatServiceUrl)
             .client(client)
@@ -76,7 +76,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideCloudStorageService(
-        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        @NormalOkHttpClient client: OkHttpClient,
         appEnv: AppEnv,
     ): CloudStorageServiceV2 {
         return Retrofit.Builder()
@@ -90,7 +90,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideCloudRecordService(
-        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        @NormalOkHttpClient client: OkHttpClient,
         appEnv: AppEnv,
     ): CloudRecordService {
         return Retrofit.Builder()
@@ -103,7 +103,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideMiscService(@NetworkModule.NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): MiscService {
+    fun provideMiscService(@NormalOkHttpClient client: OkHttpClient, appEnv: AppEnv): MiscService {
         return Retrofit.Builder()
             .baseUrl(appEnv.flatServiceUrl)
             .client(client)
@@ -115,7 +115,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideMessageService(
-        @NetworkModule.AgoraMessageOkHttpClient client: OkHttpClient,
+        @AgoraMessageOkHttpClient client: OkHttpClient,
     ): MessageService {
         return Retrofit.Builder()
             .baseUrl("https://api.agora.io/dev/")
@@ -128,7 +128,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideVersionChecker(
-        @NetworkModule.NormalOkHttpClient client: OkHttpClient,
+        @NormalOkHttpClient client: OkHttpClient,
         appKVCenter: AppKVCenter,
         @ApplicationContext context: Context,
         appEnv: AppEnv

@@ -63,7 +63,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providerLogConfig(appEnv: AppEnv): LogConfig {
+    fun providerLogConfig(appEnv: AppEnv): LogConfig? {
         return appEnv.logConfig
     }
 
@@ -87,7 +87,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providerLoginManager(@ApplicationContext context: Context): LoginManager {
-        return LoginManager(context = context)
+    fun providerLoginManager(@ApplicationContext context: Context, appEnv: AppEnv): LoginManager {
+        return LoginManager(context, appEnv)
     }
 }

@@ -13,6 +13,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.common.login.LoginManager
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.repository.UserRepository
 import javax.inject.Inject
@@ -33,11 +34,14 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
     @Inject
     lateinit var loginManager: LoginManager
 
+    @Inject
+    lateinit var appEnv: AppEnv
+
     private lateinit var api: IWXAPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        api = WXAPIFactory.createWXAPI(this, Constants.WX_APP_ID, false)
+        api = WXAPIFactory.createWXAPI(this, appEnv.wechatId, false)
         wxApiHandleIntent()
     }
 
@@ -64,12 +68,15 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
                 val code = (baseResp as SendAuth.Resp).code
                 onAuthSuccess(code)
             }
+
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
                 onAuthFail(Constants.Login.AUTH_DENIED, baseResp.errCode, baseResp.errStr)
             }
+
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
                 onAuthFail(Constants.Login.AUTH_CANCEL, baseResp.errCode, baseResp.errStr)
             }
+
             else -> {
                 onAuthFail(Constants.Login.AUTH_ERROR, baseResp.errCode, baseResp.errStr)
             }

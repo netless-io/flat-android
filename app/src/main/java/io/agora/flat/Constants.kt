@@ -2,10 +2,6 @@ package io.agora.flat
 
 class Constants {
     companion object {
-        const val WX_APP_ID = "wx09437693798bc108"
-
-        const val NETLESS_APP_IDENTIFIER = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug"
-
         const val DEFAULT_CALLING_CODE = "+86"
     }
 

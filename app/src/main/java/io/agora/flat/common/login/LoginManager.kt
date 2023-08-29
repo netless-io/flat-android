@@ -1,19 +1,25 @@
 package io.agora.flat.common.login
 
 import android.app.Activity
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.agora.flat.Constants
+import io.agora.flat.data.AppEnv
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class LoginManager @Inject constructor(
     @ApplicationContext val context: Context,
+    val appEnv: AppEnv
 ) {
     private var api: IWXAPI? = null
     private var wechatReceiver: BroadcastReceiver? = null
@@ -21,12 +27,12 @@ class LoginManager @Inject constructor(
 
     fun registerApp() {
         ensureInit()
-        api?.registerApp(Constants.WX_APP_ID)
+        api?.registerApp(appEnv.wechatId)
     }
 
     private fun ensureInit() {
         if (api == null) {
-            api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID, true)
+            api = WXAPIFactory.createWXAPI(context, appEnv.wechatId, true)
         }
     }
 

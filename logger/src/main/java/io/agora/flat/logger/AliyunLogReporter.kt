@@ -11,13 +11,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig) : LogReporter, StartupInitializer {
+class AliyunLogReporter @Inject constructor(private val logConfig: LogConfig?) : LogReporter, StartupInitializer {
 
     private var client: LogProducerClient? = null
     private var uid: String? = null
     private var sessionId: String? = null
 
     override fun init(context: Context) {
+        if (logConfig == null) return
         try {
             val endpoint: String = logConfig.endpoint
             val project: String = logConfig.project

@@ -2,8 +2,6 @@ package io.agora.flat
 
 class Config {
     companion object {
-        var forceBindPhone = true
-
         var defaultShowPhone = true
 
         // three days in milliseconds

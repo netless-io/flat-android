@@ -1,11 +1,9 @@
 package io.agora.flat.ui.activity.home
 
 import android.net.Uri
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.Config
 import io.agora.flat.common.android.AndroidDownloader
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.common.version.VersionChecker
@@ -28,7 +26,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
@@ -82,7 +79,7 @@ class MainViewModel @Inject constructor(
 
     fun needBindPhone(): Boolean {
         val bound = userRepository.getUserInfo()?.hasPhone ?: false
-        return !bound && Config.forceBindPhone
+        return !bound && appEnv.loginConfig.forceBindPhone()
     }
 
     private fun joinRoom(roomUUID: String, openVideo: Boolean, openAudio: Boolean) {
