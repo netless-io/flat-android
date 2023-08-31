@@ -346,6 +346,7 @@ class UserRepository @Inject constructor(
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.toUserInfo())
+                    appKVCenter.addLoginHistoryItem(LoginHistoryItem(phone, password))
                     Success(true)
                 }
 
@@ -373,6 +374,7 @@ class UserRepository @Inject constructor(
                 is Success -> {
                     appKVCenter.setToken(result.data.token)
                     appKVCenter.setUserInfo(result.data.toUserInfo())
+                    appKVCenter.addLoginHistoryItem(LoginHistoryItem(email, password))
                     Success(true)
                 }
 

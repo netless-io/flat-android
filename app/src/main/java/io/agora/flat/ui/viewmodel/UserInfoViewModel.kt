@@ -54,7 +54,7 @@ class UserInfoViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            UploadManager.uploadSuccess.filterNotNull().filter { it.uuid == uploadingUUID }.collect {
+            UploadManager.observeSuccess().filter { it.uuid == uploadingUUID }.collect {
                 cloudStorageRepository.updateAvatarFinish(it.uuid)
                 eventBus.produceEvent(UserUpdated)
             }
@@ -83,7 +83,7 @@ class UserInfoViewModel @Inject constructor(
                         filename = info.filename,
                         size = info.size,
                         mediaType = info.mediaType,
-                        uri = info.uri
+                        uri = info.uri,
                     )
                     UploadManager.upload(request)
                 }

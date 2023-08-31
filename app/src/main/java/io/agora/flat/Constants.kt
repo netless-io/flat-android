@@ -3,6 +3,8 @@ package io.agora.flat
 class Constants {
     companion object {
         const val DEFAULT_CALLING_CODE = "+86"
+
+        const val UPLOAD_TAG_CLOUD = "cloud"
     }
 
     object URL {

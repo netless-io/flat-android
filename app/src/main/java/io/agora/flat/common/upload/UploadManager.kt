@@ -4,7 +4,11 @@ import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.logging.HttpLoggingInterceptor
@@ -30,6 +34,8 @@ object UploadManager {
         Thread(r, "flat-upload-manager-thread")
     }
 
+    const val UPLOAD_TAG_DEFAULT = "_upload_tag_"
+
     private lateinit var application: Application
     private val taskMap = mutableMapOf<String, UploadTask>()
 
@@ -43,7 +49,10 @@ object UploadManager {
         executorService.submit(task)
 
         uploadFiles.value = uploadFiles.value.toMutableList().apply {
-            add(0, UploadFile(fileUUID = request.uuid, filename = request.filename, size = request.size))
+            add(
+                0,
+                UploadFile(fileUUID = request.uuid, filename = request.filename, size = request.size, tag = request.tag)
+            )
         }
     }
 
@@ -61,31 +70,35 @@ object UploadManager {
         }
     }
 
-    var uploadFiles = MutableStateFlow(listOf<UploadFile>())
-    var uploadSuccess = MutableStateFlow<UploadRequest?>(null)
+    private var uploadFiles = MutableStateFlow(listOf<UploadFile>())
+    private var uploadSuccess = MutableStateFlow<UploadRequest?>(null)
+
+    fun observeUploadFiles(tag: String = UPLOAD_TAG_DEFAULT): Flow<List<UploadFile>> {
+        return uploadFiles.map { it.filter { f -> f.tag == tag } }
+    }
+
+    fun observeSuccess(tag: String = UPLOAD_TAG_DEFAULT): Flow<UploadRequest> {
+        return uploadSuccess.filterNotNull().filter { it.tag == tag }
+    }
 
     private val localEventListener = UploadEventListener { event ->
         updateUploadFiles(event)
-        if (event is UploadStateEvent && event.uploadState == UploadState.Success) {
+        if (event is UploadEvent.State && event.uploadState == UploadState.Success) {
             uploadSuccess.value = taskMap[event.fileUUID]?.request
             taskMap.remove(event.fileUUID)
         }
     }
 
-    private fun updateUploadFiles(event: UploadEvent) = when (event) {
-        is UploadProgressEvent -> {
-            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
-                if (index < 0) return
-                val changed = uploadFiles.value[index].copy(progress = event.currentSize * 1f / event.totalSize)
-                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
+    private fun updateUploadFiles(event: UploadEvent) {
+        val index = uploadFiles.value.indexOfFirst { it.fileUUID == event.fileUUID }
+        if (index >= 0) {
+            val oldFile = uploadFiles.value[index]
+            val newFile = when (event) {
+                is UploadEvent.Progress -> oldFile.copy(progress = event.currentSize.toFloat() / event.totalSize)
+                is UploadEvent.State -> oldFile.copy(uploadState = event.uploadState)
             }
-        }
-
-        is UploadStateEvent -> {
-            uploadFiles.value.indexOfFirst { event.fileUUID == it.fileUUID }.let { index ->
-                if (index < 0) return
-                val changed = uploadFiles.value[index].copy(uploadState = event.uploadState)
-                uploadFiles.value = uploadFiles.value.toMutableList().apply { set(index, changed) }
+            uploadFiles.value = uploadFiles.value.toMutableList().apply {
+                set(index, newFile)
             }
         }
     }
@@ -106,6 +119,8 @@ data class UploadRequest constructor(
     val size: Long,
     val mediaType: String,
     val uri: Uri,
+
+    val tag: String = UploadManager.UPLOAD_TAG_DEFAULT,
 )
 
 private class UploadTask(
@@ -161,18 +176,18 @@ private class UploadTask(
             .post(requestBody)
             .build()
 
-        eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Uploading))
+        eventListener.onEvent(UploadEvent.State(request.uuid, UploadState.Uploading))
         try {
             val call = client.newCall(httpRequest)
             callRef = call
             val response = call.execute()
             if (response.isSuccessful) {
-                eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Success))
+                eventListener.onEvent(UploadEvent.State(request.uuid, UploadState.Success))
             } else {
-                eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Failure))
+                eventListener.onEvent(UploadEvent.State(request.uuid, UploadState.Failure))
             }
         } catch (e: Exception) {
-            eventListener.onEvent(UploadStateEvent(request.uuid, UploadState.Failure))
+            eventListener.onEvent(UploadEvent.State(request.uuid, UploadState.Failure))
         }
     }
 
@@ -212,7 +227,7 @@ private class UploadTask(
         override fun onProgress(currentSize: Long, totalSize: Long) {
             if (System.currentTimeMillis() > nextUpdate || currentSize == totalSize) {
                 nextUpdate += 1000
-                eventListener.onEvent(UploadProgressEvent(fileUUID, currentSize, totalSize))
+                eventListener.onEvent(UploadEvent.Progress(fileUUID, currentSize, totalSize))
             }
         }
     }
@@ -232,6 +247,7 @@ data class UploadFile(
     val size: Long = 0,
     val uploadState: UploadState = UploadState.Init,
     val progress: Float = 0.0F,
+    val tag: String = UploadManager.UPLOAD_TAG_DEFAULT,
 )
 
 enum class UploadState {
@@ -241,6 +257,15 @@ enum class UploadState {
     Failure,
 }
 
-sealed class UploadEvent
-data class UploadProgressEvent(val fileUUID: String, val currentSize: Long, val totalSize: Long) : UploadEvent()
-data class UploadStateEvent(val fileUUID: String, val uploadState: UploadState) : UploadEvent()
+sealed class UploadEvent(open val fileUUID: String) {
+    data class Progress(
+        override val fileUUID: String,
+        val currentSize: Long,
+        val totalSize: Long
+    ) : UploadEvent(fileUUID)
+
+    data class State(
+        override val fileUUID: String,
+        val uploadState: UploadState
+    ) : UploadEvent(fileUUID)
+}

@@ -11,6 +11,7 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Constants
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
 import io.agora.flat.data.AppEnv
@@ -46,7 +47,7 @@ class CloudStorageViewModel @Inject constructor(
         showBadge,
         totalUsage,
         loadedFiles,
-        UploadManager.uploadFiles,
+        UploadManager.observeUploadFiles(Constants.UPLOAD_TAG_CLOUD),
         dirPath,
     ) { loadUiState, showBadge, totalUsage, files, uploadFiles, dirPath ->
         CloudStorageUiState(
@@ -72,13 +73,13 @@ class CloudStorageViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            UploadManager.uploadSuccess.filterNotNull().collect {
+            UploadManager.observeSuccess(Constants.UPLOAD_TAG_CLOUD).collect {
                 handleUploadSuccess(it)
             }
         }
 
         viewModelScope.launch {
-            UploadManager.uploadFiles.map { it.size }.distinctUntilChanged().collect {
+            UploadManager.observeUploadFiles(Constants.UPLOAD_TAG_CLOUD).map { it.size }.distinctUntilChanged().collect {
                 showBadge.value = it > 0
             }
         }
@@ -228,7 +229,9 @@ class CloudStorageViewModel @Inject constructor(
                         filename = info.filename,
                         size = info.size,
                         mediaType = info.mediaType,
-                        uri = uri
+                        uri = uri,
+
+                        tag = Constants.UPLOAD_TAG_CLOUD,
                     )
                     UploadManager.upload(request)
                 }

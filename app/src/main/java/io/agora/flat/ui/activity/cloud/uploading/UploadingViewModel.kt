@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.cloud.uploading
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Constants
 import io.agora.flat.common.upload.UploadManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,7 @@ class UploadingViewModel @Inject constructor() : ViewModel() {
 
     init {
         viewModelScope.launch {
-            UploadManager.uploadFiles.map {
+            UploadManager.observeUploadFiles(Constants.UPLOAD_TAG_CLOUD).map {
                 UploadingUIState(uploadFiles = it)
             }.collect {
                 _state.value = it

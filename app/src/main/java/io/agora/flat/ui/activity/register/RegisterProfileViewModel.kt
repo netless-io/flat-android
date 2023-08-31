@@ -64,11 +64,11 @@ class RegisterProfileViewModel @Inject constructor(
                             filename = avatarRes.filename,
                             size = avatarRes.size,
                             mediaType = avatarRes.mediaType,
-                            uri = avatarRes.uri
+                            uri = avatarRes.uri,
                         )
                         UploadManager.upload(request)
                         val result = withTimeoutOrNull(5000) {
-                            UploadManager.uploadSuccess.filterNotNull().filter { it.uuid == avatarUuid }.first()
+                            UploadManager.observeSuccess().filter { r -> r.uuid == avatarUuid }.first()
                         }
                         if (result != null) {
                             cloudStorageRepository.updateAvatarFinish(avatarUuid!!)

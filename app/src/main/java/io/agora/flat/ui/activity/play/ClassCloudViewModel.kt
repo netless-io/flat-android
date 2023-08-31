@@ -12,6 +12,7 @@ import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.Constants
 import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.common.upload.UploadManager
 import io.agora.flat.common.upload.UploadRequest
@@ -87,7 +88,7 @@ class ClassCloudViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            UploadManager.uploadSuccess.filterNotNull().collect {
+            UploadManager.observeSuccess(Constants.UPLOAD_TAG_CLOUD).collect {
                 handleUploadSuccess(it)
             }
         }
@@ -189,7 +190,9 @@ class ClassCloudViewModel @Inject constructor(
                     filename = info.filename,
                     size = info.size,
                     mediaType = info.mediaType,
-                    uri = info.uri
+                    uri = info.uri,
+
+                    tag = Constants.UPLOAD_TAG_CLOUD,
                 )
                 uploadingFiles[data.fileUUID] = data
                 UploadManager.upload(request)
