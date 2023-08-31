@@ -200,19 +200,17 @@ private fun ConfirmScreen(
                 onPasswordChange = { confirmPassword = it },
                 checkValid = true,
             )
+
+            Box(Modifier.padding(top = 24.dp, bottom = 12.dp)) {
+                FlatPrimaryTextButton(
+                    text = stringResource(id = R.string.confirm),
+                    enabled = enableConfirm,
+                    onClick = { onConfirm() },
+                )
+            }
+
+            FlatTextCaption(stringResource(R.string.password_rule_tips), Modifier.align(Alignment.CenterHorizontally))
         }
-
-        Spacer(Modifier.height(12.dp))
-
-        Box(modifier = Modifier.padding(16.dp)) {
-            FlatPrimaryTextButton(
-                text = stringResource(id = R.string.confirm),
-                enabled = enableConfirm,
-                onClick = { onConfirm() },
-            )
-        }
-
-        FlatTextCaption(stringResource(R.string.password_rule_tips), Modifier.align(Alignment.CenterHorizontally))
     }
 }
 

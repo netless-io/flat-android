@@ -88,19 +88,17 @@ fun PasswordSetScreen(
                 onPasswordChange = { confirmPassword = it },
                 placeholderValue = stringResource(R.string.new_password_input_hint_again)
             )
+
+            Box(Modifier.padding(top = 24.dp, bottom = 12.dp)) {
+                FlatPrimaryTextButton(
+                    text = stringResource(id = R.string.confirm),
+                    enabled = enableConfirm,
+                    onClick = { onConfirm(password) },
+                )
+            }
+
+            FlatTextCaption(stringResource(R.string.password_rule_tips), Modifier.align(Alignment.CenterHorizontally))
         }
-
-        Spacer(Modifier.height(12.dp))
-
-        Box(modifier = Modifier.padding(16.dp)) {
-            FlatPrimaryTextButton(
-                text = stringResource(id = R.string.confirm),
-                enabled = enableConfirm,
-                onClick = { onConfirm(password) },
-            )
-        }
-
-        FlatTextCaption(stringResource(R.string.password_rule_tips), Modifier.align(Alignment.CenterHorizontally))
     }
 }
 

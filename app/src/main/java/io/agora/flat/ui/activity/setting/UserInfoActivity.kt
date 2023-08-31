@@ -151,7 +151,7 @@ internal fun AvatarItem(
 
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
-@Preview(widthDp = 400, uiMode = 0x20)
+@Preview(widthDp = 400, uiMode = 0x20, locale = "en")
 private fun DefaultPreview() {
     val uiState = UserInfoUiState(
         UserInfo(

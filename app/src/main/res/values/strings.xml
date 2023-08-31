@@ -50,7 +50,7 @@
     <string name="info_third_party">Third-party Information</string>
     <string name="network_acceleration">Network Acceleration</string>
     <string name="account_security">Account Security</string>
-    <string name="cancel_account">Cancel Account</string>
+    <string name="delete_account">Delete Account</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>
@@ -76,7 +76,7 @@
     <string name="input_room_id_hint">Please enter the room number</string>
     <string name="room_type">Room Type</string>
     <string name="nickname">Nickname</string>
-    <string name="input_nickname_hint">Please enter anonymous</string>
+    <string name="input_nickname_hint">Please enter nickname</string>
     <string name="join">Join In</string>
     <string name="join_option">Join Option</string>
     <string name="turn_on_camera">Turn on camera</string>
@@ -130,8 +130,8 @@
 
     <string name="login_sign_in">Sign In</string>
     <string name="login_sign_up">Sign Up</string>
-    <string name="login_use_sms_login">SMS Login</string>
-    <string name="login_use_password_login">Password Login</string>
+    <string name="login_use_sms_login">Via SMS</string>
+    <string name="login_use_password_login">Via Password</string>
     <string name="login_forgot_pwd">Forgot?</string>
     <string name="login_password_input_hint">Password</string>
     <string name="login_email_input_hint">Email</string>

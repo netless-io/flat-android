@@ -202,7 +202,7 @@ private fun AccountSecurityScreen(
             item {
                 SettingItem(
                     id = R.drawable.ic_settings_close_account,
-                    tip = stringResource(R.string.cancel_account),
+                    tip = stringResource(R.string.delete_account),
                     detail = detail,
                     enabled = state.roomCount == 0,
                     onClick = { showCancelDialog = true }

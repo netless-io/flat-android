@@ -54,7 +54,7 @@
     <string name="info_third_party">第三方信息数据共享</string>
     <string name="network_acceleration">网络加速</string>
     <string name="account_security">账户安全</string>
-    <string name="cancel_account">注销账户</string>
+    <string name="delete_account">注销账户</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
@@ -79,8 +79,8 @@
     <string name="room_id">房间号</string>
     <string name="input_room_id_hint">请输入房间号</string>
     <string name="room_type">房间类型</string>
-    <string name="nickname">匿名</string>
-    <string name="input_nickname_hint">请输入匿名</string>
+    <string name="nickname">昵称</string>
+    <string name="input_nickname_hint">请输入昵称</string>
     <string name="join">加入</string>
     <string name="join_option">加入选项</string>
     <string name="turn_on_camera">开启摄像头</string>
