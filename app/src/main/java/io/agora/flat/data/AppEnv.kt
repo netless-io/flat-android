@@ -74,6 +74,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/kndLTOWdG2qYcQ",
+            region = "sg",
             googleClientId = "273996094508-2rpraucen77a1o5dul5ftrua5k3og157.apps.googleusercontent.com",
             loginConfig = LoginConfig(
                 smsForce = false,
@@ -89,6 +90,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "n9q1oBxDEeyuBMn1qc0iFw/fLgNSEvdwKjlig",
+            region = "sg",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
             loginConfig = LoginConfig(
                 smsForce = false,
@@ -138,6 +140,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val whiteAppId get() = currentEnvItem.whiteAppId
 
+    val region get() = currentEnvItem.region
+
     val wechatId get() = currentEnvItem.wechatId
 
     val googleClientId get() = currentEnvItem.googleClientId
@@ -156,6 +160,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         val googleClientId: String? = null,
         val wechatId: String? = null,
         val whiteAppId: String? = null,
+        val region: String = "cn-hz",
 
         val loginConfig: LoginConfig = LoginConfig(),
     )

@@ -17,7 +17,9 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
+import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.CloudStorageRepository
+import io.agora.flat.http.model.CloudUploadStartResp
 import io.agora.flat.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -71,7 +73,7 @@ class CloudStorageViewModel @Inject constructor(
 
         viewModelScope.launch {
             UploadManager.uploadSuccess.filterNotNull().collect {
-                handleUploadSuccess(fileUUID = it.uuid, filename = it.filename, size = it.size)
+                handleUploadSuccess(it)
             }
         }
 
@@ -99,6 +101,7 @@ class CloudStorageViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Failure -> {
                     delayLaunch {
                         loadUiState.value = loadUiState.value.copy(
@@ -132,6 +135,7 @@ class CloudStorageViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Failure -> {
                     delayLaunch {
                         loadUiState.value = loadUiState.value.copy(append = LoadState.Error(resp.exception))
@@ -146,6 +150,7 @@ class CloudStorageViewModel @Inject constructor(
             FileConvertStep.None -> {
                 startConvert(file.fileUUID)
             }
+
             FileConvertStep.Converting -> {
                 if (file.resourceType == ResourceType.WhiteboardConvert) {
                     startConvertQuery(
@@ -163,6 +168,7 @@ class CloudStorageViewModel @Inject constructor(
                     )
                 }
             }
+
             else -> {}
         }
     }
@@ -184,6 +190,7 @@ class CloudStorageViewModel @Inject constructor(
                     val size = checked.sumOf { it.file.fileSize }
                     totalUsage.value = totalUsage.value - size
                 }
+
                 is Failure -> {
 
                 }
@@ -197,6 +204,7 @@ class CloudStorageViewModel @Inject constructor(
                 is Success -> {
                     loadedFiles.value = loadedFiles.value.filterNot { it.file.fileUUID == fileUUID }
                 }
+
                 is Failure -> {
 
                 }
@@ -215,7 +223,6 @@ class CloudStorageViewModel @Inject constructor(
                         filepath = data.ossFilePath,
                         policy = data.policy,
                         signature = data.signature,
-
                         ossKey = appEnv.ossKey,
 
                         filename = info.filename,
@@ -225,6 +232,7 @@ class CloudStorageViewModel @Inject constructor(
                     )
                     UploadManager.upload(request)
                 }
+
                 is Failure -> {
                     // TODO
                 }
@@ -232,32 +240,42 @@ class CloudStorageViewModel @Inject constructor(
         }
     }
 
-    private fun handleUploadSuccess(fileUUID: String, filename: String, size: Long) {
+    private fun handleUploadSuccess(r: UploadRequest) {
         viewModelScope.launch {
-            val resp = cloudStorageRepository.updateFinish(fileUUID)
-            if (resp is Success) {
-                totalUsage.value = totalUsage.value + size
+            cloudStorageRepository.updateFinish(r.uuid).onSuccess {
+                totalUsage.value = totalUsage.value + r.size
+                val uuid = r.uuid
+                val filename = r.filename
+                val fileUrl = "${r.policyURL}/${r.filepath}"
+
                 when (filename.coursewareType()) {
                     CoursewareType.DocStatic, CoursewareType.DocDynamic -> {
-                        addUiFile(fileUUID, filename, size, null)
-                        startConvert(fileUUID)
+                        addUiFile(uuid, filename, fileUrl, r.size, null)
+                        startConvert(uuid)
                     }
+
                     else -> {
-                        addUiFile(fileUUID, filename, size, ResourceType.NormalResources)
+                        addUiFile(uuid, filename, fileUrl, r.size, ResourceType.NormalResources)
                     }
                 }
             }
         }
     }
 
-    private fun addUiFile(fileUUID: String, filename: String, size: Long, resourceType: ResourceType?) {
+    private fun addUiFile(
+        fileUUID: String,
+        filename: String,
+        fileUrl: String,
+        size: Long,
+        resourceType: ResourceType?
+    ) {
         val targetFiles = loadedFiles.value.toMutableList()
         val uiFile = CloudUiFile(
             CloudFile(
                 fileUUID = fileUUID,
                 fileName = filename,
                 fileSize = size,
-                fileURL = filename,
+                fileURL = fileUrl,
                 createAt = System.currentTimeMillis(),
                 resourceType = resourceType,
             )
@@ -274,6 +292,7 @@ class CloudStorageViewModel @Inject constructor(
         val projectorQuery = ProjectorQuery.Builder()
             .setTaskUuid(taskUUID)
             .setTaskToken(taskToken)
+            .setRegion(appEnv.region.toRegion())
             .setPoolInterval(3000L)
             .setTimeout(120_000)
             .setCallback(object : ProjectorQuery.Callback {
@@ -315,6 +334,7 @@ class CloudStorageViewModel @Inject constructor(
                                 fileUUID = fileUUID,
                             )
                         }
+
                         ResourceType.WhiteboardProjector -> {
                             val taskUUID = data.whiteboardProjector!!.taskUUID
                             val taskToken = data.whiteboardProjector.taskToken
@@ -332,10 +352,12 @@ class CloudStorageViewModel @Inject constructor(
                                 fileUUID = fileUUID,
                             )
                         }
+
                         else -> {}
                     }
 
                 }
+
                 is Failure -> {
                     // TODO
                 }
@@ -354,6 +376,7 @@ class CloudStorageViewModel @Inject constructor(
             setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
             setTaskToken(taskToken)
             setTaskUuid(taskUUID)
+            setRegion(appEnv.region.toRegion())
             setCallback(object : ConverterCallbacks {
                 override fun onProgress(progress: Double, convertInfo: ConversionInfo) {
                 }
@@ -399,12 +422,14 @@ class CloudStorageViewModel @Inject constructor(
                 )
                 file.copy(meta = fileMeta)
             }
+
             ResourceType.WhiteboardProjector -> {
                 val fileMeta = file.meta?.copy(
                     whiteboardProjector = file.whiteboardProjector.copy(convertStep = convertStep)
                 )
                 file.copy(meta = fileMeta)
             }
+
             else -> file
         }
         return result
@@ -427,6 +452,7 @@ class CloudStorageViewModel @Inject constructor(
                     )
                 )
             }
+
             ResourceType.WhiteboardProjector -> {
                 CloudFileMeta(
                     whiteboardProjector = WhiteboardProjectorPayload(
@@ -437,6 +463,7 @@ class CloudStorageViewModel @Inject constructor(
                     )
                 )
             }
+
             else -> null
         }
         return file.copy(resourceType = resourceType, meta = meta)
@@ -450,8 +477,9 @@ class CloudStorageViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = cloudStorageRepository.createDirectory(state.value.dirPath, name)) {
                 is Success -> {
-                    addUiFile(UUID.randomUUID().toString(), name, 0, ResourceType.Directory)
+                    addUiFile(UUID.randomUUID().toString(), name, "", 0, ResourceType.Directory)
                 }
+
                 is Failure -> {
 
                 }
@@ -474,6 +502,7 @@ class CloudStorageViewModel @Inject constructor(
                 is Success -> updateFileState(fileUuid) { file ->
                     file.copy(fileName = fileName)
                 }
+
                 is Failure -> {
                 }
             }

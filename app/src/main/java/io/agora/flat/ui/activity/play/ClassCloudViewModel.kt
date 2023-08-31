@@ -31,6 +31,7 @@ import io.agora.flat.util.ContentInfo
 import io.agora.flat.util.coursewareType
 import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.parentFolder
+import io.agora.flat.util.toRegion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -297,6 +298,7 @@ class ClassCloudViewModel @Inject constructor(
         val projectorQuery = ProjectorQuery.Builder()
             .setTaskToken(file.whiteboardProjector.taskToken)
             .setTaskUuid(file.whiteboardProjector.taskUUID)
+            .setRegion(appEnv.region.toRegion())
             .setPoolInterval(2000)
             .setCallback(object : ProjectorQuery.Callback {
                 override fun onProgress(progress: Double, convertInfo: ProjectorQuery.QueryResponse) {

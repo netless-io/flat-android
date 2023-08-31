@@ -1,13 +1,13 @@
 package io.agora.flat.util
 
-import android.util.Patterns.EMAIL_ADDRESS
+import com.herewhite.sdk.domain.Region
 import io.agora.flat.Config
 import io.agora.flat.R
 import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.CoursewareType
 import io.agora.flat.data.model.ResourceType
-import java.util.*
+import java.util.Locale
 
 fun String.fileExtension(): String {
     return substringAfterLast('.').lowercase(Locale.getDefault())
@@ -135,4 +135,15 @@ fun String.parentFolder(): String {
 fun String.folderName(): String {
     val folder = this
     return folder.split('/').findLast { it != "" } ?: ""
+}
+
+fun String.toRegion(): Region {
+    return when (this) {
+        "cn-hz" -> Region.cn
+        "us-sv" -> Region.us
+        "sg" -> Region.sg
+        "in-mum" -> Region.in_mum
+        "gb-lon" -> Region.gb_lon
+        else -> Region.cn
+    }
 }

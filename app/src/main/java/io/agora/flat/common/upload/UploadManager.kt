@@ -96,13 +96,13 @@ data class UploadRequest constructor(
     val uuid: String,
     val policy: String,
     val policyURL: String,
+    val filepath: String,
     val signature: String,
 
     val ossKey: String,
 
     // local info
     val filename: String,
-    val filepath: String,
     val size: Long,
     val mediaType: String,
     val uri: Uri,
