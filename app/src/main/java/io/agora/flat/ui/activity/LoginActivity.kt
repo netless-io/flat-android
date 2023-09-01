@@ -2,6 +2,7 @@ package io.agora.flat.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -191,6 +192,9 @@ class LoginActivity : BaseComposeActivity() {
                     Navigator.launchHomeActivity(this@LoginActivity)
                 }
             }
+
+            // Disable press back to exit login page
+            BackHandler {}
 
             LoginPage(uiState, actioner = actioner)
 
