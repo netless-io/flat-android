@@ -44,6 +44,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
+
+            loginConfig = LoginConfig(google = false)
         )
 
         envMap[ENV_PROD] = EnvItem(
@@ -63,6 +65,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
+
+            loginConfig = LoginConfig(google = false)
         )
 
         envMap[ENV_SG_PROD] = EnvItem(
@@ -76,9 +80,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/kndLTOWdG2qYcQ",
             region = "sg",
             googleClientId = "273996094508-2rpraucen77a1o5dul5ftrua5k3og157.apps.googleusercontent.com",
-            loginConfig = LoginConfig(
-                smsForce = false,
-            )
+
+            loginConfig = LoginConfig(smsForce = false, wechat = false, phoneFirst = false)
         )
 
         envMap[ENV_SG_DEV] = EnvItem(
@@ -92,9 +95,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             whiteAppId = "n9q1oBxDEeyuBMn1qc0iFw/fLgNSEvdwKjlig",
             region = "sg",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
-            loginConfig = LoginConfig(
-                smsForce = false,
-            )
+
+            loginConfig = LoginConfig(smsForce = false, wechat = false, phoneFirst = false)
         )
     }
 
@@ -110,9 +112,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     private val currentEnvItem = envMap[getEnv()]!!
 
-    val flatServiceUrl = run {
-        currentEnvItem.serviceUrl
-    }
+    val flatServiceUrl get() = currentEnvItem.serviceUrl
+
 
     val githubClientID = run {
         currentEnvItem.githubClientId
@@ -126,9 +127,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val googleBindingCallback get() = "${flatServiceUrl}/v1/user/binding/platform/google"
 
-    val baseInviteUrl = run {
-        currentEnvItem.baseInviteUrl
-    }
+    val baseInviteUrl get() = currentEnvItem.baseInviteUrl
 
     val agoraAppId get() = currentEnvItem.agoraAppId
 
@@ -148,6 +147,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val loginConfig get() = currentEnvItem.loginConfig
 
+    val phoneFirst get() = currentEnvItem.loginConfig.phoneFirst
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
@@ -164,18 +165,20 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
         val loginConfig: LoginConfig = LoginConfig(),
     )
+}
 
-    data class LoginConfig(
-        val wechat: Boolean = true,
-        val github: Boolean = true,
-        val google: Boolean = true,
-        val apple: Boolean = true,
-        val agora: Boolean = false,
-        val sms: Boolean = true,
-        val smsForce: Boolean = true,
-    ) {
-        fun forceBindPhone(): Boolean {
-            return sms && smsForce
-        }
+data class LoginConfig(
+    val wechat: Boolean = true,
+    val github: Boolean = true,
+    val google: Boolean = true,
+    val apple: Boolean = true,
+    val agora: Boolean = false,
+    val sms: Boolean = true,
+    val smsForce: Boolean = true,
+    // at login page, show phone first or not
+    val phoneFirst: Boolean = true,
+) {
+    fun forceBindPhone(): Boolean {
+        return sms && smsForce
     }
 }

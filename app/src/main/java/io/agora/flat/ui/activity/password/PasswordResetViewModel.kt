@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.password
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -20,11 +21,19 @@ import javax.inject.Inject
 @HiltViewModel
 class PasswordResetViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val appEnv: AppEnv,
 ) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
 
-    private var _state = MutableStateFlow(PasswordResetUiState.Init)
+    private var _state = MutableStateFlow(
+        PasswordResetUiState(
+            info = PhoneOrEmailInfo(
+                cc = CallingCodeManager.getDefaultCC(),
+                phoneFirst = appEnv.phoneFirst
+            )
+        )
+    )
     val state: StateFlow<PasswordResetUiState>
         get() = _state
 
@@ -172,12 +181,8 @@ data class PasswordResetUiState(
     val sendCodeSuccess: Boolean = false,
 
     val step: Step = Step.FetchCode,
-    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(cc = CallingCodeManager.getDefaultCC()),
-) {
-    companion object {
-        val Init = PasswordResetUiState()
-    }
-}
+    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(),
+)
 
 enum class Step {
     FetchCode,

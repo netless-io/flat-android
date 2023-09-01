@@ -97,17 +97,19 @@ fun PhoneBindDialog(
     onBindSuccess: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Surface(
-            Modifier
-                .widthIn(max = 400.dp)
-                .height(500.dp),
-            shape = Shapes.large,
-        ) {
-            PhoneBindScreen(
-                onBindSuccess = onBindSuccess,
-                onBindClose = onDismissRequest,
-            )
+    FlatTheme {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                Modifier
+                    .widthIn(max = 400.dp)
+                    .height(500.dp),
+                shape = Shapes.large,
+            ) {
+                PhoneBindScreen(
+                    onBindSuccess = onBindSuccess,
+                    onBindClose = onDismissRequest,
+                )
+            }
         }
     }
 }

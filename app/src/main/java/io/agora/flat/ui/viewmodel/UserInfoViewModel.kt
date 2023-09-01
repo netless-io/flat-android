@@ -104,16 +104,3 @@ data class UserInfoUiState(
     val userInfo: UserInfo? = null,
     val message: UiMessage? = null,
 )
-
-sealed class UserInfoUiAction {
-    object Finish : UserInfoUiAction()
-    data class PickedAvatar(val info: ContentInfo) : UserInfoUiAction()
-
-    object BindGithub : UserInfoUiAction()
-    object BindWeChat : UserInfoUiAction()
-    object BindPhone : UserInfoUiAction()
-    object BindEmail : UserInfoUiAction()
-    object BindGoogle : UserInfoUiAction()
-
-    data class UnbindAction(val platform: LoginPlatform) : UserInfoUiAction()
-}

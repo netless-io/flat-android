@@ -149,6 +149,7 @@ private fun FetchCodeScreen(
                 onValueChange = { onPhoneOrEmailChange(state.copy(value = it)) },
                 callingCode = state.cc,
                 onCallingCodeChange = { onPhoneOrEmailChange(state.copy(cc = it)) },
+                phoneFirst = state.phoneFirst,
             )
 
             SendCodeInput(

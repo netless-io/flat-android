@@ -3,6 +3,7 @@ package io.agora.flat.ui.activity.register
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -19,10 +20,18 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val appEnv: AppEnv,
 ) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
 
-    private var _state = MutableStateFlow(RegisterUiState.Init)
+    private var _state = MutableStateFlow(
+        RegisterUiState(
+            info = PhoneOrEmailInfo(
+                cc = CallingCodeManager.getDefaultCC(),
+                phoneFirst = appEnv.phoneFirst
+            )
+        )
+    )
     val state: StateFlow<RegisterUiState>
         get() = _state
 
@@ -142,11 +151,7 @@ class RegisterViewModel @Inject constructor(
 data class RegisterUiState(
     val success: Boolean = false,
     val sendCodeSuccess: Boolean = false,
-    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(cc = CallingCodeManager.getDefaultCC()),
+    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(),
     val loading: Boolean = false,
     val error: UiMessage? = null
-) {
-    companion object {
-        val Init = RegisterUiState()
-    }
-}
+)

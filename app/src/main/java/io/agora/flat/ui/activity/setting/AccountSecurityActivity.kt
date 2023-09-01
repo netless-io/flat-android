@@ -30,8 +30,11 @@ import io.agora.flat.Config
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
 import io.agora.flat.common.login.UserBindingHandler
+import io.agora.flat.data.AppEnv
+import io.agora.flat.data.LoginConfig
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.Meta
 import io.agora.flat.data.model.UserBindings
@@ -169,6 +172,7 @@ private fun AccountSecurityScreen(
             if (state.bindings != null) {
                 item {
                     BindingItems(
+                        state.loginConfig,
                         state.bindings,
                         onBindGithub,
                         onBindWeChat,
@@ -219,6 +223,7 @@ private fun AccountSecurityScreen(
 
 @Composable
 fun BindingItems(
+    loginConfig: LoginConfig,
     bindings: UserBindings,
     onBindGithub: () -> Unit,
     onBindWeChat: () -> Unit,
@@ -267,26 +272,30 @@ fun BindingItems(
             onBindGithub()
         }
     }
-    SettingItem(
-        id = R.drawable.ic_user_profile_wechat,
-        tip = stringResource(R.string.wechat),
-        desc = wechatDesc
-    ) {
-        if (bindings.wechat) {
-            onUnbind(LoginPlatform.WeChat)
-        } else {
-            onBindWeChat()
+    if (loginConfig.wechat) {
+        SettingItem(
+            id = R.drawable.ic_user_profile_wechat,
+            tip = stringResource(R.string.wechat),
+            desc = wechatDesc
+        ) {
+            if (bindings.wechat) {
+                onUnbind(LoginPlatform.WeChat)
+            } else {
+                onBindWeChat()
+            }
         }
     }
-    SettingItem(
-        id = R.drawable.ic_user_profile_google,
-        tip = stringResource(R.string.google),
-        desc = googleDesc
-    ) {
-        if (bindings.google) {
-            onUnbind(LoginPlatform.Google)
-        } else {
-            onBindGoogle()
+    if (loginConfig.google) {
+        SettingItem(
+            id = R.drawable.ic_user_profile_google,
+            tip = stringResource(R.string.google),
+            desc = googleDesc
+        ) {
+            if (bindings.google) {
+                onUnbind(LoginPlatform.Google)
+            } else {
+                onBindGoogle()
+            }
         }
     }
 }

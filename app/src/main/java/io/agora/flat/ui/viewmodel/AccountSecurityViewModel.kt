@@ -3,7 +3,9 @@ package io.agora.flat.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.agora.flat.data.AppEnv
 import io.agora.flat.data.Failure
+import io.agora.flat.data.LoginConfig
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.LoginPlatform
 import io.agora.flat.data.model.UserBindings
@@ -27,12 +29,13 @@ import javax.inject.Inject
 class AccountSecurityViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val eventBus: EventBus,
+    appEnv: AppEnv,
 ) : ViewModel() {
     private val messageManager = UiMessageManager()
     private val userBindings = MutableStateFlow<UserBindings?>(null)
     private val userInfo = MutableStateFlow(userRepository.getUserInfo())
 
-    private val _state = MutableStateFlow(AccountSecurityUiState.Empty)
+    private val _state = MutableStateFlow(AccountSecurityUiState(loginConfig = appEnv.loginConfig))
     val state: StateFlow<AccountSecurityUiState>
         get() = _state
 
@@ -115,13 +118,11 @@ data class AccountSecurityUiState(
 
     val userInfo: UserInfo? = null,
     val bindings: UserBindings? = null,
+
+    val loginConfig: LoginConfig = LoginConfig(),
 ) {
     val bindingCount
         get() = bindings?.run {
             listOf(wechat, phone, email, agora, apple, github, google).count { it }
         } ?: 0
-
-    companion object {
-        val Empty = AccountSecurityUiState()
-    }
 }

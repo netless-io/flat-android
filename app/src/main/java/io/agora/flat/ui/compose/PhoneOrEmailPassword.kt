@@ -54,7 +54,6 @@ import io.agora.flat.util.isValidEmail
 import io.agora.flat.util.isValidPassword
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.isValidSmsCode
-import io.agora.flat.util.showPhoneMode
 
 @Composable
 fun SendCodeInput(
@@ -178,6 +177,7 @@ fun PhoneOrEmailInput(
     value: String,
     onValueChange: (String) -> Unit,
     onCallingCodeChange: (String) -> Unit,
+    phoneFirst: Boolean,
 ) {
     val context = LocalContext.current
     val callingCodeLauncher = rememberLauncherForActivityResult(
@@ -190,7 +190,7 @@ fun PhoneOrEmailInput(
         }
     )
 
-    val isPhone = value.showPhoneMode()
+    val isPhone = value.let { (it == "" && phoneFirst) || it.isValidPhone() }
 
     var isValidEmail by remember { mutableStateOf(true) }
     var hasEmailFocused by remember { mutableStateOf(false) }
@@ -419,6 +419,7 @@ private fun PhonePasswordAreaPreview() {
             value = "1234567890",
             onValueChange = {},
             onCallingCodeChange = {},
+            false,
         )
         Spacer(Modifier.height(8.dp))
         PasswordInput(

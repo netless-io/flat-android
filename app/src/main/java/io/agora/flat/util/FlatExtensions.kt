@@ -115,8 +115,6 @@ fun String.isValidVerifyCode(): Boolean {
     return this.length == 6
 }
 
-fun String.showPhoneMode(): Boolean = isValidPhone() || ("" == this && Config.defaultShowPhone)
-
 fun String.isValidPassword(): Boolean {
     return PASSWORD_PATTERN.toRegex().matches(this)
 }

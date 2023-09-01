@@ -151,6 +151,7 @@ private fun SettingsList(state: SettingsUiState) {
                     tip = "Debug Tools",
                     onClick = { Navigator.launchDevToolsActivity(context) })
             }
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
@@ -254,6 +255,7 @@ internal fun SettingItemDivider() {
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
+@Preview(widthDp = 800, heightDp = 600, uiMode = 0x20)
 fun UserSettingActivityPreview() {
     val state = SettingsUiState()
     FlatColumnPage {

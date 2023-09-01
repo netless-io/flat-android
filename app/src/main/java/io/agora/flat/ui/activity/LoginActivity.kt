@@ -56,8 +56,9 @@ import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.login.LoginActivityHandler
 import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
+import io.agora.flat.data.LoginConfig
+import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.activity.login.LoginInputState
 import io.agora.flat.ui.activity.login.LoginUiAction
 import io.agora.flat.ui.activity.login.LoginUiState
 import io.agora.flat.ui.activity.login.LoginViewModel
@@ -141,11 +142,11 @@ class LoginActivity : BaseComposeActivity() {
                     }
 
                     is LoginUiAction.PasswordLoginClick -> {
-                        viewModel.login(action.state)
+                        viewModel.login(action.info)
                     }
 
                     is LoginUiAction.LoginInputChange -> {
-                        viewModel.updateLoginInput(action.state)
+                        viewModel.updateLoginInput(action.info)
                     }
                 }
             }
@@ -253,7 +254,7 @@ internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Un
             contentAlignment = Alignment.TopCenter,
         ) {
             LoginArea(
-                uiState = uiState, modifier = Modifier
+                state = uiState, modifier = Modifier
                     .width(360.dp)
                     .fillMaxHeight(), actioner = actioner
             )
@@ -262,11 +263,11 @@ internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Un
 }
 
 @Composable
-private fun LoginArea(uiState: LoginUiState, modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
+private fun LoginArea(state: LoginUiState, modifier: Modifier, actioner: (LoginUiAction) -> Unit) {
     var agreementChecked by rememberSaveable { mutableStateOf(false) }
     var showAgreement by rememberSaveable { mutableStateOf(false) }
     var passwordMode by rememberSaveable { mutableStateOf(true) }
-    val inputState = uiState.loginInputState
+    val inputState = state.inputState
 
     Box(modifier) {
         Column(
@@ -317,6 +318,7 @@ private fun LoginArea(uiState: LoginUiState, modifier: Modifier, actioner: (Logi
         }
 
         LoginButtonsArea(
+            loginConfig = state.loginConfig,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
@@ -342,8 +344,8 @@ private fun LoginArea(uiState: LoginUiState, modifier: Modifier, actioner: (Logi
 
 @Composable
 private fun PasswordLoginArea(
-    inputState: LoginInputState,
-    onLoginInputChange: (LoginInputState) -> Unit,
+    inputState: PhoneOrEmailInfo,
+    onLoginInputChange: (PhoneOrEmailInfo) -> Unit,
     onSmsClick: () -> Unit,
     actioner: (LoginUiAction) -> Unit
 ) {
@@ -353,6 +355,7 @@ private fun PasswordLoginArea(
             onValueChange = { onLoginInputChange(inputState.copy(value = it)) },
             callingCode = inputState.cc,
             onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
+            phoneFirst = inputState.phoneFirst,
         )
         PasswordInput(
             password = inputState.password,
@@ -365,9 +368,7 @@ private fun PasswordLoginArea(
             .fillMaxWidth(1f)
             .padding(horizontal = 8.dp)
     ) {
-        TextButton(
-            onClick = onSmsClick
-        ) {
+        TextButton(onClick = onSmsClick) {
             FlatTextBodyTwo(stringResource(R.string.login_use_sms_login), color = MaterialTheme.colors.primary)
         }
         Spacer(Modifier.weight(1f))
@@ -398,8 +399,8 @@ private fun PasswordLoginArea(
 
 @Composable
 private fun PhoneLoginArea(
-    inputState: LoginInputState,
-    onLoginInputChange: (LoginInputState) -> Unit,
+    inputState: PhoneOrEmailInfo,
+    onLoginInputChange: (PhoneOrEmailInfo) -> Unit,
     actioner: (LoginUiAction) -> Unit
 ) {
     Column(Modifier.padding(horizontal = 16.dp)) {
@@ -411,8 +412,8 @@ private fun PhoneLoginArea(
         )
 
         SendCodeInput(
-            code = inputState.smsCode,
-            onCodeChange = { onLoginInputChange(inputState.copy(smsCode = it)) },
+            code = inputState.code,
+            onCodeChange = { onLoginInputChange(inputState.copy(code = it)) },
             onSendCode = { actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}")) },
             ready = inputState.value.isValidPhone(),
             remainTime = inputState.remainTime,
@@ -434,15 +435,16 @@ private fun PhoneLoginArea(
     Box(Modifier.padding(16.dp)) {
         FlatPrimaryTextButton(
             stringResource(id = R.string.login_sign_in_or_up),
-            enabled = inputState.value.isValidPhone() && inputState.smsCode.isValidSmsCode(),
+            enabled = inputState.value.isValidPhone() && inputState.code.isValidSmsCode(),
         ) {
-            actioner(LoginUiAction.PhoneLogin(inputState.cc + inputState.value, inputState.smsCode))
+            actioner(LoginUiAction.PhoneLogin(inputState.cc + inputState.value, inputState.code))
         }
     }
 }
 
 @Composable
 private fun LoginButtonsArea(
+    loginConfig: LoginConfig,
     modifier: Modifier = Modifier,
     actioner: (LoginUiAction) -> Unit,
 ) {
@@ -466,16 +468,26 @@ private fun LoginButtonsArea(
         }
         Spacer(Modifier.height(24.dp))
         Row {
-            LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
-                Image(painterResource(R.drawable.ic_wechat_login), "")
+            if (loginConfig.wechat) {
+                Spacer(Modifier.width(24.dp))
+                LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
+                    Image(painterResource(R.drawable.ic_wechat_login), "")
+                }
+                Spacer(Modifier.width(24.dp))
             }
-            Spacer(Modifier.width(48.dp))
-            LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
-                Image(painterResource(R.drawable.ic_github_login), "")
+            if (loginConfig.github) {
+                Spacer(Modifier.width(24.dp))
+                LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
+                    Image(painterResource(R.drawable.ic_github_login), "")
+                }
+                Spacer(Modifier.width(24.dp))
             }
-            Spacer(Modifier.width(48.dp))
-            LoginImageButton(onClick = { actioner(LoginUiAction.GoogleLogin) }) {
-                Image(painterResource(R.drawable.ic_google_login), "")
+            if (loginConfig.google) {
+                Spacer(Modifier.width(24.dp))
+                LoginImageButton(onClick = { actioner(LoginUiAction.GoogleLogin) }) {
+                    Image(painterResource(R.drawable.ic_google_login), "")
+                }
+                Spacer(Modifier.width(24.dp))
             }
         }
         Spacer(Modifier.height(64.dp))
@@ -589,10 +601,10 @@ private fun LoginImageButton(
 private fun LoginPagePreview() {
     LoginPage(
         LoginUiState(
-            loginInputState = LoginInputState(
+            inputState = PhoneOrEmailInfo(
                 value = "12345678901",
                 password = "123456",
-                smsCode = "123456",
+                code = "123456",
                 cc = "+86",
             ),
         )

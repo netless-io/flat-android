@@ -1,11 +1,12 @@
 package io.agora.flat.ui.activity.login
 
-import android.os.Parcelable
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
+import io.agora.flat.data.LoginConfig
+import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
@@ -14,11 +15,9 @@ import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
-import io.agora.flat.util.isValidPhone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +29,15 @@ class LoginViewModel @Inject constructor(
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
 
-    private var _state = MutableStateFlow(LoginUiState.Init)
+    private var _state = MutableStateFlow(
+        LoginUiState(
+            loginConfig = appEnv.loginConfig,
+            inputState = PhoneOrEmailInfo(
+                cc = CallingCodeManager.getDefaultCC(),
+                phoneFirst = appEnv.phoneFirst
+            )
+        )
+    )
     val state: StateFlow<LoginUiState>
         get() = _state
 
@@ -49,21 +56,21 @@ class LoginViewModel @Inject constructor(
 
         viewModelScope.launch {
             remainTime.collect {
-                val loginInputState = state.value.loginInputState.copy(remainTime = it)
-                _state.value = _state.value.copy(loginInputState = loginInputState)
+                val loginInputState = state.value.inputState.copy(remainTime = it)
+                _state.value = _state.value.copy(inputState = loginInputState)
             }
         }
 
         viewModelScope.launch {
             appKVCenter.getLastLoginHistoryItem()?.let {
-                val inputState = state.value.loginInputState
+                val inputState = state.value.inputState
                 val value = if (it.value.startsWith(inputState.cc)) {
                     it.value.substring(inputState.cc.length)
                 } else {
                     it.value
                 }
                 _state.value = _state.value.copy(
-                    loginInputState = inputState.copy(
+                    inputState = inputState.copy(
                         value = value,
                         password = it.password
                     )
@@ -105,8 +112,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun login(state: LoginInputState) {
-        val loginPhone = state.phoneMode
+    fun login(state: PhoneOrEmailInfo) {
+        val loginPhone = state.isPhone
         if (loginPhone) {
             loginPhone(state.phone, state.password)
         } else {
@@ -127,8 +134,8 @@ class LoginViewModel @Inject constructor(
     }
 
 
-    fun updateLoginInput(state: LoginInputState) {
-        _state.value = _state.value.copy(loginInputState = state)
+    fun updateLoginInput(state: PhoneOrEmailInfo) {
+        _state.value = _state.value.copy(inputState = state)
     }
 
     private fun notifyError(it: Throwable) {
@@ -148,33 +155,12 @@ class LoginViewModel @Inject constructor(
     }
 }
 
-@Parcelize
-data class LoginInputState(
-    // phone or email
-    val value: String = "",
-    val password: String = "",
-    val smsCode: String = "",
-    val remainTime: Long = 0,
-    val cc: String = CallingCodeManager.getDefaultCC(),
-) : Parcelable {
-    val phone: String
-        get() = "$cc$value"
-
-    val email: String
-        get() = value
-
-    val phoneMode: Boolean
-        get() = value.isValidPhone()
-}
-
 data class LoginUiState(
     val success: Boolean = false,
     val sendCodeSuccess: Boolean = false,
-    val loginInputState: LoginInputState = LoginInputState(),
+    val inputState: PhoneOrEmailInfo = PhoneOrEmailInfo(),
     val loading: Boolean = false,
     val message: UiMessage? = null,
-) {
-    companion object {
-        val Init = LoginUiState()
-    }
-}
+
+    val loginConfig: LoginConfig = LoginConfig(),
+)

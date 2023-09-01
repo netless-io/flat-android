@@ -1,5 +1,7 @@
 package io.agora.flat.ui.activity.login
 
+import io.agora.flat.data.model.PhoneOrEmailInfo
+
 
 sealed class LoginUiAction {
     object WeChatLogin : LoginUiAction()
@@ -14,8 +16,8 @@ sealed class LoginUiAction {
 
     object SignUpClick : LoginUiAction()
 
-    class PasswordLoginClick(val state: LoginInputState) : LoginUiAction()
-    class LoginInputChange(val state: LoginInputState) : LoginUiAction()
+    class PasswordLoginClick(val info: PhoneOrEmailInfo) : LoginUiAction()
+    class LoginInputChange(val info: PhoneOrEmailInfo) : LoginUiAction()
 
     object ForgotPwdClick : LoginUiAction()
 }

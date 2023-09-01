@@ -130,6 +130,7 @@ internal fun RegisterScreen(
                 onValueChange = { onInfoUpdate(info.copy(value = it)) },
                 callingCode = info.cc,
                 onCallingCodeChange = { onInfoUpdate(info.copy(cc = it)) },
+                phoneFirst = info.phoneFirst,
             )
 
             SendCodeInput(
@@ -189,7 +190,7 @@ internal fun RegisterScreen(
 internal fun PhoneBindScreenPreview() {
     FlatPage {
         RegisterScreen(
-            state = RegisterUiState.Init.copy(
+            state = RegisterUiState().copy(
                 info = PhoneOrEmailInfo(
                     value = "12345678901",
                     cc = "86",
