@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,6 +28,7 @@ import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Red_1
 import io.agora.flat.ui.theme.Red_3
+import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
 
 @Composable
@@ -121,7 +123,7 @@ private fun OperationItem(
                 .padding(vertical = 16.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, radius = 48.dp),
+                    indication = rememberRipple(bounded = false),
                     onClick = onClick,
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -166,10 +168,12 @@ private fun HomeRoomList(
     roomList: List<RoomInfo>,
     onGotoRoomDetail: (String, String?) -> Unit,
 ) {
+    val imgRes = if (isDarkTheme()) R.drawable.img_room_list_empty_dark else R.drawable.img_room_list_empty_light
+
     if (roomList.isEmpty()) {
         EmptyView(
             modifier = modifier.verticalScroll(rememberScrollState()),
-            imgRes = R.drawable.img_room_list_empty,
+            imgRes = imgRes,
             message = R.string.home_no_history_room_tip
         )
     } else {

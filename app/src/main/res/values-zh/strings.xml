@@ -23,6 +23,11 @@
     <string name="send">发送</string>
     <string name="next">下一步</string>
 
+    <string name="account">账号</string>
+    <string name="preferences">首选项</string>
+    <string name="privacy">隐私</string>
+    <string name="more">更多</string>
+
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
     <string name="relative_time_hh">%d小时</string>

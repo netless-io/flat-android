@@ -16,8 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.data.model.RoomInfo
-import io.agora.flat.ui.activity.home.EmptyView
+import io.agora.flat.ui.compose.EmptyView
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.isDarkTheme
 
 @Composable
 fun HistoryScreen(
@@ -62,10 +63,12 @@ private fun HistoryScreen(
 
 @Composable
 private fun HistoryList(modifier: Modifier, histories: List<RoomInfo>, onOpenRoomDetail: (String, String?) -> Unit) {
+    val imgRes = if (isDarkTheme()) R.drawable.img_history_list_empty_dark else R.drawable.img_history_list_empty_light
+
     if (histories.isEmpty()) {
         EmptyView(
             modifier = modifier.verticalScroll(rememberScrollState()),
-            imgRes = R.drawable.img_history_list_empty,
+            imgRes = imgRes,
             message = R.string.home_no_history_room_tip
         )
     } else {

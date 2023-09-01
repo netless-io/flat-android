@@ -52,6 +52,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.login.LoginActivityHandler
 import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
@@ -67,10 +68,8 @@ import io.agora.flat.ui.compose.FlatClickableText
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.FlatSecondaryTextButton
-import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
 import io.agora.flat.ui.compose.FlatTextBodyTwo
-import io.agora.flat.ui.compose.FlatTextTitle
 import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
@@ -228,6 +227,7 @@ internal fun LoginPage(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit)
         if (isTabletMode()) {
             LoginMainPad(uiState, actioner)
         } else {
+            LoginSlogan()
             LoginMain(uiState, actioner)
         }
     }
@@ -240,16 +240,11 @@ internal fun LoginMain(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit)
 
 @Composable
 internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Unit) {
-    val img = if (isDarkTheme()) R.drawable.img_pad_login_dark else R.drawable.img_pad_login_light
-
     Row {
-        Image(
-            painterResource(img),
-            contentDescription = null,
+        LoginPadSlogan(
             Modifier
                 .fillMaxHeight()
-                .weight(1f),
-            contentScale = ContentScale.Crop,
+                .weight(1f)
         )
         Box(
             Modifier
@@ -257,7 +252,11 @@ internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Un
                 .weight(1f),
             contentAlignment = Alignment.TopCenter,
         ) {
-            LoginArea(uiState = uiState, modifier = Modifier.width(360.dp), actioner = actioner)
+            LoginArea(
+                uiState = uiState, modifier = Modifier
+                    .width(360.dp)
+                    .fillMaxHeight(), actioner = actioner
+            )
         }
     }
 }
@@ -269,62 +268,65 @@ private fun LoginArea(uiState: LoginUiState, modifier: Modifier, actioner: (Logi
     var passwordMode by rememberSaveable { mutableStateOf(true) }
     val inputState = uiState.loginInputState
 
-    Column(
-        modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Spacer(modifier = Modifier.height(120.dp))
-        LoginSlogan()
-        Spacer(modifier = Modifier.height(32.dp))
-        if (passwordMode) {
-            PasswordLoginArea(
-                inputState = inputState,
-                onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
-                onSmsClick = {
-                    // clear email code when switch to phone mode
-                    if (!inputState.value.isValidPhone()) {
-                        actioner(LoginUiAction.LoginInputChange(inputState.copy(value = "")))
+    Box(modifier) {
+        Column(
+            Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 200.dp)
+        ) {
+            if (passwordMode) {
+                PasswordLoginArea(
+                    inputState = inputState,
+                    onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
+                    onSmsClick = {
+                        // clear email code when switch to phone mode
+                        if (!inputState.value.isValidPhone()) {
+                            actioner(LoginUiAction.LoginInputChange(inputState.copy(value = "")))
+                        }
+                        passwordMode = false
+                    },
+                    actioner = {
+                        if (agreementChecked.not() && it is LoginUiAction.PasswordLoginClick) {
+                            showAgreement = true
+                            return@PasswordLoginArea
+                        }
+                        actioner(it)
                     }
-                    passwordMode = false
-                },
-                actioner = {
-                    if (agreementChecked.not() && it is LoginUiAction.PasswordLoginClick) {
-                        showAgreement = true
-                        return@PasswordLoginArea
-                    }
-                    actioner(it)
-                }
-            )
-        } else {
-            PhoneLoginArea(
-                inputState = inputState,
-                onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
-                actioner = {
-                    if (it is LoginUiAction.PasswordLoginClick) {
-                        passwordMode = true
-                        return@PhoneLoginArea
-                    }
-                    if (agreementChecked.not() && it is LoginUiAction.PhoneLogin) {
-                        showAgreement = true
-                        return@PhoneLoginArea
-                    }
-                    actioner(it)
-                })
-        }
-        LoginAgreement(
-            Modifier.padding(horizontal = 24.dp),
-            checked = agreementChecked,
-            onCheckedChange = { agreementChecked = it },
-        )
-        Spacer(Modifier.weight(1f))
-        LoginButtonsArea(actioner = {
-            if (agreementChecked) {
-                actioner(it)
+                )
             } else {
-                showAgreement = true
+                PhoneLoginArea(
+                    inputState = inputState,
+                    onLoginInputChange = { actioner(LoginUiAction.LoginInputChange(it)) },
+                    actioner = {
+                        if (it is LoginUiAction.PasswordLoginClick) {
+                            passwordMode = true
+                            return@PhoneLoginArea
+                        }
+                        if (agreementChecked.not() && it is LoginUiAction.PhoneLogin) {
+                            showAgreement = true
+                            return@PhoneLoginArea
+                        }
+                        actioner(it)
+                    })
             }
-        })
-        Spacer(Modifier.weight(1f))
+            LoginAgreement(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                checked = agreementChecked,
+                onCheckedChange = { agreementChecked = it },
+            )
+        }
+
+        LoginButtonsArea(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            actioner = {
+                if (agreementChecked) {
+                    actioner(it)
+                } else {
+                    showAgreement = true
+                }
+            })
     }
 
     if (showAgreement) {
@@ -441,59 +443,99 @@ private fun PhoneLoginArea(
 
 @Composable
 private fun LoginButtonsArea(
+    modifier: Modifier = Modifier,
     actioner: (LoginUiAction) -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Spacer(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f)
-                .height(0.5.dp)
-                .background(Gray_1)
-        )
-        FlatTextBodyOneSecondary(stringResource(id = R.string.login_others_tip))
-        Spacer(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f)
-                .height(0.5.dp)
-                .background(Gray_1)
-        )
-    }
-    Spacer(Modifier.height(32.dp))
-    Row {
-
-        LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
-            Image(painterResource(R.drawable.ic_wechat_login), "")
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .weight(1f)
+                    .height(0.5.dp)
+                    .background(Gray_1)
+            )
+            FlatTextBodyOneSecondary(stringResource(id = R.string.login_others_tip))
+            Spacer(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .weight(1f)
+                    .height(0.5.dp)
+                    .background(Gray_1)
+            )
         }
-        Spacer(Modifier.width(48.dp))
-        LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
-            Image(painterResource(R.drawable.ic_github_login), "")
+        Spacer(Modifier.height(24.dp))
+        Row {
+            LoginImageButton(onClick = { actioner(LoginUiAction.WeChatLogin) }) {
+                Image(painterResource(R.drawable.ic_wechat_login), "")
+            }
+            Spacer(Modifier.width(48.dp))
+            LoginImageButton(onClick = { actioner(LoginUiAction.GithubLogin) }) {
+                Image(painterResource(R.drawable.ic_github_login), "")
+            }
+            Spacer(Modifier.width(48.dp))
+            LoginImageButton(onClick = { actioner(LoginUiAction.GoogleLogin) }) {
+                Image(painterResource(R.drawable.ic_google_login), "")
+            }
         }
-        Spacer(Modifier.width(48.dp))
-        LoginImageButton(onClick = { actioner(LoginUiAction.GoogleLogin) }) {
-            Image(painterResource(R.drawable.ic_google_login), "")
-        }
+        Spacer(Modifier.height(64.dp))
     }
 }
 
 @Composable
-private fun LoginSlogan() {
+private fun LoginSlogan(
+    isDark: Boolean = isDarkTheme(),
+    isZh: Boolean = LanguageManager.currentLocale().language == "zh"
+) {
     val context = LocalContext.current
+    val imgId = if (isZh) {
+        if (isDark) R.drawable.img_login_slogan_dark_zh else R.drawable.img_login_slogan_light_zh
+    } else {
+        if (isDark) R.drawable.img_login_slogan_dark_en else R.drawable.img_login_slogan_light_en
+    }
 
-    Column(
-        Modifier.pointerInput(Unit) {
-            detectTapGestures(
-                onLongPress = {
-                    if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
-                },
-            )
-        },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        FlatTextTitle(stringResource(R.string.login_welcome))
-        Spacer(Modifier.height(4.dp))
-        FlatTextBodyOne(stringResource(R.string.login_page_label_1))
+    Box(Modifier.pointerInput(Unit) {
+        detectTapGestures(
+            onLongPress = {
+                if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
+            },
+        )
+    }) {
+        Image(
+            painter = painterResource(imgId),
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.FillWidth,
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+private fun LoginPadSlogan(
+    modifier: Modifier = Modifier,
+    isDark: Boolean = isDarkTheme(),
+    izZh: Boolean = LanguageManager.currentLocale().language == "zh"
+) {
+    val context = LocalContext.current
+    val imgId = if (izZh) {
+        if (isDark) R.drawable.img_login_slogan_pad_dark_zh else R.drawable.img_login_slogan_pad_light_zh
+    } else {
+        if (isDark) R.drawable.img_login_slogan_pad_dark_en else R.drawable.img_login_slogan_pad_light_en
+    }
+
+    Box(modifier = modifier.pointerInput(Unit) {
+        detectTapGestures(
+            onLongPress = {
+                if (context.isApkInDebug()) Navigator.launchDevSettingsActivity(context)
+            },
+        )
+    }) {
+        Image(
+            painterResource(imgId),
+            contentDescription = null,
+            Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+        )
     }
 }
 
@@ -542,6 +584,8 @@ private fun LoginImageButton(
 @Composable
 @Preview(device = PIXEL_C, widthDp = 800, heightDp = 600)
 @Preview(widthDp = 400, heightDp = 600)
+@Preview(widthDp = 480, heightDp = 700)
+@Preview(widthDp = 400, heightDp = 800)
 private fun LoginPagePreview() {
     LoginPage(
         LoginUiState(

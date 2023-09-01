@@ -21,6 +21,11 @@
     <string name="send">Send</string>
     <string name="next">Next</string>
 
+    <string name="account">Account</string>
+    <string name="preferences">Preferences</string>
+    <string name="privacy">Privacy</string>
+    <string name="more">More</string>
+
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
     <string name="relative_time_dd">%d d</string>

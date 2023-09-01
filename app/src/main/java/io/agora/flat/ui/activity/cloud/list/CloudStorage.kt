@@ -28,11 +28,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.*
-import io.agora.flat.ui.activity.home.EmptyView
+import io.agora.flat.ui.compose.EmptyView
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.FlatColorWhite
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
+import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.util.*
 
@@ -346,6 +347,8 @@ internal fun CloudFileList(
     val scrollState = rememberLazyListState()
     var renaming by remember { mutableStateOf<CloudFile?>(null) }
 
+    val imgRes = if (isDarkTheme()) R.drawable.img_cloud_list_empty_dark else R.drawable.img_cloud_list_empty_light
+
     LaunchedEffect(files.firstOrNull()) {
         scrollState.animateScrollToItem(0)
     }
@@ -353,7 +356,7 @@ internal fun CloudFileList(
     if (files.isEmpty()) {
         EmptyView(
             modifier = modifier.verticalScroll(rememberScrollState()),
-            imgRes = R.drawable.img_cloud_list_empty,
+            imgRes = imgRes,
             message = R.string.cloud_storage_no_files
         )
     } else {
@@ -372,6 +375,7 @@ internal fun CloudFileList(
                             FileConvertStep.Done, FileConvertStep.None -> {
                                 onItemClick(item.file)
                             }
+
                             else -> onPreviewRestrict()
                         }
                     },
@@ -413,6 +417,7 @@ private fun CloudListFooter(loadState: LoadState, onLoadMore: () -> Unit) {
             LoadState.Loading -> {
                 FlatTextCaption(stringResource(R.string.loaded_loading))
             }
+
             is LoadState.NotLoading -> {
                 if (loadState.end) {
                     FlatTextCaption(stringResource(R.string.loaded_all))
@@ -420,6 +425,7 @@ private fun CloudListFooter(loadState: LoadState, onLoadMore: () -> Unit) {
                     FlatTextCaption(stringResource(R.string.loaded_loading))
                 }
             }
+
             is LoadState.Error -> {
                 FlatTextCaption(stringResource(R.string.loaded_retry))
             }
@@ -535,6 +541,7 @@ private fun CloudFileItem(
                         Modifier.align(Alignment.BottomEnd),
                         Color.Unspecified,
                     )
+
                     else -> {; }
                 }
             }

@@ -3,18 +3,22 @@ package io.agora.flat.ui.activity.setting
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +48,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                 viewModel.logout()
                 Navigator.launchHomeActivity(context)
             }
+
             is SettingsUiAction.SetNetworkAcceleration -> {
                 viewModel.setNetworkAcceleration(action.acceleration)
             }
@@ -60,12 +65,7 @@ fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit)
             onBackPressed = { actioner(SettingsUiAction.Back) }
         )
         Box(Modifier.weight(1f)) {
-            SettingsList(
-                state,
-                onSetNetworkAcceleration = {
-                    actioner(SettingsUiAction.SetNetworkAcceleration(it))
-                },
-            )
+            SettingsList(state)
         }
         BottomOperateArea(onLogoutClick = {
             actioner(SettingsUiAction.Logout)
@@ -74,11 +74,12 @@ fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit)
 }
 
 @Composable
-private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boolean) -> Unit)?) {
+private fun SettingsList(state: SettingsUiState) {
     val context = LocalContext.current
 
     LazyColumn {
         item {
+            SettingLabel(stringResource(R.string.account))
             SettingItem(
                 id = R.drawable.ic_user_profile_head,
                 tip = stringResource(R.string.title_my_profile),
@@ -90,7 +91,9 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 tip = stringResource(R.string.account_security),
                 onClick = { Navigator.launchAccountSecurityActivity(context) }
             )
-            SettingItemDivider()
+
+            Spacer(Modifier.height(12.dp))
+            SettingLabel(stringResource(R.string.preferences))
             SettingItem(
                 id = R.drawable.ic_settings_language,
                 tip = stringResource(R.string.title_language),
@@ -100,30 +103,9 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 id = R.drawable.ic_settings_dark_light,
                 tip = stringResource(R.string.title_dark_mode),
                 onClick = { Navigator.launchDarkModeActivity(context) })
-            SettingItemDivider()
-            // SettingItemSwitch(
-            //     id = R.drawable.ic_settings_network_acceleration,
-            //     tip = stringResource(R.string.network_acceleration),
-            //     checked = state.networkAcceleration,
-            //     onCheckedChange = { onSetNetworkAcceleration?.invoke(it) }
-            // )
-            SettingItemDivider()
-            SettingItem(
-                id = R.drawable.ic_settings_app_version,
-                tip = stringResource(R.string.setting_check_update),
-                desc = context.getAppVersion(),
-            )
-            SettingItemDivider()
-            // SettingItem(
-            //     id = R.drawable.ic_user_profile_feedback,
-            //     tip = stringResource(R.string.title_feedback),
-            //     onClick = { Navigator.launchFeedbackActivity(context) })
-            // SettingItemDivider()
-            SettingItem(
-                id = R.drawable.ic_settings_about_us,
-                tip = stringResource(R.string.title_about_us),
-                onClick = { Navigator.launchAboutUsActivity(context) })
-            SettingItemDivider()
+
+            Spacer(Modifier.height(12.dp))
+            SettingLabel(stringResource(R.string.privacy))
             SettingItem(
                 id = R.drawable.ic_settings_privacy_policy,
                 tip = stringResource(R.string.privacy_policy),
@@ -134,17 +116,28 @@ private fun SettingsList(state: SettingsUiState, onSetNetworkAcceleration: ((Boo
                 tip = stringResource(R.string.term_of_service),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
             SettingItemDivider()
-            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_info_gathering,
                 tip = stringResource(R.string.info_gathering),
                 onClick = { Navigator.launchWebViewActivity(context, state.infoUrl) })
             SettingItemDivider()
-            SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_info_third_party,
                 tip = stringResource(R.string.info_third_party),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Libraries) })
+
+            Spacer(Modifier.height(12.dp))
+            SettingLabel(stringResource(R.string.more))
+            SettingItem(
+                id = R.drawable.ic_settings_app_version,
+                tip = stringResource(R.string.setting_check_update),
+                desc = context.getAppVersion(),
+            )
+            SettingItemDivider()
+            SettingItem(
+                id = R.drawable.ic_settings_about_us,
+                tip = stringResource(R.string.title_about_us),
+                onClick = { Navigator.launchAboutUsActivity(context) })
             SettingItemDivider()
             if (context.isApkInDebug()) {
                 // Device Test
@@ -186,7 +179,7 @@ internal fun SettingItem(
     onClick: () -> Unit = {},
 ) {
     Row(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp)
             .clickable(
@@ -213,6 +206,13 @@ internal fun SettingItem(
         Spacer(Modifier.width(8.dp))
         Icon(painterResource(id = R.drawable.ic_arrow_right), contentDescription = null)
         Spacer(Modifier.width(16.dp))
+    }
+}
+
+@Composable
+internal fun SettingLabel(text: String) {
+    Row(Modifier.padding(horizontal = 16.dp)) {
+        FlatTextCaption(text)
     }
 }
 
