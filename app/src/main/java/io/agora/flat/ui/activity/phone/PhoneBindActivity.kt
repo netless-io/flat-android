@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
@@ -85,15 +85,6 @@ class PhoneBindActivity : BaseComposeActivity() {
                                 finish()
                             }
                         }
-                    },
-                    onMergeAccount = { ccode, phone ->
-                        lifecycleScope.launchWhenStarted {
-                            when (intent?.getStringExtra(Constants.IntentKey.FROM)) {
-                                Constants.From.Login -> {
-                                    Navigator.launchMergeAccountActivity(this@PhoneBindActivity, ccode, phone)
-                                }
-                            }
-                        }
                     }
                 )
             }
@@ -105,7 +96,6 @@ class PhoneBindActivity : BaseComposeActivity() {
 fun PhoneBindDialog(
     onBindSuccess: () -> Unit,
     onDismissRequest: () -> Unit,
-    onMergeAccount: (String, String) -> Unit = { _, _ -> }
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -117,7 +107,6 @@ fun PhoneBindDialog(
             PhoneBindScreen(
                 onBindSuccess = onBindSuccess,
                 onBindClose = onDismissRequest,
-                onMergeAccount = onMergeAccount
             )
         }
     }
@@ -127,18 +116,25 @@ fun PhoneBindDialog(
 fun PhoneBindScreen(
     onBindSuccess: () -> Unit,
     onBindClose: () -> Unit,
-    onMergeAccount: (String, String) -> Unit,
     viewModel: PhoneBindViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val showMergeAccount = (state.message?.exception as? FlatNetException)?.code == FlatErrorCode.Web.SMSAlreadyBinding
 
-    var lastPhone by remember { mutableStateOf("") }
+    var lastPhone by rememberSaveable { mutableStateOf("") }
     var lastCCode by remember { mutableStateOf("") }
 
+    BackHandler {
+        if (state.merging) {
+            viewModel.setMerging(false)
+        } else {
+            onBindClose()
+        }
+    }
+
     LaunchedEffect(state) {
-        if (state.bindSuccess) {
+        if (state.success) {
             onBindSuccess()
         }
     }
@@ -154,7 +150,7 @@ fun PhoneBindScreen(
         MergeAccountDialog(
             onConfirm = {
                 state.message?.run { viewModel.clearUiMessage(id) }
-                onMergeAccount(lastCCode, lastPhone)
+                viewModel.setMerging(true)
             },
             onCancel = {
                 state.message?.run { viewModel.clearUiMessage(id) }
@@ -172,14 +168,11 @@ fun PhoneBindScreen(
         onSendCode = { ccode, phone ->
             lastCCode = ccode
             lastPhone = phone
-            viewModel.sendSmsCode("$ccode$phone")
-        },
-        onBind = { phone, code ->
-            viewModel.bindPhone(phone, code)
-        },
-    )
 
-    BackHandler(onBack = onBindClose)
+            viewModel.sendCode("$ccode$phone")
+        },
+        onConfirm = viewModel::confirmBind,
+    )
 }
 
 @Composable
@@ -218,15 +211,17 @@ internal fun PhoneBindScreen(
     state: PhoneBindUiViewState,
     onBindClose: () -> Unit = {},
     onSendCode: (String, String) -> Unit,
-    onBind: (String, String) -> Unit = { _, _ -> },
+    onConfirm: (String, String) -> Unit = { _, _ -> },
 ) {
     var phone by remember { mutableStateOf("") }
     var ccode by remember { mutableStateOf(CallingCodeManager.getDefaultCC()) }
     var code by remember { mutableStateOf("") }
-    val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !state.binding
+    val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !state.loading
+
+    val title = stringResource(if (state.merging) R.string.merge_account else R.string.bind_phone)
 
     Column {
-        CloseTopAppBar(stringResource(R.string.bind_phone), onClose = onBindClose)
+        CloseTopAppBar(title, onClose = onBindClose)
         Spacer(Modifier.height(16.dp))
 
         Column(Modifier.padding(horizontal = 16.dp)) {
@@ -252,7 +247,7 @@ internal fun PhoneBindScreen(
             FlatPrimaryTextButton(
                 text = stringResource(id = R.string.confirm),
                 enabled = buttonEnable,
-                onClick = { onBind("$ccode$phone", code) },
+                onClick = { onConfirm("$ccode$phone", code) },
             )
         }
     }

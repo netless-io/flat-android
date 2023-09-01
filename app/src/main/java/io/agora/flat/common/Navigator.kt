@@ -9,7 +9,6 @@ import io.agora.flat.data.model.CloudFile
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.ui.activity.CallingCodeActivity
 import io.agora.flat.ui.activity.LoginActivity
-import io.agora.flat.ui.activity.account.MergeAccountActivity
 import io.agora.flat.ui.activity.bind.EmailBindActivity
 import io.agora.flat.ui.activity.cloud.preview.PreviewActivity
 import io.agora.flat.ui.activity.dev.DevSettingsActivity
@@ -179,13 +178,6 @@ object Navigator {
 
     fun launchPasswordSetActivity(context: Context) {
         val intent = Intent(context, PasswordSetActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun launchMergeAccountActivity(context: Context, ccode: String, phone: String) {
-        val intent = Intent(context, MergeAccountActivity::class.java)
-        intent.putExtra(Constants.IntentKey.CALLING_CODE, ccode)
-        intent.putExtra(Constants.IntentKey.PHONE, phone)
         context.startActivity(intent)
     }
 
