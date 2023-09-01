@@ -1,17 +1,17 @@
 package io.agora.flat.ui.activity.login
 
 import android.os.Parcelable
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.agora.flat.Config
 import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.ui.activity.base.BaseAccountViewModel
 import io.agora.flat.ui.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import io.agora.flat.util.isValidPhone
@@ -26,7 +26,7 @@ class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val appKVCenter: AppKVCenter,
     private val appEnv: AppEnv,
-) : ViewModel() {
+) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
 
@@ -44,6 +44,13 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             messageManager.message.collect {
                 _state.value = _state.value.copy(message = it)
+            }
+        }
+
+        viewModelScope.launch {
+            remainTime.collect {
+                val loginInputState = state.value.loginInputState.copy(remainTime = it)
+                _state.value = _state.value.copy(loginInputState = loginInputState)
             }
         }
 
@@ -98,7 +105,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-
     fun login(state: LoginInputState) {
         val loginPhone = state.phoneMode
         if (loginPhone) {
@@ -107,6 +113,19 @@ class LoginViewModel @Inject constructor(
             loginEmail(state.email, state.password)
         }
     }
+
+    fun sendPhoneCode(phone: String) {
+        viewModelScope.launch {
+            userRepository.requestLoginSmsCode(phone)
+                .onSuccess {
+                    _state.value = _state.value.copy(sendCodeSuccess = true)
+                    startCountDown()
+                }.onFailure {
+                    messageManager.emitMessage(UiErrorMessage(it))
+                }
+        }
+    }
+
 
     fun updateLoginInput(state: LoginInputState) {
         _state.value = _state.value.copy(loginInputState = state)
@@ -123,6 +142,10 @@ class LoginViewModel @Inject constructor(
             messageManager.clearMessage(id)
         }
     }
+
+    fun clearSendCodeSuccess() {
+        _state.value = _state.value.copy(sendCodeSuccess = false)
+    }
 }
 
 @Parcelize
@@ -131,6 +154,7 @@ data class LoginInputState(
     val value: String = "",
     val password: String = "",
     val smsCode: String = "",
+    val remainTime: Long = 0,
     val cc: String = CallingCodeManager.getDefaultCC(),
 ) : Parcelable {
     val phone: String
@@ -145,6 +169,7 @@ data class LoginInputState(
 
 data class LoginUiState(
     val success: Boolean = false,
+    val sendCodeSuccess: Boolean = false,
     val loginInputState: LoginInputState = LoginInputState(),
     val loading: Boolean = false,
     val message: UiMessage? = null,

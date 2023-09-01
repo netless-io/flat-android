@@ -43,7 +43,8 @@ import io.agora.flat.ui.compose.FlatSmallPrimaryTextButton
 import io.agora.flat.ui.compose.FlatSmallSecondaryTextButton
 import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.compose.FlatTextTitle
-import io.agora.flat.ui.compose.PhoneAndCodeArea
+import io.agora.flat.ui.compose.PhoneInput
+import io.agora.flat.ui.compose.SendCodeInput
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.util.ShowUiMessageEffect
@@ -166,7 +167,7 @@ fun PhoneBindScreen(
     }
 
     PhoneBindScreen(
-        viewState = state,
+        state = state,
         onBindClose = onBindClose,
         onSendCode = { ccode, phone ->
             lastCCode = ccode
@@ -214,7 +215,7 @@ fun MergeAccountDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
 
 @Composable
 internal fun PhoneBindScreen(
-    viewState: PhoneBindUiViewState,
+    state: PhoneBindUiViewState,
     onBindClose: () -> Unit = {},
     onSendCode: (String, String) -> Unit,
     onBind: (String, String) -> Unit = { _, _ -> },
@@ -222,22 +223,31 @@ internal fun PhoneBindScreen(
     var phone by remember { mutableStateOf("") }
     var ccode by remember { mutableStateOf(CallingCodeManager.getDefaultCC()) }
     var code by remember { mutableStateOf("") }
-    val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !viewState.binding
+    val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !state.binding
 
     Column {
         CloseTopAppBar(stringResource(R.string.bind_phone), onClose = onBindClose)
         Spacer(Modifier.height(16.dp))
-        PhoneAndCodeArea(
-            phone,
-            onPhoneChange = { phone = it },
-            code,
-            onCodeChange = { code = it },
-            callingCode = ccode,
-            onCallingCodeChange = { ccode = it },
-            onSendCode = {
-                onSendCode(ccode, phone)
-            }
-        )
+
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            PhoneInput(
+                phone,
+                onPhoneChange = { phone = it },
+                callingCode = ccode,
+                onCallingCodeChange = { ccode = it },
+            )
+
+            SendCodeInput(
+                code,
+                onCodeChange = { code = it },
+                onSendCode = {
+                    onSendCode(ccode, phone)
+                },
+                ready = phone.isValidPhone(),
+                remainTime = state.remainTime,
+            )
+        }
+
         Box(modifier = Modifier.padding(16.dp)) {
             FlatPrimaryTextButton(
                 text = stringResource(id = R.string.confirm),
@@ -253,6 +263,6 @@ internal fun PhoneBindScreen(
 @Preview(widthDp = 400, uiMode = 0x20)
 internal fun PhoneBindScreenPreview() {
     FlatPage {
-        PhoneBindScreen(viewState = PhoneBindUiViewState.Empty, {}, { _, _ -> }, { _, _ -> })
+        PhoneBindScreen(state = PhoneBindUiViewState.Empty, {}, { _, _ -> }, { _, _ -> })
     }
 }

@@ -365,6 +365,6 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_verification_code_invalid">code invalid</string>
     <string name="error_phone_already_binding">phone already binding</string>
     <string name="error_phone_already_exist">phone already exist</string>
-    <string name="error_send_verification_code">send code fail\n</string>
+    <string name="error_send_verification_code">send code fail</string>
 
 </resources>

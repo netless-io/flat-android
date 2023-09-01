@@ -71,8 +71,9 @@ import io.agora.flat.ui.compose.FlatTextBodyOneSecondary
 import io.agora.flat.ui.compose.FlatTextBodyTwo
 import io.agora.flat.ui.compose.FlatTextTitle
 import io.agora.flat.ui.compose.PasswordInput
-import io.agora.flat.ui.compose.PhoneAndCodeArea
+import io.agora.flat.ui.compose.PhoneInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
+import io.agora.flat.ui.compose.SendCodeInput
 import io.agora.flat.ui.theme.Gray_1
 import io.agora.flat.ui.theme.isDarkTheme
 import io.agora.flat.ui.theme.isTabletMode
@@ -128,7 +129,7 @@ class LoginActivity : BaseComposeActivity() {
                     }
 
                     is LoginUiAction.PhoneSendCode -> {
-                        loginHandler.sendPhoneCode(action.phone)
+                        viewModel.sendPhoneCode(action.phone)
                     }
 
                     is LoginUiAction.SignUpClick -> {
@@ -175,6 +176,13 @@ class LoginActivity : BaseComposeActivity() {
             ShowUiMessageEffect(uiMessage = uiState.message, onMessageShown = {
                 viewModel.clearUiMessage(it)
             })
+
+            LaunchedEffect(uiState) {
+                if (uiState.sendCodeSuccess) {
+                    showToast(R.string.message_code_send_success)
+                    viewModel.clearSendCodeSuccess()
+                }
+            }
 
             LaunchedEffect(uiState) {
                 if (uiState.success) {
@@ -388,17 +396,22 @@ private fun PhoneLoginArea(
     onLoginInputChange: (LoginInputState) -> Unit,
     actioner: (LoginUiAction) -> Unit
 ) {
-    PhoneAndCodeArea(
-        phone = inputState.value,
-        onPhoneChange = { onLoginInputChange(inputState.copy(value = it)) },
-        code = inputState.smsCode,
-        onCodeChange = { onLoginInputChange(inputState.copy(smsCode = it)) },
-        callingCode = inputState.cc,
-        onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
-        onSendCode = {
-            actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}"))
-        },
-    )
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        PhoneInput(
+            phone = inputState.value,
+            onPhoneChange = { onLoginInputChange(inputState.copy(value = it)) },
+            callingCode = inputState.cc,
+            onCallingCodeChange = { onLoginInputChange(inputState.copy(cc = it)) },
+        )
+
+        SendCodeInput(
+            code = inputState.smsCode,
+            onCodeChange = { onLoginInputChange(inputState.copy(smsCode = it)) },
+            onSendCode = { actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}")) },
+            ready = inputState.value.isValidPhone(),
+            remainTime = inputState.remainTime,
+        )
+    }
 
     Row(
         Modifier

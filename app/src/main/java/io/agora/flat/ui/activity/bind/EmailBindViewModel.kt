@@ -12,6 +12,7 @@ import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
+import io.agora.flat.util.Ticker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,6 +28,7 @@ class EmailBindViewModel @Inject constructor(
     private val bindSuccess = MutableStateFlow(false)
     private val codeSuccess = MutableStateFlow(false)
     private val uiMessageManager = UiMessageManager()
+    private val remainTime = MutableStateFlow(0L)
 
     private var _state = MutableStateFlow(EmailBindUiState.Empty)
     val state: StateFlow<EmailBindUiState>
@@ -37,12 +39,14 @@ class EmailBindViewModel @Inject constructor(
             combine(
                 bindSuccess,
                 codeSuccess,
+                remainTime,
                 bindingState.observable,
                 uiMessageManager.message
-            ) { bindSuccess, codeSuccess, binding, message ->
+            ) { bindSuccess, codeSuccess, remainTime, binding, message ->
                 EmailBindUiState(
                     bindSuccess = bindSuccess,
                     codeSuccess = codeSuccess,
+                    remainTime = remainTime,
                     binding = binding,
                     message = message,
                 )
@@ -57,6 +61,7 @@ class EmailBindViewModel @Inject constructor(
             userRepository.requestBindEmailCode(email = email)
                 .onSuccess {
                     codeSuccess.value = true
+                    startCountDown()
                 }
                 .onFailure {
                     notifyMessage(UiErrorMessage(it))
@@ -95,11 +100,20 @@ class EmailBindViewModel @Inject constructor(
             codeSuccess.value = false
         }
     }
+
+    private fun startCountDown() {
+        viewModelScope.launch {
+            Ticker.countDownFlow(60).collect {
+                remainTime.value = it
+            }
+        }
+    }
 }
 
 data class EmailBindUiState(
     val bindSuccess: Boolean = false,
     val codeSuccess: Boolean = false,
+    val remainTime: Long = 0L,
     val binding: Boolean = false,
     val message: UiMessage? = null,
 ) {

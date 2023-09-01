@@ -25,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.error.FlatErrorHandler
+import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.ui.activity.LoginAgreement
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.AgreementDialog
@@ -87,7 +88,7 @@ fun RegisterScreen(
     }
 
     RegisterScreen(
-        viewState = viewState,
+        state = viewState,
         onInfoUpdate = {
             viewModel.updateRegisterInfo(it)
         },
@@ -103,8 +104,8 @@ fun RegisterScreen(
 
 @Composable
 internal fun RegisterScreen(
-    viewState: RegisterUiState,
-    onInfoUpdate: (RegisterInfo) -> Unit,
+    state: RegisterUiState,
+    onInfoUpdate: (PhoneOrEmailInfo) -> Unit,
     onClose: () -> Unit,
     onConfirm: () -> Unit,
     onSendCode: () -> Unit,
@@ -112,7 +113,7 @@ internal fun RegisterScreen(
     var agreementChecked by rememberSaveable { mutableStateOf(false) }
     var showAgreement by rememberSaveable { mutableStateOf(false) }
 
-    val info = viewState.registerInfo
+    val info = state.info
     val buttonEnable = (info.value.isValidPhone() || info.value.isValidEmail())
             && info.password.isNotEmpty() && info.code.isNotEmpty()
 
@@ -136,6 +137,7 @@ internal fun RegisterScreen(
                 onCodeChange = { onInfoUpdate(info.copy(code = it)) },
                 onSendCode = onSendCode,
                 ready = codeReady,
+                remainTime = info.remainTime,
             )
 
             PasswordInput(
@@ -187,8 +189,8 @@ internal fun RegisterScreen(
 internal fun PhoneBindScreenPreview() {
     FlatPage {
         RegisterScreen(
-            viewState = RegisterUiState.Init.copy(
-                registerInfo = RegisterInfo(
+            state = RegisterUiState.Init.copy(
+                info = PhoneOrEmailInfo(
                     value = "12345678901",
                     cc = "86",
                     code = "123456",

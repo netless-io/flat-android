@@ -107,7 +107,7 @@ internal fun MergeAccountScreen(
     val buttonEnable = phone.isValidPhone() && code.isValidSmsCode() && !state.binding
 
     Column {
-        CloseTopAppBar(stringResource(R.string.bind_phone), onClose = onBindClose)
+        CloseTopAppBar(stringResource(R.string.merge_account), onClose = onBindClose)
         Spacer(Modifier.height(16.dp))
         Column(Modifier.padding(horizontal = 16.dp)) {
             PhoneInput(
@@ -124,7 +124,8 @@ internal fun MergeAccountScreen(
                 onSendCode = {
                     onSendPhoneCode("$ccode$phone")
                 },
-                ready = phone.isValidPhone()
+                ready = phone.isValidPhone(),
+                0,
             )
         }
         Box(modifier = Modifier.padding(16.dp)) {

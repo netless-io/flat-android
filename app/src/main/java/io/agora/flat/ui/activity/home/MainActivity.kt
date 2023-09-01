@@ -61,7 +61,6 @@ class MainActivity : BaseComposeActivity() {
             val roomPlayInfo by viewModel.roomPlayInfo.collectAsState()
             val replayInfo by viewModel.replayInfo.collectAsState()
 
-
             if (viewState.protocolAgreed) {
                 CompositionLocalProvider(LocalAgoraRtc provides rtcApi as? AgoraRtc) {
                     MainScreen(viewState)

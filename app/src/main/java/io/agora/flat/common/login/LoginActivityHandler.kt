@@ -175,17 +175,6 @@ class LoginActivityHandler(
         return _state.asStateFlow()
     }
 
-    fun sendPhoneCode(phone: String) {
-        scope.launch {
-            val sendResult = userRepository.requestLoginSmsCode(phone)
-            if (sendResult is Success) {
-                showUiMessage(context.getString(R.string.login_code_send))
-            } else {
-                showUiMessage(context.getString(R.string.error_request_common_fail))
-            }
-        }
-    }
-
     fun loginWithPhone(phone: String, code: String) {
         scope.launch {
             when (val loginResult = userRepository.loginWithPhone(phone, code)) {

@@ -1,15 +1,16 @@
 package io.agora.flat.ui.activity.register
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.ui.activity.base.BaseAccountViewModel
 import io.agora.flat.ui.util.ObservableLoadingCounter
+import io.agora.flat.ui.util.UiErrorMessage
 import io.agora.flat.ui.util.UiMessage
-import io.agora.flat.util.isValidPhone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository,
-) : ViewModel() {
+) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
 
     private var _state = MutableStateFlow(RegisterUiState.Init)
@@ -31,6 +32,13 @@ class RegisterViewModel @Inject constructor(
                 _state.value = _state.value.copy(loading = it)
             }
         }
+
+        viewModelScope.launch {
+            remainTime.collect {
+                val info = state.value.info.copy(remainTime = it)
+                _state.value = _state.value.copy(info = info)
+            }
+        }
     }
 
     private fun sendSmsCode(phone: String) {
@@ -39,6 +47,7 @@ class RegisterViewModel @Inject constructor(
             userRepository.requestRegisterSmsCode(phone = phone)
                 .onSuccess {
                     notifySendCodeSuccess()
+                    startCountDown()
                 }
                 .onFailure {
                     notifyError(it)
@@ -89,13 +98,13 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    fun updateRegisterInfo(it: RegisterInfo) {
-        _state.value = _state.value.copy(registerInfo = it)
+    fun updateRegisterInfo(it: PhoneOrEmailInfo) {
+        _state.value = _state.value.copy(info = it)
     }
 
     fun sendCode() {
-        val info = state.value.registerInfo
-        val sendPhoneCode = info.phoneMode
+        val info = state.value.info
+        val sendPhoneCode = info.isPhone
         if (sendPhoneCode) {
             sendSmsCode(info.phone)
         } else {
@@ -104,8 +113,8 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun register() {
-        val info = state.value.registerInfo
-        val registerPhone = info.phoneMode
+        val info = state.value.info
+        val registerPhone = info.isPhone
         if (registerPhone) {
             registerPhone(info.phone, info.code, info.password)
         } else {
@@ -122,7 +131,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun notifyError(throwable: Throwable) {
-        _state.value = _state.value.copy(error = UiMessage(throwable.message ?: "", throwable))
+        _state.value = _state.value.copy(error = UiErrorMessage(throwable))
     }
 
     fun clearError() {
@@ -130,29 +139,10 @@ class RegisterViewModel @Inject constructor(
     }
 }
 
-
-data class RegisterInfo(
-    val value: String = "",
-    val cc: String = "",
-    val code: String = "",
-    val password: String = "",
-) {
-    val phone: String
-        get() = "$cc$value"
-
-    val email: String
-        get() = value
-
-    val phoneMode: Boolean
-        get() = value.isValidPhone()
-}
-
 data class RegisterUiState(
     val success: Boolean = false,
     val sendCodeSuccess: Boolean = false,
-    val registerInfo: RegisterInfo = RegisterInfo(
-        cc = CallingCodeManager.getDefaultCC(),
-    ),
+    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(cc = CallingCodeManager.getDefaultCC()),
     val loading: Boolean = false,
     val error: UiMessage? = null
 ) {

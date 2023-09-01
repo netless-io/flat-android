@@ -156,6 +156,7 @@ private fun FetchCodeScreen(
                 onCodeChange = { onPhoneOrEmailChange(state.copy(code = it)) },
                 onSendCode = onSendCode,
                 ready = isValidPhoneOrEmail,
+                remainTime = state.remainTime,
             )
         }
 

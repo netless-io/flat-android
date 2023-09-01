@@ -8,6 +8,7 @@ data class PhoneOrEmailInfo(
     val cc: String = "",
     val code: String = "",
     val password: String = "",
+    val remainTime: Long = 0,
 ) {
     val phone: String
         get() = "$cc$value"

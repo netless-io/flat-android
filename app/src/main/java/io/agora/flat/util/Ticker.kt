@@ -11,4 +11,11 @@ object Ticker {
             delay(period)
         }
     }
+
+    fun countDownFlow(totalSeconds: Long) = flow {
+        for (i in totalSeconds - 1 downTo 0) {
+            emit(i)
+            delay(1000)
+        }
+    }
 }

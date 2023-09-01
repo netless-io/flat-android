@@ -134,7 +134,8 @@ internal fun EmailBindScreen(
                 code = code,
                 onCodeChange = { code = it },
                 onSendCode = { onSendCode(email) },
-                ready = true
+                ready = true,
+                remainTime = viewState.remainTime,
             )
 
         }

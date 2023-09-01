@@ -1,6 +1,5 @@
 package io.agora.flat.ui.activity.password
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
@@ -8,9 +7,9 @@ import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.ui.activity.base.BaseAccountViewModel
 import io.agora.flat.ui.util.ObservableLoadingCounter
 import io.agora.flat.ui.util.UiErrorMessage
-import io.agora.flat.ui.util.UiInfoMessage
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,9 +20,9 @@ import javax.inject.Inject
 @HiltViewModel
 class PasswordResetViewModel @Inject constructor(
     private val userRepository: UserRepository,
-) : ViewModel() {
+) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
-    private val uiMessageManager = UiMessageManager()
+    private val messageManager = UiMessageManager()
 
     private var _state = MutableStateFlow(PasswordResetUiState.Init)
     val state: StateFlow<PasswordResetUiState>
@@ -37,8 +36,15 @@ class PasswordResetViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            uiMessageManager.message.collect {
+            messageManager.message.collect {
                 _state.value = _state.value.copy(message = it)
+            }
+        }
+
+        viewModelScope.launch {
+            remainTime.collect {
+                val info = state.value.info.copy(remainTime = it)
+                _state.value = _state.value.copy(info = info)
             }
         }
     }
@@ -133,15 +139,10 @@ class PasswordResetViewModel @Inject constructor(
         }
     }
 
-    private fun showUiInfo(message: String) {
-        viewModelScope.launch {
-            uiMessageManager.emitMessage(UiInfoMessage(message))
-        }
-    }
-
     private fun showSendCodeSuccess() {
         viewModelScope.launch {
             _state.value = _state.value.copy(sendCodeSuccess = true)
+            startCountDown()
         }
     }
 
@@ -153,13 +154,13 @@ class PasswordResetViewModel @Inject constructor(
 
     private fun showUiError(e: Throwable) {
         viewModelScope.launch {
-            uiMessageManager.emitMessage(UiErrorMessage(e))
+            messageManager.emitMessage(UiErrorMessage(e))
         }
     }
 
     fun clearUiMessage(id: Long) {
         viewModelScope.launch {
-            uiMessageManager.clearMessage(id)
+            messageManager.clearMessage(id)
         }
     }
 }
@@ -171,9 +172,7 @@ data class PasswordResetUiState(
     val sendCodeSuccess: Boolean = false,
 
     val step: Step = Step.FetchCode,
-    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(
-        cc = CallingCodeManager.getDefaultCC()
-    ),
+    val info: PhoneOrEmailInfo = PhoneOrEmailInfo(cc = CallingCodeManager.getDefaultCC()),
 ) {
     companion object {
         val Init = PasswordResetUiState()

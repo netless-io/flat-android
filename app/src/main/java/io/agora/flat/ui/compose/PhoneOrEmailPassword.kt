@@ -2,7 +2,6 @@ package io.agora.flat.ui.compose
 
 import android.app.Activity
 import android.content.Intent
-import android.os.CountDownTimer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -58,22 +57,15 @@ import io.agora.flat.util.isValidSmsCode
 import io.agora.flat.util.showPhoneMode
 
 @Composable
-fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -> Unit, ready: Boolean) {
+fun SendCodeInput(
+    code: String,
+    onCodeChange: (String) -> Unit,
+    onSendCode: () -> Unit,
+    ready: Boolean,
+    remainTime: Long,
+) {
     var isValidCode by remember { mutableStateOf(true) }
     var hasCodeFocused by remember { mutableStateOf(false) }
-
-    var remainTime by remember { mutableStateOf(0L) }
-    val countDownTimer = remember {
-        object : CountDownTimer(60_000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                remainTime = millisUntilFinished / 1000
-            }
-
-            override fun onFinish() {
-                remainTime = 0
-            }
-        }
-    }
 
     val sendCodeEnable = remainTime == 0L && ready
     val sendCodeText = if (remainTime == 0L) stringResource(id = R.string.login_send_sms_code) else "${remainTime}s"
@@ -110,7 +102,6 @@ fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -
         TextButton(
             enabled = sendCodeEnable,
             onClick = {
-                countDownTimer.start()
                 onSendCode()
             },
         ) {
@@ -123,7 +114,9 @@ fun SendCodeInput(code: String, onCodeChange: (String) -> Unit, onSendCode: () -
         FlatDivider(color = Red_6, thickness = 1.dp)
         FlatTextBodyTwo(stringResource(R.string.login_code_invalid_tip), color = Red_6)
     }
+
 }
+
 
 @Composable
 fun PasswordInput(
@@ -381,28 +374,6 @@ fun PhoneInput(
 }
 
 @Composable
-fun PhoneAndCodeArea(
-    phone: String,
-    onPhoneChange: (String) -> Unit,
-    code: String,
-    onCodeChange: (String) -> Unit,
-    callingCode: String,
-    onCallingCodeChange: (String) -> Unit,
-    onSendCode: () -> Unit,
-) {
-    Column(Modifier.padding(horizontal = 16.dp)) {
-        PhoneInput(
-            phone = phone,
-            onPhoneChange = onPhoneChange,
-            callingCode = callingCode,
-            onCallingCodeChange = onCallingCodeChange,
-        )
-
-        SendCodeInput(code = code, onCodeChange = onCodeChange, onSendCode = onSendCode, ready = phone.isValidPhone())
-    }
-}
-
-@Composable
 fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -457,18 +428,4 @@ private fun PhonePasswordAreaPreview() {
         Spacer(Modifier.height(8.dp))
         EmailInput(value = "a@a", onValueChange = {})
     }
-}
-
-@Composable
-@Preview
-private fun PhoneAndCodeAreaPreview() {
-    PhoneAndCodeArea(
-        phone = "",
-        onPhoneChange = {},
-        code = "",
-        onCodeChange = {},
-        callingCode = "+1",
-        onCallingCodeChange = {},
-        {},
-    )
 }
