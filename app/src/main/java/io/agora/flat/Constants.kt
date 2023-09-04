@@ -5,6 +5,8 @@ class Constants {
         const val DEFAULT_CALLING_CODE = "+86"
 
         const val UPLOAD_TAG_CLOUD = "cloud"
+
+        const val UPLOAD_TAG_TAKE_PHOTO = "take_photo"
     }
 
     object URL {

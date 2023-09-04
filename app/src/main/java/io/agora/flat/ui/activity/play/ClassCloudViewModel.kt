@@ -88,7 +88,7 @@ class ClassCloudViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            UploadManager.observeSuccess(Constants.UPLOAD_TAG_CLOUD).collect {
+            UploadManager.observeSuccess(Constants.UPLOAD_TAG_TAKE_PHOTO).collect {
                 handleUploadSuccess(it)
             }
         }
@@ -192,7 +192,7 @@ class ClassCloudViewModel @Inject constructor(
                     mediaType = info.mediaType,
                     uri = info.uri,
 
-                    tag = Constants.UPLOAD_TAG_CLOUD,
+                    tag = Constants.UPLOAD_TAG_TAKE_PHOTO,
                 )
                 uploadingFiles[data.fileUUID] = data
                 UploadManager.upload(request)
