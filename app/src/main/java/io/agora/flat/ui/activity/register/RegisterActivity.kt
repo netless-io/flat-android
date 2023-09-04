@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
@@ -35,6 +38,8 @@ import io.agora.flat.ui.compose.FlatPrimaryTextButton
 import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
 import io.agora.flat.ui.compose.SendCodeInput
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.util.isValidEmail
 import io.agora.flat.util.isValidPhone
 import io.agora.flat.util.showToast
@@ -56,6 +61,30 @@ class RegisterActivity : BaseComposeActivity() {
         }
     }
 }
+
+
+@Composable
+fun RegisterDialog(
+    onRegisterSuccess: () -> Unit,
+    onClose: () -> Unit,
+) {
+    FlatTheme {
+        Dialog(onDismissRequest = onClose) {
+            Surface(
+                Modifier
+                    .widthIn(max = 400.dp)
+                    .height(500.dp),
+                shape = Shapes.large,
+            ) {
+                RegisterScreen(
+                    onClose = onClose,
+                    onRegisterSuccess = onRegisterSuccess,
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun RegisterScreen(

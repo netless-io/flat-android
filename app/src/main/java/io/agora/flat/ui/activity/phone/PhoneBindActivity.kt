@@ -166,7 +166,10 @@ fun PhoneBindScreen(
 
     PhoneBindScreen(
         state = state,
-        onBindClose = onBindClose,
+        onBindClose = {
+            viewModel.setMerging(false)
+            onBindClose()
+        },
         onSendCode = { ccode, phone ->
             lastCCode = ccode
             lastPhone = phone

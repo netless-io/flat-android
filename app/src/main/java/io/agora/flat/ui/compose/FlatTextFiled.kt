@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -99,6 +100,7 @@ fun FlatBasicTextField(
     textStyle: TextStyle? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     placeholderValue: String?,
 ) {
     val darkMode = isDarkTheme()
@@ -116,6 +118,7 @@ fun FlatBasicTextField(
         singleLine = true,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
+        visualTransformation = visualTransformation,
         decorationBox = { innerTextField ->
             Box(
                 Modifier.fillMaxWidth(),
@@ -131,7 +134,7 @@ fun FlatBasicTextField(
                         Icon(
                             painterResource(id = R.drawable.ic_text_filed_clear),
                             "",
-                            tint = FlatTheme.colors.textPrimary
+                            tint = FlatTheme.colors.textSecondary
                         )
                     }
                 }

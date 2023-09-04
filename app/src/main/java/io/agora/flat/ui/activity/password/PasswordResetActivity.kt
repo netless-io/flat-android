@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,12 +22,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.ui.activity.register.RegisterScreen
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
@@ -34,6 +38,8 @@ import io.agora.flat.ui.compose.FlatTextCaption
 import io.agora.flat.ui.compose.PasswordInput
 import io.agora.flat.ui.compose.PhoneOrEmailInput
 import io.agora.flat.ui.compose.SendCodeInput
+import io.agora.flat.ui.theme.FlatTheme
+import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.util.ShowUiMessageEffect
 import io.agora.flat.util.isValidPassword
 import io.agora.flat.util.isValidVerifyCode
@@ -51,6 +57,28 @@ class PasswordResetActivity : BaseComposeActivity() {
                         Navigator.launchLoginActivity(this)
                         finish()
                     }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PasswordResetDialog(
+    onClose: () -> Unit,
+    onResetSuccess: () -> Unit = {},
+) {
+    FlatTheme {
+        Dialog(onDismissRequest = onClose) {
+            Surface(
+                Modifier
+                    .widthIn(max = 400.dp)
+                    .height(500.dp),
+                shape = Shapes.large,
+            ) {
+                PasswordResetScreen(
+                    onClose = onClose,
+                    onResetSuccess = onResetSuccess,
                 )
             }
         }
@@ -229,7 +257,7 @@ internal fun PhoneBindScreenPreview() {
                     code = "123456",
                     password = "123456",
                 ),
-                step = Step.Confirm,
+                step = Step.FetchCode,
             ),
             onPhoneOrEmailChange = {},
             onSendCode = {},

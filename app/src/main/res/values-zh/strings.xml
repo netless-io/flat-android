@@ -135,7 +135,7 @@
     <string name="login_already_bind_phone">已经绑定过手机号</string>
     <string name="login_phone_already_bound">该手机已被绑定</string>
     <string name="login_verification_code_invalid">验证码无效</string>
-    <string name="wechat">WeChat</string>
+    <string name="wechat">微信</string>
     <string name="github">Github</string>
     <string name="google">Google</string>
     <string name="email">邮箱</string>

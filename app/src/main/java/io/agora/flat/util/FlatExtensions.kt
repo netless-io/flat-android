@@ -1,7 +1,6 @@
 package io.agora.flat.util
 
 import com.herewhite.sdk.domain.Region
-import io.agora.flat.Config
 import io.agora.flat.R
 import io.agora.flat.data.model.CLOUD_ROOT_DIR
 import io.agora.flat.data.model.CloudFile
@@ -68,8 +67,8 @@ fun String.isDynamicDoc(): Boolean {
     return this.coursewareType() == CoursewareType.DocDynamic
 }
 
-fun String.toInviteCodeDisplay() = if (length == 10) {
-    "${substring(IntRange(0, 2))} ${substring(IntRange(3, 5))} ${substring(IntRange(6, 9))}"
+fun String.toInviteCodeDisplay() = if (length == 11) {
+    "${substring(IntRange(0, 3))} ${substring(IntRange(4, 6))} ${substring(7)}"
 } else {
     this
 }

@@ -62,7 +62,9 @@ import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.login.LoginUiAction
 import io.agora.flat.ui.activity.login.LoginUiState
 import io.agora.flat.ui.activity.login.LoginViewModel
+import io.agora.flat.ui.activity.password.PasswordResetDialog
 import io.agora.flat.ui.activity.phone.PhoneBindDialog
+import io.agora.flat.ui.activity.register.RegisterDialog
 import io.agora.flat.ui.compose.AgreementDialog
 import io.agora.flat.ui.compose.ClickableItem
 import io.agora.flat.ui.compose.FlatClickableText
@@ -101,7 +103,12 @@ class LoginActivity : BaseComposeActivity() {
         setContent {
             val loginState by loginHandler.observeLoginState().collectAsState()
             val uiState by viewModel.state.collectAsState()
+
+            val isPhoneMode = isPhoneMode()
+
             var showPhoneBind by remember { mutableStateOf(false) }
+            var showRegister by remember { mutableStateOf(false) }
+            var showForgotPwd by remember { mutableStateOf(false) }
 
             val actioner: (LoginUiAction) -> Unit = { action ->
                 when (action) {
@@ -134,11 +141,19 @@ class LoginActivity : BaseComposeActivity() {
                     }
 
                     is LoginUiAction.SignUpClick -> {
-                        Navigator.launchRegisterActivity(this)
+                        if (isPhoneMode) {
+                            Navigator.launchRegisterActivity(this)
+                        } else {
+                            showRegister = true
+                        }
                     }
 
                     LoginUiAction.ForgotPwdClick -> {
-                        Navigator.launchForgotPwdActivity(this)
+                        if (isPhoneMode) {
+                            Navigator.launchForgotPwdActivity(this)
+                        } else {
+                            showForgotPwd = true
+                        }
                     }
 
                     is LoginUiAction.PasswordLoginClick -> {
@@ -174,6 +189,22 @@ class LoginActivity : BaseComposeActivity() {
                 }
             }
 
+            LaunchedEffect(uiState) {
+                if (uiState.success) {
+                    if (viewModel.needBindPhone()) {
+                        if (isPhoneMode()) {
+                            Navigator.launchPhoneBindActivity(this@LoginActivity)
+                        } else {
+                            showPhoneBind = true
+                        }
+                    } else {
+                        showToast(R.string.login_success_and_jump)
+                        delay(2000)
+                        Navigator.launchHomeActivity(this@LoginActivity)
+                    }
+                }
+            }
+
             ShowUiMessageEffect(uiMessage = uiState.message, onMessageShown = {
                 viewModel.clearUiMessage(it)
             })
@@ -182,14 +213,6 @@ class LoginActivity : BaseComposeActivity() {
                 if (uiState.sendCodeSuccess) {
                     showToast(R.string.message_code_send_success)
                     viewModel.clearSendCodeSuccess()
-                }
-            }
-
-            LaunchedEffect(uiState) {
-                if (uiState.success) {
-                    showToast(R.string.login_success_and_jump)
-                    delay(2000)
-                    Navigator.launchHomeActivity(this@LoginActivity)
                 }
             }
 
@@ -204,7 +227,29 @@ class LoginActivity : BaseComposeActivity() {
                         Navigator.launchHomeActivity(this)
                     },
                     onDismissRequest = {
-                        // should not cancel dialog
+                        showPhoneBind = false
+                    }
+                )
+            }
+
+            if (showRegister) {
+                RegisterDialog(
+                    onRegisterSuccess = {
+                        Navigator.launchHomeActivity(this)
+                    },
+                    onClose = {
+                        showRegister = false
+                    }
+                )
+            }
+
+            if (showForgotPwd) {
+                PasswordResetDialog(
+                    onResetSuccess = {
+                        showForgotPwd = false
+                    },
+                    onClose = {
+                        showForgotPwd = false
                     }
                 )
             }
@@ -310,6 +355,7 @@ private fun LoginArea(state: LoginUiState, modifier: Modifier, actioner: (LoginU
                         actioner(it)
                     })
             }
+
             LoginAgreement(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 checked = agreementChecked,
@@ -490,7 +536,7 @@ private fun LoginButtonsArea(
                 Spacer(Modifier.width(24.dp))
             }
         }
-        Spacer(Modifier.height(64.dp))
+        Spacer(Modifier.height(80.dp))
     }
 }
 
