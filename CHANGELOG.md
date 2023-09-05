@@ -1,4 +1,8 @@
 # Changelog
+## [2.8.0] - September 02, 2023
+- Add Email login and Password login
+- Update some UI
+
 ## [2.6.0] - June 02, 2023
 - Add take-photo in classroom
 
