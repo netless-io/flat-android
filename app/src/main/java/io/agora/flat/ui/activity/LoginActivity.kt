@@ -299,9 +299,11 @@ internal fun LoginMainPad(uiState: LoginUiState, actioner: (LoginUiAction) -> Un
             contentAlignment = Alignment.TopCenter,
         ) {
             LoginArea(
-                state = uiState, modifier = Modifier
+                state = uiState,
+                modifier = Modifier
                     .width(360.dp)
-                    .fillMaxHeight(), actioner = actioner
+                    .fillMaxHeight(),
+                actioner = actioner
             )
         }
     }
@@ -318,7 +320,8 @@ private fun LoginArea(state: LoginUiState, modifier: Modifier, actioner: (LoginU
         Column(
             Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 200.dp)
+                .padding(top = 200.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (passwordMode) {
                 PasswordLoginArea(
