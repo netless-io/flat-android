@@ -15,8 +15,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences = context.getSharedPreferences("flat_env", Context.MODE_PRIVATE)
 
     companion object {
-        const val ENV_PROD = "prod"
-        const val ENV_DEV = "dev"
+        const val ENV_CN_PROD = "cn_prod"
+        const val ENV_CN_DEV = "cn_dev"
 
         const val ENV_SG_PROD = "sg_prod"
         const val ENV_SG_DEV = "sg_dev"
@@ -27,7 +27,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     val envMap = mutableMapOf<String, EnvItem>()
 
     init {
-        envMap[ENV_DEV] = EnvItem(
+        envMap[ENV_CN_DEV] = EnvItem(
             agoraAppId = "a185de0a777f4c159e302abcc0f03b64",
             serviceUrl = "https://flat-api-dev.whiteboard.agora.io",
             githubClientId = "9821657775fbc74773f1",
@@ -48,7 +48,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             loginConfig = LoginConfig(google = false)
         )
 
-        envMap[ENV_PROD] = EnvItem(
+        envMap[ENV_CN_PROD] = EnvItem(
             agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
             serviceUrl = "https://flat-api.whiteboard.agora.io",
             githubClientId = "71a29285a437998bdfe0",
@@ -107,13 +107,16 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     }
 
     fun getEnv(): String {
-        return store.getString(STORE_KEY_ENV, ENV_PROD)!!
+        return store.getString(STORE_KEY_ENV, ENV_CN_PROD)!!
+    }
+
+    fun getEnvServiceUrl(env: String): String {
+        return envMap[env]?.serviceUrl ?: envMap[ENV_CN_PROD]!!.serviceUrl
     }
 
     private val currentEnvItem = envMap[getEnv()]!!
 
     val flatServiceUrl get() = currentEnvItem.serviceUrl
-
 
     val githubClientID = run {
         currentEnvItem.githubClientId

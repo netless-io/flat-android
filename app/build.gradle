@@ -243,7 +243,7 @@ dependencies {
     }
 
     implementation 'io.agora.rtc:full-sdk:3.7.1'
-    implementation 'com.github.agorabuilder:rtm-sdk:1.4.1'
+    implementation 'com.github.agorabuilder:rtm-sdk:1.4.10'
 
     // Exoplayer
     def exoplayer_version = "2.14.1"

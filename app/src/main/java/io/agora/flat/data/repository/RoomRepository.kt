@@ -1,7 +1,22 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
-import io.agora.flat.data.model.*
+import io.agora.flat.data.RoomServiceFetcher
+import io.agora.flat.data.model.CancelRoomReq
+import io.agora.flat.data.model.JoinRoomReq
+import io.agora.flat.data.model.NetworkRoomUser
+import io.agora.flat.data.model.PureRoomReq
+import io.agora.flat.data.model.RespNoData
+import io.agora.flat.data.model.RoomCreateReq
+import io.agora.flat.data.model.RoomCreateRespData
+import io.agora.flat.data.model.RoomDetailOrdinary
+import io.agora.flat.data.model.RoomDetailOrdinaryReq
+import io.agora.flat.data.model.RoomDetailPeriodic
+import io.agora.flat.data.model.RoomDetailPeriodicReq
+import io.agora.flat.data.model.RoomInfo
+import io.agora.flat.data.model.RoomPlayInfo
+import io.agora.flat.data.model.RoomType
+import io.agora.flat.data.model.RoomUsersReq
 import io.agora.flat.data.toResult
 import io.agora.flat.http.api.RoomService
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +27,12 @@ import javax.inject.Singleton
 @Singleton
 class RoomRepository @Inject constructor(
     private val roomService: RoomService,
+    private val roomServiceFetcher: RoomServiceFetcher
 ) {
+    private fun fetchService(uuid: String): RoomService {
+        return roomServiceFetcher.fetch(uuid)
+    }
+
     suspend fun getRoomListAll(page: Int): Result<List<RoomInfo>> {
         return withContext(Dispatchers.IO) {
             roomService.getRoomAll(page).toResult()
@@ -27,8 +47,7 @@ class RoomRepository @Inject constructor(
 
     suspend fun getOrdinaryRoomInfo(roomUUID: String): Result<RoomDetailOrdinary> {
         return withContext(Dispatchers.IO) {
-            roomService.getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID))
-                .toResult()
+            fetchService(roomUUID).getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID)).toResult()
         }
     }
 
@@ -40,34 +59,31 @@ class RoomRepository @Inject constructor(
 
     suspend fun cancelOrdinary(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.cancelOrdinary(CancelRoomReq(roomUUID = roomUUID))
-                .toResult()
+            fetchService(roomUUID).cancelOrdinary(CancelRoomReq(roomUUID = roomUUID)).toResult()
         }
     }
 
     suspend fun cancelPeriodic(periodicUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.cancelPeriodic(CancelRoomReq(periodicUUID = periodicUUID))
-                .toResult()
+            roomService.cancelPeriodic(CancelRoomReq(periodicUUID = periodicUUID)).toResult()
         }
     }
 
     suspend fun cancelPeriodicSubRoom(roomUUID: String, periodicUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.cancelPeriodicSubRoom(CancelRoomReq(roomUUID, periodicUUID))
-                .toResult()
+            roomService.cancelPeriodicSubRoom(CancelRoomReq(roomUUID, periodicUUID)).toResult()
         }
     }
 
-    suspend fun joinRoom(uuid: String): Result<RoomPlayInfo> {
+    suspend fun joinRoom(roomUUID: String): Result<RoomPlayInfo> {
         return withContext(Dispatchers.IO) {
-            roomService.joinRoom(JoinRoomReq(uuid)).toResult()
+            fetchService(roomUUID).joinRoom(JoinRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun getRoomUsers(roomUUID: String, usersUUID: List<String>?): Result<Map<String, NetworkRoomUser>> {
         return withContext(Dispatchers.IO) {
-            roomService.getRoomUsers(RoomUsersReq(roomUUID, usersUUID)).toResult()
+            fetchService(roomUUID).getRoomUsers(RoomUsersReq(roomUUID, usersUUID)).toResult()
         }
     }
 
@@ -79,19 +95,19 @@ class RoomRepository @Inject constructor(
 
     suspend fun startRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.startRoomClass(PureRoomReq(roomUUID)).toResult()
+            fetchService(roomUUID).startRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun pauseRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.pauseRoomClass(PureRoomReq(roomUUID)).toResult()
+            fetchService(roomUUID).pauseRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 
     suspend fun stopRoomClass(roomUUID: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            roomService.stopRoomClass(PureRoomReq(roomUUID)).toResult()
+            fetchService(roomUUID).stopRoomClass(PureRoomReq(roomUUID)).toResult()
         }
     }
 }
