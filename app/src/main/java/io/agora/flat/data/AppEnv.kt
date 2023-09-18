@@ -25,6 +25,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     }
 
     val envMap = mutableMapOf<String, EnvItem>()
+    private var defaultEnv = ENV_CN_PROD
 
     init {
         envMap[ENV_CN_DEV] = EnvItem(
@@ -98,20 +99,20 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
             loginConfig = LoginConfig(smsForce = false, wechat = false, phoneFirst = false)
         )
+
+        defaultEnv = BuildConfig.DEFAULT_ENV
     }
 
     fun setEnv(env: String) {
-        store.edit(commit = true) {
-            putString(STORE_KEY_ENV, env)
-        }
+        store.edit(commit = true) { putString(STORE_KEY_ENV, env) }
     }
 
     fun getEnv(): String {
-        return store.getString(STORE_KEY_ENV, ENV_CN_PROD)!!
+        return store.getString(STORE_KEY_ENV, defaultEnv)!!
     }
 
     fun getEnvServiceUrl(env: String): String {
-        return envMap[env]?.serviceUrl ?: envMap[ENV_CN_PROD]!!.serviceUrl
+        return envMap[env]?.serviceUrl ?: envMap[defaultEnv]!!.serviceUrl
     }
 
     private val currentEnvItem = envMap[getEnv()]!!

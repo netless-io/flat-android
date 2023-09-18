@@ -109,6 +109,22 @@ android {
         }
     }
 
+    flavorDimensions "default"
+
+    productFlavors {
+        create("cn") {
+            buildConfigField "String", "DEFAULT_CALLING_CODE", "\"+86\""
+            buildConfigField "String", "DEFAULT_ENV", "\"cn_prod\""
+        }
+
+        create("sg") {
+            applicationId = "io.agora.flat.global"
+
+            buildConfigField "String", "DEFAULT_CALLING_CODE", "\"+01\""
+            buildConfigField "String", "DEFAULT_ENV", "\"sg_prod\""
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
