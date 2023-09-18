@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - ui-change
 
 jobs:
   build:
@@ -14,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Decrypt
         run: ./.github/scripts/decrypt_secret.sh
@@ -30,9 +29,10 @@ jobs:
           ALIYUN_LOG_PROD_AK: ${{ secrets.ALIYUN_LOG_PROD_AK }}
           ALIYUN_LOG_PROD_SK: ${{ secrets.ALIYUN_LOG_PROD_SK }}
 
-      - name: JDK Setup
-        uses: actions/setup-java@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
+          distribution: 'zulu'
           java-version: 11
 
       - uses: actions/cache@v2
@@ -54,7 +54,7 @@ jobs:
           path: '*/build/reports/'
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: flat-artifact
-          path: app/build/outputs/apk/release/*.apk
+          path: app/build/outputs/apk/**/release/*.apk

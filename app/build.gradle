@@ -102,8 +102,6 @@ android {
                     def apkName = output.outputFile.name
                     if (apkName.contains("debug")) {
                         output.outputFileName = "Flat-v${defaultConfig.versionName}-$formattedDate-debug.apk"
-                    } else {
-                        output.outputFileName = "Flat-v${defaultConfig.versionName}.apk"
                     }
                 }
         }
