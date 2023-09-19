@@ -191,8 +191,8 @@ class ToolComponent(
         }
 
         lifecycleScope.launch {
-            viewModel.messageAreaShown.collect {
-                binding.message.isSelected = it
+            RoomOverlayManager.observeShowId().collect { areaId ->
+                binding.message.isSelected = areaId == RoomOverlayManager.AREA_ID_MESSAGE
             }
         }
 

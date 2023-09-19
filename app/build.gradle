@@ -110,13 +110,13 @@ android {
     flavorDimensions "default"
 
     productFlavors {
-        create("cn") {
+        create("flat") {
             buildConfigField "String", "DEFAULT_CALLING_CODE", "\"+86\""
             buildConfigField "String", "DEFAULT_ENV", "\"cn_prod\""
         }
 
-        create("sg") {
-            applicationId = "io.agora.flat.global"
+        create("flint") {
+            applicationId = "io.agora.flint"
 
             buildConfigField "String", "DEFAULT_CALLING_CODE", "\"+01\""
             buildConfigField "String", "DEFAULT_ENV", "\"sg_prod\""

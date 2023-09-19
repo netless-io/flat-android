@@ -15,6 +15,7 @@ import io.agora.flat.R
 import io.agora.flat.common.rtm.Message
 import io.agora.flat.databinding.LayoutRoomMessageListBinding
 import io.agora.flat.ui.activity.play.MessageAdapter
+import io.agora.flat.ui.manager.RoomOverlayManager
 
 
 class MessageListView @JvmOverloads constructor(
@@ -77,6 +78,10 @@ class MessageListView @JvmOverloads constructor(
             val targetMuted = !binding.mute.isSelected
             binding.mute.isSelected = targetMuted
             listener?.onMute(targetMuted)
+        }
+
+        binding.close.setOnClickListener {
+            RoomOverlayManager.setShown(RoomOverlayManager.AREA_ID_MESSAGE, false)
         }
 
         // Consume events to prevent edittext focus loss

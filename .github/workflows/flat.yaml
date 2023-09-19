@@ -44,7 +44,7 @@ jobs:
           key: gradle-${{ hashFiles('checksum.txt') }}
 
       - name: Build project
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleFlatRelease bundleFlintRelease --stacktrace
 
       - name: Archive reports for failed build
         if: ${{ failure() }}
@@ -57,4 +57,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: flat-artifact
-          path: app/build/outputs/apk/**/release/*.apk
+          path: |
+            app/build/outputs/apk/**/release/*.apk
+            app/build/outputs/bundle/**/release/*.aab

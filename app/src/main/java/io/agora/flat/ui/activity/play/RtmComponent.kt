@@ -14,6 +14,7 @@ import dagger.hilt.android.components.ActivityComponent
 import io.agora.flat.common.FlatException
 import io.agora.flat.databinding.ComponentMessageBinding
 import io.agora.flat.di.interfaces.RtmApi
+import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.view.MessageListView
 import io.agora.flat.ui.viewmodel.MessageViewModel
 import io.agora.flat.ui.viewmodel.MessagesUpdate
@@ -42,7 +43,7 @@ class RtmComponent(
         super.onCreate(owner)
         injectApi()
         initView()
-        loadData()
+        observeData()
     }
 
     private fun injectApi() {
@@ -101,14 +102,12 @@ class RtmComponent(
         binding.root.viewTreeObserver.addOnWindowFocusChangeListener(onWindowFocusChangeListener)
     }
 
-    private fun loadData() {
+    private fun observeData() {
         lifecycleScope.launchWhenResumed {
             messageViewModel.messageUiState.filterNotNull().collect {
                 binding.messageLv.showBanBtn(it.isOwner)
                 binding.messageLv.setBan(it.ban, it.isOwner)
                 binding.messageLv.showLoading(it.loading)
-
-                binding.root.isVisible = it.messageAreaShown
             }
         }
 
@@ -120,17 +119,19 @@ class RtmComponent(
                 }
             }
         }
+
+        lifecycleScope.launchWhenResumed {
+            RoomOverlayManager.observeShowId().collect { areaId ->
+                binding.root.isVisible = areaId == RoomOverlayManager.AREA_ID_MESSAGE
+            }
+        }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         keyboardHeightProvider?.dismiss()
         runBlocking {
-            try {
-                rtmApi.logout()
-            } catch (e: FlatException) {
-
-            }
+            try { rtmApi.logout() } catch (e: FlatException) { }
         }
     }
 }

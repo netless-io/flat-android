@@ -81,7 +81,6 @@ class ClassRoomViewModel @Inject constructor(
     private var _videoAreaShown = MutableStateFlow(true)
     val videoAreaShown = _videoAreaShown.asStateFlow()
 
-    val messageAreaShown = RoomOverlayManager.observeShowId().map { it == RoomOverlayManager.AREA_ID_MESSAGE }
     val messageCount = messageManager.messages.map { it.size }.distinctUntilChanged()
 
     private val roomUUID: String = checkNotNull(savedStateHandle[Constants.IntentKey.ROOM_UUID])

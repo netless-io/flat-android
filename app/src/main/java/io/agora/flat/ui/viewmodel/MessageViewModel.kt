@@ -40,19 +40,16 @@ class MessageViewModel @Inject constructor(
     val messageUpdate = _messageUpdate.asStateFlow()
 
     private val messageLoading = ObservableLoadingCounter()
-    private val messageAreaShown = RoomOverlayManager.observeShowId().map { it == RoomOverlayManager.AREA_ID_MESSAGE }
 
     val messageUiState = combine(
         syncedClassState.observeClassroomState(),
         messageLoading.observable,
         userManager.observeOwnerUUID(),
-        messageAreaShown,
-    ) { classState, loading, ownerUuid, areaShown ->
+    ) { classState, loading, ownerUuid ->
         MessageUiState(
             ban = classState.ban,
             isOwner = ownerUuid == userRepository.getUserUUID(),
             loading = loading,
-            messageAreaShown = areaShown,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -145,5 +142,4 @@ data class MessageUiState(
     val ban: Boolean = false,
     val isOwner: Boolean = false,
     val loading: Boolean = false,
-    val messageAreaShown: Boolean = false,
 )
