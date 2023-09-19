@@ -52,9 +52,12 @@ fun SendCodeInput(
 ) {
     var isValidCode by remember { mutableStateOf(true) }
     var hasCodeFocused by remember { mutableStateOf(false) }
+    var remainTimeState by remember { mutableStateOf(0L) }
 
-    val sendCodeEnable = remainTime == 0L && ready
-    val sendCodeText = if (remainTime == 0L) stringResource(id = R.string.login_send_sms_code) else "${remainTime}s"
+    remainTimeState = remainTime
+
+    val sendCodeEnable = remainTimeState == 0L && ready
+    val sendCodeText = if (remainTimeState == 0L) stringResource(id = R.string.login_send_sms_code) else "${remainTimeState}s"
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.ic_login_sms_code), contentDescription = "")
@@ -89,6 +92,7 @@ fun SendCodeInput(
             enabled = sendCodeEnable,
             onClick = {
                 onSendCode()
+                remainTimeState = 60
             },
         ) {
             FlatTextOnButton(text = sendCodeText)

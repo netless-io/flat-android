@@ -85,6 +85,7 @@ class RegisterViewModel @Inject constructor(
             userRepository.requestRegisterEmailCode(email = email)
                 .onSuccess {
                     notifySendCodeSuccess()
+                    startCountDown()
                 }
                 .onFailure {
                     notifyError(it)
