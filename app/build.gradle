@@ -85,6 +85,9 @@ android {
             buildConfigField "String", "ALIYUN_LOG_DEV_SK", "\"ALIYUN_LOG_DEV_SK_VALUE\""
             buildConfigField "String", "ALIYUN_LOG_PROD_AK", "\"ALIYUN_LOG_PROD_AK_VALUE\""
             buildConfigField "String", "ALIYUN_LOG_PROD_SK", "\"ALIYUN_LOG_PROD_SK_VALUE\""
+
+            buildConfigField "String", "ALIYUN_LOG_SG_PROD_AK", "\"ALIYUN_LOG_SG_PROD_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_SG_PROD_SK", "\"ALIYUN_LOG_SG_PROD_SK_VALUE\""
         }
 
         debug {
@@ -96,6 +99,9 @@ android {
             buildConfigField "String", "ALIYUN_LOG_DEV_SK", "\"ALIYUN_LOG_DEV_SK_VALUE\""
             buildConfigField "String", "ALIYUN_LOG_PROD_AK", "\"ALIYUN_LOG_PROD_AK_VALUE\""
             buildConfigField "String", "ALIYUN_LOG_PROD_SK", "\"ALIYUN_LOG_PROD_SK_VALUE\""
+
+            buildConfigField "String", "ALIYUN_LOG_SG_PROD_AK", "\"ALIYUN_LOG_SG_PROD_AK_VALUE\""
+            buildConfigField "String", "ALIYUN_LOG_SG_PROD_SK", "\"ALIYUN_LOG_SG_PROD_SK_VALUE\""
         }
 
         applicationVariants.all {

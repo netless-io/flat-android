@@ -76,6 +76,14 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             githubClientId = "da83d7e14217594fba46",
             baseInviteUrl = "https://web.flat.agora.io",
             versionCheckUrl = "",
+
+            logConfig = LogConfig(
+                ak = BuildConfig.ALIYUN_LOG_SG_PROD_AK,
+                sk = BuildConfig.ALIYUN_LOG_SG_PROD_SK,
+                project = "flat-sg",
+                logstore = "android",
+                endpoint = "ap-southeast-1.log.aliyuncs.com",
+            ),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/kndLTOWdG2qYcQ",
@@ -91,6 +99,13 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             githubClientId = "0ac608815326aead5db7",
             baseInviteUrl = "https://flat-web-dev-sg.whiteboard.agora.io",
             versionCheckUrl = "",
+            logConfig = LogConfig(
+                ak = BuildConfig.ALIYUN_LOG_SG_PROD_AK,
+                sk = BuildConfig.ALIYUN_LOG_SG_PROD_SK,
+                project = "flat-sg",
+                logstore = "android",
+                endpoint = "ap-southeast-1.log.aliyuncs.com",
+            ),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "n9q1oBxDEeyuBMn1qc0iFw/fLgNSEvdwKjlig",
