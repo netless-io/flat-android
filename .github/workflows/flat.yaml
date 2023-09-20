@@ -28,6 +28,8 @@ jobs:
           ALIYUN_LOG_DEV_SK: ${{ secrets.ALIYUN_LOG_DEV_SK }}
           ALIYUN_LOG_PROD_AK: ${{ secrets.ALIYUN_LOG_PROD_AK }}
           ALIYUN_LOG_PROD_SK: ${{ secrets.ALIYUN_LOG_PROD_SK }}
+          ALIYUN_LOG_SG_PROD_AK: ${{ secrets.ALIYUN_LOG_SG_PROD_AK }}
+          ALIYUN_LOG_SG_PROD_SK: ${{ secrets.ALIYUN_LOG_SG_PROD_SK }}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
