@@ -5,6 +5,9 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
     id "androidx.navigation.safeargs"
+
+    id 'com.google.gms.google-services'
+    id "com.google.firebase.crashlytics"
 }
 
 android {
@@ -271,4 +274,8 @@ dependencies {
     // WindowManager
     implementation "androidx.window:window:1.0.0"
     implementation "androidx.exifinterface:exifinterface:1.3.6"
+
+    implementation platform('com.google.firebase:firebase-bom:31.5.0')
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
 }

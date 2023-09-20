@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "132248813632",
+    "project_id": "flat-434d0",
+    "storage_bucket": "flat-434d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132248813632:android:5ab03fdf2abcf200ed5fa5",
+        "android_client_info": {
+          "package_name": "io.agora.flat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTiYmkyWAY_MQZ9POSTWiJdJ6XYQZr0Bw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132248813632:android:9b83d459405af101ed5fa5",
+        "android_client_info": {
+          "package_name": "io.agora.flint"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTiYmkyWAY_MQZ9POSTWiJdJ6XYQZr0Bw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
