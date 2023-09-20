@@ -1,24 +1,32 @@
 package io.agora.flat.ui.activity.setting
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,53 +37,59 @@ import androidx.navigation.NavController
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
-import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.compose.BackTopAppBar
+import io.agora.flat.ui.compose.FlatColumnPage
+import io.agora.flat.ui.compose.FlatDivider
+import io.agora.flat.ui.compose.FlatHighlightTextButton
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextCaption
+import io.agora.flat.ui.compose.UpdateDialog
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.viewmodel.SettingsUiState
 import io.agora.flat.ui.viewmodel.SettingsViewModel
 import io.agora.flat.util.getAppVersion
 import io.agora.flat.util.isApkInDebug
+import io.agora.flat.util.launchMarket
 
 @Composable
 fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
 
-    val actioner: (SettingsUiAction) -> Unit = { action ->
-        when (action) {
-            SettingsUiAction.Back -> navController.popBackStack()
-            SettingsUiAction.Logout -> {
-                viewModel.logout()
-                Navigator.launchHomeActivity(context)
-            }
-
-            is SettingsUiAction.SetNetworkAcceleration -> {
-                viewModel.setNetworkAcceleration(action.acceleration)
-            }
+    SettingsScreen(
+        state = state,
+        onDownload = viewModel::downloadApp,
+        onBack = { navController.popBackStack() },
+        onLogout = {
+            viewModel.logout()
+            Navigator.launchHomeActivity(context)
         }
-    }
-    SettingsScreen(state, actioner)
+    )
 }
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actioner: (SettingsUiAction) -> Unit) {
+fun SettingsScreen(
+    state: SettingsUiState,
+    onDownload: suspend () -> Uri,
+    onBack: () -> Unit,
+    onLogout: () -> Unit
+) {
     Column {
         BackTopAppBar(
             title = stringResource(R.string.title_setting),
-            onBackPressed = { actioner(SettingsUiAction.Back) }
+            onBackPressed = onBack
         )
         Box(Modifier.weight(1f)) {
-            SettingsList(state)
+            SettingsList(state, onDownload)
         }
-        BottomOperateArea(onLogoutClick = {
-            actioner(SettingsUiAction.Logout)
-        })
+        BottomOperateArea(onLogout = onLogout)
     }
 }
 
 @Composable
-private fun SettingsList(state: SettingsUiState) {
+private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri) {
     val context = LocalContext.current
+    var showUpdate by remember { mutableStateOf(false) }
 
     LazyColumn {
         item {
@@ -132,6 +146,11 @@ private fun SettingsList(state: SettingsUiState) {
                 id = R.drawable.ic_settings_app_version,
                 tip = stringResource(R.string.setting_check_update),
                 desc = context.getAppVersion(),
+                onClick = {
+                    if (state.versionCheckResult.showUpdate) {
+                        showUpdate = true
+                    }
+                }
             )
             SettingItemDivider()
             SettingItem(
@@ -154,10 +173,24 @@ private fun SettingsList(state: SettingsUiState) {
             Spacer(modifier = Modifier.height(40.dp))
         }
     }
+
+    if (showUpdate) {
+        UpdateDialog(
+            versionCheckResult = state.versionCheckResult,
+            downloadApp = onDownload,
+            onCancel = {
+                showUpdate = false
+            },
+            onGotoMarket = {
+                showUpdate = false
+                context.launchMarket()
+            }
+        )
+    }
 }
 
 @Composable
-private fun BottomOperateArea(onLogoutClick: () -> Unit) {
+private fun BottomOperateArea(onLogout: () -> Unit) {
     Box(
         Modifier
             .padding(horizontal = 16.dp, vertical = 32.dp)
@@ -165,7 +198,7 @@ private fun BottomOperateArea(onLogoutClick: () -> Unit) {
         FlatHighlightTextButton(
             stringResource(R.string.login_exit),
             icon = R.drawable.ic_login_out,
-            onClick = { onLogoutClick() }
+            onClick = { onLogout() }
         )
     }
 }
@@ -259,6 +292,6 @@ internal fun SettingItemDivider() {
 fun UserSettingActivityPreview() {
     val state = SettingsUiState()
     FlatColumnPage {
-        SettingsScreen(state, {})
+        SettingsScreen(state, { Uri.EMPTY }, {}, {})
     }
 }

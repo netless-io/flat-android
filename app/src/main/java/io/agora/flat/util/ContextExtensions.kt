@@ -157,7 +157,7 @@ fun Context.installApk(uri: Uri) {
     }
 }
 
-fun Activity.gotoMarket() {
+fun Context.launchMarket() {
     try {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
     } catch (e: ActivityNotFoundException) {

@@ -8,8 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import javax.inject.Inject
 
-class VersionChecker constructor(
+class VersionChecker @Inject constructor(
     @NetworkModule.NormalOkHttpClient val client: OkHttpClient,
     val appKVCenter: AppKVCenter,
     private val appVersion: String,
@@ -64,13 +65,39 @@ class VersionChecker constructor(
                     appVersion = response.appVersion,
                     title = response.title,
                     description = response.description,
-                    showUpdate = checkCanUpdate(appVersion, response.appVersion) && canUpdateByUser() || forceUpdate,
+                    showUpdate = checkCanUpdate(
+                        appVersion,
+                        response.appVersion
+                    ) && canUpdateByUser() || forceUpdate,
                     forceUpdate = forceUpdate,
                     gotoMarket = response.gotoMarket
                 )
             } catch (e: Exception) {
                 // ignore
                 e.printStackTrace()
+                return@withContext VersionCheckResult.Empty
+            }
+        }
+    }
+
+    suspend fun forceCheck(): VersionCheckResult {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder().url(versionCheckerUrl).build()
+                val newCall = client.newCall(request)
+                val versionBody = newCall.execute().body?.string()
+                val response = gson.fromJson(versionBody, VersionResponse::class.java)
+                val forceUpdate = checkForceUpdate(appVersion, response.minVersion)
+                return@withContext VersionCheckResult(
+                    appUrl = response.appUrl,
+                    appVersion = response.appVersion,
+                    title = response.title,
+                    description = response.description,
+                    showUpdate = checkCanUpdate(appVersion, response.appVersion) || forceUpdate,
+                    forceUpdate = forceUpdate,
+                    gotoMarket = response.gotoMarket
+                )
+            } catch (e: Exception) {
                 return@withContext VersionCheckResult.Empty
             }
         }
