@@ -5,6 +5,7 @@ data class VersionCheckResult(
     val appVersion: String? = null,
     val title: String = "",
     val description: String = "",
+    val gotoMarket: Boolean = false,
     val showUpdate: Boolean = false,
     val forceUpdate: Boolean = false,
 ) {

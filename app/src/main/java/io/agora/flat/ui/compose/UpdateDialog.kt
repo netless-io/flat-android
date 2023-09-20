@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -31,6 +32,7 @@ internal fun UpdateDialog(
     versionCheckResult: VersionCheckResult,
     downloadApp: suspend () -> Uri,
     onCancel: () -> Unit,
+    onGotoMarket: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -62,6 +64,10 @@ internal fun UpdateDialog(
                         Column {
                             FlatPrimaryTextButton(text = stringResource(R.string.update)) {
                                 scope.launch {
+                                    if (versionCheckResult.gotoMarket) {
+                                        onGotoMarket()
+                                        return@launch
+                                    }
                                     downloading = true
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                         val haveInstallPermission = context.packageManager.canRequestPackageInstalls()
@@ -132,6 +138,19 @@ private fun InstallPermissionDialogPreview() {
         InstallPermissionDialog(
             onLaunch = {},
             onCancel = {},
+        )
+    }
+}
+
+@Composable
+@Preview
+@Preview(device = Devices.PIXEL_C)
+private fun UpdateDialogPreview() {
+    FlatTheme {
+        UpdateDialog(
+            VersionCheckResult(),
+            downloadApp = { Uri.EMPTY },
+            {}
         )
     }
 }

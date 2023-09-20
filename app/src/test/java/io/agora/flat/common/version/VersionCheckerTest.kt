@@ -1,5 +1,6 @@
 package io.agora.flat.common.version
 
+import io.agora.flat.util.JsonUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -23,5 +24,21 @@ class VersionCheckerTest {
         assertFalse(VersionChecker.checkForceUpdate("1.3.6", "1.3.6"))
         assertFalse(VersionChecker.checkForceUpdate("1.5.3.112", "1.5.2"))
         assertFalse(VersionChecker.checkForceUpdate("1.4.0", "1.4.0"))
+    }
+
+    @Test
+    fun `checkNoGotoMarketValue`() {
+        val oldJson = """
+            {
+                "appUrl": "https://flat-storage.oss-accelerate.aliyuncs.com/versions/latest/stable/android/Flat-v2.8.0.apk",
+                "appVersion": "2.8.0",
+                "title": "更新提示",
+                "description": "- 支持账号密码注册、登录\n- 调整部分界面样式\n- 修复部分已知问题",
+                "minVersion": "2.4.0",
+            }
+        """.trimIndent()
+
+        val response = JsonUtils.fromJson(oldJson, VersionChecker.VersionResponse::class.java)
+        assertFalse(response.gotoMarket)
     }
 }

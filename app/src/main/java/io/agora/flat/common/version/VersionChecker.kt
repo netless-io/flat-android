@@ -66,6 +66,7 @@ class VersionChecker constructor(
                     description = response.description,
                     showUpdate = checkCanUpdate(appVersion, response.appVersion) && canUpdateByUser() || forceUpdate,
                     forceUpdate = forceUpdate,
+                    gotoMarket = response.gotoMarket
                 )
             } catch (e: Exception) {
                 // ignore
@@ -90,5 +91,6 @@ class VersionChecker constructor(
         val title: String,
         val description: String,
         val minVersion: String,
+        val gotoMarket: Boolean = false,
     )
 }
