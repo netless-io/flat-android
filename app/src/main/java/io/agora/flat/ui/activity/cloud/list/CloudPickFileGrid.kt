@@ -8,8 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -45,7 +45,7 @@ internal fun CloudPickFileGrid(onUploadFile: (uri: Uri, info: ContentInfo) -> Un
         onUploadFile(it.uri, it)
     }
     val count = if (isTabletMode()) 4 else 2
-    LazyVerticalGrid(cells = GridCells.Fixed(count)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(count)) {
         items(allItems.size) { index ->
             UploadPickItem(
                 allItems[index].id,

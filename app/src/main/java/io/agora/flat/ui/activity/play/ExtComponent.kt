@@ -74,6 +74,8 @@ class ExtComponent(
                     RemoteLoginEvent -> {
                         showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
                     }
+
+                    else -> {}
                 }
             }
         }

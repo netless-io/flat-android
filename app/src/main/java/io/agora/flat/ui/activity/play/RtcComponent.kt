@@ -991,7 +991,7 @@ class RtcComponent(
             setAnimation("lottie/reward.json")
         }
         rewardAnimationView.addAnimatorListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 val targetContainer = adapter.findContainerByUuid(userUUID)
                 val end = if (windowsDragManager.isOnBoard(userUUID)) {
                     windowsDragManager.getWindowRect(userUUID)

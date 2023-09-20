@@ -63,7 +63,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 endpoint = "cn-hangzhou.log.aliyuncs.com",
             ),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
-            wechatId = "wx09437693798bc108",
+            wechatId = "wx09437693798bc108", 
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
 
@@ -74,7 +74,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             agoraAppId = "549c8a24c1e64852bd163f853f5fe14f",
             serviceUrl = "https://api.flat.agora.io",
             githubClientId = "da83d7e14217594fba46",
-            baseInviteUrl = "https://flat-web.whiteboard.agora.io",
+            baseInviteUrl = "https://web.flat.agora.io",
             versionCheckUrl = "",
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
