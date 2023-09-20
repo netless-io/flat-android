@@ -1,6 +1,7 @@
 package io.agora.flat.util
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -104,6 +105,7 @@ fun ComponentActivity.isDarkMode(): Boolean = when (DarkModeManager.current()) {
         val nightMode: Int = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         nightMode == Configuration.UI_MODE_NIGHT_YES
     }
+
     DarkModeManager.Mode.Light -> false
     DarkModeManager.Mode.Dark -> true
 }
@@ -152,5 +154,18 @@ fun Context.installApk(uri: Uri) {
         startActivity(intent)
     } catch (e: Exception) {
         // ignore
+    }
+}
+
+fun Activity.gotoMarket() {
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+    } catch (e: ActivityNotFoundException) {
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+        )
     }
 }

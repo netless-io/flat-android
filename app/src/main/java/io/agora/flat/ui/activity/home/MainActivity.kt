@@ -39,6 +39,7 @@ import io.agora.flat.ui.activity.cloud.list.CloudScreen
 import io.agora.flat.ui.compose.*
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
+import io.agora.flat.util.gotoMarket
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -120,6 +121,10 @@ class MainActivity : BaseComposeActivity() {
                         viewState.versionCheckResult,
                         viewModel::downloadApp,
                         viewModel::cancelUpdate,
+                        onGotoMarket = {
+                            this.gotoMarket()
+                            viewModel.cancelUpdate()
+                        }
                     )
                 }
             } else {
