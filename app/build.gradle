@@ -104,15 +104,22 @@ android {
             buildConfigField "String", "ALIYUN_LOG_SG_PROD_SK", "\"ALIYUN_LOG_SG_PROD_SK_VALUE\""
         }
 
-        applicationVariants.all {
-            variant ->
-                variant.outputs.each { output ->
-                    def formattedDate = new Date().format('MM-dd-HH')
-                    def apkName = output.outputFile.name
-                    if (apkName.contains("debug")) {
-                        output.outputFileName = "Flat-v${defaultConfig.versionName}-$formattedDate-debug.apk"
+        applicationVariants.all { variant ->
+            variant.outputs.each { output ->
+                def fileName = output.outputFileName
+
+                def buildType = variant.buildType.name
+                if (buildType == "debug") {
+                    fileName = fileName.replaceFirst(/(\.\w+)$/) {
+                        "-v${defaultConfig.versionName}-${new Date().format('MM-dd-HH')}${it[0]}"
+                    }
+                } else if (buildType == "release") {
+                    fileName = fileName.replaceFirst(/(\.\w+)$/) {
+                        "-v${defaultConfig.versionName}${it[0]}"
                     }
                 }
+                output.outputFileName = fileName
+            }
         }
     }
 
