@@ -61,4 +61,4 @@ jobs:
           name: flat-artifact
           path: |
             app/build/outputs/apk/**/release/*.apk
-            app/build/outputs/bundle/**/release/*.aab
+            app/build/outputs/bundle/flintRelease/*.aab
