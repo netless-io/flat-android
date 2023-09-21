@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.tencent.bugly:crashreport:4.0.4'
     implementation 'com.aliyun.openservices:aliyun-log-android-sdk:2.6.0'
 
+    implementation "com.google.dagger:dagger:$rootProject.hilt_version"
     kapt "com.google.dagger:dagger-compiler:$rootProject.hilt_version"
     kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
 }

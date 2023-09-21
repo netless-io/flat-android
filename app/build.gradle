@@ -281,7 +281,7 @@ dependencies {
     implementation "androidx.window:window:1.0.0"
     implementation "androidx.exifinterface:exifinterface:1.3.6"
 
-    implementation platform('com.google.firebase:firebase-bom:31.5.0')
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    flintImplementation platform('com.google.firebase:firebase-bom:31.5.0')
+    flintImplementation("com.google.firebase:firebase-analytics-ktx")
+    flintImplementation("com.google.firebase:firebase-crashlytics-ktx")
 }
