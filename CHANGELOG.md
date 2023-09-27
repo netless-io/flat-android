@@ -1,4 +1,8 @@
 # Changelog
+## [2.9.0] - September 27, 2023
+- Support SG
+- Fix replay bugs
+
 ## [2.8.0] - September 02, 2023
 - Add Email login and Password login
 - Update some UI
