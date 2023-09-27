@@ -5,10 +5,11 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.databinding.ComponentReplayToolBinding
 import io.agora.flat.ui.activity.play.BaseComponent
 import io.agora.flat.ui.view.ReplayExitDialog
-import io.agora.flat.ui.viewmodel.ReplayViewModel
+import io.agora.flat.util.showToast
 import kotlinx.coroutines.launch
 
 class ReplayToolComponent(
@@ -59,7 +60,10 @@ class ReplayToolComponent(
     private fun observeData() {
         lifecycleScope.launch {
             viewModel.state.collect {
-                toolBinding.messageLv.setMessages(it.messages)
+                it.message?.let { message ->
+                    activity.showToast(FlatErrorHandler.getErrorStr(activity, message.exception))
+                    viewModel.clearMessage(message.id)
+                }
             }
         }
     }

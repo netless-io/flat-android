@@ -8,7 +8,13 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.agora.netless.syncplayer.*
+import com.agora.netless.syncplayer.AtomPlayer
+import com.agora.netless.syncplayer.AtomPlayerListener
+import com.agora.netless.syncplayer.AtomPlayerPhase
+import com.agora.netless.syncplayer.ClusterPlayer
+import com.agora.netless.syncplayer.MultiVideoPlayer
+import com.agora.netless.syncplayer.VideoItem
+import com.agora.netless.syncplayer.WhiteboardPlayer
 import com.herewhite.sdk.CommonCallback
 import com.herewhite.sdk.Player
 import com.herewhite.sdk.WhiteSdk
@@ -20,19 +26,16 @@ import com.herewhite.sdk.domain.WindowParams
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import io.agora.flat.BuildConfig
-import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.model.RecordItem
 import io.agora.flat.databinding.ComponentReplayVideoBinding
 import io.agora.flat.databinding.ComponentReplayWhiteboardBinding
 import io.agora.flat.ui.activity.play.BaseComponent
-import io.agora.flat.ui.viewmodel.ReplayViewModel
 import io.agora.flat.util.FlatFormatter
 import io.agora.flat.util.isDarkMode
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-
 
 class ReplayPlayerComponent(
     activity: ReplayActivity,
@@ -174,7 +177,7 @@ class ReplayPlayerComponent(
     private fun observeData() {
         lifecycleScope.launch {
             viewModel.state.collect {
-                if (it.recordInfo != null && it.roomInfo != null && clusterPlayer == null) {
+                if (it.recordInfo != null && clusterPlayer == null) {
                     createVideoPlayer(it.recordInfo.recordInfo, it.beginTime)
                     createWhitePlayer(
                         it.recordInfo.whiteboardRoomUUID,
@@ -239,7 +242,6 @@ class ReplayPlayerComponent(
                         if (!isSeeking) {
                             whiteBinding.playbackSeekBar.progress = toProgress(position)
                             whiteBinding.playbackTime.text = getPlaybackTime(position)
-                            viewModel.updateTime(position)
                         }
                     }
 
@@ -250,15 +252,19 @@ class ReplayPlayerComponent(
                             AtomPlayerPhase.Idle -> {}
                             AtomPlayerPhase.Ready -> {
                             }
+
                             AtomPlayerPhase.Paused -> {
                                 setPlaying(false)
                             }
+
                             AtomPlayerPhase.Playing -> {
                                 setPlaying(true)
                             }
+
                             AtomPlayerPhase.Buffering -> {
 
                             }
+
                             AtomPlayerPhase.End -> {
                                 clusterPlayer?.pause()
                                 clusterPlayer?.seekTo(0)
