@@ -348,7 +348,7 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>
     <string name="request_common_success">success</string>
-    <string name="error_string_network">network error</string>
+    <string name="error_string_network">network error (%1$s)</string>
 
     <string name="error_user_not_found">user not found</string>
     <string name="error_user_room_list_not_empty">room list not empty</string>

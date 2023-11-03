@@ -47,7 +47,7 @@ object FlatErrorHandler {
             FlatErrorCode.Web.EmailAlreadyBinding -> context.getString(R.string.error_email_already_binding)
             FlatErrorCode.Web.EmailFailedToSendCode -> context.getString(R.string.error_email_failed_to_send_code)
 
-            else -> context.getString(R.string.error_string_network)
+            else -> context.getString(R.string.error_string_network, "${error.code}")
         }
     }
 }
