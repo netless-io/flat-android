@@ -611,7 +611,7 @@ class RtcComponent(
         logger.i("RtcComponent", "onDragListener ${event.action}")
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                val user = event.localState as RoomUser
+                val user = adapter.findUserByUuid(windowsDragManager.currentUUID()) ?: return@OnDragListener false
                 addNewUserWindow(
                     user, UserWindowUiState(
                         centerX = event.x,

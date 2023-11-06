@@ -184,6 +184,10 @@ class UserVideoAdapter(
         return dataSet[position]
     }
 
+    fun findUserByUuid(uuid: String) : RoomUser? {
+        return dataSet.find { it.userUUID == uuid }
+    }
+
     fun updateVideoView(uid: Int) {
         recyclerView?.findViewHolderForItemId(uid.toLong())?.also {
             windowsDragManager.setupUserVideo((it as ViewHolder).binding.videoContainer, uid)
