@@ -92,11 +92,12 @@ class RtmComponent(
     }
 
     private fun lateStartKeyboardHeightProvider() {
-        lateinit var onWindowFocusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener
-        onWindowFocusChangeListener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+        val onWindowFocusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener =
+            ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
             if (hasFocus) {
                 keyboardHeightProvider?.start()
-                binding.root.viewTreeObserver.removeOnWindowFocusChangeListener(onWindowFocusChangeListener)
+            } else {
+                keyboardHeightProvider?.stop()
             }
         }
         binding.root.viewTreeObserver.addOnWindowFocusChangeListener(onWindowFocusChangeListener)
