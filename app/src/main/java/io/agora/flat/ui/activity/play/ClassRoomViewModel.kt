@@ -721,11 +721,15 @@ class ClassRoomViewModel @Inject constructor(
 
     fun agreeCamera() {
         viewModelScope.launch {
-            enableVideo(true)
-            rtmApi.sendPeerCommand(
-                RequestDeviceResponseEvent(roomUUID = roomUUID, camera = true),
-                userManager.ownerUUID
-            )
+            if (syncedStoreReady) {
+                enableVideo(true)
+                rtmApi.sendPeerCommand(
+                    RequestDeviceResponseEvent(roomUUID = roomUUID, camera = true),
+                    userManager.ownerUUID
+                )
+            } else {
+                refuseCamera()
+            }
         }
     }
 
@@ -740,11 +744,15 @@ class ClassRoomViewModel @Inject constructor(
 
     fun agreeMic() {
         viewModelScope.launch {
-            enableAudio(true)
-            rtmApi.sendPeerCommand(
-                RequestDeviceResponseEvent(roomUUID = roomUUID, mic = true),
-                userManager.ownerUUID
-            )
+            if (syncedStoreReady) {
+                enableAudio(true)
+                rtmApi.sendPeerCommand(
+                    RequestDeviceResponseEvent(roomUUID = roomUUID, mic = true),
+                    userManager.ownerUUID
+                )
+            } else {
+                refuseMic()
+            }
         }
     }
 
