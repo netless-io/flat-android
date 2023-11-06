@@ -27,12 +27,17 @@ class KeyboardHeightProvider(private val activity: Activity) : PopupWindow(activ
         inputMethodMode = INPUT_METHOD_NEEDED
     }
 
-    fun start(): KeyboardHeightProvider {
+    fun start() {
         if (!isShowing) {
             val view: View = activity.window.decorView
             view.post { showAtLocation(view, Gravity.NO_GRAVITY, 0, 0) }
         }
-        return this
+    }
+
+    fun stop() {
+        if (isShowing) {
+            dismiss()
+        }
     }
 
     fun setHeightListener(listener: HeightListener?): KeyboardHeightProvider {
