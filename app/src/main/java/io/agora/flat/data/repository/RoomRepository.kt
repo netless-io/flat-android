@@ -2,7 +2,9 @@ package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
 import io.agora.flat.data.RoomServiceFetcher
+import io.agora.flat.data.manager.JoinRoomRecordManager
 import io.agora.flat.data.model.CancelRoomReq
+import io.agora.flat.data.model.JoinRoomRecord
 import io.agora.flat.data.model.JoinRoomReq
 import io.agora.flat.data.model.NetworkRoomUser
 import io.agora.flat.data.model.PureRoomReq
@@ -27,7 +29,8 @@ import javax.inject.Singleton
 @Singleton
 class RoomRepository @Inject constructor(
     private val roomService: RoomService,
-    private val roomServiceFetcher: RoomServiceFetcher
+    private val roomServiceFetcher: RoomServiceFetcher,
+    private val joinRoomRecordManager: JoinRoomRecordManager,
 ) {
     private fun fetchService(uuid: String): RoomService {
         return roomServiceFetcher.fetch(uuid)
@@ -47,7 +50,13 @@ class RoomRepository @Inject constructor(
 
     suspend fun getOrdinaryRoomInfo(roomUUID: String): Result<RoomDetailOrdinary> {
         return withContext(Dispatchers.IO) {
-            fetchService(roomUUID).getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID)).toResult()
+            fetchService(roomUUID).getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID)).toResult().also {
+                it.get()?.roomInfo?.run {
+                    if (isPmi == true) {
+                        joinRoomRecordManager.addRecord(JoinRoomRecord(this.title, this.inviteCode))
+                    }
+                }
+            }
         }
     }
 

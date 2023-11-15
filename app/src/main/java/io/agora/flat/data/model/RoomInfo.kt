@@ -36,6 +36,8 @@ data class RoomInfo(
     val inviteCode: String,
     // 区域信息
     val region: String,
+    // 是否是 pmi 房间
+    val isPmi: Boolean? = null,
 ) : Parcelable {
 
     val isPeriodic: Boolean
