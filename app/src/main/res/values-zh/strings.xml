@@ -376,6 +376,8 @@ Flat 账号一旦被注销相关数据将不可恢复，请你在操作注销之
     <string name="error_phone_already_exist">手机已存在</string>
     <string name="error_send_verification_code">发送验证码失败</string>
 
+    <string name="error_pmi_not_started">房间未开始，请等待老师加入</string>
+
     <!--messages -->
     <string name="message_code_send_success">验证码已发送</string>
     <string name="message_reset_success">密码重置成功</string>

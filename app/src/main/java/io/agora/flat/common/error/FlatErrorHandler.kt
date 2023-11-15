@@ -27,6 +27,7 @@ object FlatErrorHandler {
 
             FlatErrorCode.Web.RoomNotFound -> context.getString(R.string.fetcher_room_not_found)
             FlatErrorCode.Web.RoomIsEnded -> context.getString(R.string.fetcher_room_is_ended)
+            FlatErrorCode.Web.RoomNotFoundAndIsPmi -> context.getString(R.string.error_pmi_not_started)
 
             FlatErrorCode.Web.SMSVerificationCodeInvalid -> context.getString(R.string.login_verification_code_invalid)
             FlatErrorCode.Web.ExhaustiveAttack -> context.getString(R.string.error_request_too_frequently)
