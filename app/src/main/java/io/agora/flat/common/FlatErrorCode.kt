@@ -24,6 +24,8 @@ class FlatErrorCode {
         const val RoomNotIsRunning = 200003 // room not is running
         const val RoomNotIsEnded = 200004 // room not is stopped
         const val RoomNotIsIdle = 200005 // room not is idle
+        const val RoomExists = 200006 // (pmi) room already exists, cannot create new room
+        const val RoomNotFoundAndIsPmi = 200007 // room not found and the invite code is pmi
 
         const val PeriodicNotFound = 300000 // room not found
         const val PeriodicIsEnded = 300001 // room has been ended
