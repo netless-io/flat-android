@@ -1,14 +1,19 @@
 package io.agora.flat.ui.activity.room
 
 import android.Manifest
-import android.os.Bundle
-import androidx.activity.compose.setContent
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
+import androidx.compose.material.TextButton
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,38 +24,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.board.DeviceState
-import io.agora.flat.ui.activity.base.BaseComposeActivity
+import io.agora.flat.data.model.JoinRoomRecord
 import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
-import io.agora.flat.ui.viewmodel.JoinRoomAction
 import io.agora.flat.ui.viewmodel.JoinRoomUiState
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
 import io.agora.flat.util.hasPermission
 import io.agora.flat.util.showToast
-
-@AndroidEntryPoint
-class JoinRoomActivity : BaseComposeActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            // FlatPage { JoinRoomPage() }
-        }
-    }
-}
+import io.agora.flat.util.toInviteCodeDisplay
+import kotlinx.coroutines.launch
 
 @Composable
 fun JoinRoomScreen(
@@ -72,119 +67,165 @@ fun JoinRoomScreen(
         }
     }
 
-    val actioner: (JoinRoomAction) -> Unit = { action ->
-        when (action) {
-            JoinRoomAction.Close -> {
-                navController.popBackStack()
-            }
-            is JoinRoomAction.JoinRoom -> {
-                viewModel.joinRoom(action.roomID, action.openVideo, action.openAudio)
-            }
-        }
-    }
-    if (isTabletMode()) {
-        JoinRoomContentTablet(viewState, actioner = actioner)
-    } else {
-        JoinRoomContent(viewState, actioner = actioner)
-    }
+    JoinRoomScreen(
+        viewState = viewState,
+        onClose = { navController.popBackStack() },
+        onJoinRoom = { roomID, openVideo, openAudio -> viewModel.joinRoom(roomID, openVideo, openAudio) },
+        onClearRecord = viewModel::clearJoinRoomRecord
+    )
 }
 
 @Composable
-private fun JoinRoomContentTablet(viewState: JoinRoomUiState, actioner: (JoinRoomAction) -> Unit) {
-    var uuid by remember { mutableStateOf("") }
+fun JoinRoomScreen(
+    viewState: JoinRoomUiState,
+    onClose: () -> Unit,
+    onJoinRoom: (String, Boolean, Boolean) -> Unit,
+    onClearRecord: () -> Unit,
+) {
+    if (isTabletMode()) {
+        JoinRoomContentTablet(viewState, onClose = onClose, onJoinRoom = onJoinRoom, onClearRecord)
+    } else {
+        JoinRoomContent(viewState, onClose = onClose, onJoinRoom = onJoinRoom, onClearRecord)
+    }
+}
 
-    val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
-    val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
-    var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
-    var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun JoinRoomContentTablet(
+    viewState: JoinRoomUiState,
+    onClose: () -> Unit,
+    onJoinRoom: (String, Boolean, Boolean) -> Unit,
+    onClearRecord: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = {
+            onClose.invoke()
+        },
+        properties = DialogProperties(dismissOnClickOutside = false),
+    ) {
+        var uuid by remember { mutableStateOf("") }
 
-    var openDialog by remember { mutableStateOf(true) }
+        val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
+        val recordGranted = LocalContext.current.hasPermission(Manifest.permission.RECORD_AUDIO)
+        var cameraOn by remember { mutableStateOf(viewState.deviceState.camera && cameraGranted) }
+        var micOn by remember { mutableStateOf(viewState.deviceState.mic && recordGranted) }
 
-    if (openDialog) {
-        Dialog(
-            onDismissRequest = {
-                actioner(JoinRoomAction.Close)
-                openDialog = false
-            },
-            properties = DialogProperties(dismissOnClickOutside = false),
-        ) {
-            val focusRequester = remember { FocusRequester() }
-            val focusManager = LocalFocusManager.current
-            val context = LocalContext.current
+        val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
+        val context = LocalContext.current
 
-            Surface(Modifier.sizeIn(maxWidth = 480.dp), shape = Shapes.large) {
-                Column {
-                    Box(
-                        Modifier
-                            .fillMaxWidth(1f)
-                            .height(56.dp)
+        val sheetState = rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+        )
+        val scope = rememberCoroutineScope()
+
+        Surface(Modifier.sizeIn(maxWidth = 480.dp, maxHeight = 500.dp), shape = Shapes.large) {
+            Column {
+                Box(
+                    Modifier
+                        .fillMaxWidth(1f)
+                        .height(56.dp)
+                ) {
+                    FlatTextTitle(stringResource(R.string.title_join_room), Modifier.align(Alignment.Center))
+                    IconButton(
+                        onClick = {
+                            onClose.invoke()
+                        },
+                        modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
-                        FlatTextTitle(stringResource(R.string.title_join_room), Modifier.align(Alignment.Center))
-                        IconButton(
-                            onClick = {
-                                actioner(JoinRoomAction.Close)
-                                openDialog = false
-                            },
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        ) {
-                            Icon(painterResource(R.drawable.ic_title_close), contentDescription = null)
+                        Icon(painterResource(R.drawable.ic_title_close), contentDescription = null)
+                    }
+                }
+                FlatDivider()
+                Spacer(Modifier.height(12.dp))
+                JoinRoomTextField(
+                    value = uuid,
+                    onValueChange = { uuid = it },
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(64.dp)
+                        .padding(horizontal = 80.dp)
+                        .focusRequester(focusRequester),
+                    placeholderValue = stringResource(R.string.input_room_id_hint),
+                    onExtendButtonClick = {
+                        if (viewState.records.isEmpty()) return@JoinRoomTextField
+                        focusManager.clearFocus()
+                        scope.launch {
+                            sheetState.show()
                         }
                     }
-                    FlatDivider()
-                    Spacer(Modifier.height(12.dp))
-                    RoomThemeTextField(
-                        value = uuid,
-                        onValueChange = { uuid = it },
-                        modifier = Modifier
-                            .fillMaxWidth(1f)
-                            .height(64.dp)
-                            .padding(horizontal = 80.dp)
-                            .focusRequester(focusRequester),
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        placeholderValue = stringResource(R.string.input_room_id_hint)
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    CameraPreviewCard(
-                        modifier = Modifier
-                            .padding(horizontal = 80.dp)
-                            .aspectRatio(2f)
-                            .clip(MaterialTheme.shapes.large),
+                )
+                Spacer(Modifier.height(24.dp))
+                CameraPreviewCard(
+                    modifier = Modifier
+                        .padding(horizontal = 80.dp)
+                        .aspectRatio(2f)
+                        .clip(MaterialTheme.shapes.large),
+                    cameraOn = cameraOn,
+                    avatar = viewState.avatar
+                )
+                Spacer(Modifier.height(48.dp))
+                Row(
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    DeviceOptions(
+                        preferCameraOn = viewState.deviceState.camera,
+                        preferMicOn = viewState.deviceState.mic,
                         cameraOn = cameraOn,
-                        avatar = viewState.avatar
+                        micOn = micOn,
+                        onCameraChanged = { cameraOn = it },
+                        onMicChanged = { micOn = it }
                     )
-                    Row(
-                        Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DeviceOptions(
-                            preferCameraOn = viewState.deviceState.camera,
-                            preferMicOn = viewState.deviceState.mic,
-                            cameraOn = cameraOn,
-                            micOn = micOn,
-                            onCameraChanged = { cameraOn = it },
-                            onMicChanged = { micOn = it }
-                        )
-                        Box(Modifier.padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
-                            FlatSmallPrimaryTextButton(stringResource(R.string.join)) {
-                                if (uuid.isNotBlank()) {
-                                    actioner(JoinRoomAction.JoinRoom(uuid, cameraOn, micOn))
-                                } else {
-                                    context.showToast(R.string.join_room_toast_empty)
-                                }
-                                focusManager.clearFocus()
+                    Box(Modifier.padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                        FlatSmallPrimaryTextButton(stringResource(R.string.join)) {
+                            if (uuid.isNotBlank()) {
+                                onJoinRoom(uuid, cameraOn, micOn)
+                            } else {
+                                context.showToast(R.string.join_room_toast_empty)
                             }
+                            focusManager.clearFocus()
                         }
                     }
                 }
             }
+
+            JoinRoomHistoryBottomSheet(
+                sheetState = sheetState,
+                histories = viewState.records,
+                onClearRecord = {
+                    scope.launch {
+                        sheetState.hide()
+                    }
+                    onClearRecord()
+                },
+                onItemPicked = {
+                    scope.launch {
+                        sheetState.hide()
+                    }
+                    uuid = it.uuid
+                },
+                onCancel = {
+                    scope.launch {
+                        sheetState.hide()
+                    }
+                }
+            )
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomAction) -> Unit) {
+private fun JoinRoomContent(
+    viewState: JoinRoomUiState,
+    onClose: () -> Unit,
+    onJoinRoom: (String, Boolean, Boolean) -> Unit,
+    onClearRecord: () -> Unit,
+) {
     var uuid by remember { mutableStateOf("") }
 
     val cameraGranted = LocalContext.current.hasPermission(Manifest.permission.CAMERA)
@@ -196,8 +237,13 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+    )
+    val scope = rememberCoroutineScope()
+
     Column {
-        CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = { actioner(JoinRoomAction.Close) })
+        CloseTopAppBar(title = stringResource(R.string.title_join_room), onClose = onClose)
         Column(
             Modifier
                 .weight(1f)
@@ -205,7 +251,7 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(48.dp))
-            RoomThemeTextField(
+            JoinRoomTextField(
                 value = uuid,
                 onValueChange = { uuid = it },
                 modifier = Modifier
@@ -213,8 +259,14 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
                     .height(64.dp)
                     .padding(horizontal = 16.dp)
                     .focusRequester(focusRequester),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                placeholderValue = stringResource(R.string.input_room_id_hint)
+                placeholderValue = stringResource(R.string.input_room_id_hint),
+                onExtendButtonClick = {
+                    if (viewState.records.isEmpty()) return@JoinRoomTextField
+                    focusManager.clearFocus()
+                    scope.launch {
+                        sheetState.show()
+                    }
+                }
             )
             Spacer(Modifier.height(32.dp))
             CameraPreviewCard(
@@ -241,7 +293,7 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
             ) {
                 FlatPrimaryTextButton(stringResource(R.string.join)) {
                     if (uuid.isNotBlank()) {
-                        actioner(JoinRoomAction.JoinRoom(uuid, cameraOn, micOn))
+                        onJoinRoom(uuid, cameraOn, micOn)
                     } else {
                         context.showToast(R.string.join_room_toast_empty)
                     }
@@ -250,14 +302,114 @@ private fun JoinRoomContent(viewState: JoinRoomUiState, actioner: (JoinRoomActio
             }
         }
     }
+
+    JoinRoomHistoryBottomSheet(
+        sheetState = sheetState,
+        histories = viewState.records,
+        onClearRecord = {
+            scope.launch {
+                sheetState.hide()
+            }
+            onClearRecord()
+        },
+        onItemPicked = {
+            scope.launch {
+                sheetState.hide()
+            }
+            uuid = it.uuid
+        },
+        onCancel = {
+            scope.launch {
+                sheetState.hide()
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun JoinRoomHistoryBottomSheet(
+    sheetState: ModalBottomSheetState,
+    histories: List<JoinRoomRecord>,
+    onClearRecord: () -> Unit,
+    onItemPicked: (JoinRoomRecord) -> Unit,
+    onCancel: () -> Unit,
+) {
+    var index by remember { mutableStateOf(0) }
+
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetContent = {
+            Column(Modifier.padding(16.dp)) {
+                Row(Modifier.height(40.dp)) {
+                    TextButton(onClick = onClearRecord) {
+                        FlatTextBodyOne(
+                            text = stringResource(R.string.clear_record),
+                            color = FlatTheme.colors.textPrimary
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = { onItemPicked(histories[index]) }) {
+                        FlatTextBodyOne(text = stringResource(R.string.confirm), color = MaterialTheme.colors.primary)
+                    }
+                }
+
+                WheelPicker(
+                    count = histories.count(),
+                    rowCount = 5,
+                    size = DpSize(500.dp, 200.dp),
+                    onScrollFinished = {
+                        Log.e("Aderan", "onScrollFinished $it")
+                        index = it
+                        null
+                    }) {
+                    val item = histories[it]
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FlatTextBodyTwo(item.title)
+                        Spacer(modifier = Modifier.weight(1f))
+                        FlatTextBodyTwo(item.uuid.toInviteCodeDisplay())
+                    }
+                }
+
+                TextButton(
+                    onClick = onCancel,
+                    Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    FlatTextBodyTwo(text = stringResource(R.string.cancel), color = FlatTheme.colors.textPrimary)
+                }
+            }
+        }
+    ) {}
 }
 
 @Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
-@Preview(widthDp = 640, uiMode = 0x20)
+@Preview(widthDp = 800, uiMode = 0x20)
 private fun PagePreview() {
     FlatPage {
-        JoinRoomContent(JoinRoomUiState.by(DeviceState(true, mic = true))) {}
+        JoinRoomScreen(
+            viewState = JoinRoomUiState.by(
+                DeviceState(camera = true, mic = true),
+                avatar = "",
+                records = listOf(
+                    JoinRoomRecord("AAA PMI Room", "11112223333"),
+                    JoinRoomRecord("BBB PMI Room", "11112224444"),
+                    JoinRoomRecord("CCC PMI Room", "11112225555"),
+                    JoinRoomRecord("DDD PMI Room", "11112226666"),
+                )
+            ),
+            {},
+            { _, _, _ -> },
+            {}
+        )
     }
 }

@@ -45,8 +45,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.FlatAndroid.Fullscreen" />
 
-        <activity android:name=".ui.activity.room.CreateRoomActivity" />
-        <activity android:name=".ui.activity.room.JoinRoomActivity" />
         <activity android:name=".ui.activity.room.SubscribeRoomActivity" />
         <activity android:name=".ui.activity.room.RoomDetailActivity" />
         <activity android:name=".ui.activity.setting.FeedbackActivity" />

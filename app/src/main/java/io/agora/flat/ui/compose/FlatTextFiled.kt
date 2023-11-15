@@ -3,6 +3,7 @@ package io.agora.flat.ui.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,8 +33,12 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -149,6 +154,65 @@ fun PlaceholderText(placeholderValue: String, darkMode: Boolean) {
 }
 
 @Composable
+fun JoinRoomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholderValue: String,
+    onExtendButtonClick: () -> Unit = {}
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val dividerColor = if (isFocused) MaterialTheme.colors.primary else FlatTheme.colors.divider
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier.onFocusChanged { isFocused = it.isFocused },
+        textStyle = TextStyle(
+            color = FlatTheme.colors.textPrimary,
+            fontWeight = FontWeight.Medium,
+            fontSize = 20.sp,
+            letterSpacing = 0.15.sp,
+            textAlign = TextAlign.Center
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardActions = KeyboardActions.Default,
+        singleLine = true,
+        visualTransformation = RoomNumInputVisualTransformation()
+    ) { innerTextField ->
+        Box(contentAlignment = Alignment.Center) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp), contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
+            }
+            FlatDivider(Modifier.align(Alignment.BottomCenter), color = dividerColor)
+            if (value.isEmpty()) {
+                FlatTextBodyOneSecondary(placeholderValue)
+            }
+            Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+                if (isFocused && value.isNotBlank()) {
+                    IconButton(onClick = { onValueChange("") }) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_text_filed_clear),
+                            "",
+                            tint = FlatTheme.colors.textPrimary
+                        )
+                    }
+                }
+
+                IconButton(onClick = onExtendButtonClick) {
+                    Icon(painterResource(id = R.drawable.ic_record_arrow_down), "", tint = FlatTheme.colors.textPrimary)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun RoomThemeTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -205,6 +269,7 @@ fun RoomThemeTextField(
     }
 }
 
+
 @Composable
 fun CloudDialogTextField(
     value: String,
@@ -240,13 +305,7 @@ fun CloudDialogTextField(
             ) {
                 innerTextField()
             }
-            Spacer(
-                Modifier
-                    .fillMaxWidth(1f)
-                    .height(1.dp)
-                    .background(dividerColor)
-                    .align(Alignment.BottomCenter)
-            )
+            FlatDivider(Modifier.align(Alignment.BottomCenter), color = dividerColor)
             if (value.isEmpty()) {
                 FlatTextBodyOneSecondary(placeholderValue)
             }
@@ -263,6 +322,39 @@ fun CloudDialogTextField(
     }
 }
 
+class RoomNumInputVisualTransformation : VisualTransformation {
+    private val offsetMapping = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            if (offset <= 4) return offset
+            if (offset <= 7) return offset + 1
+            if (offset <= 11) return offset + 2
+            return offset
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            if (offset <= 4) return offset
+            if (offset <= 8) return offset - 1
+            if (offset <= 13) return offset - 2
+            return offset
+        }
+    }
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        val input = text.toString()
+        val transformedText = when {
+            input.length > 11 -> input
+            input.length > 7 -> "${input.substring(0, 4)} ${input.substring(4, 7)} ${input.substring(7)}"
+            input.length > 4 -> "${input.substring(0, 4)} ${input.substring(4)}"
+            else -> input
+        }
+        return TransformedText(
+            AnnotatedString(transformedText),
+            offsetMapping
+        )
+    }
+}
+
+
 @Composable
 @Preview(uiMode = 0x30)
 @Preview(uiMode = 0x20)
@@ -276,6 +368,15 @@ private fun FlatTextButtonPreview() {
             FlatNormalVerticalSpacer()
             FlatBasicTextField("TextButton", onValueChange = {}, placeholderValue = "placeholderValue")
             FlatNormalVerticalSpacer()
+
+            JoinRoomTextField(
+                value = "12345678901",
+                onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                placeholderValue = "placeholderValue"
+            )
         }
     }
 }

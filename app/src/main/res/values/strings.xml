@@ -344,6 +344,8 @@ Translated with www.DeepL.com/Translator (free version)"</string>
 
     <string name="toast_mute_all_mic">All students muted</string>
 
+    <string name="clear_record">Clear</string>
+
     <!-- errors -->
     <string name="error_request_too_frequently">request too frequently</string>
     <string name="error_request_common_fail">request fail</string>

@@ -43,18 +43,6 @@ import io.agora.flat.util.delayLaunch
 import io.agora.flat.util.hasPermission
 import io.agora.flat.util.showToast
 
-@AndroidEntryPoint
-class CreateRoomActivity : BaseComposeActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FlatPage {
-                // CreateRoomPage()
-            }
-        }
-    }
-}
-
 @Composable
 fun CreateRoomScreen(
     navController: NavController,
