@@ -144,6 +144,7 @@ data class UIRoomInfo(
     val hasRecord: Boolean = false,
     val inviteCode: String,
     val baseInviteUrl: String,
+    val isPmi: Boolean = false,
     val isOwner: Boolean = false,
 )
 
@@ -166,6 +167,7 @@ private fun RoomInfo.map(
         roomStatus = roomStatus,
         hasRecord = hasRecord,
         inviteCode = inviteCode,
+        isPmi = isPmi == true,
         baseInviteUrl = baseInviteUrl,
         isOwner = isOwner,
     )

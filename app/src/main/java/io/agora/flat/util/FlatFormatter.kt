@@ -37,6 +37,10 @@ object FlatFormatter {
         return "${timeHmFormatter.format(beginMs)} ~ ${timeHmFormatter.format(endMs)}"
     }
 
+    fun dateWithDuring(beginMs: Long, endMs: Long): String {
+        return "${date(beginMs)} ${timeDuring(beginMs, endMs)}"
+    }
+
     fun diffTime(context: Context, begin: Long, end: Long): String {
         val diff = end - begin
         if (diff < 0) {
