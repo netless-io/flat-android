@@ -23,7 +23,6 @@ import io.agora.flat.di.interfaces.SyncedClassState
 import io.agora.flat.event.*
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
-import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
 import io.agora.flat.ui.viewmodel.RtcVideoController
@@ -145,6 +144,7 @@ class ClassRoomViewModel @Inject constructor(
             title = roomInfo.title,
             roomType = roomInfo.roomType,
             inviteCode = roomInfo.inviteCode,
+            isPmi = roomInfo.isPmi == true,
             beginTime = roomInfo.beginTime,
             endTime = roomInfo.endTime,
             roomStatus = roomInfo.roomStatus,
@@ -660,10 +660,12 @@ class ClassRoomViewModel @Inject constructor(
 
     fun getInviteInfo(): InviteInfo? {
         val state = state.value ?: return null
+        val linkCode = if (state.isPmi) state.inviteCode else state.roomUUID
+
         return InviteInfo(
             username = currentUserName,
             roomTitle = state.title,
-            link = appEnv.baseInviteUrl + "/join/" + state.roomUUID,
+            link =  "${appEnv.baseInviteUrl}/join/$linkCode",
             roomUuid = state.inviteCode.toInviteCodeDisplay(),
             beginTime = state.beginTime,
             endTime = state.endTime,
@@ -816,6 +818,8 @@ data class ClassRoomState(
     val endTime: Long = 0L,
     // 房间邀请码
     val inviteCode: String,
+
+    val isPmi: Boolean = false,
     // 房间类型
     val roomType: RoomType,
     // 房间区域

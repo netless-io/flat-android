@@ -82,21 +82,25 @@ fun RoomDetailScreen(
             DetailUiAction.Back -> {
                 navController.popBackStack()
             }
+
             is DetailUiAction.EnterRoom -> {
                 Navigator.launchRoomPlayActivity(context, action.roomUUID, action.periodicUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
             }
+
             DetailUiAction.Invite -> {
                 showInvite = true
             }
+
             is DetailUiAction.Playback -> {
                 Navigator.launchPlaybackActivity(context, action.roomUUID)
                 scope.delayLaunch {
                     navController.popBackStack()
                 }
             }
+
             DetailUiAction.ShowAllRooms -> showAllRooms = true
             DetailUiAction.AllRoomBack -> showAllRooms = false
             DetailUiAction.CancelRoom, DetailUiAction.DeleteRoom -> viewModel.cancelRoom()
@@ -478,6 +482,7 @@ private fun TabletOperations(
             actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
         })
     }
+
     RoomStatus.Stopped -> Row(modifier) {
         FlatSmallPrimaryTextButton(stringResource(id = R.string.replay),
             enabled = roomInfo.hasRecord,
@@ -500,6 +505,7 @@ private fun Operations(
             actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
         })
     }
+
     RoomStatus.Stopped -> Column(modifier) {
         FlatPrimaryTextButton(stringResource(id = R.string.replay), enabled = roomInfo.hasRecord, onClick = {
             actioner(DetailUiAction.Playback(roomInfo.roomUUID))
@@ -517,9 +523,10 @@ private fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
 
 @Composable
 private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
-    val datetime =
-        "${FlatFormatter.date(roomInfo.beginTime)} ${FlatFormatter.timeDuring(roomInfo.beginTime, roomInfo.endTime)}"
-    val inviteLink = roomInfo.baseInviteUrl + "/join/" + roomInfo.roomUUID
+    val datetime = FlatFormatter.dateWithDuring(roomInfo.beginTime, roomInfo.endTime)
+    val linkCode = if (roomInfo.isPmi) roomInfo.inviteCode else roomInfo.roomUUID
+    val inviteLink = "${roomInfo.baseInviteUrl}/join/$linkCode"
+
     val inviteText = stringResource(
         R.string.invite_text_format,
         roomInfo.username,
