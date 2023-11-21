@@ -111,7 +111,7 @@ class RtcComponent(
     override fun onCreate(owner: LifecycleOwner) {
         injectApi()
         initView()
-        checkPermission(::observeState)
+        checkPermission(::actionAfterPermission)
     }
 
     private fun injectApi() {
@@ -121,6 +121,13 @@ class RtcComponent(
         windowsDragManager = entryPoint.windowsDragManager()
         logger = entryPoint.logger()
         syncedState = entryPoint.syncedState()
+    }
+
+    private fun actionAfterPermission() {
+        rtcApi.enableLocalVideo(true)
+        rtcApi.enableLocalAudio(true)
+
+        observeState()
     }
 
     private fun observeState() {
