@@ -12,6 +12,8 @@ interface RtcApi {
 
     fun enableLocalVideo(enabled: Boolean)
 
+    fun enableLocalAudio(enabled: Boolean)
+
     fun setupLocalVideo(local: VideoCanvas)
 
     fun setupRemoteVideo(remote: VideoCanvas)
