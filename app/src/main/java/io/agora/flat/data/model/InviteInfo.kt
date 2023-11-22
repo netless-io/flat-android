@@ -7,4 +7,5 @@ data class InviteInfo(
     val roomUuid: String,
     val beginTime: Long,
     val endTime: Long,
+    val isPmi: Boolean
 )

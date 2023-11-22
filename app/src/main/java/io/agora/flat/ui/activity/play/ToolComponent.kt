@@ -214,6 +214,7 @@ class ToolComponent(
                             activity.showToast(R.string.teacher_turn_off_mic)
                         }
                     }
+
                     is RequestDeviceResponseReceived -> {
                         if (event.camera == false) {
                             activity.showToast(
@@ -227,15 +228,19 @@ class ToolComponent(
                             activity.showToast(activity.getString(R.string.refuse_turn_on_mic_format, event.username))
                         }
                     }
+
                     is RequestDeviceSent -> {
                         activity.showToast(R.string.teacher_send_request_device)
                     }
+
                     is RequestDeviceReceived -> {
                         handleRequestDevice(event)
                     }
+
                     RequestMuteAllSent -> {
                         activity.showToast(R.string.toast_mute_all_mic)
                     }
+
                     else -> {}
                 }
             }
@@ -526,21 +531,24 @@ class ToolComponent(
 
     private fun showInviteDialog() {
         val inviteInfo = viewModel.getInviteInfo() ?: return
-        val inviteTitle = activity.getString(R.string.invite_title_format, inviteInfo.username)
+
         val inviteLink = inviteInfo.link
-        val datetime = "${FlatFormatter.date(inviteInfo.beginTime)} ${
-            FlatFormatter.timeDuring(inviteInfo.beginTime, inviteInfo.endTime)
-        }"
+        val datetime = FlatFormatter.dateWithDuring(inviteInfo.beginTime, inviteInfo.endTime)
         val roomTitle = inviteInfo.roomTitle
         val roomUuid = inviteInfo.roomUuid
 
         val inviteText = activity.getString(
-            R.string.invite_text_format,
+            if (inviteInfo.isPmi) R.string.invite_pmi_text_format else R.string.invite_text_format,
             inviteInfo.username,
             roomTitle,
             roomUuid,
             datetime,
             inviteLink
+        )
+
+        val inviteTitle = activity.getString(
+            if (inviteInfo.isPmi) R.string.invite_pmi_title_format else R.string.invite_title_format,
+            inviteInfo.username
         )
 
         val dialog = InviteDialog().apply {

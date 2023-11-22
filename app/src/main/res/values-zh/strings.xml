@@ -266,6 +266,9 @@
     <string name="invite_text_format">%1$s 邀请你加入 Flat 房间\n\n房间主题：%2$s\n房间号：%3$s\n\n开始时间：%4$s\n加入链接：%5$s</string>
     <string name="invite_title_format">%1$s 邀请你加入 Flat 房间</string>
 
+    <string name="invite_pmi_text_format">%1$s 邀请你加入 Flat 个人房间\n\n房间主题：%2$s\n房间号：%3$s\n\n开始时间：%4$s\n加入链接：%5$s</string>
+    <string name="invite_pmi_title_format">%1$s 邀请你加入 Flat 个人房间</string>
+
     <string name="replay">回放</string>
     <string name="exit_replay">退出回放</string>
     <string name="exit_replay_tip">确定退出回放？</string>

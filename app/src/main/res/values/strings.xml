@@ -254,6 +254,8 @@
     <string name="copy_success">Copy successfully</string>
     <string name="invite_text_format">%1$s invites you to join the Flat room\n\nRoom Theme: %2$s\nRoom ID: %3$s\n\nStart Time: %4$s\nJoin Link: %5$s</string>
     <string name="invite_title_format">%1$s invites you to join the Flat room</string>
+    <string name="invite_pmi_text_format">%1$s invites you to join the Flat pmi room\n\nRoom Theme: %2$s\nRoom ID: %3$s\n\nStart Time: %4$s\nJoin Link: %5$s</string>
+    <string name="invite_pmi_title_format">%1$s invites you to join the Flat pmi room</string>
     <string name="replay">Replay</string>
     <string name="exit_replay">Exit playback</string>
     <string name="exit_replay_tip">Are you sure to exit playback?</string>
