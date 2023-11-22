@@ -16,7 +16,7 @@ class JoinRoomRecordManager @Inject constructor(@ApplicationContext context: Con
 
     fun addRecord(item: JoinRoomRecord) {
         val items = getRecordList().items
-        val updatedItems = items.filterNot { it == item }.toMutableList()
+        val updatedItems = items.filterNot { it.uuid == item.uuid }.toMutableList()
         updatedItems.add(0, item)
         store.edit().putString(KEY_JOIN_ROOM_RECORD, gson.toJson(JoinRoomRecordList(updatedItems.take(MAX_RECORD_SIZE)))).apply()
     }
@@ -36,6 +36,6 @@ class JoinRoomRecordManager @Inject constructor(@ApplicationContext context: Con
 
     companion object {
         private const val KEY_JOIN_ROOM_RECORD = "join_room_record_key"
-        private const val MAX_RECORD_SIZE = 5
+        private const val MAX_RECORD_SIZE = 10
     }
 }

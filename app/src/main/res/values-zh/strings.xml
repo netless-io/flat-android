@@ -90,9 +90,9 @@
     <string name="join_option">加入选项</string>
     <string name="turn_on_camera">开启摄像头</string>
     <string name="turn_on_mic">开启麦克风</string>
-    <string name="join_room_default_time_format">%1$s创建的房间</string>
+    <string name="join_room_default_time_format">%1$s 创建的房间</string>
     <string name="join_room_toast_empty">房间号不能为空</string>
-    <string name="join_room_record_pmi_title">%1$s的个人房间</string>
+    <string name="join_room_record_pmi_title">%1$s 的个人房间</string>
 
     <string name="home_room_list">房间列表</string>
     <string name="home_room_history">历史记录</string>
