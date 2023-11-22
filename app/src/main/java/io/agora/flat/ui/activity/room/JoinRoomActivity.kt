@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -364,17 +365,7 @@ private fun JoinRoomHistoryBottomSheet(
                         index = it
                         null
                     }) {
-                    val item = histories[it]
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FlatTextBodyTwo(item.title)
-                        Spacer(modifier = Modifier.weight(1f))
-                        FlatTextBodyTwo(item.uuid.toInviteCodeDisplay())
-                    }
+                    JoinRoomRecordLayout(histories[it])
                 }
 
                 TextButton(
@@ -388,6 +379,20 @@ private fun JoinRoomHistoryBottomSheet(
             }
         }
     ) {}
+}
+
+@Composable
+private fun JoinRoomRecordLayout(item: JoinRoomRecord) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FlatTextBodyTwo(item.title, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.width(8.dp))
+        FlatTextBodyTwo(item.uuid.toInviteCodeDisplay())
+    }
 }
 
 @Composable
@@ -411,5 +416,28 @@ private fun PagePreview() {
             { _, _, _ -> },
             {}
         )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+@Preview(widthDp = 400)
+private fun JoinRoomRecordLayoutPreview() {
+    FlatPage {
+        JoinRoomHistoryBottomSheet(
+            sheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Expanded,
+                skipHalfExpanded = true,
+            ),
+            histories = listOf(
+                JoinRoomRecord("AAA PMI Room, AAA PMI Room, AAA PMI Room, AAA PMI Room, AAA PMI Room", "11123333"),
+                JoinRoomRecord("AAA PMI Room", "1223333"),
+                JoinRoomRecord("AAA PMI Room dd", "11112223333"),
+            ),
+            onClearRecord = { },
+            onItemPicked = {}
+        ) {
+
+        }
     }
 }
