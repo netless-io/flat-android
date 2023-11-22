@@ -1,6 +1,8 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.common.android.I18NFetcher
+import io.agora.flat.data.AppEnv
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Result
 import io.agora.flat.data.RoomServiceFetcher
 import io.agora.flat.data.manager.JoinRoomRecordManager
@@ -32,6 +34,7 @@ class RoomRepository @Inject constructor(
     private val roomService: RoomService,
     private val roomServiceFetcher: RoomServiceFetcher,
     private val joinRoomRecordManager: JoinRoomRecordManager,
+    private val appKVCenter: AppKVCenter,
     private val i18NFetcher: I18NFetcher,
 ) {
     private fun fetchService(uuid: String): RoomService {
@@ -54,6 +57,7 @@ class RoomRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             fetchService(roomUUID).getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID)).toResult().also {
                 it.get()?.roomInfo?.run {
+                    if (ownerUUID == appKVCenter.getUserInfo()?.uuid) return@run
                     val title = if (isPmi == true) {
                         i18NFetcher.getString(I18NFetcher.JOIN_ROOM_RECORD_PMI_TITLE, ownerUserName)
                     } else {

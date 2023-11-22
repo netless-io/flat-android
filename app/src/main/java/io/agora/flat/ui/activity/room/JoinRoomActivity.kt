@@ -261,12 +261,15 @@ private fun JoinRoomContent(
                     .padding(horizontal = 16.dp)
                     .focusRequester(focusRequester),
                 placeholderValue = stringResource(R.string.input_room_id_hint),
-                onExtendButtonClick = {
-                    if (viewState.records.isEmpty()) return@JoinRoomTextField
-                    focusManager.clearFocus()
-                    scope.launch {
-                        sheetState.show()
+                onExtendButtonClick = if (viewState.records.isNotEmpty()) {
+                    {
+                        focusManager.clearFocus()
+                        scope.launch {
+                            sheetState.show()
+                        }
                     }
+                } else {
+                    null
                 }
             )
             Spacer(Modifier.height(32.dp))

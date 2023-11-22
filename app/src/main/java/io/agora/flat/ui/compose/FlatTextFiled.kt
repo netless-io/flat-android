@@ -159,7 +159,7 @@ fun JoinRoomTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholderValue: String,
-    onExtendButtonClick: () -> Unit = {}
+    onExtendButtonClick: (() -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val dividerColor = if (isFocused) MaterialTheme.colors.primary else FlatTheme.colors.divider
@@ -204,8 +204,10 @@ fun JoinRoomTextField(
                     }
                 }
 
-                IconButton(onClick = onExtendButtonClick) {
-                    Icon(painterResource(id = R.drawable.ic_record_arrow_down), "", tint = FlatTheme.colors.textPrimary)
+                if (onExtendButtonClick != null) {
+                    IconButton(onClick = onExtendButtonClick) {
+                        Icon(painterResource(id = R.drawable.ic_record_arrow_down), "", tint = FlatTheme.colors.textPrimary)
+                    }
                 }
             }
         }
