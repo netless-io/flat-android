@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -114,7 +115,9 @@ fun CameraPreviewCard(
 
     Card(modifier = modifier) {
         if (cameraOn) {
-            SimpleCameraPreview(Modifier.fillMaxSize())
+            if (!LocalInspectionMode.current) {
+                SimpleCameraPreview(Modifier.fillMaxSize())
+            }
         } else {
             Box(
                 modifier = Modifier
