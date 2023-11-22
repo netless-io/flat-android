@@ -528,7 +528,7 @@ private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onC
     val inviteLink = "${roomInfo.baseInviteUrl}/join/$linkCode"
 
     val inviteText = stringResource(
-        R.string.invite_text_format,
+        if (roomInfo.isPmi) R.string.invite_pmi_text_format else R.string.invite_text_format,
         roomInfo.username,
         roomInfo.title,
         datetime,
@@ -536,10 +536,15 @@ private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onC
         inviteLink
     )
 
+    val inviteTitle = stringResource(
+        if (roomInfo.isPmi) R.string.invite_pmi_title_format else R.string.invite_title_format,
+        roomInfo.username
+    )
+
     Dialog(onDismissRequest) {
         Surface(shape = Shapes.large) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                Text(stringResource(R.string.invite_title_format, roomInfo.username))
+                Text(inviteTitle)
                 FlatLargeVerticalSpacer()
                 Row {
                     Text(stringResource(R.string.room_theme))

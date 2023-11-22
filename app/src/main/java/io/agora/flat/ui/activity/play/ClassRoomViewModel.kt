@@ -669,6 +669,7 @@ class ClassRoomViewModel @Inject constructor(
             roomUuid = state.inviteCode.toInviteCodeDisplay(),
             beginTime = state.beginTime,
             endTime = state.endTime,
+            isPmi = state.isPmi,
         )
     }
 
