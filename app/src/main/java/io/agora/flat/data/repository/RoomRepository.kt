@@ -58,6 +58,8 @@ class RoomRepository @Inject constructor(
             fetchService(roomUUID).getOrdinaryRoomInfo(RoomDetailOrdinaryReq(roomUUID = roomUUID)).toResult().also {
                 it.get()?.roomInfo?.run {
                     if (ownerUUID == appKVCenter.getUserInfo()?.uuid) return@run
+                    // treat 32 length or longer string as long uuid
+                    if (inviteCode.length >= 32) return@run
                     val title = if (isPmi == true) {
                         i18NFetcher.getString(I18NFetcher.JOIN_ROOM_RECORD_PMI_TITLE, ownerUserName)
                     } else {
