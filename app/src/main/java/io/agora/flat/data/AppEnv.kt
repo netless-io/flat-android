@@ -51,9 +51,9 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
         envMap[ENV_CN_PROD] = EnvItem(
             agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
-            serviceUrl = "https://flat-api.whiteboard.agora.io",
+            serviceUrl = "https://api.flat.shengwang.cn",
             githubClientId = "71a29285a437998bdfe0",
-            baseInviteUrl = "https://flat-web.whiteboard.agora.io",
+            baseInviteUrl = "https://web.flat.shengwang.cn",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/checkVersion.json",
             logConfig = LogConfig(
                 ak = BuildConfig.ALIYUN_LOG_PROD_AK,
