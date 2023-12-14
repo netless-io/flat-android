@@ -10,7 +10,7 @@
 
 <div align="center">
     <h1>Agora Flat Android</h1>
-    <p>Project Flat Android is the Android client of <a href="https://flat.whiteboard.agora.io/en/">Agora Flat</a> open source classroom.</p>
+    <p>Project Flat Android is the Android client of <a href="https://www.flat.shengwang.cn/en/">Agora Flat</a> open source classroom.</p>
     <img src="art/flat-showcase.png">
     <p><a href="./README-zh.md">中文</a></p>
 </div>
@@ -88,9 +88,9 @@ usage. Please head
 to [agora-flexible-classroom](https://www.agora.io/en/products/flexible-classroom) for such
 requirements.
 
-[flat-homepage]: https://flat.whiteboard.agora.io/en/#download
+[flat-homepage]: https://www.flat.shengwang.cn/en/#download
 
-[flat-web]: https://flat-web.whiteboard.agora.io/
+[flat-web]: https://web.flat.shengwang.cn/
 
 [flat-server]: https://github.com/netless-io/flat-server
 

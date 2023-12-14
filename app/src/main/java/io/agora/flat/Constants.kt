@@ -8,11 +8,11 @@ class Constants {
     }
 
     object URL {
-        const val Service = "https://flat.whiteboard.agora.io/service.html"
+        const val Service = "https://www.flat.shengwang.cn/service.html"
 
-        const val Privacy = "https://flat.whiteboard.agora.io/privacy.html"
+        const val Privacy = "https://www.flat.shengwang.cn/privacy.html"
 
-        const val Libraries = "https://flat.whiteboard.agora.io/privacy-extra/libraries.html"
+        const val Libraries = "https://www.flat.shengwang.cn/privacy-extra/libraries.html"
     }
 
     object IntentKey {
