@@ -1,6 +1,7 @@
 package io.agora.flat.ui.compose
 
 import android.Manifest
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
@@ -57,32 +58,21 @@ fun LifecycleHandler(
 }
 
 @Composable
-fun launcherPickContent(
+fun launcherPickContent( 
     onPickContent: (ContentInfo) -> Unit,
 ): (String) -> Unit {
     val context = LocalContext.current
-    var hasPermission by remember {
-        mutableStateOf(context.hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE))
-    }
+
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.also {
             val info = context.contentInfo(it) ?: return@rememberLauncherForActivityResult
             onPickContent(info)
         }
     }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
-            hasPermission = true
-        } else {
-            context.showToast("Permission Not Granted")
-        }
-    }
+
     val launcherCheckPermission: (String) -> Unit = {
-        if (hasPermission) {
-            launcher.launch(it)
-        } else {
-            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
+        launcher.launch(it)
     }
+
     return launcherCheckPermission
 }
