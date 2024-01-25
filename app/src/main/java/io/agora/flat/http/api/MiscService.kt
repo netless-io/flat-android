@@ -31,4 +31,9 @@ interface MiscService {
     fun censorRtm(
         @Body req: RtmCensorReq,
     ): Call<BaseResp<RtmCensorRespData>>
+
+    @POST("v2/region/configs")
+    fun getRegionConfigs(
+        @Body req: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<RegionConfigs>>
 }

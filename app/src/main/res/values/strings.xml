@@ -98,6 +98,7 @@
     <string name="home_room_state_end">Ended</string>
     <string name="home_no_room_tip">No rooms available</string>
     <string name="home_no_history_room_tip">No records</string>
+    <string name="home_room_start_at_min">%1$d minutes until start</string>
     <string name="setting_check_update">Check for updates</string>
     <string name="intent_no_browser">Link error or no browser</string>
     <string name="intent_browser_choose_title">Choose Browser</string>
@@ -380,4 +381,11 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_send_verification_code">send code fail</string>
     <string name="error_pmi_not_started">wait for the teacher to join</string>
 
+    <!-- payment -->
+    <string name="pay_room_reached_limit">Free room creation limit reached this month. Upgrade for more benefits.</string>
+    <string name="pay_room_users_limit">Free room capacity reached. Unable to join at the moment. Please contact the teacher for assistance.</string>
+    <string name="pay_room_expired">Room has ended.</string>
+    <string name="pay_room_not_started">Room not started. Join in %1$d minutes before the class begins.</string>
+    <string name="pay_room_not_started_join">Room not started. Join in %1$d minutes before the class begins. The room has been added to your room list.</string>
+    <string name="pay_time_limit_tip">You have joined a free room for %1$d minutes.</string>
 </resources>

@@ -27,6 +27,15 @@ class FlatErrorCode {
         const val RoomExists = 200006 // (pmi) room already exists, cannot create new room
         const val RoomNotFoundAndIsPmi = 200007 // room not found and the invite code is pmi
 
+        const val BadRequest = 210000  // bad request
+        const val JWTVerifyFailed = 210001  // jwt verify failed
+        const val RoomLimit = 210002  // join room reach max user limit
+        const val RoomExpired = 210003  // room expired
+        const val RoomNotBegin = 210004  // join room before begin_time
+
+        const val InternalError = 220000 // unknown error
+        const val ForwardFailed = 220001 // forward failed
+
         const val PeriodicNotFound = 300000 // room not found
         const val PeriodicIsEnded = 300001 // room has been ended
         const val PeriodicSubRoomHasRunning = 300002 // periodic sub room has running

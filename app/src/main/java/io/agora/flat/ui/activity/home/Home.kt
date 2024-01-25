@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,6 +47,7 @@ fun HomeScreen(
         onOpenRoomCreate = onOpenRoomCreate,
         onOpenRoomJoin = onOpenRoomJoin,
         onOpenRoomDetail = onOpenRoomDetail,
+        onOpenRoom = { roomUUID, periodicUUID -> Navigator.launchRoomPlayActivity(context, roomUUID, periodicUUID) },
         onOpenSetting = onOpenSetting,
         onOpenHistory = onOpenHistory,
         onReloadRooms = viewModel::reloadRooms,
@@ -61,6 +61,7 @@ private fun HomeScreen(
     onOpenRoomCreate: () -> Unit,
     onOpenRoomJoin: () -> Unit,
     onOpenRoomDetail: (roomUUID: String, periodicUUID: String?) -> Unit,
+    onOpenRoom: (roomUUID: String, periodicUUID: String?) -> Unit,
     onOpenSetting: () -> Unit,
     onOpenHistory: () -> Unit,
     onReloadRooms: () -> Unit,
@@ -78,7 +79,12 @@ private fun HomeScreen(
         TopOperations(onOpenRoomCreate = onOpenRoomCreate, onOpenRoomJoin = onOpenRoomJoin)
         // 房间列表区
         FlatSwipeRefresh(refreshing = viewState.refreshing, onRefresh = onReloadRooms) {
-            HomeRoomList(Modifier.fillMaxSize(), viewState.roomList, onGotoRoomDetail = onOpenRoomDetail)
+            HomeRoomList(
+                Modifier.fillMaxSize(),
+                viewState.roomList,
+                onGotoRoomDetail = onOpenRoomDetail,
+                onOpenRoom = onOpenRoom
+            )
         }
     }
 }
@@ -167,6 +173,7 @@ private fun HomeRoomList(
     modifier: Modifier,
     roomList: List<RoomInfo>,
     onGotoRoomDetail: (String, String?) -> Unit,
+    onOpenRoom: (String, String?) -> Unit,
 ) {
     val imgRes = if (isDarkTheme()) R.drawable.img_room_list_empty_dark else R.drawable.img_room_list_empty_light
 
@@ -181,9 +188,11 @@ private fun HomeRoomList(
             items(count = roomList.size, key = { index: Int ->
                 roomList[index].roomUUID
             }) {
-                RoomItem(roomList[it], Modifier.clickable {
-                    onGotoRoomDetail(roomList[it].roomUUID, roomList[it].periodicUUID)
-                })
+                RoomItem(
+                    roomInfo = roomList[it],
+                    onItemClick = { onGotoRoomDetail(roomList[it].roomUUID, roomList[it].periodicUUID) },
+                    onStartClick = { onOpenRoom(roomList[it].roomUUID, roomList[it].periodicUUID) },
+                )
             }
             item {
                 Box(
@@ -206,6 +215,16 @@ fun HomePreview() {
         networkActive = false
     )
     FlatPage {
-        HomeScreen(viewState, {}, {}, { _, _ -> }, {}, {}, {}, {})
+        HomeScreen(
+            viewState = viewState,
+            onOpenRoomCreate = {},
+            onOpenRoomJoin = {},
+            onOpenRoomDetail = { _, _ -> },
+            onOpenRoom = { _, _ -> },
+            onOpenSetting = {},
+            onOpenHistory = {},
+            onReloadRooms = {},
+            onSetNetwork = {}
+        )
     }
 }

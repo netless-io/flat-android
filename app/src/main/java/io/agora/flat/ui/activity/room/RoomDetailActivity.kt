@@ -514,14 +514,6 @@ private fun Operations(
 }
 
 @Composable
-private fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
-    if (isOwner && roomStatus == RoomStatus.Idle) {
-        stringResource(id = R.string.start)
-    } else {
-        stringResource(R.string.enter)
-    }
-
-@Composable
 private fun InviteDialog(roomInfo: UIRoomInfo, onDismissRequest: () -> Unit, onCopy: (String) -> Unit) {
     val datetime = FlatFormatter.dateWithDuring(roomInfo.beginTime, roomInfo.endTime)
     val linkCode = if (roomInfo.isPmi) roomInfo.inviteCode else roomInfo.roomUUID
