@@ -12,7 +12,7 @@ interface UserService {
     @POST("v1/login")
     fun loginCheck(
         @Body req: LoginCheckReq = LoginCheckReq(),
-    ): Call<BaseResp<UserInfo>>
+    ): Call<BaseResp<UserInfoWithToken>>
 
     @POST("v1/login/set-auth-uuid")
     fun loginSetAuthUUID(

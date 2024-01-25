@@ -53,7 +53,7 @@ class UserRepository @Inject constructor(
         }
         return when (result) {
             is Success -> {
-                appKVCenter.setUserInfo(result.data)
+                updateUserAndToken(result)
                 appKVCenter.updateSessionId(UUID.randomUUID().toString())
                 logger.setUserId(result.data.uuid)
                 Success(true)
@@ -103,8 +103,7 @@ class UserRepository @Inject constructor(
         }
         return when (result) {
             is Success -> {
-                appKVCenter.setToken(result.data.token)
-                appKVCenter.setUserInfo(result.data.toUserInfo())
+                updateUserAndToken(result)
                 Success(true)
             }
 
@@ -117,8 +116,7 @@ class UserRepository @Inject constructor(
             repeat(times) {
                 val result = userService.loginProcess(AuthUUIDReq(authUUID)).toResult()
                 if (result is Success && result.data.token.isNotBlank()) {
-                    appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    updateUserAndToken(result)
                     return@withContext Success(true)
                 }
                 delay(2000)
@@ -147,17 +145,16 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun loginWithPhone(phone: String, code: String): Result<Boolean> {
-        val callResult = withContext(Dispatchers.IO) {
+        val result = withContext(Dispatchers.IO) {
             userService.loginWithPhone(PhoneSmsCodeReq(phone = phone, code = code)).toResult()
         }
-        return when (callResult) {
+        return when (result) {
             is Success -> {
-                appKVCenter.setToken(callResult.data.token)
-                appKVCenter.setUserInfo(callResult.data.toUserInfo())
+                updateUserAndToken(result)
                 Success(true)
             }
 
-            is Failure -> Failure(callResult.exception)
+            is Failure -> Failure(result.exception)
         }
     }
 
@@ -344,8 +341,7 @@ class UserRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             when (val result = userService.registerWithPhone(PhoneRegisterReq(phone, code, password)).toResult()) {
                 is Success -> {
-                    appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    updateUserAndToken(result)
                     appKVCenter.addLoginHistoryItem(LoginHistoryItem(phone, password))
                     Success(true)
                 }
@@ -372,8 +368,7 @@ class UserRepository @Inject constructor(
                 )
             ).toResult()) {
                 is Success -> {
-                    appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    updateUserAndToken(result)
                     appKVCenter.addLoginHistoryItem(LoginHistoryItem(email, password))
                     Success(true)
                 }
@@ -388,8 +383,7 @@ class UserRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             when (val result = userService.loginWithPhonePassword(PhonePasswordReq(phone, password)).toResult()) {
                 is Success -> {
-                    appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    updateUserAndToken(result)
                     appKVCenter.addLoginHistoryItem(LoginHistoryItem(phone, password))
                     Success(true)
                 }
@@ -403,8 +397,7 @@ class UserRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             when (val result = userService.loginWithEmailPassword(EmailPasswordReq(email, password)).toResult()) {
                 is Success -> {
-                    appKVCenter.setToken(result.data.token)
-                    appKVCenter.setUserInfo(result.data.toUserInfo())
+                    updateUserAndToken(result)
                     appKVCenter.addLoginHistoryItem(LoginHistoryItem(email, password))
                     Success(true)
                 }
@@ -412,6 +405,11 @@ class UserRepository @Inject constructor(
                 is Failure -> Failure(result.exception)
             }
         }
+    }
+
+    private fun updateUserAndToken(result: Success<UserInfoWithToken>) {
+        appKVCenter.setToken(result.data.token)
+        appKVCenter.setUserInfo(result.data.toUserInfo())
     }
 
     suspend fun requestResetEmailCode(email: String): Result<RespNoData> {
