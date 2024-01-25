@@ -1,5 +1,6 @@
 package io.agora.flat.data.repository
 
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Result
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class MiscRepository @Inject constructor(
     private val miscService: MiscService,
+    private val appKVCenter: AppKVCenter,
 ) {
     suspend fun generateRtcToken(roomUUID: String): Result<PureToken> {
         return withContext(Dispatchers.IO) {
@@ -31,6 +33,16 @@ class MiscRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             val result = miscService.censorRtm(RtmCensorReq(text)).toResult()
             return@withContext result.get()?.valid == true
+        }
+    }
+
+    suspend fun getRegionConfigs() {
+        return withContext(Dispatchers.IO) {
+            val result = miscService.getRegionConfigs().toResult()
+            result.get()?.let {
+                val joinEarly = it.server?.joinEarly ?: 10
+                appKVCenter.setJoinEarly(joinEarly)
+            }
         }
     }
 }

@@ -158,6 +158,16 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         }.apply()
     }
 
+    fun getJoinEarly(): Int {
+        return store.getInt(KEY_SERVER_JOIN_EARLY, 5)
+    }
+
+    fun setJoinEarly(joinEarly: Int) {
+        store.edit().apply {
+            putInt(KEY_SERVER_JOIN_EARLY, joinEarly)
+        }.apply()
+    }
+
     companion object {
         const val KEY_LOGIN_TOKEN = "key_login_token"
 
@@ -178,6 +188,8 @@ class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_DEVICE_STATE = "key_device_state"
 
         const val KEY_LOGIN_HISTORY = "key_login_history"
+
+        const val KEY_SERVER_JOIN_EARLY = "key_server_join_early"
     }
 
     class MockData {

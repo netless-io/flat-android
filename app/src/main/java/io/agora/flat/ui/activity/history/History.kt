@@ -81,14 +81,12 @@ private fun HistoryList(modifier: Modifier, histories: List<RoomInfo>, onOpenRoo
             ) {
                 RoomItem(
                     histories[it],
-                    Modifier.clickable(
-                        onClick = {
-                            onOpenRoomDetail(
-                                histories[it].roomUUID,
-                                histories[it].periodicUUID
-                            )
-                        },
-                    )
+                    onItemClick = {
+                        onOpenRoomDetail(
+                            histories[it].roomUUID,
+                            histories[it].periodicUUID
+                        )
+                    },
                 )
             }
             item {

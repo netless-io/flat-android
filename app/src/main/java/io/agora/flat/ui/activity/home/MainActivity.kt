@@ -33,6 +33,7 @@ import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
 import io.agora.flat.common.rtc.AgoraRtc
+import io.agora.flat.data.AppKVCenter
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.activity.cloud.list.CloudScreen
@@ -53,6 +54,9 @@ class MainActivity : BaseComposeActivity() {
     @Inject
     lateinit var rtcApi: RtcApi
 
+    @Inject
+    lateinit var appKVCenter: AppKVCenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,7 +67,10 @@ class MainActivity : BaseComposeActivity() {
             val replayInfo by viewModel.replayInfo.collectAsState()
 
             if (viewState.protocolAgreed) {
-                CompositionLocalProvider(LocalAgoraRtc provides rtcApi as? AgoraRtc) {
+                CompositionLocalProvider(
+                    LocalAgoraRtc provides rtcApi as? AgoraRtc,
+                    LocalAppKVCenter provides appKVCenter
+                ) {
                     MainScreen(viewState)
                 }
                 LifecycleHandler(

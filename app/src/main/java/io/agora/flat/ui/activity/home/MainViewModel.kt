@@ -13,6 +13,7 @@ import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
 import io.agora.flat.data.model.RoomConfig
 import io.agora.flat.data.model.RoomPlayInfo
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.RoomConfigRepository
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
@@ -26,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val miscRepository: MiscRepository,
     private val userRepository: UserRepository,
     private val roomRepository: RoomRepository,
     private val roomConfigRepository: RoomConfigRepository,
@@ -62,6 +64,10 @@ class MainViewModel @Inject constructor(
             uiMessageManager.message.collect {
                 _state.value = _state.value.copy(message = it)
             }
+        }
+
+        viewModelScope.launch {
+            miscRepository.getRegionConfigs()
         }
     }
 
