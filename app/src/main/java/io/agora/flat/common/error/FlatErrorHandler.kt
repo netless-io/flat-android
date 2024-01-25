@@ -30,6 +30,7 @@ object FlatErrorHandler {
             FlatErrorCode.Web.RoomNotFoundAndIsPmi -> context.getString(R.string.error_pmi_not_started)
 
             FlatErrorCode.Web.SMSVerificationCodeInvalid -> context.getString(R.string.login_verification_code_invalid)
+            FlatErrorCode.Web.JWTSignFailed -> context.getString(R.string.error_jwt_sign_failed)
             FlatErrorCode.Web.ExhaustiveAttack -> context.getString(R.string.error_request_too_frequently)
 
             FlatErrorCode.Web.UserNotFound -> context.getString(R.string.error_user_not_found)
