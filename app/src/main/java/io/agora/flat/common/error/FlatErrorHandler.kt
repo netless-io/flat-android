@@ -49,6 +49,10 @@ object FlatErrorHandler {
             FlatErrorCode.Web.EmailAlreadyBinding -> context.getString(R.string.error_email_already_binding)
             FlatErrorCode.Web.EmailFailedToSendCode -> context.getString(R.string.error_email_failed_to_send_code)
 
+            FlatErrorCode.Web.RoomLimit -> context.getString(R.string.pay_room_users_limit)
+            FlatErrorCode.Web.RoomExpired -> context.getString(R.string.pay_room_expired)
+            FlatErrorCode.Web.RoomCreateLimit -> context.getString(R.string.pay_room_reached_limit)
+
             else -> context.getString(R.string.error_string_network, "${error.code}")
         }
     }

@@ -22,6 +22,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         const val ENV_SG_DEV = "sg_dev"
 
         const val STORE_KEY_ENV = "key_env"
+
+        const val DEFAULT_JOIN_EARLY_MINUTES = 10
     }
 
     val envMap = mutableMapOf<String, EnvItem>()

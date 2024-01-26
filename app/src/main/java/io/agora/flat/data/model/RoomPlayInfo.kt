@@ -28,7 +28,17 @@ data class RoomPlayInfo(
     val rtmToken: String,
 
     val region: String,
+
+    val billing: Billing? = null,
 ) : Parcelable
 
 @Parcelize
 data class RtcShareScreen(val uid: Int, val token: String) : Parcelable
+
+@Parcelize
+data class Billing(
+    val expireAt: String,
+    val maxUser: Int,
+    // 0 = normal, 1 = pro
+    val vipLevel: Int
+) : Parcelable

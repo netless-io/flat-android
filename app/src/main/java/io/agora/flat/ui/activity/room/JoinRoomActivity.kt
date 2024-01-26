@@ -2,7 +2,16 @@ package io.agora.flat.ui.activity.room
 
 import android.Manifest
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -14,7 +23,14 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +49,25 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.agora.flat.R
+import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.model.JoinRoomRecord
-import io.agora.flat.ui.compose.*
+import io.agora.flat.ui.compose.CameraPreviewCard
+import io.agora.flat.ui.compose.CloseTopAppBar
+import io.agora.flat.ui.compose.DeviceOptions
+import io.agora.flat.ui.compose.FlatDivider
+import io.agora.flat.ui.compose.FlatPage
+import io.agora.flat.ui.compose.FlatPrimaryTextButton
+import io.agora.flat.ui.compose.FlatSmallPrimaryTextButton
+import io.agora.flat.ui.compose.FlatTextBodyOne
+import io.agora.flat.ui.compose.FlatTextBodyTwo
+import io.agora.flat.ui.compose.FlatTextTitle
+import io.agora.flat.ui.compose.JoinRoomTextField
+import io.agora.flat.ui.compose.WheelPicker
+import io.agora.flat.ui.compose.noRippleClickable
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.theme.isTabletMode
@@ -58,6 +89,13 @@ fun JoinRoomScreen(
 
     ShowUiMessageEffect(
         uiMessage = viewState.message,
+        errorStr = { error ->
+            if (error is FlatNetException && error.code == FlatErrorCode.Web.RoomNotBegin) {
+                context.getString(R.string.pay_room_not_started_join, viewState.joinEarly)
+            } else {
+                FlatErrorHandler.getErrorStr(context, error)
+            }
+        },
         onMessageShown = viewModel::clearMessage
     )
 

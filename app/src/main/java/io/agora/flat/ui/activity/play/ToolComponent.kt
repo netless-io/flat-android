@@ -241,6 +241,12 @@ class ToolComponent(
                         activity.showToast(R.string.toast_mute_all_mic)
                     }
 
+                    is ExpirationEvent -> {
+                        val expiration = FlatFormatter.timeHM(event.expireAt);
+                        val minutes = event.leftMinutes;
+                        activity.showToast(activity.getString(R.string.pay_room_about_to_end, expiration, minutes))
+                    }
+
                     else -> {}
                 }
             }
