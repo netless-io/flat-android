@@ -388,4 +388,5 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="pay_room_not_started">Room not started. Join in %1$d minutes before the class begins.</string>
     <string name="pay_room_not_started_join">Room not started. Join in %1$d minutes before the class begins. The room has been added to your room list.</string>
     <string name="pay_time_limit_tip">You have joined a free room for %1$d minutes.</string>
+    <string name="pay_room_about_to_end">The room is about to reach duration limit and will end at %1$s (%2$d minutes left)</string>
 </resources>

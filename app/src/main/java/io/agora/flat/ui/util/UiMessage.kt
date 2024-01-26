@@ -80,18 +80,20 @@ class UiMessageManager {
 @Composable
 fun ShowUiMessageEffect(
     uiMessage: UiMessage?,
-    onMessageShown: (Long) -> Unit
+    errorStr: (Throwable?) -> String? = { null },
+    onMessageShown: (Long) -> Unit = {}
 ) {
     val context = LocalContext.current
     uiMessage?.let { message ->
         LaunchedEffect(message) {
-            context.showToast(
-                FlatErrorHandler.getErrorStr(
+            val errorMessage = errorStr(message.exception)
+                ?: FlatErrorHandler.getErrorStr(
                     context = context,
                     error = message.exception,
                     defaultValue = message.text
                 )
-            )
+
+            context.showToast(errorMessage)
             onMessageShown(message.id)
         }
     }

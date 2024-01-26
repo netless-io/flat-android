@@ -77,10 +77,13 @@ class AgoraRtm @Inject constructor(
             super.onMessageReceived(message, member)
 
             when (message.messageType) {
-                // chat message
                 RtmMessageType.TEXT -> {
                     rtmListeners.forEach {
-                        it.onChatMessage(ChatMessage(message.text, member.userId))
+                        if (member.userId == "flat-server") {
+                            it.onClassEvent(ClassRtmEvent.parseSys(message.text, member.userId))
+                        } else {
+                            it.onChatMessage(ChatMessage(message.text, member.userId))
+                        }
                     }
                 }
                 // command

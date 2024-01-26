@@ -9,7 +9,7 @@ data class RequestDeviceSent(
     val camera: Boolean? = null
 ) : ClassroomEvent()
 
-object RequestMuteAllSent :ClassroomEvent()
+object RequestMuteAllSent : ClassroomEvent()
 
 data class RequestDeviceReceived(
     val mic: Boolean? = null,
@@ -34,3 +34,9 @@ data class RewardReceived(
 object RemoteLoginEvent : ClassroomEvent()
 
 data class TakePhotoEvent(val info: ContentInfo) : ClassroomEvent()
+
+data class ExpirationEvent(
+    val roomLevel: Int,
+    val expireAt: Long,
+    val leftMinutes: Int,
+) : ClassroomEvent()

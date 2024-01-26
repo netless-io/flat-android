@@ -351,6 +351,14 @@ class ClassRoomViewModel @Inject constructor(
                 eventbus.produceEvent(RemoteLoginEvent)
             }
 
+            is ExpirationWarningEvent -> {
+                eventbus.produceEvent(ExpirationEvent(
+                    roomLevel = event.roomLevel,
+                    expireAt = event.expireAt,
+                    leftMinutes = event.leftMinutes,
+                ))
+            }
+
             else -> {
                 logger.w("[RTM] event not handled: $event")
             }

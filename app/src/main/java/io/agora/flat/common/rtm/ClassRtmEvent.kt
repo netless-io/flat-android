@@ -43,6 +43,20 @@ sealed class ClassRtmEvent {
             return UnknownEvent()
         }
 
+        /**
+         * parse service event
+         */
+        fun parseSys(message: String, sender: String? = null): ClassRtmEvent {
+            try {
+                val event = ExpirationWarningEvent.parse(message)
+                if (event != null) {
+                    return event
+                }
+            } catch (_: Exception) {
+            }
+            return UnknownEvent()
+        }
+
         fun toText(event: ClassRtmEvent): String {
             val element = gson.toJsonTree(event)
             if (event is EventWithSender) {
@@ -140,3 +154,26 @@ data class ChatMessage(
 data class UnknownEvent(
     val id: Long = UUID.randomUUID().mostSignificantBits,
 ) : ClassRtmEvent()
+
+// from service
+data class ExpirationWarningEvent(
+    val roomLevel: Int,
+    val expireAt: Long,
+    val leftMinutes: Int,
+    val message: String,
+) : ClassRtmEvent() {
+    companion object {
+        fun parse(message: String): ExpirationWarningEvent? {
+            try {
+                val obj = gson.fromJson(message, JsonObject::class.java)
+                val roomLevel = obj.get("roomLevel").asInt
+                val expireAt = obj.get("expireAt").asLong
+                val leftMinutes = obj.get("leftMinutes").asInt
+                val message = obj.get("message").asString
+                return ExpirationWarningEvent(roomLevel, expireAt, leftMinutes, message)
+            } catch (_: Exception) {
+            }
+            return null
+        }
+    }
+}

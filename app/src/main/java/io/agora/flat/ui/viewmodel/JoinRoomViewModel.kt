@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.board.DeviceState
+import io.agora.flat.data.AppEnv.Companion.DEFAULT_JOIN_EARLY_MINUTES
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Failure
 import io.agora.flat.data.Success
@@ -30,7 +31,8 @@ class JoinRoomViewModel @Inject constructor(
 
     private var _state = MutableStateFlow(
         JoinRoomUiState.by(
-            deviceState = appKVCenter.getDeviceStatePreference(),
+            appKVCenter.getDeviceStatePreference(),
+            joinEarly = appKVCenter.getJoinEarly(),
             avatar = userRepository.getUserInfo()?.avatar,
             records = joinRoomRecordManager.getRecordList().items
         )
@@ -77,16 +79,18 @@ data class JoinRoomUiState(
     val roomPlayInfo: RoomPlayInfo? = null,
     val avatar: String? = null,
     val deviceState: DeviceState,
+    val joinEarly: Int,
     val message: UiMessage? = null,
     val records: List<JoinRoomRecord>,
 ) {
     companion object {
         fun by(
             deviceState: DeviceState,
+            joinEarly: Int = DEFAULT_JOIN_EARLY_MINUTES,
             avatar: String? = null,
-            records: List<JoinRoomRecord> = listOf()
+            records: List<JoinRoomRecord> = listOf(),
         ): JoinRoomUiState {
-            return JoinRoomUiState(deviceState = deviceState, avatar = avatar, records = records)
+            return JoinRoomUiState(deviceState = deviceState, avatar = avatar, records = records, joinEarly = joinEarly)
         }
     }
 }
