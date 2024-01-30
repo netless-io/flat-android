@@ -88,6 +88,7 @@
     <string name="turn_on_mic">Turn on microphone</string>
     <string name="join_room_default_time_format">Room created by %1$s</string>
     <string name="join_room_record_pmi_title">%1$s\'s personal room</string>
+    <string name="room_not_stared">room not started</string>
 
     <string name="home_room_list">Room</string>
     <string name="home_room_history">History</string>
