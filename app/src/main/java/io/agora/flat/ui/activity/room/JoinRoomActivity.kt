@@ -88,7 +88,7 @@ fun JoinRoomScreen(
     val viewState by viewModel.state.collectAsState()
     val context = LocalContext.current
 
-    MessageHandler(viewState.message, viewState.joinEarly, viewModel::clearMessage)
+    MessageHandler(viewState.message, viewState.joinEarly, viewModel::clearMessage, viewModel::notifyRoomUpdated)
 
     viewState.roomPlayInfo?.let { roomPlayInfo ->
         LaunchedEffect(roomPlayInfo) {
@@ -106,14 +106,22 @@ fun JoinRoomScreen(
 }
 
 @Composable
-fun MessageHandler(message: UiMessage?, joinEarly: Int, onClearMessage: (Long) -> Unit = {}) {
+private fun MessageHandler(
+    message: UiMessage?,
+    joinEarly: Int,
+    onClearMessage: (Long) -> Unit = {},
+    onRoomUpdated: () -> Unit
+) {
     val context = LocalContext.current
 
     if (message?.exception is FlatNetException && message.exception.code == FlatErrorCode.Web.RoomNotBegin) {
         FlatBaseDialog(
             title = context.getString(R.string.room_not_stared),
             message = context.getString(R.string.pay_room_not_started_join, joinEarly),
-            onConfirm = { onClearMessage(message.id) }
+            onConfirm = {
+                onClearMessage(message.id)
+                onRoomUpdated()
+            }
         )
     } else {
         ShowUiMessageEffect(

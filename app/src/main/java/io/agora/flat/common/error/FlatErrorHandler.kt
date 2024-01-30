@@ -2,7 +2,12 @@ package io.agora.flat.common.error
 
 import android.content.Context
 import io.agora.flat.R
-import io.agora.flat.common.*
+import io.agora.flat.common.FlatErrorCode
+import io.agora.flat.common.FlatException
+import io.agora.flat.common.FlatNetException
+import io.agora.flat.common.FlatRtcException
+import io.agora.flat.common.FlatRtmException
+import io.agora.flat.di.GlobalInstanceProvider
 
 object FlatErrorHandler {
     fun getErrorStr(context: Context, error: Throwable?, defaultValue: String = "Unhandled exceptions"): String {
@@ -22,6 +27,8 @@ object FlatErrorHandler {
     }
 
     private fun getNetErrorString(context: Context, error: FlatNetException): String {
+        val appKVCenter = GlobalInstanceProvider.getAppKvCenter()
+
         return when (error.code) {
             FlatErrorCode.Web.ParamsCheckFailed -> context.getString(R.string.error_params_check_failed)
 
@@ -51,6 +58,11 @@ object FlatErrorHandler {
 
             FlatErrorCode.Web.RoomLimit -> context.getString(R.string.pay_room_users_limit)
             FlatErrorCode.Web.RoomExpired -> context.getString(R.string.pay_room_expired)
+            FlatErrorCode.Web.RoomNotBegin -> context.getString(
+                R.string.pay_room_not_started,
+                appKVCenter.getJoinEarly()
+            )
+
             FlatErrorCode.Web.RoomCreateLimit -> context.getString(R.string.pay_room_reached_limit)
 
             else -> context.getString(R.string.error_string_network, "${error.code}")
