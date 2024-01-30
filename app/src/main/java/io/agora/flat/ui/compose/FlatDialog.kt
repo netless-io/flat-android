@@ -71,8 +71,44 @@ fun UnbindLimitDialog(onConfirm: () -> Unit) {
 }
 
 @Composable
+fun FlatBaseDialog(title: String, message: String, onConfirm: () -> Unit, onCancel: (() -> Unit)? = null) {
+    FlatTheme {
+        Dialog(onDismissRequest = onConfirm) {
+            Surface(
+                Modifier.widthIn(max = 400.dp),
+                shape = Shapes.large,
+            ) {
+                Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                    FlatTextTitle(title)
+                    FlatNormalVerticalSpacer()
+                    FlatTextBodyOne(message)
+                    FlatNormalVerticalSpacer()
+                    Row {
+                        if (onCancel != null) {
+                            FlatSmallSecondaryTextButton(
+                                stringResource(R.string.cancel),
+                                Modifier.weight(1f)
+                            ) { onCancel() }
+                            FlatLargeHorizontalSpacer()
+                        }
+                        FlatSmallPrimaryTextButton(
+                            stringResource(R.string.confirm),
+                            Modifier.weight(1f)
+                        ) { onConfirm() }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 @Preview(widthDp = 400, uiMode = 0x10, locale = "zh")
 @Preview(widthDp = 400, uiMode = 0x20)
 private fun UnbindNoticeDialogPreview() {
-    UnbindNoticeDialog(onConfirm = { }, onCancel = { })
+    Row {
+        UnbindNoticeDialog(onConfirm = { }, onCancel = { })
+        UnbindLimitDialog(onConfirm = { })
+    }
+
 }

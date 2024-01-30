@@ -53,11 +53,11 @@ import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatNetException
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.board.DeviceState
-import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.model.JoinRoomRecord
 import io.agora.flat.ui.compose.CameraPreviewCard
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.DeviceOptions
+import io.agora.flat.ui.compose.FlatBaseDialog
 import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatPage
 import io.agora.flat.ui.compose.FlatPrimaryTextButton
@@ -72,6 +72,7 @@ import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.ui.theme.isTabletMode
 import io.agora.flat.ui.util.ShowUiMessageEffect
+import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.viewmodel.JoinRoomUiState
 import io.agora.flat.ui.viewmodel.JoinRoomViewModel
 import io.agora.flat.util.hasPermission
@@ -84,20 +85,10 @@ fun JoinRoomScreen(
     navController: NavController,
     viewModel: JoinRoomViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
-    ShowUiMessageEffect(
-        uiMessage = viewState.message,
-        errorStr = { error ->
-            if (error is FlatNetException && error.code == FlatErrorCode.Web.RoomNotBegin) {
-                context.getString(R.string.pay_room_not_started_join, viewState.joinEarly)
-            } else {
-                FlatErrorHandler.getErrorStr(context, error)
-            }
-        },
-        onMessageShown = viewModel::clearMessage
-    )
+    MessageHandler(viewState.message, viewState.joinEarly, viewModel::clearMessage)
 
     viewState.roomPlayInfo?.let { roomPlayInfo ->
         LaunchedEffect(roomPlayInfo) {
@@ -112,6 +103,24 @@ fun JoinRoomScreen(
         onJoinRoom = { roomID, openVideo, openAudio -> viewModel.joinRoom(roomID, openVideo, openAudio) },
         onClearRecord = viewModel::clearJoinRoomRecord
     )
+}
+
+@Composable
+fun MessageHandler(message: UiMessage?, joinEarly: Int, onClearMessage: (Long) -> Unit = {}) {
+    val context = LocalContext.current
+
+    if (message?.exception is FlatNetException && message.exception.code == FlatErrorCode.Web.RoomNotBegin) {
+        FlatBaseDialog(
+            title = context.getString(R.string.room_not_stared),
+            message = context.getString(R.string.pay_room_not_started_join, joinEarly),
+            onConfirm = { onClearMessage(message.id) }
+        )
+    } else {
+        ShowUiMessageEffect(
+            uiMessage = message,
+            onMessageShown = onClearMessage
+        )
+    }
 }
 
 @Composable
