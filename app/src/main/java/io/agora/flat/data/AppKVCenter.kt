@@ -10,10 +10,12 @@ import io.agora.flat.data.model.LoginHistoryItem
 import io.agora.flat.data.model.UserInfo
 import io.agora.flat.data.model.UserInfoWithToken
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 提供App级别的KV存储
  */
+@Singleton
 class AppKVCenter @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences = context.getSharedPreferences("flat_kv_data", Context.MODE_PRIVATE)
     private val gson = Gson()

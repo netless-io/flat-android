@@ -7,10 +7,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.agora.flat.BuildConfig
 import io.agora.flat.di.interfaces.LogConfig
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 应用内切换配置
  */
+@Singleton
 class AppEnv @Inject constructor(@ApplicationContext context: Context) {
     private val store: SharedPreferences = context.getSharedPreferences("flat_env", Context.MODE_PRIVATE)
 

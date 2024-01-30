@@ -11,6 +11,7 @@ import io.agora.flat.common.android.CallingCodeManager
 import io.agora.flat.common.android.DarkModeManager
 import io.agora.flat.common.android.LanguageManager
 import io.agora.flat.common.upload.UploadManager
+import io.agora.flat.di.GlobalInstanceProvider
 import io.agora.flat.util.isApkInDebug
 
 @HiltAndroidApp
@@ -21,6 +22,7 @@ class MainApplication : Application(), CameraXConfig.Provider {
         LanguageManager.init(this)
         DarkModeManager.init(this)
         CallingCodeManager.init(this)
+        GlobalInstanceProvider.init(this)
         WebView.setWebContentsDebuggingEnabled(isApkInDebug())
         WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
     }

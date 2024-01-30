@@ -42,6 +42,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val viewState by viewModel.state.collectAsState()
+
     HomeScreen(
         viewState = viewState,
         onOpenRoomCreate = onOpenRoomCreate,

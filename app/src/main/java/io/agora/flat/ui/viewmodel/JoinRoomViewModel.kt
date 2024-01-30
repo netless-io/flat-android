@@ -13,6 +13,8 @@ import io.agora.flat.data.model.JoinRoomRecord
 import io.agora.flat.data.model.RoomPlayInfo
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
+import io.agora.flat.event.EventBus
+import io.agora.flat.event.RoomsUpdated
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.util.UiMessageManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,7 @@ class JoinRoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
     private val appKVCenter: AppKVCenter,
     private val joinRoomRecordManager: JoinRoomRecordManager,
+    private val eventBus: EventBus
 ) : ViewModel() {
     private val uiMessageManager = UiMessageManager()
 
@@ -71,6 +74,12 @@ class JoinRoomViewModel @Inject constructor(
     fun clearMessage(id: Long) {
         viewModelScope.launch {
             uiMessageManager.clearMessage(id)
+        }
+    }
+
+    fun notifyRoomUpdated() {
+        viewModelScope.launch {
+            eventBus.produceEvent(RoomsUpdated)
         }
     }
 }
