@@ -155,6 +155,8 @@ class AgoraBoardRoom @Inject constructor(
         fastRoom?.join {
             cont.resume(true)
         }
+
+        fastboard.setWhiteboardRatio(null)
     }
 
     private fun getCollectorStyle(): HashMap<String, String> {

@@ -8,20 +8,30 @@
     tools:context="io.agora.flat.ui.activity.play.ClassRoomActivity">
 
     <FrameLayout
+        android:id="@+id/roomStateContainer"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
         android:id="@+id/videoListContainer"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/roomStateContainer"
         tools:layout_width="@dimen/room_class_video_area_width" />
 
     <FrameLayout
         android:id="@+id/whiteboardContainer"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/videoListContainer"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/roomStateContainer" />
 
     <FrameLayout
         android:id="@+id/user_windows_container"

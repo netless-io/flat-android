@@ -17,7 +17,7 @@
     <color name="flat_day_night_text_secondary">@color/flat_gray_3</color>
     <color name="flat_day_night_background">@color/flat_white</color>
     <color name="flat_day_night_surface">@color/flat_white</color>
-    <color name="flat_day_night_divider">@color/flat_gray_2</color>
+    <color name="flat_day_night_divider">@color/flat_gray_1</color>
     <color name="flat_day_night_primary_blue">@color/flat_blue_6</color>
 
     <color name="class_room_panel_title">@color/flat_blue_12</color>

@@ -30,7 +30,7 @@ class ClassRoomActivity : BaseActivity() {
         componentSet.add(RtmComponent(this, binding.messageContainer))
         componentSet.add(ToolComponent(this, binding.toolContainer))
         componentSet.add(ClassCloudComponent(this, binding.cloudStorageContainer))
-        componentSet.add(ExtComponent(this, binding.extensionContainer))
+        componentSet.add(ExtComponent(this, binding.extensionContainer, binding.roomStateContainer))
         componentSet.forEach { lifecycle.addObserver(it) }
     }
 
