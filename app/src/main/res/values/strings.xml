@@ -237,6 +237,11 @@
     <string name="record_started_toast">Record Started</string>
     <string name="record_stopped_toast">Record Stopped</string>
 
+    <string name="room_class_time_waiting_format">Waiting: %1$s</string>
+    <string name="room_class_time_started_format">Started: %1$s</string>
+    <string name="room_class_time_left_format">Time Left: %1$s</string>
+    <string name="room_class_time_ended">Ended</string>
+
     <string name="cloud_storage">Cloud Storage</string>
     <string name="cloud_storage_usage_format">%1$s used</string>
     <string name="cloud_storage_upload_image">Photos</string>

@@ -16,10 +16,12 @@ import io.agora.flat.R
 import io.agora.flat.common.error.FlatErrorHandler
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentExtensionBinding
+import io.agora.flat.databinding.ComponentRoomStateBinding
 import io.agora.flat.event.RemoteLoginEvent
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.view.RoomExitDialog
+import io.agora.flat.ui.view.TimeStateData
 import io.agora.flat.util.delayAndFinish
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
@@ -31,8 +33,10 @@ import kotlinx.coroutines.flow.filterNotNull
 class ExtComponent(
     activity: ClassRoomActivity,
     rootView: FrameLayout,
+    private val roomStateContainer: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     private lateinit var extensionBinding: ComponentExtensionBinding
+    private lateinit var roomStateBinding: ComponentRoomStateBinding
 
     private val viewModel: ExtensionViewModel by activity.viewModels()
     private val classRoomViewModel: ClassRoomViewModel by activity.viewModels()
@@ -44,6 +48,7 @@ class ExtComponent(
 
     private fun initView() {
         extensionBinding = ComponentExtensionBinding.inflate(activity.layoutInflater, rootView, true)
+        roomStateBinding = ComponentRoomStateBinding.inflate(activity.layoutInflater, roomStateContainer, true)
     }
 
     private fun observeState() {
@@ -61,6 +66,15 @@ class ExtComponent(
                 if (it.roomStatus == RoomStatus.Stopped) {
                     showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                 }
+
+                // TODO current version does not have an end time limit
+                roomStateBinding.timeStateLayout.updateTimeStateData(
+                    TimeStateData(
+                        it.beginTime,
+                        Long.MAX_VALUE,
+                        10 * 60 * 1000,
+                    )
+                )
             }
         }
 

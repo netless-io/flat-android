@@ -246,6 +246,11 @@
     <string name="record_started_toast">开启录制</string>
     <string name="record_stopped_toast">录制完成，可到历史记录查看</string>
 
+    <string name="room_class_time_waiting_format">距离上课: %1$s</string>
+    <string name="room_class_time_started_format">开始上课: %1$s</string>
+    <string name="room_class_time_left_format">剩余时间: %1$s</string>
+    <string name="room_class_time_ended">房间已经结束</string>
+
     <string name="cloud_storage">云盘</string>
     <string name="cloud_storage_usage_format">已使用 %1$s</string>
     <string name="cloud_storage_upload_image">上传照片</string>
