@@ -42,9 +42,10 @@
 
             <TextView
                 android:id="@+id/user_offline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/flat_black_50"
+                android:gravity="center"
                 android:text="@string/user_offline"
                 android:textColor="@color/class_room_video_text_color"
                 android:textSize="12sp" />
