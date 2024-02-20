@@ -43,7 +43,6 @@ import io.agora.flat.util.DateUtils
 import io.agora.flat.util.FlatFormatter
 import java.util.Calendar
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 @Composable
 fun RoomItem(
@@ -85,8 +84,7 @@ fun RoomItem(
 private fun RoomItemRightBox(roomInfo: RoomInfo, modifier: Modifier, onStartClick: () -> Unit = {}) {
     val appKVCenter = LocalAppKVCenter.current ?: AppKVCenter(LocalContext.current)
     val joinEarly = appKVCenter.getJoinEarly()
-    val uuid = appKVCenter.getUserInfo()?.uuid
-    val text = enterRoomString(uuid == roomInfo.ownerUUID, roomInfo.roomStatus)
+    val text = stringResource(R.string.enter)
 
     Box(modifier) {
         val now = Calendar.getInstance().timeInMillis

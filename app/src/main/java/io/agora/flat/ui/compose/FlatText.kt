@@ -16,16 +16,6 @@ import io.agora.flat.ui.theme.Gray_6
 import io.agora.flat.ui.theme.Green_6
 import io.agora.flat.ui.theme.Yellow_6
 
-
-@Composable
-fun enterRoomString(isOwner: Boolean, roomStatus: RoomStatus): String =
-    if (isOwner && roomStatus == RoomStatus.Idle) {
-        stringResource(R.string.start)
-    } else {
-        stringResource(R.string.enter)
-    }
-
-
 @Composable
 fun FlatRoomStatusText(roomStatus: RoomStatus, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
