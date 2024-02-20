@@ -478,7 +478,7 @@ private fun TabletOperations(
             actioner(DetailUiAction.Invite)
         }
         FlatNormalHorizontalSpacer()
-        FlatSmallPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
+        FlatSmallPrimaryTextButton(stringResource(R.string.enter), onClick = {
             actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
         })
     }
@@ -501,7 +501,7 @@ private fun Operations(
             actioner(DetailUiAction.Invite)
         })
         FlatNormalVerticalSpacer()
-        FlatPrimaryTextButton(enterRoomString(roomInfo.isOwner, roomInfo.roomStatus), onClick = {
+        FlatPrimaryTextButton(stringResource(R.string.enter), onClick = {
             actioner(DetailUiAction.EnterRoom(roomInfo.roomUUID, roomInfo.periodicUUID))
         })
     }
