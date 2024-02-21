@@ -3,6 +3,7 @@ package io.agora.flat.di.interfaces
 import com.herewhite.sdk.domain.ConvertedFiles
 import io.agora.board.fast.FastboardView
 import io.agora.board.fast.ui.RoomControllerGroup
+import io.agora.flat.common.board.BoardError
 import io.agora.flat.common.board.BoardPhase
 import kotlinx.coroutines.flow.Flow
 
@@ -35,4 +36,6 @@ interface BoardRoom {
     fun insertApp(kind: String)
 
     fun observeRoomPhase(): Flow<BoardPhase>
+
+    fun observeRoomError(): Flow<BoardError>
 }
