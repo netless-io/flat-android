@@ -7,3 +7,7 @@ sealed class BoardPhase {
     object Disconnected : BoardPhase()
     data class Error(val message: String) : BoardPhase()
 }
+
+sealed class BoardError {
+    object Kicked : BoardError()
+}

@@ -40,3 +40,5 @@ data class ExpirationEvent(
     val expireAt: Long,
     val leftMinutes: Int,
 ) : ClassroomEvent()
+
+object RoomKickedEvent : ClassroomEvent()

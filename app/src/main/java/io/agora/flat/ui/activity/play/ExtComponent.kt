@@ -18,6 +18,7 @@ import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentExtensionBinding
 import io.agora.flat.databinding.ComponentRoomStateBinding
 import io.agora.flat.event.RemoteLoginEvent
+import io.agora.flat.event.RoomKickedEvent
 import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.util.UiMessage
 import io.agora.flat.ui.view.RoomExitDialog
@@ -52,6 +53,10 @@ class ExtComponent(
     }
 
     private fun observeState() {
+        lifecycleScope.launchWhenCreated {
+            classRoomViewModel.loginThirdParty()
+        }
+
         lifecycleScope.launchWhenResumed {
             viewModel.state.collect {
                 showLoading(it.loading)
@@ -78,15 +83,15 @@ class ExtComponent(
             }
         }
 
-        lifecycleScope.launchWhenCreated {
-            classRoomViewModel.loginThirdParty()
-        }
-
         lifecycleScope.launchWhenResumed {
             classRoomViewModel.classroomEvent.collect { event ->
                 when (event) {
                     RemoteLoginEvent -> {
                         showRoomExitDialog(activity.getString(R.string.exit_remote_login_message))
+                    }
+
+                    RoomKickedEvent -> {
+                        showRoomExitDialog(activity.getString(R.string.exit_room_stopped_message))
                     }
 
                     else -> {}

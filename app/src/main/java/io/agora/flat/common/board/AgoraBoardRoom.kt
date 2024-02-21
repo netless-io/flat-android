@@ -8,6 +8,7 @@ import com.herewhite.sdk.domain.*
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import io.agora.board.fast.FastException
 import io.agora.board.fast.FastRoom
 import io.agora.board.fast.FastRoomListener
 import io.agora.board.fast.Fastboard
@@ -32,6 +33,7 @@ import io.agora.flat.util.px2dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -52,6 +54,7 @@ class AgoraBoardRoom @Inject constructor(
     private var darkMode: Boolean = false
     private var rootRoomController: RoomControllerGroup? = null
     private var boardPhase = MutableStateFlow<BoardPhase>(BoardPhase.Init)
+    private var boardError = MutableStateFlow<BoardError?>(null)
     private val activityContext: Context by lazy { fastboardView.context }
     private val flatNetlessUA: List<String> by lazy {
         listOf(
@@ -86,18 +89,19 @@ class AgoraBoardRoom @Inject constructor(
         ).apply {
             userPayload = FastUserPayload(userRepository.getUsername())
         }
+
         fastRoomOptions.sdkConfiguration = fastRoomOptions.sdkConfiguration.apply {
             isLog = true
             netlessUA = flatNetlessUA
             isEnableSyncedStore = true
         }
+
         fastRoomOptions.roomParams = fastRoomOptions.roomParams.apply {
             windowParams.prefersColorScheme = if (darkMode) Dark else Light
             windowParams.collectorStyles = getCollectorStyle()
             windowParams.scrollVerticalOnly = true
             windowParams.stageStyle = "box-shadow: 0 0 0"
 
-            // isUseNativeWebSocket = appKVCenter.isNetworkAcceleration()
             disableEraseImage = true
         }
         fastRoom = fastboard.createFastRoom(fastRoomOptions)
@@ -117,6 +121,12 @@ class AgoraBoardRoom @Inject constructor(
                 logger.i("[BOARD] room ready changed ${fastRoom.isReady}")
                 if (syncedClassState is WhiteSyncedState && fastRoom.isReady) {
                     syncedClassState.resetRoom(fastRoom)
+                }
+            }
+
+            override fun onFastError(error: FastException) {
+                if (error.code == FastException.ROOM_KICKED) {
+                    boardError.value = BoardError.Kicked
                 }
             }
         })
@@ -265,6 +275,10 @@ class AgoraBoardRoom @Inject constructor(
 
     override fun observeRoomPhase(): Flow<BoardPhase> {
         return boardPhase.asStateFlow()
+    }
+
+    override fun observeRoomError(): Flow<BoardError> {
+        return boardError.asStateFlow().filterNotNull()
     }
 
     private fun String.toFastRegion(): FastRegion {
