@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
@@ -21,11 +23,16 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +66,7 @@ fun RoomItem(
     ) {
         FlatAvatar(avatar = roomInfo.ownerAvatarURL, size = 32.dp)
         Spacer(Modifier.width(16.dp))
-        Box(Modifier.weight(1f)) {
+        Box {
             Row {
                 Column(Modifier.weight(1f)) {
                     Spacer(Modifier.height(12.dp))
@@ -68,7 +75,7 @@ fun RoomItem(
                     RoomItemTime(roomInfo.beginTime, roomInfo.endTime)
                     Spacer(Modifier.height(12.dp))
                 }
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(12.dp))
                 RoomItemRightBox(
                     roomInfo,
                     modifier = Modifier.align(Alignment.CenterVertically),
@@ -152,11 +159,24 @@ private fun RoomItemJoinButton(text: String, onClick: () -> Unit) {
     }
 }
 
-
 @Composable
 private fun RoomItemTitle(roomInfo: RoomInfo) {
-    Row {
-        FlatTextSubtitle(roomInfo.title, color = FlatTheme.colors.textTitle)
+    var width by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned {
+                width = with(density) {
+                    it.size.width.toDp()
+                }
+            }) {
+        FlatTextSubtitle(
+            roomInfo.title,
+            modifier = Modifier.sizeIn(maxWidth = width - 28.dp),
+            color = FlatTheme.colors.textTitle
+        )
         if (roomInfo.roomStatus != RoomStatus.Stopped && roomInfo.isPeriodic) {
             Spacer(Modifier.width(4.dp))
             Image(
@@ -206,5 +226,13 @@ fun RoomItemPreview() {
         RoomItem(roomInfo.copy(beginTime = now + 5 * 60 * 1000 + 2 * 1000))
         RoomItem(roomInfo.copy(beginTime = now + 10 * 60 * 1000))
         RoomItem(roomInfo.copy(beginTime = now + 100 * 60 * 1000))
+        RoomItem(roomInfo.copy(beginTime = now + 100 * 60 * 1000, title = "Long Long Long Long Long Long Long Title"))
+        RoomItem(
+            roomInfo.copy(
+                beginTime = now + 10 * 60 * 1000,
+                periodicUUID = "123",
+                title = "Long Long Long Long Long Long Long Title"
+            )
+        )
     }
 }
