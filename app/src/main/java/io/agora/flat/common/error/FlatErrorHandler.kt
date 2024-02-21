@@ -59,7 +59,11 @@ object FlatErrorHandler {
             FlatErrorCode.Web.RoomLimit -> context.getString(R.string.pay_room_users_limit)
             FlatErrorCode.Web.RoomExpired -> context.getString(R.string.pay_room_expired)
             FlatErrorCode.Web.RoomNotBegin -> context.getString(
-                R.string.pay_room_not_started,
+                R.string.room_not_started,
+                appKVCenter.getJoinEarly()
+            )
+            FlatErrorCode.Web.RoomNotBeginAndAddList -> context.getString(
+                R.string.room_not_started_added,
                 appKVCenter.getJoinEarly()
             )
 
