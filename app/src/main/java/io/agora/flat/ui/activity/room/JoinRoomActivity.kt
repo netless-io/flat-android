@@ -114,10 +114,18 @@ private fun MessageHandler(
 ) {
     val context = LocalContext.current
 
-    if (message?.exception is FlatNetException && message.exception.code == FlatErrorCode.Web.RoomNotBegin) {
+    if (message?.exception is FlatNetException &&
+        (message.exception.code == FlatErrorCode.Web.RoomNotBegin ||
+                message.exception.code == FlatErrorCode.Web.RoomNotBeginAndAddList)
+    ) {
+        val msg = when (message.exception.code) {
+            FlatErrorCode.Web.RoomNotBegin -> context.getString(R.string.room_not_started, joinEarly)
+            FlatErrorCode.Web.RoomNotBeginAndAddList -> context.getString(R.string.room_not_started_added, joinEarly)
+            else -> ""
+        }
         FlatBaseDialog(
             title = context.getString(R.string.room_not_stared),
-            message = context.getString(R.string.pay_room_not_started_join, joinEarly),
+            message = msg,
             onConfirm = {
                 onClearMessage(message.id)
                 onRoomUpdated()

@@ -33,6 +33,7 @@ class FlatErrorCode {
         const val RoomExpired = 210003  // room expired
         const val RoomNotBegin = 210004  // join room before begin_time
         const val RoomCreateLimit = 210005  // create room reach max limit
+        const val RoomNotBeginAndAddList = 210006 // join room before begin_time and joined
 
         const val InternalError = 220000 // unknown error
         const val ForwardFailed = 220001 // forward failed
