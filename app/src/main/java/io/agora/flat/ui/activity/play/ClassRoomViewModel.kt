@@ -71,6 +71,8 @@ class ClassRoomViewModel @Inject constructor(
 
     val classroomEvent get() = eventbus.events.filterIsInstance<ClassroomEvent>()
 
+    val rtcEvent get() = rtcApi.observeRtcEvent()
+
     val teacher = userManager.observeUsers().map { it.firstOrNull { user -> user.isOwner } }
     val students = userManager.observeUsers().map {
         it.filter { user -> !user.isOwner && (user.isJoined || user.isOnStage) }

@@ -14,6 +14,48 @@
             android:layout_width="16dp"
             android:layout_height="0dp" />
 
+        <TextView
+            android:id="@+id/network_delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:maxLines="1"
+            android:textSize="12sp"
+            tools:text="@string/room_class_network_delay" />
+
+        <Space
+            android:layout_width="24dp"
+            android:layout_height="0dp" />
+
+        <LinearLayout
+            android:id="@+id/network_state_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:textSize="12sp"
+                android:text="@string/room_class_network_status" />
+
+            <Space
+                android:layout_width="4dp"
+                android:layout_height="0dp" />
+
+            <ImageView
+                android:id="@+id/network_state_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_network_status" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="24dp"
+            android:layout_height="0dp" />
+
         <io.agora.flat.ui.view.TimeStateLayout
             android:id="@+id/time_state_layout"
             android:layout_width="wrap_content"
