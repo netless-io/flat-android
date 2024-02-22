@@ -88,7 +88,7 @@
     <string name="turn_on_mic">Turn on microphone</string>
     <string name="join_room_default_time_format">Room created by %1$s</string>
     <string name="join_room_record_pmi_title">%1$s\'s personal room</string>
-    <string name="room_not_stared">room not started</string>
+    <string name="room_not_stared">Room not started</string>
 
     <string name="home_room_list">Room</string>
     <string name="home_room_history">History</string>
@@ -99,7 +99,7 @@
     <string name="home_room_state_end">Ended</string>
     <string name="home_no_room_tip">No rooms available</string>
     <string name="home_no_history_room_tip">No records</string>
-    <string name="home_room_start_at_min">%1$d minutes until start</string>
+    <string name="home_room_start_at_min">In %1$d minutes</string>
     <string name="setting_check_update">Check for updates</string>
     <string name="intent_no_browser">Link error or no browser</string>
     <string name="intent_browser_choose_title">Choose Browser</string>
