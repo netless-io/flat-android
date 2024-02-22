@@ -193,6 +193,9 @@ class RtcComponent(
                     is RtcEvent.VolumeIndication -> {
                         adapter.updateVolume(event.speakers)
                     }
+                    else -> {
+
+                    }
                 }
             }
         }

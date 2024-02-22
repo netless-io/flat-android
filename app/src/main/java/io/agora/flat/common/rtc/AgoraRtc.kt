@@ -5,6 +5,7 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
+import io.agora.rtc.Constants
 import io.agora.rtc.IRtcEngineEventHandler
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.models.ChannelMediaOptions
@@ -106,11 +107,32 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
                 }
                 trySend(RtcEvent.VolumeIndication(info, totalVolume))
             }
+
+            override fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {
+                if (uid == 0) {
+                    trySend(RtcEvent.NetworkStatus(getOverallQuality(txQuality, rxQuality)))
+                }
+            }
+
+            override fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats) {
+                trySend(RtcEvent.LastmileDelay(stats.lastmileDelay))
+            }
         }
         mHandler.addListener(listener)
         awaitClose {
             logger.i("[RTC] rtc event flow closed")
             mHandler.removeListener(listener)
+        }
+    }
+
+    companion object {
+        internal fun getOverallQuality(txQuality: Int, rxQuality: Int): NetworkQuality {
+            return when (maxOf(txQuality, rxQuality)) {
+                Constants.QUALITY_UNKNOWN -> NetworkQuality.Unknown
+                Constants.QUALITY_EXCELLENT -> NetworkQuality.Excellent
+                Constants.QUALITY_GOOD -> NetworkQuality.Good
+                else -> NetworkQuality.Bad
+            }
         }
     }
 }

@@ -105,11 +105,11 @@ internal interface RTCEventListener {
 
     fun onLastmileQuality(quality: Int) {}
 
-    fun onLastmileProbeResult(result: IRtcEngineEventHandler.LastmileProbeResult?) {}
+    fun onLastmileProbeResult(result: IRtcEngineEventHandler.LastmileProbeResult) {}
 
-    fun onLocalVideoStats(stats: IRtcEngineEventHandler.LocalVideoStats?) {}
+    fun onLocalVideoStats(stats: IRtcEngineEventHandler.LocalVideoStats) {}
 
-    fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats?) {}
+    fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats) {}
 
     fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {}
 

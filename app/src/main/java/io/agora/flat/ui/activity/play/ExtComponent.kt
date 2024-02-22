@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +15,8 @@ import coil.load
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.error.FlatErrorHandler
+import io.agora.flat.common.rtc.NetworkQuality
+import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.data.model.RoomStatus
 import io.agora.flat.databinding.ComponentExtensionBinding
 import io.agora.flat.databinding.ComponentRoomStateBinding
@@ -27,6 +30,7 @@ import io.agora.flat.util.delayAndFinish
 import io.agora.flat.util.isDarkMode
 import io.agora.flat.util.showToast
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 /**
  * display common loading, toast, dialog, global layout change.
@@ -95,6 +99,34 @@ class ExtComponent(
                     }
 
                     else -> {}
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            classRoomViewModel.rtcEvent.collect { event ->
+                when (event) {
+                    is RtcEvent.NetworkStatus -> {
+                        when (event.quality) {
+                            NetworkQuality.Unknown, NetworkQuality.Excellent -> {
+                                roomStateBinding.networkStateIcon.setColorFilter(ContextCompat.getColor(activity, R.color.flat_green_6))
+                            }
+                            NetworkQuality.Good -> {
+                                roomStateBinding.networkStateIcon.setColorFilter(ContextCompat.getColor(activity, R.color.flat_yellow_6))
+                            }
+                            NetworkQuality.Bad-> {
+                                roomStateBinding.networkStateIcon.setColorFilter(ContextCompat.getColor(activity, R.color.flat_red_6))
+                            }
+                        }
+                    }
+
+                    is RtcEvent.LastmileDelay -> {
+                        roomStateBinding.networkDelay.text = activity.getString(R.string.room_class_network_delay, event.delay)
+                    }
+
+                    else -> {
+
+                    }
                 }
             }
         }
