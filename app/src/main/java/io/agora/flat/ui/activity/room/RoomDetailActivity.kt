@@ -190,6 +190,7 @@ private fun RomeInfoDisplay(roomInfo: UIRoomInfo, onCopy: (String) -> Unit) {
         RoomStatus.Started, RoomStatus.Paused -> stringResource(R.string.home_room_state_started)
         RoomStatus.Stopped -> stringResource(R.string.home_room_state_end)
     }
+    val inviteCode = roomInfo.inviteCode
 
     Spacer(modifier = Modifier.height(16.dp))
     Row(Modifier.padding(horizontal = 16.dp)) {
@@ -209,10 +210,10 @@ private fun RomeInfoDisplay(roomInfo: UIRoomInfo, onCopy: (String) -> Unit) {
             FlatTextSubtitle(stringResource(R.string.room_id))
             Spacer(Modifier.height(8.dp))
             Row(
-                Modifier.clickable { onCopy(roomInfo.roomUUID) },
+                Modifier.clickable { onCopy(inviteCode) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FlatTextBodyTwo(roomInfo.inviteCode.toInviteCodeDisplay(), color = FlatTheme.colors.textPrimary)
+                FlatTextBodyTwo(inviteCode.toInviteCodeDisplay(), color = FlatTheme.colors.textPrimary)
                 Spacer(Modifier.width(8.dp))
                 Image(painterResource(R.drawable.ic_room_detail_copy), contentDescription = "")
             }
