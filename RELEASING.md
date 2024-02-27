@@ -45,3 +45,13 @@ Cutting a Release
    oss_push_prod_check_version checkVersion.json
    # test in prod
    ```
+
+6. Next version change
+   ```shell
+   export NEXT_VERSION=`echo $RELEASE_VERSION | awk -F '.' '{printf("%d.%d.%d-beta\n", $1, $2, $3 + 1)}'`
+   sed -i "" \
+   "s/versionName \".*\"/versionName \"$NEXT_VERSION\"/g" \
+   "app/build.gradle"
+   git commit -am "Prepare next development version."
+   git push
+   ```
