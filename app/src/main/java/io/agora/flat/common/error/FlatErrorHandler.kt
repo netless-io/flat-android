@@ -69,7 +69,7 @@ object FlatErrorHandler {
 
             FlatErrorCode.Web.RoomCreateLimit -> context.getString(R.string.pay_room_reached_limit)
 
-            else -> context.getString(R.string.error_string_network, "${error.code}")
+            else -> context.getString(R.string.error_string_known_network, "${error.code}")
         }
     }
 }
