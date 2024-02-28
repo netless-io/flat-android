@@ -4,7 +4,11 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
-import com.herewhite.sdk.domain.*
+import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.Promise
+import com.herewhite.sdk.domain.RoomPhase
+import com.herewhite.sdk.domain.SDKError
+import com.herewhite.sdk.domain.WindowAppParam
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
 import dagger.hilt.android.scopes.ActivityRetainedScoped
@@ -78,7 +82,7 @@ class AgoraBoardRoom @Inject constructor(
         roomToken: String,
         region: String,
         writable: Boolean
-    ): Boolean = suspendCoroutine { cont ->
+    ) {
         val fastRoomOptions = FastRoomOptions(
             appEnv.whiteAppId,
             roomUUID,
@@ -162,10 +166,7 @@ class AgoraBoardRoom @Inject constructor(
         }
         fastRoom?.setResource(fastResource)
         setDarkMode(darkMode)
-        fastRoom?.join {
-            cont.resume(true)
-        }
-
+        fastRoom?.join()
         fastboard.setWhiteboardRatio(null)
     }
 

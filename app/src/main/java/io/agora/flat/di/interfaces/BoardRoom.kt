@@ -14,7 +14,7 @@ interface BoardRoom {
 
     fun setRoomController(rootRoomController: RoomControllerGroup)
 
-    suspend fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean): Boolean
+    suspend fun join(roomUUID: String, roomToken: String, region: String, writable: Boolean)
 
     fun release()
 
