@@ -10,17 +10,51 @@ import io.agora.flat.common.android.ClipboardController
 import io.agora.flat.common.board.AgoraBoardRoom
 import io.agora.flat.common.board.DeviceState
 import io.agora.flat.common.rtc.RtcJoinOptions
-import io.agora.flat.common.rtm.*
+import io.agora.flat.common.rtm.ChatMessage
+import io.agora.flat.common.rtm.ClassRtmEvent
+import io.agora.flat.common.rtm.EnterRoomEvent
+import io.agora.flat.common.rtm.EventUserInfo
+import io.agora.flat.common.rtm.ExpirationWarningEvent
+import io.agora.flat.common.rtm.Message
+import io.agora.flat.common.rtm.MessageFactory
+import io.agora.flat.common.rtm.NotifyDeviceOffEvent
+import io.agora.flat.common.rtm.OnMemberJoined
+import io.agora.flat.common.rtm.OnMemberLeft
+import io.agora.flat.common.rtm.OnRemoteLogin
+import io.agora.flat.common.rtm.RaiseHandEvent
+import io.agora.flat.common.rtm.RequestDeviceEvent
+import io.agora.flat.common.rtm.RequestDeviceResponseEvent
+import io.agora.flat.common.rtm.RewardEvent
+import io.agora.flat.common.rtm.RoomBanEvent
+import io.agora.flat.common.rtm.RoomStateEvent
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
-import io.agora.flat.data.model.*
+import io.agora.flat.data.model.InviteInfo
+import io.agora.flat.data.model.RoomInfo
+import io.agora.flat.data.model.RoomPlayInfo
+import io.agora.flat.data.model.RoomStatus
+import io.agora.flat.data.model.RoomType
+import io.agora.flat.data.model.RoomUser
+import io.agora.flat.data.model.RtcShareScreen
 import io.agora.flat.data.repository.RoomRepository
 import io.agora.flat.data.repository.UserRepository
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.RtmApi
 import io.agora.flat.di.interfaces.SyncedClassState
-import io.agora.flat.event.*
+import io.agora.flat.event.ClassroomEvent
+import io.agora.flat.event.Event
+import io.agora.flat.event.EventBus
+import io.agora.flat.event.ExpirationEvent
+import io.agora.flat.event.MessagesAppended
+import io.agora.flat.event.NoOptPermission
+import io.agora.flat.event.NotifyDeviceOffReceived
+import io.agora.flat.event.RemoteLoginEvent
+import io.agora.flat.event.RequestDeviceReceived
+import io.agora.flat.event.RequestDeviceResponseReceived
+import io.agora.flat.event.RequestDeviceSent
+import io.agora.flat.event.RequestMuteAllSent
+import io.agora.flat.event.RewardReceived
 import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.UserManager
@@ -31,7 +65,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -181,6 +223,7 @@ class ClassRoomViewModel @Inject constructor(
             ),
             ownerUUID = roomInfo.ownerUUID
         )
+
         recordManager.reset(roomUUID, viewModelScope)
 
         onStageLimit = when (roomInfo.roomType) {
@@ -354,11 +397,13 @@ class ClassRoomViewModel @Inject constructor(
             }
 
             is ExpirationWarningEvent -> {
-                eventbus.produceEvent(ExpirationEvent(
-                    roomLevel = event.roomLevel,
-                    expireAt = event.expireAt,
-                    leftMinutes = event.leftMinutes,
-                ))
+                eventbus.produceEvent(
+                    ExpirationEvent(
+                        roomLevel = event.roomLevel,
+                        expireAt = event.expireAt,
+                        leftMinutes = event.leftMinutes,
+                    )
+                )
             }
 
             else -> {
@@ -584,6 +629,8 @@ class ClassRoomViewModel @Inject constructor(
             if (roomRepository.startRoomClass(roomUUID).isSuccess) {
                 rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, status = RoomStatus.Started))
                 _state.value = state.copy(roomStatus = RoomStatus.Started)
+            } else {
+                logger.e("start class error")
             }
         }
     }
@@ -600,7 +647,7 @@ class ClassRoomViewModel @Inject constructor(
         val result = roomRepository.stopRoomClass(roomUUID)
         if (result.isSuccess) {
             rtmApi.sendChannelCommand(RoomStateEvent(roomUUID = roomUUID, status = RoomStatus.Stopped))
-            recordManager.stopRecord()
+            recordManager.stopRecord(true)
         }
         return result.isSuccess
     }
@@ -675,7 +722,7 @@ class ClassRoomViewModel @Inject constructor(
         return InviteInfo(
             username = currentUserName,
             roomTitle = state.title,
-            link =  "${appEnv.baseInviteUrl}/join/$linkCode",
+            link = "${appEnv.baseInviteUrl}/join/$linkCode",
             roomUuid = state.inviteCode.toInviteCodeDisplay(),
             beginTime = state.beginTime,
             endTime = state.endTime,

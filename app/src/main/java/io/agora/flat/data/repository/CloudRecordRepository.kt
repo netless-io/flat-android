@@ -50,13 +50,15 @@ class CloudRecordRepository @Inject constructor(
 
     suspend fun queryRecordWithAgora(
         roomUUID: String,
-        resourceId: String, mode: AgoraRecordMode = AgoraRecordMode.Mix,
+        resourceId: String,
+        sid: String,
+        mode: AgoraRecordMode = AgoraRecordMode.Mix,
     ): Result<RecordQueryRespData> {
         return withContext(Dispatchers.IO) {
             cloudRecordService.queryRecordWithAgora(
                 RecordReq(
                     roomUUID,
-                    AgoraRecordParams(resourceId, mode),
+                    AgoraRecordParams(resourceid = resourceId, mode = mode, sid = sid),
                 )
             ).toResult()
         }

@@ -55,6 +55,10 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideRecordHistoryDao(db: AppDatabase) = db.recordHistoryDao()
+
+    @Singleton
+    @Provides
     fun providerAppEnv(@ApplicationContext context: Context): AppEnv {
         return AppEnv(context)
     }
