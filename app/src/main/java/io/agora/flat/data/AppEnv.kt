@@ -26,6 +26,12 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         const val STORE_KEY_ENV = "key_env"
 
         const val DEFAULT_JOIN_EARLY_MINUTES = 10
+
+        val ALL_BASE_URLS = listOf(
+            "https://flat-web.whiteboard.agora.io",
+            "https://web.flat.shengwang.cn",
+            "https://web.flat.agora.io",
+        )
     }
 
     val envMap = mutableMapOf<String, EnvItem>()
