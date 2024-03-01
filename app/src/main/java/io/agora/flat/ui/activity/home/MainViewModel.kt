@@ -128,7 +128,8 @@ class MainViewModel @Inject constructor(
     }
 
     fun handleDeepLink(uri: Uri) {
-        if (uri.toString().startsWith(appEnv.baseInviteUrl)) {
+        val startsWithBaseUrl = AppEnv.ALL_BASE_URLS.any { baseUrl -> uri.toString().startsWith(baseUrl) }
+        if (startsWithBaseUrl) {
             val pathSegments = uri.pathSegments
             // https://web.flat.shengwang.cn/join/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/
             if (pathSegments.size == 2 && pathSegments[0] == "join") {
