@@ -2,11 +2,14 @@ package io.agora.flat.ui.manager
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.data.Success
+import io.agora.flat.data.dao.RecordHistoryDao
 import io.agora.flat.data.model.BackgroundConfig
 import io.agora.flat.data.model.LayoutConfig
+import io.agora.flat.data.model.RecordHistory
 import io.agora.flat.data.model.RoomUser
 import io.agora.flat.data.model.TranscodingConfig
 import io.agora.flat.data.model.UpdateLayoutClientRequest
+import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.CloudRecordRepository
 import io.agora.flat.util.Ticker
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +24,7 @@ import javax.inject.Inject
 class RecordManager @Inject constructor(
     private val cloudRecordRepository: CloudRecordRepository,
     private val userManager: UserManager,
+    private val recordHistoryDao: RecordHistoryDao,
 ) {
     lateinit var viewModelScope: CoroutineScope
     lateinit var roomUUID: String
@@ -40,20 +44,34 @@ class RecordManager @Inject constructor(
         @JvmStatic
         fun filterOnStages(users: List<RoomUser>): List<RoomUser> {
             return users.filter { it.isOnStage }
-                .sortedBy { user ->
-                    if (user.isOwner) -1 else user.rtcUID
-                }
+                .sortedWith(compareBy({ !it.isOwner }, { it.rtcUID }))
                 .take(MAX_USER_SIZE)
         }
     }
 
-    fun reset(roomUUID: String, scope: CoroutineScope) {
-        this.roomUUID = roomUUID
+    suspend fun reset(uuid: String, scope: CoroutineScope) {
         viewModelScope = scope
-
         viewModelScope.launch {
             userManager.observeUsers().collect {
                 videoUsers.value = filterOnStages(it)
+            }
+        }
+
+        viewModelScope.launch {
+            videoUsers.collect {
+                if (recordState.value != null) {
+                    updateRecordLayout()
+                }
+            }
+        }
+
+        roomUUID = uuid
+        recordHistoryDao.getByRoomUuid(uuid).firstOrNull()?.let { record ->
+            cloudRecordRepository.queryRecordWithAgora(uuid, record.resourceId, record.sid).onSuccess {
+                recordState.value = RecordState(
+                    resourceId = it.resourceId,
+                    sid = it.sid,
+                )
             }
         }
     }
@@ -71,20 +89,35 @@ class RecordManager @Inject constructor(
                 transcodingConfig()
             )
             if (startResp is Success) {
-                recordState.value = RecordState(
-                    resourceId = startResp.data.resourceId,
-                    sid = startResp.data.sid
-                )
+                with(startResp.data) {
+                    recordState.value = RecordState(
+                        resourceId = resourceId,
+                        sid = sid
+                    )
+                    recordHistoryDao.insert(
+                        RecordHistory(
+                            roomUuid = roomUUID,
+                            resourceId = resourceId,
+                            sid = sid,
+                        )
+                    )
+                }
                 startTimer()
+                updateRecordLayout()
             }
         }
     }
 
-    suspend fun stopRecord() {
+    suspend fun stopRecord(endClass: Boolean = false) {
         recordState.value?.run {
             val resp = cloudRecordRepository.stopRecordWithAgora(roomUUID, resourceId, sid)
             if (resp is Success) {
                 recordState.value = null
+                if (endClass) {
+                    recordHistoryDao.deleteByRoomUuid(roomUUID)
+                } else {
+                    recordHistoryDao.deleteByResourceId(resourceId)
+                }
             }
             stopTimer()
         }
@@ -96,7 +129,6 @@ class RecordManager @Inject constructor(
             Ticker.tickerFlow(1000, 1000).collect {
                 val state = recordState.value ?: return@collect
                 recordState.value = state.copy(recordTime = state.recordTime + 1)
-                updateRecordLayout()
             }
         }
     }
@@ -149,7 +181,7 @@ class RecordManager @Inject constructor(
     }
 }
 
-data class RecordState constructor(
+data class RecordState(
     val resourceId: String,
     val sid: String,
     val recordTime: Long = 0,
