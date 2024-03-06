@@ -12,6 +12,8 @@ class Constants {
 
         const val Privacy = "https://www.flat.shengwang.cn/privacy.html"
 
+        const val Registration = "https://beian.miit.gov.cn"
+
         const val Libraries = "https://www.flat.shengwang.cn/privacy-extra/libraries.html"
     }
 

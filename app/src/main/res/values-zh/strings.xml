@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Flat</string>
     <string name="toast_in_development">Not Supported Yet</string>
 
@@ -271,6 +271,7 @@
     <string name="upload_failure">上传失败</string>
     <string name="service_agreement">服务协议</string>
     <string name="privacy_agreement">隐私协议</string>
+    <string name="icp_registration_record">ICP编号: 沪ICP备14053584号-25A</string>
     <string name="network_error">网络异常，请检查网络设置</string>
     <string name="copy_success">复制成功</string>
 

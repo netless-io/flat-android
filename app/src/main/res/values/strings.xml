@@ -51,6 +51,7 @@
     <string name="title_country_or_area">Country/Area</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="term_of_service">Term of Service</string>
+    <string name="icp_registration_record">ICP编号: 沪ICP备14053584号-25A</string>
     <string name="info_gathering">Information Gathering</string>
     <string name="info_third_party">Third-party Information</string>
     <string name="network_acceleration">Network Acceleration</string>
