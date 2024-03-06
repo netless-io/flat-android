@@ -56,7 +56,9 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
 
-            loginConfig = LoginConfig(google = false)
+            loginConfig = LoginConfig(google = false),
+
+            showIcp = true,
         )
 
         envMap[ENV_CN_PROD] = EnvItem(
@@ -73,11 +75,13 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 endpoint = "https://cn-hangzhou.log.aliyuncs.com",
             ),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
-            wechatId = "wx09437693798bc108", 
+            wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
 
-            loginConfig = LoginConfig(google = false)
+            loginConfig = LoginConfig(google = false),
+
+            showIcp = true,
         )
 
         envMap[ENV_SG_PROD] = EnvItem(
@@ -178,6 +182,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val phoneFirst get() = currentEnvItem.loginConfig.phoneFirst
 
+    val showIcp get() = currentEnvItem.showIcp
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,
@@ -193,6 +199,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         val region: String = "cn-hz",
 
         val loginConfig: LoginConfig = LoginConfig(),
+
+        val showIcp: Boolean = false,
     )
 }
 
