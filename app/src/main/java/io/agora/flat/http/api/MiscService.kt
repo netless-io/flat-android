@@ -3,6 +3,7 @@ package io.agora.flat.http.api
 import io.agora.flat.data.model.*
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 /**
@@ -32,8 +33,6 @@ interface MiscService {
         @Body req: RtmCensorReq,
     ): Call<BaseResp<RtmCensorRespData>>
 
-    @POST("v2/region/configs")
-    fun getRegionConfigs(
-        @Body req: BaseReq = BaseReq.EMPTY,
-    ): Call<BaseResp<RegionConfigs>>
+    @GET("v2/region/configs")
+    fun getRegionConfigs(): Call<BaseResp<RegionConfigs>>
 }

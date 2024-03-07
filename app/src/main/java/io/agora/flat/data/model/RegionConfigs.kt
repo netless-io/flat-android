@@ -59,11 +59,10 @@ data class Google(
 )
 
 data class CloudStorage(
-    @SerializedName("singleFileSize") var singleFileSize: Int? = null,
-    @SerializedName("totalSize") var totalSize: Int? = null,
+    @SerializedName("singleFileSize") var singleFileSize: Long? = null,
+    @SerializedName("totalSize") var totalSize: Long? = null,
     @SerializedName("allowFileSuffix") var allowFileSuffix: ArrayList<String> = arrayListOf(),
     @SerializedName("accessKey") var accessKey: String? = null
-
 )
 
 data class Censorship(
