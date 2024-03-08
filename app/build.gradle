@@ -18,8 +18,8 @@ android {
         applicationId "io.agora.flat"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 57
-        versionName "2.10.1-beta"
+        versionCode 58
+        versionName "2.10.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
