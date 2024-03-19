@@ -4,6 +4,7 @@ data class RecordInfo constructor(
     val title: String,
     val ownerUUID: String,
     val roomType: RoomType,
+    val region: String,
     val whiteboardRoomToken: String,
     val whiteboardRoomUUID: String,
     val rtmToken: String,

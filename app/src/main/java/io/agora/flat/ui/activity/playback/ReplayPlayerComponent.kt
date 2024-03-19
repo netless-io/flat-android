@@ -21,10 +21,12 @@ import com.herewhite.sdk.WhiteSdk
 import com.herewhite.sdk.WhiteSdkConfiguration
 import com.herewhite.sdk.domain.PlayerConfiguration
 import com.herewhite.sdk.domain.Promise
+import com.herewhite.sdk.domain.Region
 import com.herewhite.sdk.domain.SDKError
 import com.herewhite.sdk.domain.WindowParams
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
+import io.agora.board.fast.model.FastRegion
 import io.agora.flat.BuildConfig
 import io.agora.flat.R
 import io.agora.flat.data.AppEnv
@@ -182,6 +184,7 @@ class ReplayPlayerComponent(
                     createWhitePlayer(
                         it.recordInfo.whiteboardRoomUUID,
                         it.recordInfo.whiteboardRoomToken,
+                        it.recordInfo.region,
                         it.beginTime,
                         it.duration
                     )
@@ -208,7 +211,18 @@ class ReplayPlayerComponent(
         }
     }
 
-    private fun createWhitePlayer(roomUUID: String, roomToken: String, beginTime: Long, duration: Long) {
+    private fun String.toRegion(): Region {
+        val region = Region.values().find { it.name.lowercase().replace('_', '-') == this }
+        return region ?: Region.cn
+    }
+
+    private fun createWhitePlayer(
+        roomUUID: String,
+        roomToken: String,
+        region: String,
+        beginTime: Long,
+        duration: Long
+    ) {
         val conf = PlayerConfiguration(roomUUID, roomToken).apply {
             val styleMap = hashMapOf(
                 "bottom" to "30px",
@@ -224,6 +238,7 @@ class ReplayPlayerComponent(
             windowParams.scrollVerticalOnly = true
             windowParams.prefersColorScheme = if (activity.isDarkMode()) Dark else Light
         }
+        conf.region = region.toRegion()
         conf.beginTimestamp = beginTime
         conf.duration = duration
 

@@ -41,7 +41,7 @@ class RoomServiceFetcherTest {
         )
 
         cases.forEach { it ->
-            assertEquals(it.expected, RoomServiceFetcher.fetchEnv(it.uuid, it.env))
+            assertEquals(it.expected, ServiceFetcher.fetchEnv(it.uuid, it.env))
         }
     }
 }
