@@ -1,6 +1,7 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.data.Result
+import io.agora.flat.data.ServiceFetcher
 import io.agora.flat.data.model.*
 import io.agora.flat.data.toResult
 import io.agora.flat.http.api.CloudRecordService
@@ -12,6 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class CloudRecordRepository @Inject constructor(
     private val cloudRecordService: CloudRecordService,
+    private val serviceFetcher: ServiceFetcher,
 ) {
     suspend fun acquireRecord(roomUUID: String, expiredHour: Int = 24): Result<RecordAcquireRespData> {
         return withContext(Dispatchers.IO) {
@@ -100,7 +102,11 @@ class CloudRecordRepository @Inject constructor(
 
     suspend fun getRecordInfo(roomUUID: String): Result<RecordInfo> {
         return withContext(Dispatchers.IO) {
-            cloudRecordService.getRecordInfo(PureRoomReq(roomUUID)).toResult()
+            fetchService(roomUUID).getRecordInfo(PureRoomReq(roomUUID)).toResult()
         }
+    }
+
+    private fun fetchService(roomUUID: String): CloudRecordService {
+        return serviceFetcher.fetchCloudRecordService(roomUUID)
     }
 }

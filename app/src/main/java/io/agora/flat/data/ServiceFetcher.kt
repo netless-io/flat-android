@@ -1,6 +1,7 @@
 package io.agora.flat.data
 
 import io.agora.flat.di.NetworkModule
+import io.agora.flat.http.api.CloudRecordService
 import io.agora.flat.http.api.RoomService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -8,23 +9,24 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 /**
  * Fetch room service by uuid
  *
  * For joining rooms between different regions
  */
 @Singleton
-class RoomServiceFetcher @Inject constructor(
+class ServiceFetcher @Inject constructor(
     @NetworkModule.NormalOkHttpClient private val client: OkHttpClient,
     private val appEnv: AppEnv
 ) {
     companion object {
-        val regions = listOf(
+        private val regions = listOf(
             "CN",
             "SG",
         )
 
-        val codeMap = mapOf(
+        private val codeMap = mapOf(
             "1" to "CN",
             "2" to "SG",
         )
@@ -48,23 +50,31 @@ class RoomServiceFetcher @Inject constructor(
         }
     }
 
-    private val cache = mutableMapOf<String, RoomService>()
+    private val allCache = mutableMapOf<Pair<String, String>, Any>()
 
-    fun fetch(uuid: String): RoomService {
-        val env = fetchEnv(uuid, appEnv.getEnv())
-        val envServiceUrl = appEnv.getEnvServiceUrl(env)
-
-        return cache[env] ?: createRoomService(envServiceUrl).also {
-            cache[env] = it
-        }
+    fun fetchRoomService(uuid: String): RoomService {
+        return getApiService<RoomService>(uuid)
     }
 
-    private fun createRoomService(serviceUrl: String): RoomService {
+    fun fetchCloudRecordService(uuid: String): CloudRecordService {
+        return getApiService<CloudRecordService>(uuid)
+    }
+
+    private inline fun <reified T> getApiService(uuid: String): T {
+        val env = fetchEnv(uuid, appEnv.getEnv())
+        val name = T::class.java.simpleName
+        return allCache.getOrPut(env to name) {
+            val serviceUrl = appEnv.getEnvServiceUrl(env)
+            createService<T>(serviceUrl)!!
+        } as T
+    }
+
+    private inline fun <reified T> createService(serviceUrl: String): T {
         return Retrofit.Builder()
             .baseUrl(serviceUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(RoomService::class.java)
+            .create(T::class.java)
     }
 }

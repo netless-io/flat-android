@@ -1,10 +1,9 @@
 package io.agora.flat.data.repository
 
 import io.agora.flat.common.android.I18NFetcher
-import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Result
-import io.agora.flat.data.RoomServiceFetcher
+import io.agora.flat.data.ServiceFetcher
 import io.agora.flat.data.manager.JoinRoomRecordManager
 import io.agora.flat.data.model.CancelRoomReq
 import io.agora.flat.data.model.JoinRoomRecord
@@ -32,13 +31,13 @@ import javax.inject.Singleton
 @Singleton
 class RoomRepository @Inject constructor(
     private val roomService: RoomService,
-    private val roomServiceFetcher: RoomServiceFetcher,
+    private val serviceFetcher: ServiceFetcher,
     private val joinRoomRecordManager: JoinRoomRecordManager,
     private val appKVCenter: AppKVCenter,
     private val i18NFetcher: I18NFetcher,
 ) {
     private fun fetchService(uuid: String): RoomService {
-        return roomServiceFetcher.fetch(uuid)
+        return serviceFetcher.fetchRoomService(uuid)
     }
 
     suspend fun getRoomListAll(page: Int): Result<List<RoomInfo>> {
