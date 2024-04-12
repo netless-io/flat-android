@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
-import com.herewhite.sdk.domain.ConvertedFiles
 import com.herewhite.sdk.domain.Promise
 import com.herewhite.sdk.domain.RoomPhase
 import com.herewhite.sdk.domain.SDKError
+import com.herewhite.sdk.domain.Scene
 import com.herewhite.sdk.domain.WindowAppParam
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Dark
 import com.herewhite.sdk.domain.WindowPrefersColorScheme.Light
@@ -256,8 +256,8 @@ class AgoraBoardRoom @Inject constructor(
         fastRoom?.setAppliance(FastAppliance.SELECTOR)
     }
 
-    override fun insertPpt(dir: String, files: ConvertedFiles, title: String) {
-        val param = WindowAppParam.createSlideApp(dir, files.scenes, title)
+    override fun insertPpt(dir: String, scenes: List<Scene>, title: String) {
+        val param = WindowAppParam.createSlideApp(dir, scenes.toTypedArray(), title)
         fastRoom?.room?.addApp(param, null)
     }
 

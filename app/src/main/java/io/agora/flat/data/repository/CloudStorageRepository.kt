@@ -51,10 +51,20 @@ class CloudStorageRepository @Inject constructor(
      * @param fileSize
      * @param path DirectoryPath
      */
-    suspend fun updateStart(fileName: String, fileSize: Long, path: String): Result<CloudUploadStartResp> {
+    suspend fun updateStart(
+        fileName: String,
+        fileSize: Long,
+        path: String,
+        convertType: String = "WhiteboardProjector"
+    ): Result<CloudUploadStartResp> {
         return withContext(Dispatchers.IO) {
             cloudStorageService.updateStart(
-                CloudUploadStartReq(fileName = fileName, fileSize = fileSize, targetDirectoryPath = path)
+                CloudUploadStartReq(
+                    fileName = fileName,
+                    fileSize = fileSize,
+                    targetDirectoryPath = path,
+                    convertType = convertType,
+                )
             ).toResult()
         }
     }

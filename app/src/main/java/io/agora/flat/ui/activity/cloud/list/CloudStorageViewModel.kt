@@ -20,7 +20,6 @@ import io.agora.flat.data.Success
 import io.agora.flat.data.model.*
 import io.agora.flat.data.onSuccess
 import io.agora.flat.data.repository.CloudStorageRepository
-import io.agora.flat.http.model.CloudUploadStartResp
 import io.agora.flat.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

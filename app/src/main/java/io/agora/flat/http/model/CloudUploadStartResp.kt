@@ -6,4 +6,5 @@ data class CloudUploadStartResp constructor(
     val ossFilePath: String,
     val policy: String,
     val signature: String,
+    val convertType: String? = null,
 )
