@@ -11,6 +11,8 @@ import com.herewhite.sdk.converter.ProjectorQuery
 import com.herewhite.sdk.domain.ConversionInfo
 import com.herewhite.sdk.domain.ConvertException
 import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.PptPage
+import com.herewhite.sdk.domain.Scene
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.Constants
 import io.agora.flat.common.board.AgoraBoardRoom
@@ -204,24 +206,31 @@ class ClassCloudViewModel @Inject constructor(
 
     fun insertCourseware(file: CloudFile) {
         viewModelScope.launch {
-            // "正在插入课件……"
             when (file.fileURL.coursewareType()) {
                 CoursewareType.Image -> {
                     insertImage(file.fileURL)
                 }
+
                 CoursewareType.Audio, CoursewareType.Video -> {
                     boardRoom.insertVideo(file.fileURL, file.fileName)
                 }
+
                 CoursewareType.DocStatic -> {
-                    insertDocs(file, false)
-                }
-                CoursewareType.DocDynamic -> {
                     if (file.resourceType == ResourceType.WhiteboardConvert) {
-                        insertDocs(file, true)
+                        insertV5Docs(file, false)
                     } else if (file.resourceType == ResourceType.WhiteboardProjector) {
                         insertProjectorDocs(file)
                     }
                 }
+
+                CoursewareType.DocDynamic -> {
+                    if (file.resourceType == ResourceType.WhiteboardConvert) {
+                        insertV5Docs(file, true)
+                    } else if (file.resourceType == ResourceType.WhiteboardProjector) {
+                        insertProjectorDocs(file)
+                    }
+                }
+
                 else -> {
                     // Not Support Mobile
                 }
@@ -231,8 +240,8 @@ class ClassCloudViewModel @Inject constructor(
 
     private suspend fun insertImage(fileUrl: String) {
         val imageInfo = loadImageInfo(fileUrl)
-        val change = imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_90
-                || imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_270
+        val change =
+            imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_90 || imageInfo.orientation == ExifInterface.ORIENTATION_ROTATE_270
         if (change) {
             boardRoom.insertImage(fileUrl, w = imageInfo.height, h = imageInfo.width)
         } else {
@@ -275,7 +284,7 @@ class ClassCloudViewModel @Inject constructor(
         }
     }
 
-    private fun insertDocs(file: CloudFile, dynamic: Boolean) {
+    private fun insertV5Docs(file: CloudFile, dynamic: Boolean) {
         val convert = ConverterV5.Builder().apply {
             setResource(file.fileURL)
             setType(if (dynamic) ConvertType.Dynamic else ConvertType.Static)
@@ -287,7 +296,11 @@ class ClassCloudViewModel @Inject constructor(
                 }
 
                 override fun onFinish(ppt: ConvertedFiles, convertInfo: ConversionInfo) {
-                    boardRoom.insertPpt("/${file.whiteboardConvert.taskUUID}/${UUID.randomUUID()}", ppt, file.fileName)
+                    boardRoom.insertPpt(
+                        "/${file.whiteboardConvert.taskUUID}/${UUID.randomUUID()}",
+                        ppt.scenes.toList(),
+                        file.fileName
+                    )
                 }
 
                 override fun onFailure(e: ConvertException) {
@@ -297,10 +310,20 @@ class ClassCloudViewModel @Inject constructor(
         convert.startConvertTask()
     }
 
+    private fun ProjectorQuery.QueryResponse.scenes(): List<Scene> {
+        return IntRange(1, images.size).mapNotNull { index ->
+            images["$index"]?.let {
+                Scene("$index", PptPage(it.url, it.width.toDouble(), it.height.toDouble()))
+            }
+        }
+    }
+
+    private fun ProjectorQuery.QueryResponse.isStatic() = type == "static"
+
     private fun insertProjectorDocs(file: CloudFile) {
         val projectorQuery = ProjectorQuery.Builder()
-            .setTaskToken(file.whiteboardProjector.taskToken)
             .setTaskUuid(file.whiteboardProjector.taskUUID)
+            .setTaskToken(file.whiteboardProjector.taskToken)
             .setRegion(appEnv.region.toRegion())
             .setPoolInterval(2000)
             .setCallback(object : ProjectorQuery.Callback {
@@ -309,14 +332,21 @@ class ClassCloudViewModel @Inject constructor(
                 }
 
                 override fun onFinish(response: ProjectorQuery.QueryResponse) {
-                    boardRoom.insertProjectorPpt(file.whiteboardProjector.taskUUID, response.prefix, file.fileName)
+                    if (response.isStatic()) {
+                        boardRoom.insertPpt(
+                            "/${response.uuid}/${UUID.randomUUID()}",
+                            response.scenes(),
+                            file.fileName
+                        )
+                    } else {
+                        boardRoom.insertProjectorPpt(file.whiteboardProjector.taskUUID, response.prefix, file.fileName)
+                    }
                 }
 
                 override fun onFailure(e: ConvertException?) {
 
                 }
-            })
-            .build()
+            }).build()
         projectorQuery.startQuery()
     }
 

@@ -1,6 +1,7 @@
 package io.agora.flat.di.interfaces
 
 import com.herewhite.sdk.domain.ConvertedFiles
+import com.herewhite.sdk.domain.Scene
 import io.agora.board.fast.FastboardView
 import io.agora.board.fast.ui.RoomControllerGroup
 import io.agora.flat.common.board.BoardError
@@ -27,7 +28,7 @@ interface BoardRoom {
     // courseware
     fun insertImage(imageUrl: String, w: Int, h: Int)
 
-    fun insertPpt(dir: String, files: ConvertedFiles, title: String)
+    fun insertPpt(dir: String, scenes: List<Scene>, title: String)
 
     fun insertProjectorPpt(taskUuid: String, prefixUrl: String, title: String)
 
