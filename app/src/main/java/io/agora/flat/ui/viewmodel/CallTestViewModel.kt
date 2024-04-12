@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.rtc.AgoraRtc
 import io.agora.flat.di.interfaces.RtcApi
-import io.agora.rtc.IRtcEngineEventHandler
-import io.agora.rtc.IRtcEngineEventHandler.LastmileProbeResult
-import io.agora.rtc.RtcEngine
-import io.agora.rtc.internal.LastmileProbeConfig
+import io.agora.rtc2.IRtcEngineEventHandler
+import io.agora.rtc2.IRtcEngineEventHandler.LastmileProbeResult
+import io.agora.rtc2.RtcEngine
+import io.agora.rtc2.internal.LastmileProbeConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

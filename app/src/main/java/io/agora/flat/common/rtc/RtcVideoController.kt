@@ -1,4 +1,4 @@
-package io.agora.flat.ui.viewmodel
+package io.agora.flat.common.rtc
 
 import android.view.TextureView
 import android.view.View
@@ -6,14 +6,15 @@ import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.agora.flat.di.interfaces.RtcApi
-import io.agora.rtc.RtcEngine
-import io.agora.rtc.video.VideoCanvas
+import io.agora.rtc2.video.VideoCanvas
+import io.agora.rtc2.RtcEngine
 import javax.inject.Inject
 import kotlin.collections.set
 
 @ActivityRetainedScoped
 class RtcVideoController @Inject constructor(private val rtcApi: RtcApi) {
     private var textureMap = HashMap<Int, TextureView>()
+
     var shareScreenContainer: FrameLayout? = null
     var localUid: Int = 0
     var shareScreenUid: Int = 0

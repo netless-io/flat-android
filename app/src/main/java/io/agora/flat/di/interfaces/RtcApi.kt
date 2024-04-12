@@ -2,13 +2,13 @@ package io.agora.flat.di.interfaces
 
 import io.agora.flat.common.rtc.RtcEvent
 import io.agora.flat.common.rtc.RtcJoinOptions
-import io.agora.rtc.video.VideoCanvas
+import io.agora.rtc2.video.VideoCanvas
 import kotlinx.coroutines.flow.Flow
 
 interface RtcApi {
     fun joinChannel(options: RtcJoinOptions): Int
 
-    fun leaveChannel()
+    fun leaveChannel(): Int
 
     fun enableLocalVideo(enabled: Boolean)
 

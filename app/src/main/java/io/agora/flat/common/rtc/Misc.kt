@@ -1,6 +1,7 @@
 package io.agora.flat.common.rtc
 
-import io.agora.rtc.IRtcEngineEventHandler
+import io.agora.rtc2.Constants
+import io.agora.rtc2.IRtcEngineEventHandler
 
 internal class RTCEventHandler : IRtcEngineEventHandler() {
     private val listeners = ArrayList<RTCEventListener>()
@@ -19,10 +20,20 @@ internal class RTCEventHandler : IRtcEngineEventHandler() {
         }
     }
 
+    override fun onRejoinChannelSuccess(channel: String, uid: Int, elapsed: Int) {
+        for (listener in listeners) {
+            listener.onRejoinChannelSuccess(channel, uid, elapsed)
+        }
+    }
+
     override fun onLeaveChannel(stats: RtcStats) {
         for (listener in listeners) {
             listener.onLeaveChannel(stats)
         }
+    }
+
+    override fun onConnectionStateChanged(state: Int, reason: Int) {
+        super.onConnectionStateChanged(state, reason)
     }
 
     override fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {
@@ -43,7 +54,7 @@ internal class RTCEventHandler : IRtcEngineEventHandler() {
         }
     }
 
-    override fun onLocalVideoStats(stats: LocalVideoStats) {
+    override fun onLocalVideoStats(source: Constants.VideoSourceType, stats: LocalVideoStats) {
         for (listener in listeners) {
             listener.onLocalVideoStats(stats)
         }
@@ -90,14 +101,46 @@ internal class RTCEventHandler : IRtcEngineEventHandler() {
             listener.onAudioVolumeIndication(speakers, totalVolume)
         }
     }
+
+    override fun onPermissionError(permission: Int) {
+        for (listener in listeners) {
+            listener.onPermissionError(permission)
+        }
+    }
+
+    override fun onRemoteAudioStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {
+        for (listener in listeners) {
+            listener.onRemoteAudioStateChanged(uid, state, reason, elapsed)
+        }
+    }
+
+    override fun onRemoteVideoStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {
+        for (listener in listeners) {
+            listener.onRemoteVideoStateChanged(uid, state, reason, elapsed)
+        }
+    }
+
+    override fun onUserMuteAudio(uid: Int, muted: Boolean) {
+        for (listener in listeners) {
+            listener.onUserMuteAudio(uid, muted)
+        }
+    }
+
+    override fun onUserMuteVideo(uid: Int, muted: Boolean) {
+        for (listener in listeners) {
+            listener.onUserMuteVideo(uid, muted)
+        }
+    }
 }
 
 internal interface RTCEventListener {
     fun onFirstRemoteVideoDecoded(uid: Int, width: Int, height: Int, elapsed: Int) {}
 
-    fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {}
-
     fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {}
+
+    fun onRejoinChannelSuccess(channel: String, uid: Int, elapsed: Int) {}
+
+    fun onLeaveChannel(stats: IRtcEngineEventHandler.RtcStats?) {}
 
     fun onUserOffline(uid: Int, reason: Int) {}
 
@@ -118,4 +161,13 @@ internal interface RTCEventListener {
     fun onRemoteAudioStats(stats: IRtcEngineEventHandler.RemoteAudioStats) {}
 
     fun onAudioVolumeIndication(speakers: Array<out IRtcEngineEventHandler.AudioVolumeInfo>, totalVolume: Int) {}
+    fun onPermissionError(permission: Int) {}
+
+    fun onRemoteAudioStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {}
+
+    fun onRemoteVideoStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {}
+
+    fun onUserMuteAudio(uid: Int, muted: Boolean) {}
+
+    fun onUserMuteVideo(uid: Int, muted: Boolean) {}
 }

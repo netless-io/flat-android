@@ -59,7 +59,7 @@ import io.agora.flat.ui.manager.RecordManager
 import io.agora.flat.ui.manager.RoomErrorManager
 import io.agora.flat.ui.manager.UserManager
 import io.agora.flat.ui.viewmodel.ChatMessageManager
-import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.common.rtc.RtcVideoController
 import io.agora.flat.util.toInviteCodeDisplay
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
@@ -265,11 +265,19 @@ class ClassRoomViewModel @Inject constructor(
     private fun joinRtc() {
         logger.i("[RTC] start join rtc")
         state.value?.run {
+            val rtcJoinOptions = RtcJoinOptions(
+                token = rtcToken,
+                channel = roomUUID,
+                uid = rtcUID,
+                audioOpen = audioOpen,
+                videoOpen = videoOpen
+            )
             rtcVideoController.setupUid(uid = rtcUID, ssUid = rtcShareScreen.uid)
-            rtcApi.joinChannel(
-                RtcJoinOptions(rtcToken, roomUUID, rtcUID, audioOpen = audioOpen, videoOpen = videoOpen)
-            ).also {
-                logger.i("[RTC] join rtc result: $it")
+            rtcApi.joinChannel(rtcJoinOptions).also { result ->
+                when (result) {
+                    0 -> logger.i("[RTC] join rtc successful")
+                    else -> logger.w("[RTC] join rtc error: $result")
+                }
             }
         }
     }
