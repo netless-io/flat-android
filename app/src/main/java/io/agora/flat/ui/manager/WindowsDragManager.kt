@@ -7,7 +7,7 @@ import dagger.hilt.android.scopes.ActivityScoped
 import io.agora.flat.common.board.WhiteSyncedState
 import io.agora.flat.common.board.WindowInfo
 import io.agora.flat.ui.activity.play.UserWindowUiState
-import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.common.rtc.RtcVideoController
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -5,12 +5,13 @@ import io.agora.flat.data.AppEnv
 import io.agora.flat.di.interfaces.Logger
 import io.agora.flat.di.interfaces.RtcApi
 import io.agora.flat.di.interfaces.StartupInitializer
-import io.agora.rtc.Constants
-import io.agora.rtc.IRtcEngineEventHandler
-import io.agora.rtc.RtcEngine
-import io.agora.rtc.models.ChannelMediaOptions
-import io.agora.rtc.video.VideoCanvas
-import io.agora.rtc.video.VideoEncoderConfiguration
+import io.agora.rtc2.ChannelMediaOptions
+import io.agora.rtc2.Constants
+import io.agora.rtc2.IRtcEngineEventHandler
+import io.agora.rtc2.RtcEngine
+import io.agora.rtc2.RtcEngineConfig
+import io.agora.rtc2.video.VideoCanvas
+import io.agora.rtc2.video.VideoEncoderConfiguration
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -20,11 +21,17 @@ import javax.inject.Singleton
 @Singleton
 class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : RtcApi, StartupInitializer {
     private lateinit var rtcEngine: RtcEngine
-    private val mHandler: RTCEventHandler = RTCEventHandler()
+    private val eventHandler: RTCEventHandler = RTCEventHandler()
+    private var currentUid = 0
 
     override fun init(context: Context) {
         try {
-            rtcEngine = RtcEngine.create(context, appEnv.agoraAppId, mHandler)
+            val config = RtcEngineConfig().apply {
+                mContext = context
+                mAppId = appEnv.agoraAppId
+                mEventHandler = eventHandler
+            }
+            rtcEngine = RtcEngine.create(config)
             // rtcEngine.setLogFile(FileUtil.initializeLogFile(this))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -44,6 +51,7 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
             )
         )
         rtcEngine.adjustRecordingSignalVolume(200)
+        rtcEngine.setChannelProfile(Constants.CHANNEL_PROFILE_COMMUNICATION)
     }
 
     fun rtcEngine(): RtcEngine {
@@ -51,14 +59,22 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
     }
 
     override fun joinChannel(options: RtcJoinOptions): Int {
-        val channelMediaOptions = ChannelMediaOptions()
-        channelMediaOptions.publishLocalVideo = options.videoOpen
-        channelMediaOptions.publishLocalAudio = options.audioOpen
-        return rtcEngine.joinChannel(options.token, options.channel, "{}", options.uid, channelMediaOptions)
+        currentUid = options.uid
+        logger.i("[RTC] create media options by state: video=${options.videoOpen}, audio=${options.audioOpen}")
+        val mediaOptions = ChannelMediaOptions().apply {
+            clientRoleType =
+                if (options.videoOpen || options.audioOpen) Constants.CLIENT_ROLE_BROADCASTER else Constants.CLIENT_ROLE_AUDIENCE
+            publishCameraTrack = options.videoOpen
+            publishMicrophoneTrack = options.audioOpen
+            autoSubscribeAudio = true
+            autoSubscribeVideo = true
+        }
+        return rtcEngine.joinChannel(options.token, options.channel, options.uid, mediaOptions)
     }
 
-    override fun leaveChannel() {
-        rtcEngine.leaveChannel()
+    override fun leaveChannel(): Int {
+        currentUid = 0
+        return rtcEngine.leaveChannel()
     }
 
     override fun enableLocalVideo(enabled: Boolean) {
@@ -78,9 +94,12 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
     }
 
     override fun updateLocalStream(audio: Boolean, video: Boolean) {
-        // 使用 enableLocalAudio 关闭或开启本地采集后，本地听远端播放会有短暂中断。
-        rtcEngine.muteLocalAudioStream(!audio)
-        rtcEngine.muteLocalVideoStream(!video)
+        val mediaOptions = ChannelMediaOptions().apply {
+            clientRoleType = if (audio || video) Constants.CLIENT_ROLE_BROADCASTER else Constants.CLIENT_ROLE_AUDIENCE
+            publishCameraTrack = video
+            publishMicrophoneTrack = audio
+        }
+        rtcEngine.updateChannelMediaOptions(mediaOptions)
     }
 
     override fun updateRemoteStream(rtcUid: Int, audio: Boolean, video: Boolean) {
@@ -99,8 +118,7 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
             }
 
             override fun onAudioVolumeIndication(
-                speakers: Array<out IRtcEngineEventHandler.AudioVolumeInfo>,
-                totalVolume: Int
+                speakers: Array<out IRtcEngineEventHandler.AudioVolumeInfo>, totalVolume: Int
             ) {
                 val info = speakers.map {
                     AudioVolumeInfo(uid = it.uid, volume = it.volume, vad = it.vad)
@@ -109,7 +127,7 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
             }
 
             override fun onNetworkQuality(uid: Int, txQuality: Int, rxQuality: Int) {
-                if (uid == 0) {
+                if (uid == currentUid) {
                     trySend(RtcEvent.NetworkStatus(getOverallQuality(txQuality, rxQuality)))
                 }
             }
@@ -117,11 +135,31 @@ class AgoraRtc @Inject constructor(val appEnv: AppEnv, val logger: Logger) : Rtc
             override fun onRtcStats(stats: IRtcEngineEventHandler.RtcStats) {
                 trySend(RtcEvent.LastmileDelay(stats.lastmileDelay))
             }
+
+            override fun onPermissionError(permission: Int) {
+                logger.e("[RTC] permission error: $permission")
+            }
+
+            override fun onRemoteAudioStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {
+                logger.i("[RTC] remote audio state changed: $uid, $state, $reason, $elapsed")
+            }
+
+            override fun onRemoteVideoStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {
+                logger.i("[RTC] remote video state changed: $uid, $state, $reason, $elapsed")
+            }
+
+            override fun onUserMuteAudio(uid: Int, muted: Boolean) {
+                logger.i("[RTC] user mute audio: $uid, $muted")
+            }
+
+            override fun onUserMuteVideo(uid: Int, muted: Boolean) {
+                logger.i("[RTC] user mute video: $uid, $muted")
+            }
         }
-        mHandler.addListener(listener)
+        eventHandler.addListener(listener)
         awaitClose {
             logger.i("[RTC] rtc event flow closed")
-            mHandler.removeListener(listener)
+            eventHandler.removeListener(listener)
         }
     }
 

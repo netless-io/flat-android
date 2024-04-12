@@ -273,7 +273,7 @@ dependencies {
         implementation "com.github.netless-io:sync-player-android:1.2.1"
     }
 
-    implementation 'io.agora.rtc:full-sdk:3.7.2.1'
+    implementation 'io.agora.rtc:full-sdk:4.3.0'
     implementation 'com.github.agorabuilder:rtm-sdk:1.4.10'
 
     // Exoplayer

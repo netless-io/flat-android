@@ -47,7 +47,7 @@ import io.agora.flat.ui.manager.RoomOverlayManager
 import io.agora.flat.ui.manager.WindowsDragManager
 import io.agora.flat.ui.view.PaddingItemDecoration
 import io.agora.flat.ui.view.UserWindowLayout
-import io.agora.flat.ui.viewmodel.RtcVideoController
+import io.agora.flat.common.rtc.RtcVideoController
 import io.agora.flat.util.dp2px
 import io.agora.flat.util.renderTo
 import io.agora.flat.util.showToast
@@ -66,10 +66,18 @@ class RtcComponent(
     private val userWindowsLayout: FrameLayout,
 ) : BaseComponent(activity, rootView) {
     companion object {
-        val REQUESTED_PERMISSIONS = arrayOf(
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.CAMERA,
-        )
+        fun getRequiredPermissions(): Array<String> {
+            return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH_CONNECT
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.CAMERA,
+                )
+            }
+        }
     }
 
     @EntryPoint
@@ -187,12 +195,15 @@ class RtcComponent(
                     is RtcEvent.UserJoined -> lifecycleScope.launch {
                         rtcVideoController.handlerJoined(event.uid)
                     }
+
                     is RtcEvent.UserOffline -> lifecycleScope.launch {
                         rtcVideoController.handleOffline(event.uid)
                     }
+
                     is RtcEvent.VolumeIndication -> {
                         adapter.updateVolume(event.speakers)
                     }
+
                     else -> {
 
                     }
@@ -206,6 +217,7 @@ class RtcComponent(
                     is RewardReceived -> {
                         handleReward(event.userUUID)
                     }
+
                     else -> {}
                 }
             }
@@ -271,8 +283,7 @@ class RtcComponent(
                     getViewRect(container, userWindowsBinding.root)
                 } ?: Rect(0, 0, 0, 0)
                 addNewUserWindow(
-                    user = it,
-                    windowUiState = UserWindowUiState(
+                    user = it, windowUiState = UserWindowUiState(
                         centerX = rect.centerX().toFloat(),
                         centerY = rect.centerY().toFloat(),
                         width = rect.width().toFloat(),
@@ -288,10 +299,9 @@ class RtcComponent(
             val needAnimate = toUpdate.any {
                 val a = state[it]!!
                 val b = targetState[it]!!
-                abs(a.height - b.height) > scaledTouchSlop ||
-                        abs(a.width - b.width) > scaledTouchSlop ||
-                        abs(a.centerX - b.centerX) > scaledTouchSlop ||
-                        abs(a.centerY - b.centerY) > scaledTouchSlop
+                abs(a.height - b.height) > scaledTouchSlop || abs(a.width - b.width) > scaledTouchSlop || abs(a.centerX - b.centerX) > scaledTouchSlop || abs(
+                    a.centerY - b.centerY
+                ) > scaledTouchSlop
             }
             if (!needAnimate) {
                 windowsDragManager.setWindowMap(targetState)
@@ -334,12 +344,15 @@ class RtcComponent(
             fullScreenBinding.fullAudioOpt, videoListBinding.audioOpt -> userCallOut?.run {
                 viewModel.enableAudio(!it.isSelected, userUUID)
             }
+
             fullScreenBinding.fullVideoOpt, videoListBinding.videoOpt -> userCallOut?.run {
                 viewModel.enableVideo(!it.isSelected, userUUID)
             }
+
             fullScreenBinding.exitFullScreen -> {
                 fullScreenAnimator.hide()
             }
+
             videoListBinding.enterFullScreen -> {
                 hideVideoListOptArea()
                 fullScreenAnimator.show()
@@ -441,45 +454,37 @@ class RtcComponent(
         videoListBinding.videoList.adapter = adapter
         videoListBinding.videoList.addItemDecoration(PaddingItemDecoration(vertical = activity.dp2px(4)))
 
-        videoAreaAnimator = SimpleAnimator(
-            onUpdate = ::updateVideoContainer,
+        videoAreaAnimator = SimpleAnimator(onUpdate = ::updateVideoContainer,
             onShowStart = { videoListBinding.root.isVisible = true },
-            onHideEnd = { videoListBinding.root.isVisible = false }
-        )
+            onHideEnd = { videoListBinding.root.isVisible = false })
 
-        fullScreenAnimator = SimpleAnimator(
-            onUpdate = ::updateView,
-            onShowStart = {
-                fullScreenBinding.root.isVisible = true
-                fullScreenBinding.fullVideoView.isVisible = true
-                userCallOut?.run {
-                    rtcVideoController.enterFullScreen(rtcUID)
-                    rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
+        fullScreenAnimator = SimpleAnimator(onUpdate = ::updateView, onShowStart = {
+            fullScreenBinding.root.isVisible = true
+            fullScreenBinding.fullVideoView.isVisible = true
+            userCallOut?.run {
+                rtcVideoController.enterFullScreen(rtcUID)
+                rtcVideoController.updateFullScreenVideo(fullScreenBinding.fullVideoView, rtcUID)
 
-                    fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
-                    fullScreenBinding.fullScreenAvatar.load(avatarURL) {
-                        crossfade(true)
-                        transformations(CircleCropTransformation())
-                    }
+                fullScreenBinding.fullVideoDisableLayout.isVisible = !videoOpen
+                fullScreenBinding.fullScreenAvatar.load(avatarURL) {
+                    crossfade(true)
+                    transformations(CircleCropTransformation())
                 }
-            },
-            onShowEnd = {
-                fullScreenBinding.fullVideoOptArea.isVisible = true
-            },
-            onHideStart = {
-                fullScreenBinding.fullVideoOptArea.isVisible = false
-            },
-            onHideEnd = {
-                fullScreenBinding.root.isVisible = false
-                fullScreenBinding.fullVideoView.isVisible = false
-                fullScreenBinding.fullVideoDisableLayout.isVisible = false
-                rtcVideoController.exitFullScreen()
-                userCallOut?.run {
-                    adapter.updateVideoView(rtcUID)
-                }
-                clearCallOutAndNotify()
             }
-        )
+        }, onShowEnd = {
+            fullScreenBinding.fullVideoOptArea.isVisible = true
+        }, onHideStart = {
+            fullScreenBinding.fullVideoOptArea.isVisible = false
+        }, onHideEnd = {
+            fullScreenBinding.root.isVisible = false
+            fullScreenBinding.fullVideoView.isVisible = false
+            fullScreenBinding.fullVideoDisableLayout.isVisible = false
+            rtcVideoController.exitFullScreen()
+            userCallOut?.run {
+                adapter.updateVideoView(rtcUID)
+            }
+            clearCallOutAndNotify()
+        })
         initUserWindowsLayout()
     }
 
@@ -585,11 +590,8 @@ class RtcComponent(
     }
 
     private fun checkPermission(actionAfterPermission: () -> Unit) {
-        val permissions = REQUESTED_PERMISSIONS.filter { permission ->
-            ContextCompat.checkSelfPermission(
-                activity,
-                permission
-            ) != PackageManager.PERMISSION_GRANTED
+        val permissions = getRequiredPermissions().filter { permission ->
+            ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
 
         if (permissions.isEmpty()) {
@@ -598,6 +600,7 @@ class RtcComponent(
         }
 
         logger.d("[RTC] checkPermission request $permissions")
+
         activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { it ->
             val allGranted = it.mapNotNull { it.key }.size == it.size
             if (allGranted) {
@@ -632,11 +635,13 @@ class RtcComponent(
                     )
                 )
             }
+
             DragEvent.ACTION_DRAG_ENTERED -> {}
             DragEvent.ACTION_DRAG_LOCATION -> {
                 updateCenter(windowsDragManager.currentUUID(), event.x, event.y)
                 showEnterBoardArea()
             }
+
             DragEvent.ACTION_DROP -> {
                 updateCenter(windowsDragManager.currentUUID(), event.x, event.y)
                 clearDragRectShow()
@@ -822,16 +827,13 @@ class RtcComponent(
         }
 
         val r = Rect()
-        val animator = SimpleAnimator(
-            onUpdate = { value ->
-                r.lerp(from, to, value)
-                windowLayoutMap[uuid]?.renderTo(r)
-            },
-            onShowEnd = {
-                removeNewUserWindow(uuid)
-                adapter.updateItemByUuid(uuid)
-            }
-        )
+        val animator = SimpleAnimator(onUpdate = { value ->
+            r.lerp(from, to, value)
+            windowLayoutMap[uuid]?.renderTo(r)
+        }, onShowEnd = {
+            removeNewUserWindow(uuid)
+            adapter.updateItemByUuid(uuid)
+        })
         animator.show()
     }
 
@@ -861,16 +863,13 @@ class RtcComponent(
         } ?: return
 
         val r = Rect()
-        val animator = SimpleAnimator(
-            onUpdate = { value ->
-                r.lerp(from, to, value)
-                windowLayoutMap[uuid]?.renderTo(r)
-            },
-            onShowEnd = {
-                windowLayoutMap[uuid]?.renderTo(to)
-                updateCenter(uuid, to.centerX().toFloat(), to.centerY().toFloat())
-            }
-        )
+        val animator = SimpleAnimator(onUpdate = { value ->
+            r.lerp(from, to, value)
+            windowLayoutMap[uuid]?.renderTo(r)
+        }, onShowEnd = {
+            windowLayoutMap[uuid]?.renderTo(to)
+            updateCenter(uuid, to.centerX().toFloat(), to.centerY().toFloat())
+        })
         animator.show()
     }
 
@@ -882,21 +881,18 @@ class RtcComponent(
         }
 
         val r = Rect()
-        val animator = SimpleAnimator(
-            onUpdate = { value ->
-                r.lerp(from, to, value)
-                windowLayoutMap[uuid]?.renderTo(r)
-            },
-            onShowEnd = {
-                removeNewUserWindow(uuid)
-                adapter.updateItemByUuid(uuid)
-                if (fullOnStage) {
-                    syncedState.removeMaximizeWindow(uuid)
-                } else {
-                    syncedState.removeNormalWindow(uuid)
-                }
+        val animator = SimpleAnimator(onUpdate = { value ->
+            r.lerp(from, to, value)
+            windowLayoutMap[uuid]?.renderTo(r)
+        }, onShowEnd = {
+            removeNewUserWindow(uuid)
+            adapter.updateItemByUuid(uuid)
+            if (fullOnStage) {
+                syncedState.removeMaximizeWindow(uuid)
+            } else {
+                syncedState.removeNormalWindow(uuid)
             }
-        )
+        })
         animator.show()
     }
 
@@ -953,11 +949,10 @@ class RtcComponent(
      * @param value The value to lerp by. Must be between 0 and 1.
      */
     private fun Rect.lerp(start: Rect, end: Rect, value: Float) {
-        this.set(
-            /* left = */ (start.left + (end.left - start.left) * value).toInt(),
-            /* top = */ (start.top + (end.top - start.top) * value).toInt(),
-            /* right = */ (start.right + (end.right - start.right) * value).toInt(),
-            /* bottom = */ (start.bottom + (end.bottom - start.bottom) * value).toInt()
+        this.set(/* left = */ (start.left + (end.left - start.left) * value).toInt(),/* top = */
+            (start.top + (end.top - start.top) * value).toInt(),/* right = */
+            (start.right + (end.right - start.right) * value).toInt(),/* bottom = */
+            (start.bottom + (end.bottom - start.bottom) * value).toInt()
         )
     }
 
@@ -1025,11 +1020,9 @@ class RtcComponent(
                             rewardAnimationView.alpha = 1 - (time - 1.5f) / 0.5f
                         }
                     }
-                    addListener(
-                        onEnd = {
-                            userWindowsBinding.root.removeView(rewardAnimationView)
-                        }
-                    )
+                    addListener(onEnd = {
+                        userWindowsBinding.root.removeView(rewardAnimationView)
+                    })
                     start()
                 }
             }
