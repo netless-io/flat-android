@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.AppInitializers
+import io.agora.flat.PostLoginInitializers
 import io.agora.flat.R
 import io.agora.flat.common.*
 import io.agora.flat.common.login.LoginManager
@@ -50,6 +51,9 @@ class MainActivity : BaseComposeActivity() {
 
     @Inject
     lateinit var initializers: AppInitializers
+
+    @Inject
+    lateinit var postLoginInitializers: PostLoginInitializers
 
     @Inject
     lateinit var rtcApi: RtcApi
@@ -97,6 +101,7 @@ class MainActivity : BaseComposeActivity() {
                             viewModel.handleDeepLink(data)
                             intent.data = null
                         }
+                        postLoginInitializers.init()
                     },
                     onDestroy = {
                         loginManager.unregisterReceiver(this)
