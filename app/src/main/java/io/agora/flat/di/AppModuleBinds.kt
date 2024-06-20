@@ -22,7 +22,7 @@ abstract class AppModuleBinds {
 
     @Binds
     @IntoSet
-    abstract fun provideRtmInitializer(bind: AgoraRtm): StartupInitializer
+    abstract fun provideRtmInitializer(bind: AgoraRtm): PostLoginInitializer
 
     @Binds
     @IntoSet
