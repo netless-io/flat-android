@@ -85,7 +85,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         )
 
         envMap[ENV_SG_PROD] = EnvItem(
-            agoraAppId = "549c8a24c1e64852bd163f853f5fe14f",
+            agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
             serviceUrl = "https://api.flat.agora.io",
             githubClientId = "da83d7e14217594fba46",
             baseInviteUrl = "https://web.flat.agora.io",
@@ -108,7 +108,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         )
 
         envMap[ENV_SG_DEV] = EnvItem(
-            agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
+            agoraAppId = "a185de0a777f4c159e302abcc0f03b64",
             serviceUrl = "https://flat-api-dev-sg.whiteboard.agora.io",
             githubClientId = "0ac608815326aead5db7",
             baseInviteUrl = "https://flat-web-dev-sg.whiteboard.agora.io",
