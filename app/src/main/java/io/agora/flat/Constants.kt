@@ -8,13 +8,13 @@ class Constants {
     }
 
     object URL {
-        const val Service = "https://www.flat.shengwang.cn/service.html"
+        const val Service = "https://www.flat.apprtc.cn/service.html"
 
-        const val Privacy = "https://www.flat.shengwang.cn/privacy.html"
+        const val Privacy = "https://www.flat.apprtc.cn/privacy.html"
 
         const val Registration = "https://beian.miit.gov.cn"
 
-        const val Libraries = "https://www.flat.shengwang.cn/privacy-extra/libraries.html"
+        const val Libraries = "https://www.flat.apprtc.cn/privacy-extra/libraries.html"
     }
 
     object IntentKey {

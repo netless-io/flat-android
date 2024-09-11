@@ -29,7 +29,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
         val ALL_BASE_URLS = listOf(
             "https://flat-web.whiteboard.agora.io",
-            "https://web.flat.shengwang.cn",
+            "https://web.flat.apprtc.cn",
             "https://web.flat.agora.io",
         )
     }
@@ -63,9 +63,9 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
         envMap[ENV_CN_PROD] = EnvItem(
             agoraAppId = "931b86d6781e49a2a255db4ce6e8e804",
-            serviceUrl = "https://api.flat.shengwang.cn",
+            serviceUrl = "https://api.flat.apprtc.cn",
             githubClientId = "71a29285a437998bdfe0",
-            baseInviteUrl = "https://web.flat.shengwang.cn",
+            baseInviteUrl = "https://web.flat.apprtc.cn",
             versionCheckUrl = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/checkVersion.json",
             logConfig = LogConfig(
                 ak = BuildConfig.ALIYUN_LOG_PROD_AK,
