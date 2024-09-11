@@ -8,10 +8,6 @@ class Constants {
     }
 
     object URL {
-        const val Service = "https://www.flat.apprtc.cn/service.html"
-
-        const val Privacy = "https://www.flat.apprtc.cn/privacy.html"
-
         const val Registration = "https://beian.miit.gov.cn"
 
         const val Libraries = "https://www.flat.apprtc.cn/privacy-extra/libraries.html"

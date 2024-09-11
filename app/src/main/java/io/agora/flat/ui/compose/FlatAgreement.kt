@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.common.android.ProtocolUrlManager
 import io.agora.flat.data.model.Agreement
 import io.agora.flat.ui.theme.Shapes
 
@@ -82,8 +82,8 @@ internal fun AgreementDialog(agreement: Agreement? = null, onAgree: () -> Unit, 
 private fun LoginAgreementDialogMessage(agreement: Agreement?) {
     var text = agreement?.message ?: stringResource(R.string.login_agreement_dialog_message)
     val items = listOf(
-        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", Constants.URL.Privacy),
-        ClickableItem(stringResource(R.string.agreement_global_service), "service", Constants.URL.Service)
+        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", ProtocolUrlManager.Privacy),
+        ClickableItem(stringResource(R.string.agreement_global_service), "service", ProtocolUrlManager.Service)
     )
 
     FlatClickableText(text = text, items = items)
@@ -93,8 +93,8 @@ private fun LoginAgreementDialogMessage(agreement: Agreement?) {
 private fun GlobalAgreementMessage() {
     val text = stringResource(R.string.agreement_global_dialog_message)
     val items = listOf(
-        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", Constants.URL.Privacy),
-        ClickableItem(stringResource(R.string.agreement_global_service), "service", Constants.URL.Service)
+        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", ProtocolUrlManager.Privacy),
+        ClickableItem(stringResource(R.string.agreement_global_service), "service", ProtocolUrlManager.Service)
     )
 
     FlatClickableText(text = text, items = items)
@@ -104,8 +104,8 @@ private fun GlobalAgreementMessage() {
 private fun GlobalRecheckAgreementMessage() {
     val text = stringResource(R.string.agreement_global_recheck_dialog_message)
     val items = listOf(
-        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", Constants.URL.Privacy),
-        ClickableItem(stringResource(R.string.agreement_global_service), "service", Constants.URL.Service)
+        ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", ProtocolUrlManager.Privacy),
+        ClickableItem(stringResource(R.string.agreement_global_service), "service", ProtocolUrlManager.Service)
     )
 
     FlatClickableText(text = text, items = items)

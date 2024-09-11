@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.android.ProtocolUrlManager
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.FlatColumnPage
 import io.agora.flat.ui.compose.FlatDivider
@@ -126,12 +127,12 @@ private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri, 
             SettingItem(
                 id = R.drawable.ic_settings_privacy_policy,
                 tip = stringResource(R.string.privacy_policy),
-                onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Privacy) })
+                onClick = { Navigator.launchWebViewActivity(context, ProtocolUrlManager.Privacy) })
             SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_term_of_service,
                 tip = stringResource(R.string.term_of_service),
-                onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Service) })
+                onClick = { Navigator.launchWebViewActivity(context, ProtocolUrlManager.Service) })
             SettingItemDivider()
             SettingItem(
                 id = R.drawable.ic_settings_info_gathering,
