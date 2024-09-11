@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.agora.flat.BuildConfig
+import io.agora.flat.common.version.AgreementFetcher
 import io.agora.flat.common.version.VersionChecker
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
@@ -134,5 +135,14 @@ object NetworkModule {
         appEnv: AppEnv
     ): VersionChecker {
         return VersionChecker(client, appKVCenter, context.getAppVersion(), appEnv.versionCheckUrl)
+    }
+
+    @Provides
+    @Singleton
+    fun providerAgreementFetcher(
+        @NormalOkHttpClient client: OkHttpClient,
+        appEnv: AppEnv
+    ): AgreementFetcher {
+        return AgreementFetcher(client, appEnv)
     }
 }
