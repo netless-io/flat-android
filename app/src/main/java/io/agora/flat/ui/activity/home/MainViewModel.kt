@@ -131,12 +131,12 @@ class MainViewModel @Inject constructor(
         val startsWithBaseUrl = AppEnv.ALL_BASE_URLS.any { baseUrl -> uri.toString().startsWith(baseUrl) }
         if (startsWithBaseUrl) {
             val pathSegments = uri.pathSegments
-            // https://web.flat.shengwang.cn/join/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/
+            // https://web.flat.apprtc.cn/join/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/
             if (pathSegments.size == 2 && pathSegments[0] == "join") {
                 val roomUUID = pathSegments[1]
                 joinRoom(roomUUID, openVideo = false, openAudio = false)
             }
-            // https://web.flat.shengwang.cn/replay/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/855c8d51-b5a5-439f-a74b-2eb1a0284036/
+            // https://web.flat.apprtc.cn/replay/SmallClass/c06ab0b1-05ef-403d-9db0-69cc85ee23bf/855c8d51-b5a5-439f-a74b-2eb1a0284036/
             if (pathSegments.size == 4 && pathSegments[0] == "replay") {
                 val roomUUID = pathSegments[2]
                 replayInfo.value = roomUUID

@@ -10,7 +10,7 @@
 
 <div align="center">
     <h1>Agora Flat Android</h1>
-    <p>Flat Android 是 <a href="https://www.flat.shengwang.cn/">Agora Flat</a> 开源教室的 Android 客户端</p>
+    <p>Flat Android 是 <a href="https://www.flat.apprtc.cn/">Agora Flat</a> 开源教室的 Android 客户端</p>
     <img src="art/flat-showcase-zh.jpg">
 </div>
 
@@ -83,9 +83,9 @@ Flat 试图使用最新 Android 开发库和工具开发应用程序。主要使
 你可以将 Flat
 用于商业用途但请注意我们不接受商业化需求定制与部署支持以及其它客户服务。如有相关需求请前往[灵动课堂](https://www.agora.io/cn/agora-flexible-classroom)。
 
-[flat-homepage]: https://www.flat.shengwang.cn/
+[flat-homepage]: https://www.flat.apprtc.cn/
 
-[flat-web]: https://web.flat.shengwang.cn/
+[flat-web]: https://web.flat.apprtc.cn/
 
 [flat-server]: https://github.com/netless-io/flat-server
 
