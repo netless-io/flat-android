@@ -4,7 +4,9 @@ import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.Result
 import io.agora.flat.data.model.PureRoomReq
 import io.agora.flat.data.model.PureToken
+import io.agora.flat.data.model.RespNoData
 import io.agora.flat.data.model.RtmCensorReq
+import io.agora.flat.data.model.StreamAgreementReq
 import io.agora.flat.data.toResult
 import io.agora.flat.http.api.MiscService
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,19 @@ class MiscRepository @Inject constructor(
                 val joinEarly = it.server?.joinEarly ?: 10
                 appKVCenter.setJoinEarly(joinEarly)
             }
+        }
+    }
+
+    suspend fun getStreamAgreement(): Boolean? {
+        return withContext(Dispatchers.IO) {
+            val result = miscService.getStreamAgreement().toResult()
+            return@withContext result.get()?.isAgree
+        }
+    }
+
+    suspend fun setStreamAgreement(isAgree: Boolean): Result<RespNoData> {
+        return withContext(Dispatchers.IO) {
+            return@withContext miscService.setStreamAgreement(StreamAgreementReq(isAgree)).toResult()
         }
     }
 }

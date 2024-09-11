@@ -43,6 +43,7 @@ import io.agora.flat.ui.compose.FlatDivider
 import io.agora.flat.ui.compose.FlatHighlightTextButton
 import io.agora.flat.ui.compose.FlatTextBodyOne
 import io.agora.flat.ui.compose.FlatTextCaption
+import io.agora.flat.ui.compose.StreamCollectDialog
 import io.agora.flat.ui.compose.UpdateDialog
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.viewmodel.SettingsUiState
@@ -59,6 +60,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     SettingsScreen(
         state = state,
         onDownload = viewModel::downloadApp,
+        onAgreeStream = viewModel::setAgreeStream,
         onBack = { navController.popBackStack() },
         onLogout = {
             viewModel.logout()
@@ -71,6 +73,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
 fun SettingsScreen(
     state: SettingsUiState,
     onDownload: suspend () -> Uri,
+    onAgreeStream: (Boolean) -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -80,16 +83,17 @@ fun SettingsScreen(
             onBackPressed = onBack
         )
         Box(Modifier.weight(1f)) {
-            SettingsList(state, onDownload)
+            SettingsList(state, onDownload, onAgreeStream)
         }
         BottomOperateArea(onLogout = onLogout)
     }
 }
 
 @Composable
-private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri) {
+private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri, onAgreeStream: (Boolean) -> Unit) {
     val context = LocalContext.current
     var showUpdate by remember { mutableStateOf(false) }
+    var showCollect by remember { mutableStateOf(false) }
 
     LazyColumn {
         item {
@@ -117,7 +121,6 @@ private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri) 
                 id = R.drawable.ic_settings_dark_light,
                 tip = stringResource(R.string.title_dark_mode),
                 onClick = { Navigator.launchDarkModeActivity(context) })
-
             Spacer(Modifier.height(12.dp))
             SettingLabel(stringResource(R.string.privacy))
             SettingItem(
@@ -139,6 +142,15 @@ private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri) 
                 id = R.drawable.ic_settings_info_third_party,
                 tip = stringResource(R.string.info_third_party),
                 onClick = { Navigator.launchWebViewActivity(context, Constants.URL.Libraries) })
+            if (state.isAgreeStream != null) {
+                SettingItem(
+                    id = R.drawable.ic_settings_stream_analysis,
+                    tip = stringResource(R.string.stream_data_analysis),
+                    desc = if (state.isAgreeStream) stringResource(R.string.setting_on) else stringResource(R.string.setting_off),
+                    onClick = { showCollect = true }
+                )
+                SettingItemDivider()
+            }
 
             Spacer(Modifier.height(12.dp))
             SettingLabel(stringResource(R.string.more))
@@ -184,6 +196,22 @@ private fun SettingsList(state: SettingsUiState, onDownload: suspend () -> Uri) 
             onGotoMarket = {
                 showUpdate = false
                 context.launchMarket()
+            }
+        )
+    }
+
+    if (showCollect) {
+        StreamCollectDialog(
+            onOpen = {
+                onAgreeStream(true)
+                showCollect = false
+            },
+            onClose = {
+                onAgreeStream(false)
+                showCollect = false
+            },
+            onCancel = {
+                showCollect = false
             }
         )
     }
@@ -292,6 +320,6 @@ internal fun SettingItemDivider() {
 fun UserSettingActivityPreview() {
     val state = SettingsUiState()
     FlatColumnPage {
-        SettingsScreen(state, { Uri.EMPTY }, {}, {})
+        SettingsScreen(state, { Uri.EMPTY }, {}, {}, {})
     }
 }

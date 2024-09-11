@@ -35,4 +35,14 @@ interface MiscService {
 
     @GET("v2/region/configs")
     fun getRegionConfigs(): Call<BaseResp<RegionConfigs>>
+
+    @POST("v1/user/agreement/get")
+    fun getStreamAgreement(
+        @Body empty: BaseReq = BaseReq.EMPTY,
+    ): Call<BaseResp<StreamAgreement>>
+
+    @POST("v1/user/agreement/set")
+    fun setStreamAgreement(
+        @Body req: StreamAgreementReq,
+    ): Call<BaseResp<RespNoData>>
 }

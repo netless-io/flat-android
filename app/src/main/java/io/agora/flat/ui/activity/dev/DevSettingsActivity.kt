@@ -21,6 +21,7 @@ class DevSettingsActivity : BaseComposeActivity() {
                     onBack = { finish() },
                     onLogout = {},
                     onDownload = { Uri.EMPTY },
+                    onAgreeStream = {},
                 )
             }
         }

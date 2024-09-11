@@ -27,6 +27,8 @@
     <string name="preferences">首选项</string>
     <string name="privacy">隐私</string>
     <string name="more">更多</string>
+    <string name="setting_on">开启</string>
+    <string name="setting_off">关闭</string>
 
     <!-- time -->
     <string name="relative_time_mm">%d分</string>
@@ -60,6 +62,7 @@
     <string name="network_acceleration">网络加速</string>
     <string name="account_security">账户安全</string>
     <string name="delete_account">注销账户</string>
+    <string name="stream_data_analysis">音视频数据采集</string>
 
     <string name="room_type_big_class">大班课</string>
     <string name="room_type_small_class">小班课</string>
