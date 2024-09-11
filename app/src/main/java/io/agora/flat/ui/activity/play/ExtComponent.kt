@@ -136,7 +136,7 @@ class ExtComponent(
         if (error.exception == null) {
             activity.showToast(error.text)
         } else {
-            showRoomExitDialog(FlatErrorHandler.getErrorStr(activity, error.exception, ""))
+            showRoomExitDialog(FlatErrorHandler.getErrorStr(activity, error.exception))
         }
     }
 
