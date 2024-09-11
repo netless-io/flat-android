@@ -49,10 +49,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
-import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.common.android.LanguageManager
+import io.agora.flat.common.android.ProtocolUrlManager
 import io.agora.flat.common.login.LoginActivityHandler
 import io.agora.flat.common.login.LoginState
 import io.agora.flat.common.login.LoginType
@@ -125,11 +125,11 @@ class LoginActivity : BaseComposeActivity() {
                     }
 
                     LoginUiAction.OpenServiceProtocol -> {
-                        Navigator.launchWebViewActivity(this, Constants.URL.Service)
+                        Navigator.launchWebViewActivity(this, ProtocolUrlManager.Service)
                     }
 
                     LoginUiAction.OpenPrivacyProtocol -> {
-                        Navigator.launchWebViewActivity(this, Constants.URL.Privacy)
+                        Navigator.launchWebViewActivity(this, ProtocolUrlManager.Privacy)
                     }
 
                     is LoginUiAction.PhoneLogin -> {
@@ -618,8 +618,8 @@ fun LoginAgreement(
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
         Spacer(Modifier.width(4.dp))
         val items = listOf(
-            ClickableItem(stringResource(R.string.privacy_policy), "privacy", Constants.URL.Privacy),
-            ClickableItem(stringResource(R.string.term_of_service), "service", Constants.URL.Service)
+            ClickableItem(stringResource(R.string.privacy_policy), "privacy", ProtocolUrlManager.Privacy),
+            ClickableItem(stringResource(R.string.term_of_service), "service", ProtocolUrlManager.Service)
         )
         FlatClickableText(stringResource(R.string.login_agreement_message), items = items)
     }

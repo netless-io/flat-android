@@ -29,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.agora.flat.Constants
 import io.agora.flat.R
 import io.agora.flat.common.Navigator
+import io.agora.flat.common.android.ProtocolUrlManager
 import io.agora.flat.data.AppEnv
 import io.agora.flat.ui.activity.base.BaseComposeActivity
 import io.agora.flat.ui.compose.BackTopAppBar
@@ -54,11 +55,11 @@ class AboutUsActivity : BaseComposeActivity() {
                     when (action) {
                         is AboutUiAction.Back -> finish()
                         is AboutUiAction.OpenServiceProtocol -> {
-                            Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Service)
+                            Navigator.launchWebViewActivity(this@AboutUsActivity, ProtocolUrlManager.Service)
                         }
 
                         is AboutUiAction.OpenPrivacyProtocol -> {
-                            Navigator.launchWebViewActivity(this@AboutUsActivity, Constants.URL.Privacy)
+                            Navigator.launchWebViewActivity(this@AboutUsActivity, ProtocolUrlManager.Privacy)
                         }
 
                         is AboutUiAction.OpenRegistration -> {
