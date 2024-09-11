@@ -5,25 +5,17 @@ import io.agora.flat.R
 import io.agora.flat.common.FlatErrorCode
 import io.agora.flat.common.FlatException
 import io.agora.flat.common.FlatNetException
-import io.agora.flat.common.FlatRtcException
-import io.agora.flat.common.FlatRtmException
 import io.agora.flat.di.GlobalInstanceProvider
 
 object FlatErrorHandler {
     fun getErrorStr(context: Context, error: Throwable?, defaultValue: String = "Unhandled exceptions"): String {
-        return if (error is FlatException) {
-            when (error) {
+        if (error is FlatException) {
+            return when (error) {
                 is FlatNetException -> getNetErrorString(context, error)
-
-                is FlatRtcException -> defaultValue
-
-                is FlatRtmException -> defaultValue
-
-                else -> defaultValue
+                else -> error.message ?: defaultValue
             }
-        } else {
-            defaultValue
         }
+        return error?.message ?: defaultValue
     }
 
     private fun getNetErrorString(context: Context, error: FlatNetException): String {
@@ -59,12 +51,11 @@ object FlatErrorHandler {
             FlatErrorCode.Web.RoomLimit -> context.getString(R.string.pay_room_users_limit)
             FlatErrorCode.Web.RoomExpired -> context.getString(R.string.pay_room_expired)
             FlatErrorCode.Web.RoomNotBegin -> context.getString(
-                R.string.room_not_started,
-                appKVCenter.getJoinEarly()
+                R.string.room_not_started, appKVCenter.getJoinEarly()
             )
+
             FlatErrorCode.Web.RoomNotBeginAndAddList -> context.getString(
-                R.string.room_not_started_added,
-                appKVCenter.getJoinEarly()
+                R.string.room_not_started_added, appKVCenter.getJoinEarly()
             )
 
             FlatErrorCode.Web.RoomCreateLimit -> context.getString(R.string.pay_room_reached_limit)
