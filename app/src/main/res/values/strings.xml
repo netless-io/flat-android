@@ -25,6 +25,8 @@
     <string name="preferences">Preferences</string>
     <string name="privacy">Privacy</string>
     <string name="more">More</string>
+    <string name="setting_on">On</string>
+    <string name="setting_off">Off</string>
 
     <string name="relative_time_mm">%d m</string>
     <string name="relative_time_hh">%d h</string>
@@ -57,6 +59,7 @@
     <string name="network_acceleration">Network Acceleration</string>
     <string name="account_security">Account Security</string>
     <string name="delete_account">Delete Account</string>
+    <string name="stream_data_analysis">Data Analysis</string>
 
     <string name="room_type_big_class">Big Class</string>
     <string name="room_type_small_class">Small Class</string>

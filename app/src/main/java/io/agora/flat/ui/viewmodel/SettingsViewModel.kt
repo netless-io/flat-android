@@ -9,6 +9,7 @@ import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.common.version.VersionChecker
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
+import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ class SettingsViewModel @Inject constructor(
     private val appKVCenter: AppKVCenter,
     private val versionChecker: VersionChecker,
     private val downloader: AndroidDownloader,
+    private val miscRepository: MiscRepository,
     env: AppEnv
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -34,6 +36,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(versionCheckResult = versionChecker.forceCheck())
         }
+
+        viewModelScope.launch {
+            val value = miscRepository.getStreamAgreement()
+            _state.value = _state.value.copy(isAgreeStream = value)
+        }
     }
 
     suspend fun downloadApp(): Uri {
@@ -46,6 +53,13 @@ class SettingsViewModel @Inject constructor(
         _state.value = _state.value.copy(versionCheckResult = VersionCheckResult.Empty)
     }
 
+    fun setAgreeStream(isAgree: Boolean) {
+        viewModelScope.launch {
+            miscRepository.setStreamAgreement(isAgree)
+            _state.value = _state.value.copy(isAgreeStream = isAgree)
+        }
+    }
+
     fun logout() {
         userRepository.logout()
     }
@@ -53,5 +67,6 @@ class SettingsViewModel @Inject constructor(
 
 data class SettingsUiState(
     val infoUrl: String = "",
-    val versionCheckResult: VersionCheckResult = VersionCheckResult.Empty
+    val versionCheckResult: VersionCheckResult = VersionCheckResult.Empty,
+    val isAgreeStream: Boolean? = null
 )
