@@ -184,6 +184,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val showIcp get() = currentEnvItem.showIcp
 
+    val agreementsUrl get() = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/agreements.json"
+
     data class EnvItem(
         val agoraAppId: String,
         val serviceUrl: String,

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.agora.flat.Constants
 import io.agora.flat.R
+import io.agora.flat.data.model.Agreement
 import io.agora.flat.ui.theme.Shapes
 
 @Composable
@@ -55,7 +56,7 @@ fun GlobalAgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
 }
 
 @Composable
-internal fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
+internal fun AgreementDialog(agreement: Agreement? = null, onAgree: () -> Unit, onRefuse: () -> Unit) {
     Dialog(onDismissRequest = onRefuse) {
         Surface(
             Modifier.widthIn(max = 400.dp),
@@ -64,7 +65,7 @@ internal fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
             Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
                 FlatTextTitle(stringResource(R.string.login_agreement_dialog_title))
                 FlatNormalVerticalSpacer()
-                LoginAgreementDialogMessage()
+                LoginAgreementDialogMessage(agreement)
                 FlatNormalVerticalSpacer()
                 Row {
                     FlatSmallSecondaryTextButton(stringResource(R.string.refuse), Modifier.weight(1f)) { onRefuse() }
@@ -78,8 +79,8 @@ internal fun AgreementDialog(onAgree: () -> Unit, onRefuse: () -> Unit) {
 
 
 @Composable
-private fun LoginAgreementDialogMessage() {
-    val text = stringResource(R.string.login_agreement_dialog_message)
+private fun LoginAgreementDialogMessage(agreement: Agreement?) {
+    var text = agreement?.message ?: stringResource(R.string.login_agreement_dialog_message)
     val items = listOf(
         ClickableItem(stringResource(R.string.agreement_global_privacy), "privacy", Constants.URL.Privacy),
         ClickableItem(stringResource(R.string.agreement_global_service), "service", Constants.URL.Service)

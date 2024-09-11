@@ -3,9 +3,11 @@ package io.agora.flat.ui.activity.login
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.agora.flat.common.android.CallingCodeManager
+import io.agora.flat.common.version.AgreementFetcher
 import io.agora.flat.data.AppEnv
 import io.agora.flat.data.AppKVCenter
 import io.agora.flat.data.LoginConfig
+import io.agora.flat.data.model.Agreement
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.data.onFailure
 import io.agora.flat.data.onSuccess
@@ -25,12 +27,14 @@ class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val appKVCenter: AppKVCenter,
     private val appEnv: AppEnv,
+    private val agreementFetcher: AgreementFetcher,
 ) : BaseAccountViewModel() {
     private val loading = ObservableLoadingCounter()
     private val messageManager = UiMessageManager()
 
     private var _state = MutableStateFlow(
         LoginUiState(
+            agreement = null,
             loginConfig = appEnv.loginConfig,
             inputState = PhoneOrEmailInfo(
                 cc = CallingCodeManager.getDefaultCC(),
@@ -75,6 +79,13 @@ class LoginViewModel @Inject constructor(
                         password = it.password
                     )
                 )
+            }
+        }
+
+        viewModelScope.launch {
+            val fetchAgreement = agreementFetcher.fetchAgreement()
+            if (fetchAgreement != null) {
+                _state.value = _state.value.copy(agreement = fetchAgreement)
             }
         }
     }
@@ -163,4 +174,5 @@ data class LoginUiState(
     val message: UiMessage? = null,
 
     val loginConfig: LoginConfig = LoginConfig(),
+    val agreement: Agreement? = null,
 )

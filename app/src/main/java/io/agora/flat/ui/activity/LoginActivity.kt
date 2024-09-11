@@ -362,7 +362,14 @@ private fun LoginArea(state: LoginUiState, modifier: Modifier, actioner: (LoginU
             LoginAgreement(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 checked = agreementChecked,
-                onCheckedChange = { agreementChecked = it },
+                onCheckedChange = { target ->
+                    // force show agreement dialog when not checked
+                    if (target) {
+                        showAgreement = true
+                    } else {
+                        agreementChecked = target
+                    }
+                },
             )
         }
 
@@ -382,6 +389,7 @@ private fun LoginArea(state: LoginUiState, modifier: Modifier, actioner: (LoginU
 
     if (showAgreement) {
         AgreementDialog(
+            agreement = state.agreement,
             onAgree = {
                 agreementChecked = true
                 showAgreement = false
