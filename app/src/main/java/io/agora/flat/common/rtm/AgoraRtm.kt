@@ -53,6 +53,7 @@ class AgoraRtm @Inject constructor(
     private var rtmListeners = mutableListOf<RtmListener>()
 
     override fun init(context: Context) {
+        RtmClient.release()
         try {
             val config = RtmConfig.Builder(appEnv.agoraAppId, appKVCenter.getUserInfo()?.uuid)
                 .eventListener(this)

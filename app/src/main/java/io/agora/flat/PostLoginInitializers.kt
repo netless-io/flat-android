@@ -12,13 +12,9 @@ class PostLoginInitializers @Inject constructor(
     @ApplicationContext val context: Context,
     private val initializers: Set<@JvmSuppressWildcards PostLoginInitializer>,
 ) {
-    private var inited = false
-
     fun init() {
-        if (inited) return
         initializers.forEach {
             it.init(context)
         }
-        inited = true
     }
 }
