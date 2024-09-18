@@ -11,13 +11,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
-    buildToolsVersion "33.0.0"
+    compileSdk 34
 
     defaultConfig {
         applicationId "io.agora.flat"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdk 34
         versionCode 58
         versionName "2.10.1"
 

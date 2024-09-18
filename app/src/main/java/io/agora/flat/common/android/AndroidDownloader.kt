@@ -5,9 +5,11 @@ import android.app.DownloadManager.Request
 import android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -26,7 +28,11 @@ class AndroidDownloader @Inject constructor(@ApplicationContext val context: Con
                 value?.run { cont.resume(desUri) }
             }
         }
-        context.registerReceiver(receiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(receiver, filter)
+        }
     }
 
     private val downloadManager: DownloadManager by lazy {
