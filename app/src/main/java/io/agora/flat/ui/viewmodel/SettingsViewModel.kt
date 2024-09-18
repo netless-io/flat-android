@@ -13,6 +13,7 @@ import io.agora.flat.data.repository.MiscRepository
 import io.agora.flat.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,12 +35,22 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _state.value = _state.value.copy(versionCheckResult = versionChecker.forceCheck())
+            val checkResult = versionChecker.forceCheck()
+            _state.update {
+                it.copy(versionCheckResult = checkResult)
+            }
         }
 
-        viewModelScope.launch {
-            val value = miscRepository.getStreamAgreement()
-            _state.value = _state.value.copy(isAgreeStream = value)
+        if (env.showStreamAgreement) {
+            _state.update {
+                it.copy(isAgreeStream = false)
+            }
+            viewModelScope.launch {
+                val value = miscRepository.getStreamAgreement() ?: false
+                _state.update {
+                    it.copy(isAgreeStream = value)
+                }
+            }
         }
     }
 

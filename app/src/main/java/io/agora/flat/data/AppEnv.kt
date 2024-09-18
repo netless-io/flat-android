@@ -59,6 +59,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             loginConfig = LoginConfig(google = false),
 
             showIcp = true,
+            showStreamAgreement = true,
         )
 
         envMap[ENV_CN_PROD] = EnvItem(
@@ -82,6 +83,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             loginConfig = LoginConfig(google = false),
 
             showIcp = true,
+            showStreamAgreement = true,
         )
 
         envMap[ENV_SG_PROD] = EnvItem(
@@ -184,6 +186,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val showIcp get() = currentEnvItem.showIcp
 
+    val showStreamAgreement get() = currentEnvItem.showStreamAgreement
+
     val agreementsUrl get() = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/agreements.json"
 
     data class EnvItem(
@@ -203,6 +207,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         val loginConfig: LoginConfig = LoginConfig(),
 
         val showIcp: Boolean = false,
+        val showStreamAgreement: Boolean = false,
     )
 }
 
