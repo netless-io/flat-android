@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Decrypt
         run: ./.github/scripts/decrypt_secret.sh
@@ -32,12 +32,12 @@ jobs:
           ALIYUN_LOG_SG_PROD_SK: ${{ secrets.ALIYUN_LOG_SG_PROD_SK }}
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 11
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches/modules-*
@@ -50,13 +50,13 @@ jobs:
 
       - name: Archive reports for failed build
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-reports
           path: '*/build/reports/'
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flat-artifact
           path: |
