@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -18,8 +20,7 @@ import javax.inject.Singleton
 
 @Singleton
 class LoginManager @Inject constructor(
-    @ApplicationContext val context: Context,
-    val appEnv: AppEnv
+    @ApplicationContext val context: Context, val appEnv: AppEnv
 ) {
     private var api: IWXAPI? = null
     private var wechatReceiver: BroadcastReceiver? = null
@@ -44,7 +45,11 @@ class LoginManager @Inject constructor(
                 }
             }
         }
-        context.registerReceiver(wechatReceiver, IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(wechatReceiver, IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP), RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(wechatReceiver, IntentFilter(ConstantsAPI.ACTION_REFRESH_WXAPP))
+        }
     }
 
     fun unregisterReceiver(context: Context) {
