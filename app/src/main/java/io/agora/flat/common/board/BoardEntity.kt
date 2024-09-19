@@ -10,4 +10,5 @@ sealed class BoardPhase {
 
 sealed class BoardError {
     object Kicked : BoardError()
+    data class Unknown(val message: String) : BoardError()
 }

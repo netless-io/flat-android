@@ -66,6 +66,7 @@ class ExtComponent(
                 showLoading(it.loading)
                 it.error?.run {
                     handleErrorMessage(it.error)
+                    viewModel.clearError()
                 }
             }
         }
