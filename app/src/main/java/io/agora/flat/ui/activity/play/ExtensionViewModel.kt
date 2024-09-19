@@ -19,7 +19,7 @@ import javax.inject.Inject
 class ExtensionViewModel @Inject constructor(
     private val errorManager: RoomErrorManager,
     private val boardRoom: AgoraBoardRoom,
-    private val eventBus: EventBus
+    private val eventBus: EventBus,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExtensionState())
     val state = _state.asStateFlow()
@@ -51,6 +51,10 @@ class ExtensionViewModel @Inject constructor(
                     is BoardError.Kicked -> {
                         eventBus.produceEvent(RoomKickedEvent)
                     }
+
+                    is BoardError.Unknown -> {
+                        _state.value = _state.value.copy(error = UiMessage(error.message))
+                    }
                 }
             }
         }
@@ -60,6 +64,10 @@ class ExtensionViewModel @Inject constructor(
                 _state.value = _state.value.copy(error = it)
             }
         }
+    }
+
+    fun clearError() {
+        _state.value = _state.value.copy(error = null)
     }
 }
 

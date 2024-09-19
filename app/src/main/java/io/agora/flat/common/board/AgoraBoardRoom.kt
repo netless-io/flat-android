@@ -131,6 +131,8 @@ class AgoraBoardRoom @Inject constructor(
             override fun onFastError(error: FastException) {
                 if (error.code == FastException.ROOM_KICKED) {
                     boardError.value = BoardError.Kicked
+                } else {
+                    // boardError.value = BoardError.Unknown(error.message ?: "Unknown error")
                 }
             }
         })
@@ -138,6 +140,10 @@ class AgoraBoardRoom @Inject constructor(
         rootRoomController?.let {
             fastRoom?.rootRoomController = it
             updateRoomController(writable)
+        }
+
+        fastRoom?.setErrorHandler {
+            logger.e("[BOARD] error ${it.message}")
         }
 
         val fastResource = object : FastResource() {
