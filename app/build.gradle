@@ -6,8 +6,15 @@ plugins {
     id 'kotlin-parcelize'
     id "androidx.navigation.safeargs"
 
-    id 'com.google.gms.google-services'
     id "com.google.firebase.crashlytics"
+}
+
+def googleServicesPath = "$projectDir/google-services.json"
+if (file(googleServicesPath).exists()) {
+    apply plugin: 'com.google.gms.google-services'
+    println "Applying Google Services plugin."
+} else {
+    println "Skipping Google Services plugin as google-services.json not found."
 }
 
 android {
@@ -134,7 +141,7 @@ android {
     productFlavors {
         create("flat") {
             applicationId = "io.agora.flat"
-            
+
             buildConfigField "String", "DEFAULT_CALLING_CODE", "\"+86\""
             buildConfigField "String", "DEFAULT_ENV", "\"cn_prod\""
         }
