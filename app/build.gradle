@@ -285,7 +285,10 @@ dependencies {
     if (findProject(":syncplayer") != null) {
         implementation project(':syncplayer')
     } else {
-        implementation "com.github.netless-io:sync-player-android:1.2.1"
+        implementation ("com.github.netless-io:sync-player-android:1.2.1") {
+            exclude group: "androidx.test.ext", module: "junit-ktx"
+            exclude group: "androidx.test", module: "monitor"
+        }
     }
 
     implementation 'io.agora.rtc:full-sdk:4.3.0'
