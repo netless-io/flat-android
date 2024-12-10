@@ -169,3 +169,11 @@ fun Context.launchMarket() {
         )
     }
 }
+
+fun Context.launchBrowser(url: String) {
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (e: Exception) {
+        // ignore
+    }
+}

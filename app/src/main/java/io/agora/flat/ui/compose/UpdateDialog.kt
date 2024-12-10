@@ -21,10 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.agora.flat.R
+import io.agora.flat.common.android.ProtocolUrlManager
 import io.agora.flat.common.version.VersionCheckResult
 import io.agora.flat.ui.theme.FlatTheme
 import io.agora.flat.ui.theme.Shapes
 import io.agora.flat.util.installApk
+import io.agora.flat.util.launchBrowser
 import kotlinx.coroutines.launch
 
 @Composable
@@ -68,8 +70,14 @@ internal fun UpdateDialog(
                                         onGotoMarket()
                                         return@launch
                                     }
+                                    // Open the website to download the app and install self
+                                    if (true) {
+                                        context.launchBrowser(ProtocolUrlManager.Website)
+                                        return@launch
+                                    }
                                     downloading = true
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        // Need to declare android.permission.REQUEST_INSTALL_PACKAGES to call this api
                                         val haveInstallPermission = context.packageManager.canRequestPackageInstalls()
                                         if (!haveInstallPermission) {
                                             showPermissionDialog = true
