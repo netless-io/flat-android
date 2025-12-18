@@ -30,9 +30,14 @@ interface UserService {
         @Body req: AuthUUIDReq,
     ): Call<BaseResp<UserInfoWithToken>>
 
-    @POST("v1/login/phone/sendMessage")
-    fun requestSmsCode(
-        @Body req: PhoneReq,
+//     @POST("v1/login/phone/sendMessage")
+//     fun requestSmsCode(
+//         @Body req: PhoneReq,
+//     ): Call<BaseResp<RespNoData>>
+
+    @POST("v1/login/phone/sendMessage/captcha")
+    fun requestSmsCodeCaptcha(
+        @Body req: PhoneCaptchaReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v1/login/phone")
@@ -104,9 +109,14 @@ interface UserService {
         @Body req: RemoveBindingReq,
     ): Call<BaseResp<UserTokenData>>
 
-    @POST("v2/register/phone/send-message")
-    fun requestRegisterSmsCode(
-        @Body req: PhoneReq,
+//    @POST("v2/register/phone/send-message")
+//    fun requestRegisterSmsCode(
+//        @Body req: PhoneReq,
+//    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/register/phone/send-message/captcha")
+    fun requestRegisterSmsCodeCaptcha(
+        @Body req: PhoneCaptchaReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v2/register/phone")
@@ -144,9 +154,14 @@ interface UserService {
         @Body req: EmailRegisterReq,
     ): Call<BaseResp<RespNoData>>
 
-    @POST("v2/reset/phone/send-message")
-    fun requestResetPhoneCode(
-        @Body req: PhoneReq,
+//    @POST("v2/reset/phone/send-message")
+//    fun requestResetPhoneCode(
+//        @Body req: PhoneReq,
+//    ): Call<BaseResp<RespNoData>>
+
+    @POST("v2/reset/phone/send-message/captcha")
+    fun requestResetPhoneCodeCaptcha(
+        @Body req: PhoneCaptchaReq,
     ): Call<BaseResp<RespNoData>>
 
     @POST("v2/reset/phone")

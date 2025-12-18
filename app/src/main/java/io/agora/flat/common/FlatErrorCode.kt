@@ -85,6 +85,10 @@ class FlatErrorCode {
         const val OAuthUUIDNotFound = 130000 // oauth uuid not found
         const val OAuthClientIDNotFound = 130001 // oauth client id not found
         const val OAuthSecretUUIDNotFound = 130002 // oauth secret uuid not found
+
+        const val CaptchaFailed = 150000 // captcha failed
+        const val CaptchaInvalid = 150001 // captcha invalid
+        const val CaptchaRequired = 150002 // captcha required
     }
 
     object RTM {

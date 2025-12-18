@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>认证码验证</title>
+    <script>
+        // 默认配置
+        var CaptchaDefaultConfig = {
+            region: "cn",
+            prefix: "195gxh",
+            sceneId: "nypf9bgg",
+            language: "cn"
+        };
+
+        // 从 Native 获取配置的统一方法
+        function getNativeConfig() {
+            var config = Object.assign({}, CaptchaDefaultConfig);
+            if (window.captchaJsBridge && typeof window.captchaJsBridge.getConfig === 'function') {
+                try {
+                    var nativeConfig = JSON.parse(window.captchaJsBridge.getConfig());
+                    Object.assign(config, nativeConfig);
+                    console.log("Native 配置加载成功:", JSON.stringify(config));
+                } catch (e) {
+                    console.error("解析 Native 配置失败", e);
+                }
+            }
+            return config;
+        }
+
+        // 初始化阿里云验证码全局配置
+        (function() {
+            var config = getNativeConfig();
+            window.AliyunCaptchaConfig = {
+                region: config.region,
+                prefix: config.prefix
+            };
+        })();
+    </script>
+    <script type="text/javascript" src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        #captcha-element {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+<div id="captcha-element"></div>
+<div id="captcha-button"></div>
+
+<script>
+    var captcha;
+    var config = getNativeConfig();
+
+    window.initAliyunCaptcha({
+        SceneId: config.sceneId,
+        mode: 'popup',
+        element: '#captcha-element',
+        button: '#captcha-button',
+        success: onSuccess,
+        fail: onFail,
+        onClose: onClose,
+        getInstance: onGetInstance,
+        slideStyle: {
+            width: 320,
+            height: 0,
+        },
+        language: config.language,
+    });
+
+    function onGetInstance(instance) {
+        captcha = instance;
+        document.getElementById('captcha-button').click();
+    }
+
+    function onSuccess(captchaVerifyParam) {
+        window.captchaJsBridge && window.captchaJsBridge.getCaptchaVerifyParam(captchaVerifyParam);
+    }
+
+    function onFail(result) {
+        window.captchaJsBridge && window.captchaJsBridge.dispatchFail(JSON.stringify(result));
+    }
+
+    function onClose() {
+        window.captchaJsBridge && window.captchaJsBridge.dispatchClose();
+    }
+</script>
+</body>
+</html>

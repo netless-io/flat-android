@@ -128,6 +128,9 @@ fun RegisterScreen(
         onSendCode = {
             viewModel.sendCode()
         },
+        onSendCodeCaptcha = {
+            viewModel.sendCodeWithCaptcha(it)
+        },
     )
 }
 
@@ -138,6 +141,7 @@ internal fun RegisterScreen(
     onClose: () -> Unit,
     onConfirm: () -> Unit,
     onSendCode: () -> Unit,
+    onSendCodeCaptcha: (String) -> Unit,
 ) {
     var agreementChecked by rememberSaveable { mutableStateOf(false) }
     var showAgreement by rememberSaveable { mutableStateOf(false) }
@@ -147,6 +151,7 @@ internal fun RegisterScreen(
             && info.password.isNotEmpty() && info.code.isNotEmpty()
 
     val codeReady = info.value.isValidPhone() || info.value.isValidEmail()
+    val onSendCodeCaptcha = if (info.isPhone) onSendCodeCaptcha else null
 
     Column {
         CloseTopAppBar(stringResource(R.string.register), {
@@ -166,6 +171,7 @@ internal fun RegisterScreen(
                 code = info.code,
                 onCodeChange = { onInfoUpdate(info.copy(code = it)) },
                 onSendCode = onSendCode,
+                onSendCodeCaptcha = onSendCodeCaptcha,
                 ready = codeReady,
                 remainTime = info.remainTime,
             )
@@ -230,6 +236,8 @@ internal fun PhoneBindScreenPreview() {
             onInfoUpdate = {},
             onClose = {},
             onConfirm = {},
-            onSendCode = {})
+            onSendCode = {},
+            onSendCodeCaptcha = {},
+        )
     }
 }

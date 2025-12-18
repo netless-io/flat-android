@@ -29,7 +29,6 @@ import io.agora.flat.R
 import io.agora.flat.common.Navigator
 import io.agora.flat.data.model.PhoneOrEmailInfo
 import io.agora.flat.ui.activity.base.BaseComposeActivity
-import io.agora.flat.ui.activity.register.RegisterScreen
 import io.agora.flat.ui.compose.BackTopAppBar
 import io.agora.flat.ui.compose.CloseTopAppBar
 import io.agora.flat.ui.compose.FlatPage
@@ -116,6 +115,7 @@ fun PasswordResetScreen(
         uiState = viewState,
         onPhoneOrEmailChange = { viewModel.changePhoneOrEmailState(it) },
         onSendCode = { viewModel.sendCode() },
+        onSendCodeCaptcha = { captcha -> viewModel.sendCodeWithCaptcha(captcha) },
         onNext = { viewModel.nextStep() },
         onPrev = { viewModel.prevStep() },
         onConfirm = { viewModel.resetPassword() },
@@ -128,6 +128,7 @@ internal fun PasswordResetScreen(
     uiState: PasswordResetUiState,
     onPhoneOrEmailChange: (PhoneOrEmailInfo) -> Unit,
     onSendCode: () -> Unit,
+    onSendCodeCaptcha: (String) -> Unit,
     onNext: () -> Unit,
     onPrev: () -> Unit,
     onConfirm: () -> Unit,
@@ -140,6 +141,7 @@ internal fun PasswordResetScreen(
             state = state,
             onPhoneOrEmailChange = onPhoneOrEmailChange,
             onSendCode = onSendCode,
+            onSendCodeCaptcha = onSendCodeCaptcha,
             onNext = onNext,
             onClose = onClose,
         )
@@ -158,6 +160,7 @@ private fun FetchCodeScreen(
     state: PhoneOrEmailInfo,
     onPhoneOrEmailChange: (PhoneOrEmailInfo) -> Unit,
     onSendCode: () -> Unit,
+    onSendCodeCaptcha: (String) -> Unit,
     onNext: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -165,6 +168,7 @@ private fun FetchCodeScreen(
     val isValidCode = state.code.isValidVerifyCode()
 
     val enableNext = isValidPhoneOrEmail && isValidCode
+    val onSendCodeCaptcha = if (state.isPhone) onSendCodeCaptcha else null
 
     Column {
         CloseTopAppBar(stringResource(R.string.reset_password), onClose = { onClose() })
@@ -184,6 +188,7 @@ private fun FetchCodeScreen(
                 code = state.code,
                 onCodeChange = { onPhoneOrEmailChange(state.copy(code = it)) },
                 onSendCode = onSendCode,
+                onSendCodeCaptcha = onSendCodeCaptcha,
                 ready = isValidPhoneOrEmail,
                 remainTime = state.remainTime,
             )
@@ -261,6 +266,7 @@ internal fun PhoneBindScreenPreview() {
             ),
             onPhoneOrEmailChange = {},
             onSendCode = {},
+            onSendCodeCaptcha = {},
             onNext = {},
             onPrev = {},
             onConfirm = {},

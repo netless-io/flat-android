@@ -27,6 +27,13 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
         const val DEFAULT_JOIN_EARLY_MINUTES = 10
 
+        val DEFAULT_ALIYUN_CAPTCHA_CONFIG = AliyunCaptchaConfig(
+            region = "cn",
+            language = "cn",
+            prefix = "195gxh",
+            sceneId = "nypf9bgg",
+        )
+
         val ALL_BASE_URLS = listOf(
             "https://flat-web.whiteboard.agora.io",
             "https://web.flat.apprtc.cn",
@@ -51,6 +58,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 logstore = "android",
                 endpoint = "https://cn-hangzhou.log.aliyuncs.com",
             ),
+            aliyunCaptchaConfig = DEFAULT_ALIYUN_CAPTCHA_CONFIG,
             ossKey = "LTAI5tD4WSVBxAyfwVoaKTWr",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/mO9uJB_DiCIqug",
@@ -81,6 +89,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
             googleClientId = "273996094508-p97og69ojac5ja0khn1rvmi3tb7vgfgm.apps.googleusercontent.com",
 
             loginConfig = LoginConfig(google = false),
+            aliyunCaptchaConfig = DEFAULT_ALIYUN_CAPTCHA_CONFIG,
 
             showIcp = true,
             showStreamAgreement = true,
@@ -100,6 +109,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 logstore = "android",
                 endpoint = "https://ap-southeast-1.log.aliyuncs.com",
             ),
+            aliyunCaptchaConfig = DEFAULT_ALIYUN_CAPTCHA_CONFIG.copy(region = "sgp", language = "en"),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "cFjxAJjiEeuUQ0211QCRBw/kndLTOWdG2qYcQ",
@@ -122,6 +132,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
                 logstore = "android",
                 endpoint = "https://ap-southeast-1.log.aliyuncs.com",
             ),
+            aliyunCaptchaConfig = DEFAULT_ALIYUN_CAPTCHA_CONFIG.copy(region = "sgp", language = "en"),
             ossKey = "LTAI5tMwHQ1xyroeneA9XLh4",
             wechatId = "wx09437693798bc108",
             whiteAppId = "n9q1oBxDEeyuBMn1qc0iFw/fLgNSEvdwKjlig",
@@ -182,6 +193,8 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val loginConfig get() = currentEnvItem.loginConfig
 
+    val aliyunCaptchaConfig get() = currentEnvItem.aliyunCaptchaConfig ?: DEFAULT_ALIYUN_CAPTCHA_CONFIG
+
     val phoneFirst get() = currentEnvItem.loginConfig.phoneFirst
 
     val showIcp get() = currentEnvItem.showIcp
@@ -205,6 +218,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
         val region: String = "cn-hz",
 
         val loginConfig: LoginConfig = LoginConfig(),
+        val aliyunCaptchaConfig: AliyunCaptchaConfig? = null,
 
         val showIcp: Boolean = false,
         val showStreamAgreement: Boolean = false,
@@ -226,3 +240,10 @@ data class LoginConfig(
         return sms && smsForce
     }
 }
+
+data class AliyunCaptchaConfig(
+    val region: String,
+    val prefix: String,
+    val sceneId: String,
+    val language: String,
+)

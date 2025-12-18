@@ -25,7 +25,7 @@ class MainApplication : Application(), CameraXConfig.Provider {
         CallingCodeManager.init(this)
         GlobalInstanceProvider.init(this)
         ProtocolUrlManager.init(this)
-        WebView.setWebContentsDebuggingEnabled(isApkInDebug())
+        WebView.setWebContentsDebuggingEnabled(true)
         WhiteboardView.setEntryUrl("file:///android_asset/flatboard/index.html")
     }
 

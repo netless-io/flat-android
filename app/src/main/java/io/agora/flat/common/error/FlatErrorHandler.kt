@@ -60,6 +60,10 @@ object FlatErrorHandler {
 
             FlatErrorCode.Web.RoomCreateLimit -> context.getString(R.string.pay_room_reached_limit)
 
+            FlatErrorCode.Web.CaptchaFailed -> context.getString(R.string.error_captcha_failed)
+            FlatErrorCode.Web.CaptchaRequired -> context.getString(R.string.error_captcha_required)
+            FlatErrorCode.Web.CaptchaInvalid -> context.getString(R.string.error_captcha_invalid)
+
             else -> context.getString(R.string.error_string_known_network, "${error.code}")
         }
     }

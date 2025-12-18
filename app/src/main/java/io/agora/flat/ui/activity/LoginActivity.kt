@@ -137,7 +137,7 @@ class LoginActivity : BaseComposeActivity() {
                     }
 
                     is LoginUiAction.PhoneSendCode -> {
-                        viewModel.sendPhoneCode(action.phone)
+                        viewModel.sendPhoneCode(action.phone, action.captchaVerifyParam)
                     }
 
                     is LoginUiAction.SignUpClick -> {
@@ -471,7 +471,8 @@ private fun PhoneLoginArea(
         SendCodeInput(
             code = inputState.code,
             onCodeChange = { onLoginInputChange(inputState.copy(code = it)) },
-            onSendCode = { actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}")) },
+            onSendCode = {},
+            onSendCodeCaptcha = { actioner(LoginUiAction.PhoneSendCode("${inputState.cc}${inputState.value}", it)) },
             ready = inputState.value.isValidPhone(),
             remainTime = inputState.remainTime,
         )

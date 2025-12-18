@@ -383,6 +383,11 @@ Translated with www.DeepL.com/Translator (free version)"</string>
     <string name="error_email_failed_to_send_code">send code failed</string>
 
     <string name="error_params_check_failed">parameter verification failed</string>
+
+    <string name="error_captcha_failed">Captcha failed</string>
+    <string name="error_captcha_invalid">Captcha invalid</string>
+    <string name="error_captcha_required">Captcha required</string>
+
     <!--messages -->
     <string name="message_code_send_success">Code Send..</string>
     <string name="message_reset_success">Reset Success</string>

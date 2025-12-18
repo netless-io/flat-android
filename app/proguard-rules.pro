@@ -35,3 +35,7 @@
 -keep class io.agora.**{*;}
 # Agora Whiteboard
 -keep class com.herewhite.** { *; }
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}

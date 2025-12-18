@@ -13,6 +13,7 @@ import io.agora.flat.data.model.EmailPasswordReq
 import io.agora.flat.data.model.EmailRegisterReq
 import io.agora.flat.data.model.LoginHistoryItem
 import io.agora.flat.data.model.LoginPlatform
+import io.agora.flat.data.model.PhoneCaptchaReq
 import io.agora.flat.data.model.PhonePasswordReq
 import io.agora.flat.data.model.PhoneRegisterReq
 import io.agora.flat.data.model.PhoneReq
@@ -138,9 +139,9 @@ class UserRepository @Inject constructor(
     /**
      * phone: +[country code][phone number]
      */
-    suspend fun requestLoginSmsCode(phone: String): Result<RespNoData> {
+    suspend fun requestLoginSmsCode(phone: String, captchaVerifyParam: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestSmsCode(PhoneReq(phone = phone)).toResult()
+            userService.requestSmsCodeCaptcha(PhoneCaptchaReq(phone = phone, captchaVerifyParam = captchaVerifyParam)).toResult()
         }
     }
 
@@ -331,9 +332,9 @@ class UserRepository @Inject constructor(
 //        }
 //    }
 
-    suspend fun requestRegisterSmsCode(phone: String): Result<RespNoData> {
+    suspend fun requestRegisterSmsCode(phone: String, captchaVerifyParam: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestRegisterSmsCode(PhoneReq(phone)).toResult()
+            userService.requestRegisterSmsCodeCaptcha(PhoneCaptchaReq(phone = phone, captchaVerifyParam = captchaVerifyParam)).toResult()
         }
     }
 
@@ -424,9 +425,9 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun requestResetPhoneCode(phone: String): Result<RespNoData> {
+    suspend fun requestResetPhoneCode(phone: String, captchaVerifyParam: String): Result<RespNoData> {
         return withContext(Dispatchers.IO) {
-            userService.requestResetPhoneCode(PhoneReq(phone)).toResult()
+            userService.requestResetPhoneCodeCaptcha(PhoneCaptchaReq(phone, captchaVerifyParam)).toResult()
         }
     }
 

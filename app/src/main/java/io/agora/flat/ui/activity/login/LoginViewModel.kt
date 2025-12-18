@@ -132,9 +132,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun sendPhoneCode(phone: String) {
+    fun sendPhoneCode(phone: String, captchaVerifyParam: String) {
         viewModelScope.launch {
-            userRepository.requestLoginSmsCode(phone)
+            userRepository.requestLoginSmsCode(phone, captchaVerifyParam)
                 .onSuccess {
                     _state.value = _state.value.copy(sendCodeSuccess = true)
                     startCountDown()

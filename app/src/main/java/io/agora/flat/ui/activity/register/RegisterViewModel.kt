@@ -50,17 +50,18 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun sendSmsCode(phone: String) {
+    private fun sendSmsCodeWithCaptcha(phone: String, captchaVerifyParam: String) {
         viewModelScope.launch {
             loading.addLoader()
-            userRepository.requestRegisterSmsCode(phone = phone)
-                .onSuccess {
-                    notifySendCodeSuccess()
-                    startCountDown()
-                }
-                .onFailure {
-                    notifyError(it)
-                }
+            userRepository.requestRegisterSmsCode(
+                phone = phone,
+                captchaVerifyParam = captchaVerifyParam
+            ).onSuccess {
+                notifySendCodeSuccess()
+                startCountDown()
+            }.onFailure {
+                notifyError(it)
+            }
             loading.removeLoader()
         }
     }
@@ -116,10 +117,15 @@ class RegisterViewModel @Inject constructor(
         val info = state.value.info
         val sendPhoneCode = info.isPhone
         if (sendPhoneCode) {
-            sendSmsCode(info.phone)
+            // not used
         } else {
             sendEmailCode(info.email)
         }
+    }
+
+    fun sendCodeWithCaptcha(captchaVerifyParam: String) {
+        val info = state.value.info
+        sendSmsCodeWithCaptcha(info.phone, captchaVerifyParam)
     }
 
     fun register() {

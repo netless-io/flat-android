@@ -47,6 +47,7 @@ fun SendCodeInput(
     code: String,
     onCodeChange: (String) -> Unit,
     onSendCode: () -> Unit,
+    onSendCodeCaptcha: ((captchaParams: String) -> Unit)? = null,
     ready: Boolean,
     remainTime: Long,
 ) {
@@ -88,15 +89,15 @@ fun SendCodeInput(
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             placeholderValue = stringResource(R.string.login_code_input_placeholder),
         )
-        TextButton(
+        SendCodeButton(
             enabled = sendCodeEnable,
-            onClick = {
+            text = sendCodeText,
+            onSendDirect = {
                 onSendCode()
                 remainTimeState = 60
             },
-        ) {
-            FlatTextOnButton(text = sendCodeText)
-        }
+            onSendWithCaptcha = onSendCodeCaptcha
+        )
     }
     if (isValidCode) {
         FlatDivider(thickness = 1.dp)
@@ -104,9 +105,42 @@ fun SendCodeInput(
         FlatDivider(color = Red_6, thickness = 1.dp)
         FlatTextBodyTwo(stringResource(R.string.login_code_invalid_tip), color = Red_6)
     }
-
 }
 
+@Composable
+fun SendCodeButton(
+    enabled: Boolean,
+    text: String,
+    onSendDirect: () -> Unit,
+    onSendWithCaptcha: ((String) -> Unit)? = null
+) {
+    var showCaptchaDialog by remember { mutableStateOf(false) }
+
+    TextButton(
+        enabled = enabled,
+        onClick = {
+            if (onSendWithCaptcha != null) {
+                showCaptchaDialog = true
+            } else {
+                onSendDirect()
+            }
+        }
+    ) {
+        FlatTextOnButton(text = text)
+    }
+
+    if (showCaptchaDialog && onSendWithCaptcha != null) {
+        CaptchaDialog(
+            onVerifySuccess = { captchaParams ->
+                showCaptchaDialog = false
+                onSendWithCaptcha(captchaParams)
+            },
+            onDismiss = {
+                showCaptchaDialog = false
+            }
+        )
+    }
+}
 
 @Composable
 fun PasswordInput(

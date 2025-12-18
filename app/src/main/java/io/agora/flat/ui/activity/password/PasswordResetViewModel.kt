@@ -58,10 +58,10 @@ class PasswordResetViewModel @Inject constructor(
         }
     }
 
-    private fun sendCodeByPhone(phone: String) {
+    private fun sendCodeByPhone(phone: String, captchaVerifyParam: String) {
         viewModelScope.launch {
             loading.addLoader()
-            userRepository.requestResetPhoneCode(phone)
+            userRepository.requestResetPhoneCode(phone, captchaVerifyParam)
                 .onSuccess {
                     showSendCodeSuccess()
                 }
@@ -89,10 +89,15 @@ class PasswordResetViewModel @Inject constructor(
     fun sendCode() {
         val info = state.value.info
         if (info.isPhone) {
-            sendCodeByPhone(info.phone)
+            // note: for phone, captcha is required
         } else {
             sendCodeByEmail(info.email)
         }
+    }
+
+    fun sendCodeWithCaptcha(captchaVerifyParam: String) {
+        val info = state.value.info
+        sendCodeByPhone(info.phone, captchaVerifyParam)
     }
 
     private fun resetPasswordByPhone(phone: String, password: String, code: String) {
