@@ -199,7 +199,7 @@ class AppEnv @Inject constructor(@ApplicationContext context: Context) {
 
     val showIcp get() = currentEnvItem.showIcp
 
-    val showStreamAgreement get() = currentEnvItem.showStreamAgreement
+    val showStreamAgreement get() = false
 
     val agreementsUrl get() = "https://flat-storage.oss-cn-hangzhou.aliyuncs.com/versions/latest/stable/android/agreements.json"
 
