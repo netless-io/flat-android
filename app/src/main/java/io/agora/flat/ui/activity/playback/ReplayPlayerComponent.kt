@@ -141,8 +141,6 @@ class ReplayPlayerComponent(
     }
 
     private fun initWhiteboard() {
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-
         val configuration = WhiteSdkConfiguration(appEnv.whiteAppId, true).apply {
             isUserCursor = true
             useMultiViews = true

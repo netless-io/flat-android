@@ -107,7 +107,6 @@ private fun WebView.setupWebView() {
         ViewGroup.LayoutParams.MATCH_PARENT
     )
     setBackgroundColor(android.graphics.Color.TRANSPARENT)
-    WebView.setWebContentsDebuggingEnabled(true)
 
     settings.apply {
         javaScriptEnabled = true
