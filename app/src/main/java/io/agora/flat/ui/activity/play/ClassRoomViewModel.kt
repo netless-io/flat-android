@@ -161,7 +161,7 @@ class ClassRoomViewModel @Inject constructor(
                 joinBoard()
                 syncInitState()
                 observerUserState()
-                if (quickStart) startClass()
+                checkAndStartClassAsOwner()
             }
         }
     }
@@ -628,6 +628,15 @@ class ClassRoomViewModel @Inject constructor(
                 )
                 userManager.updateRaiseHandStatus(userUUID, raiseHand)
             }
+        }
+    }
+
+    private fun checkAndStartClassAsOwner() {
+        val state = _state.value ?: return
+
+        if (state.isOwner && state.roomStatus == RoomStatus.Idle) {
+            logger.d("Owner joined an Idle room, triggering startClass...")
+            startClass()
         }
     }
 
